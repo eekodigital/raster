@@ -175,6 +175,10 @@
   overflow: hidden;
 }
 
+.swatch-card > * {
+  margin-top: 0 !important;
+}
+
 .swatch-body {
   padding: 0.5rem 0.75rem;
 }
