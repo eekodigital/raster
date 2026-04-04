@@ -38,7 +38,8 @@
   "scripts": {
     "build:tokens": "node --import tsx/esm style-dictionary.config.ts && pnpm exec vp check --fix src/tokens",
     "build": "pnpm build:tokens && tsdown",
-    "dev": "tsdown --watch",
+    "dev": "pnpm build && pnpm --filter @eekodigital/raster-docs dev",
+    "dev:lib": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
     "check": "vp check",
