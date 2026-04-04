@@ -1,0 +1,201 @@
+---
+title: Flex
+description: A flexbox layout component for arranging items horizontally or vertically with token-based gaps. Use direction="row" for toolbars, tag groups, and button rows. Use direction="column" for vertical stacking with consistent spacing.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  FlexRowDemo,
+  FlexJustifyDemo,
+  FlexNoWrapDemo,
+  FlexColumnDemo,
+  FlexColumnGapDemo,
+  FlexColumnAlignDemo,
+} from "../../../components/FlexDemo.tsx";
+
+## Row (horizontal)
+
+### Basic
+
+<Example
+  code={`import { Flex } from '@eekodigital/raster';\n\n<Flex gap="2" wrap>\n  <Tag>Design</Tag>\n  <Tag>Accessibility</Tag>\n  <Tag>Components</Tag>\n</Flex>`}
+>
+  <FlexRowDemo client:load />
+</Example>
+
+### Justify
+
+Spread items across the main axis with `justify="between"`.
+
+<Example
+  code={`<Flex justify="between">\n  <Button variant="secondary">Cancel</Button>\n  <Button>Save</Button>\n</Flex>`}
+>
+  <FlexJustifyDemo client:load />
+</Example>
+
+### No wrap
+
+Items don't wrap by default. Set `wrap` to enable wrapping.
+
+<Example code={`<Flex gap="3">\n  <Tag>One</Tag>\n  <Tag>Two</Tag>\n  <Tag>Three</Tag>\n</Flex>`}>
+  <FlexNoWrapDemo client:load />
+</Example>
+
+## Column (vertical)
+
+### Basic
+
+<Example
+  code={`<Flex direction="column" gap="4">\n  <div>Item one</div>\n  <div>Item two</div>\n  <div>Item three</div>\n</Flex>`}
+>
+  <FlexColumnDemo client:load />
+</Example>
+
+### Gap sizes
+
+Gaps map directly to spacing tokens (`--spacing-*`).
+
+<Example
+  code={`<Flex direction="column" gap="8">\n  <div>Wider gap</div>\n  <div>Between items</div>\n</Flex>`}
+>
+  <FlexColumnGapDemo client:load />
+</Example>
+
+### Alignment
+
+Control cross-axis alignment with the `align` prop.
+
+<Example
+  code={`<Flex direction="column" align="center">\n  <Button>Short</Button>\n  <Button>A longer button</Button>\n</Flex>`}
+>
+  <FlexColumnAlignDemo client:load />
+</Example>
+
+### Responsive
+
+Props accept responsive objects with named breakpoints (`sm`, `md`, `lg`, `xl`) or custom pixel values.
+
+```tsx
+<Flex direction={{ base: "column", "600px": "row" }} gap={{ base: "2", md: "4" }}>
+  <div>First</div>
+  <div>Second</div>
+</Flex>
+```
+
+### Semantic element
+
+Use the `as` prop to change the rendered element.
+
+```tsx
+<Flex as="nav" gap="4">
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+</Flex>
+```
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>direction</code>
+      </td>
+      <td>
+        <code>"row" | "column"</code>
+      </td>
+      <td>
+        <code>"row"</code>
+      </td>
+      <td>Flex direction. Accepts responsive values.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>gap</code>
+      </td>
+      <td>
+        <code>"1"–"24"</code>
+      </td>
+      <td>
+        <code>"4"</code>
+      </td>
+      <td>Gap between items (spacing token). Accepts responsive values.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>align</code>
+      </td>
+      <td>
+        <code>"start" | "center" | "end" | "baseline" | "stretch"</code>
+      </td>
+      <td>
+        <code>"stretch"</code>
+      </td>
+      <td>Cross-axis alignment.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>justify</code>
+      </td>
+      <td>
+        <code>"start" | "center" | "end" | "between" | "around"</code>
+      </td>
+      <td>
+        <code>"start"</code>
+      </td>
+      <td>Main-axis distribution.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>wrap</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Whether items wrap to new lines.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>as</code>
+      </td>
+      <td>
+        <code>ElementType</code>
+      </td>
+      <td>
+        <code>"div"</code>
+      </td>
+      <td>Rendered HTML element.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+        <code>style</code>
+      </td>
+      <td>
+        <code>CSSProperties</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

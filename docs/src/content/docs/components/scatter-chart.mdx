@@ -1,0 +1,129 @@
+---
+title: ScatterChart
+description: X/Y dot plot for showing correlations between two variables. Supports multi-series with legend, axis labels, grid configuration, number formatting, click handlers, and keyboard navigation.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  ScatterChartBasicDemo,
+  ScatterChartMultiDemo,
+} from "../../../components/ScatterChartDemo.tsx";
+
+## Basic
+
+<Example
+  code={`import { ScatterChart } from '@eekodigital/raster';\n\n<ScatterChart\n  data={[\n    { x: 12, y: 3, label: 'Homepage' },\n    { x: 28, y: 7, label: 'Dashboard' },\n  ]}\n  xLabel="Page complexity"\n  yLabel="Issues found"\n  aria-label="Complexity vs issues"\n/>`}
+>
+  <ScatterChartBasicDemo client:load />
+</Example>
+
+## Multi-series
+
+<Example
+  code={`<ScatterChart\n  series={[\n    { name: 'Audit 1', data: [...], color: 'var(--color-interactive)' },\n    { name: 'Audit 2', data: [...], color: 'var(--color-success)' },\n  ]}\n  xLabel="Elements"\n  yLabel="Violations"\n  aria-label="Audit comparison"\n/>`}
+>
+  <ScatterChartMultiDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>data</code>
+      </td>
+      <td>
+        <code>ScatterPoint[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Single series: <code>{`{ x, y, label? }`}</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>series</code>
+      </td>
+      <td>
+        <code>ScatterSeries[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Multi-series: <code>{`{ name, data, color? }`}</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>xLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>X-axis title</td>
+    </tr>
+    <tr>
+      <td>
+        <code>yLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Y-axis title</td>
+    </tr>
+    <tr>
+      <td>
+        <code>grid</code>
+      </td>
+      <td>
+        <code>"horizontal" | "vertical" | "both" | "none"</code>
+      </td>
+      <td>
+        <code>"both"</code>
+      </td>
+      <td>Grid line visibility</td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(v: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>String</code>
+      </td>
+      <td>Format tick values</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onPointClick</code>
+      </td>
+      <td>
+        <code>(point, si, pi) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Click handler per point</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required.</td>
+    </tr>
+  </tbody>
+</table>

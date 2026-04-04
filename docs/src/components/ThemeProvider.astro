@@ -1,0 +1,37 @@
+---
+/**
+ * Starlight ThemeProvider override — supports system/light/dark/high-contrast.
+ * Inlined script prevents FOUC by setting data-theme before first paint.
+ */
+---
+
+<script is:inline>
+  window.StarlightThemeProvider = (() => {
+    const storageKey = 'starlight-theme';
+    const stored = typeof localStorage !== 'undefined' && localStorage.getItem(storageKey);
+
+    function resolve(pref) {
+      if (pref === 'light' || pref === 'dark' || pref === 'high-contrast') return pref;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.dataset.theme = resolve(stored);
+
+    return {
+      updatePickers(pref) {
+        if (pref === undefined) pref = stored || 'system';
+        document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+          const select = picker.querySelector('select');
+          if (select) select.value = pref;
+          picker.querySelectorAll('[role="option"]').forEach((li) => {
+            li.setAttribute('aria-selected', String(li.dataset.value === pref));
+          });
+          ['system', 'light', 'dark', 'high-contrast'].forEach((t) => {
+            const icon = picker.querySelector('.icon-' + t.replace('-', ''));
+            if (icon) icon.classList.toggle('active', t === pref);
+          });
+        });
+      },
+    };
+  })();
+</script>

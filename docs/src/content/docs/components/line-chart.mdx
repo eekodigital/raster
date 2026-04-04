@@ -1,0 +1,127 @@
+---
+title: LineChart
+description: Line chart for showing trends over time. Supports single and multi-series, optional area fill, and automatic legend for multi-series. Zero dependencies — keyboard navigable with screen reader fallback.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  LineChartBasicDemo,
+  LineChartMultiDemo,
+  LineChartAreaDemo,
+} from "../../../components/LineChartDemo.tsx";
+
+## Basic
+
+<Example
+  code={`import { LineChart } from '@eekodigital/raster';\n\n<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  labels={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  aria-label="Assessment progress over time"\n/>`}
+>
+  <LineChartBasicDemo client:load />
+</Example>
+
+## Multi-series
+
+Pass multiple series to compare trends. A legend renders automatically.
+
+<Example
+  code={`<LineChart\n  series={[\n    { name: 'Pass', data: [0, 5, 12, 20, 30, 42], color: 'var(--color-success)' },\n    { name: 'Fail', data: [0, 1, 3, 5, 6, 8], color: 'var(--color-danger)' },\n    { name: 'N/A', data: [0, 2, 4, 7, 10, 12], color: 'var(--color-inactive)' },\n  ]}\n  labels={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']}\n  aria-label="Results trend by status"\n/>`}
+>
+  <LineChartMultiDemo client:load />
+</Example>
+
+## Area fill
+
+Set `area` to fill below the line.
+
+<Example
+  code={`<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  labels={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  area\n  aria-label="Assessment progress (area)"\n/>`}
+>
+  <LineChartAreaDemo client:load />
+</Example>
+
+## Accessibility
+
+- SVG has `role="img"` with `aria-label`
+- Each series is a `role="region"` with the series name
+- Data points are focusable with series name, label, and value announced
+- Left/Right arrows navigate within a series; Up/Down switch between series
+- A hidden `<table>` provides the full data for screen readers
+- Legend rendered as HTML (not SVG) for proper semantics
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>series</code>
+      </td>
+      <td>
+        <code>LineSeries[]</code>
+      </td>
+      <td>—</td>
+      <td>Array of {`{ name, data: number[], color? }`}</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>—</td>
+      <td>X-axis labels (one per data point)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>area</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Fill below the line</td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>200</code>
+      </td>
+      <td>Chart height in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required. Describes the chart.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

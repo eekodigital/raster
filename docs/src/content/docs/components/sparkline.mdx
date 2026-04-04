@@ -1,0 +1,98 @@
+---
+title: Sparkline
+description: Inline mini line chart for embedding in tables, KPI cards, or alongside text. No axes, labels, or legend — just the trend line.
+---
+
+import Example from "../../../components/Example.astro";
+import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
+
+## Examples
+
+<Example
+  code={`import { Sparkline } from '@eekodigital/raster';\n\n<Sparkline data={[10, 25, 18, 40, 35, 60, 72, 86]} color="var(--color-success)" aria-label="Upward trend" />\n<Sparkline data={[5, 15, 10, 30, 25, 45]} fill color="var(--color-interactive)" aria-label="Growth" />`}
+>
+  <SparklineDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>data</code>
+      </td>
+      <td>
+        <code>number[]</code>
+      </td>
+      <td>—</td>
+      <td>Data points (minimum 2)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>width</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>80</code>
+      </td>
+      <td>Width in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>24</code>
+      </td>
+      <td>Height in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>color</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>--color-interactive</code>
+      </td>
+      <td>Line colour</td>
+    </tr>
+    <tr>
+      <td>
+        <code>fill</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Fill area below line</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required.</td>
+    </tr>
+  </tbody>
+</table>

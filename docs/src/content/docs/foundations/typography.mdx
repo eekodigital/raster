@@ -1,0 +1,65 @@
+---
+title: Typography
+description: Type scale, link styles, and colour usage for text across the design system.
+---
+
+## Type scale
+
+All sizes are defined as CSS custom properties and map to the design token scale.
+
+<div style="display:flex;flex-direction:column;gap:var(--spacing-4);margin-block:var(--spacing-4)">
+  <div>
+    <span style="font-size:var(--font-size-3xl);font-weight:var(--font-weight-bold)">
+      Heading 1 — 3xl bold
+    </span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-3xl</code>
+  </div>
+  <div>
+    <span style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold)">
+      Heading 2 — 2xl bold
+    </span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-2xl</code>
+  </div>
+  <div>
+    <span style="font-size:var(--font-size-xl);font-weight:var(--font-weight-semibold)">
+      Heading 3 — xl semibold
+    </span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-xl</code>
+  </div>
+  <div>
+    <span style="font-size:var(--font-size-lg)">Large body</span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-lg</code>
+  </div>
+  <div>
+    <span style="font-size:var(--font-size-base)">Base body (default)</span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-base</code>
+  </div>
+  <div>
+    <span style="font-size:var(--font-size-sm)">Small / caption</span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-sm</code>
+  </div>
+  <div>
+    <span style="font-size:var(--font-size-xs)">Extra small / labels</span>
+    <code style="margin-left:var(--spacing-3);font-size:var(--font-size-xs)">--font-size-xs</code>
+  </div>
+</div>
+
+## Links
+
+Text links within body copy are **always underlined**. Underlines provide a
+universal, colour-independent cue that text is interactive. Users who cannot distinguish the
+link colour from surrounding text can still identify links by the underline.
+
+<div class="preview" style="flex-direction:column">
+  <p style="max-width:none;color:var(--color-text)">
+    This paragraph contains <a href="#">an underlined link</a> that is always visually distinct.
+  </p>
+</div>
+
+Nav links (breadcrumbs, top bar) suppress the underline because the interactive region is
+unambiguous from context. The underline is restored on `:hover`.
+
+## Colour
+
+Link colour uses `--color-interactive` (#1d4ed8), which achieves a contrast ratio
+above 4.5:1 on the default white background — meeting WCAG SC 1.4.3.

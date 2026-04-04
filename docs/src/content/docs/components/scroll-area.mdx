@@ -1,0 +1,112 @@
+---
+title: ScrollArea
+description: A scrollable container with custom-styled scrollbars that overlay content. Built on Radix ScrollArea for cross-browser consistency and accessibility. The scrollbar appears on hover and auto-hides when not in use.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  ScrollAreaBasicDemo,
+  ScrollAreaHorizontalDemo,
+} from "../../../components/ScrollAreaDemo.tsx";
+
+## Vertical scroll
+
+<Example
+  code={`import { ScrollArea } from '@eekodigital/raster';\n\n<ScrollArea.Root style={{ height: '12rem', width: '22rem' }}>\n  <ScrollArea.Viewport>\n    {items.map(item => <div key={item}>{item}</div>)}\n  </ScrollArea.Viewport>\n  <ScrollArea.Scrollbar orientation="vertical" />\n  <ScrollArea.Corner />\n</ScrollArea.Root>`}
+>
+  <ScrollAreaBasicDemo client:load />
+</Example>
+
+## Horizontal scroll
+
+<Example
+  code={`<ScrollArea.Root style={{ width: '22rem' }}>\n  <ScrollArea.Viewport>\n    <div style={{ display: 'flex', gap: '0.75rem', width: 'max-content' }}>\n      {items.map(item => <div key={item}>{item}</div>)}\n    </div>\n  </ScrollArea.Viewport>\n  <ScrollArea.Scrollbar orientation="horizontal" />\n</ScrollArea.Root>`}
+>
+  <ScrollAreaHorizontalDemo client:load />
+</Example>
+
+## Props
+
+### Root
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>type</code>
+      </td>
+      <td>
+        <code>"auto" | "always" | "scroll" | "hover"</code>
+      </td>
+      <td>
+        <code>"hover"</code>
+      </td>
+      <td>When scrollbars are shown.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>scrollHideDelay</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Milliseconds before scrollbars hide (for auto/scroll types).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>style</code>
+      </td>
+      <td>
+        <code>CSSProperties</code>
+      </td>
+      <td>—</td>
+      <td>Inline styles — use to set width/height constraints.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>
+
+### Scrollbar
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>orientation</code>
+      </td>
+      <td>
+        <code>"vertical" | "horizontal"</code>
+      </td>
+      <td>
+        <code>"vertical"</code>
+      </td>
+      <td>Scrollbar axis.</td>
+    </tr>
+  </tbody>
+</table>

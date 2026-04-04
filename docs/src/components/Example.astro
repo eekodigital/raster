@@ -1,0 +1,117 @@
+---
+import { Code } from 'astro:components';
+
+interface Props {
+  code: string;
+  lang?: string;
+  center?: boolean;
+}
+
+const { code, lang = 'tsx', center = false } = Astro.props;
+---
+
+<div class="example not-content">
+  <div class={['example-preview', center ? 'example-preview--center' : ''].filter(Boolean).join(' ')}>
+    <slot />
+  </div>
+  <div class="example-code">
+    <button class="copy-btn" data-copy={code} aria-label="Copy code" title="Copy code">
+      <svg class="copy-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
+        <path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+      </svg>
+      <svg class="check-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3 8.5L6.5 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <Code code={code} lang={lang as any} theme="github-light-default" />
+  </div>
+</div>
+
+<style>
+  .example {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    overflow: clip;
+    margin-block: 1rem;
+  }
+
+  .example-preview {
+    padding: 2rem 1.5rem;
+    background: var(--sl-color-gray-7);
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+
+  .example-preview--center {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .example-code {
+    position: relative;
+  }
+
+  .example-code pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0.5rem 1rem;
+    font-size: var(--sl-text-xs);
+    overflow-x: auto;
+  }
+
+  .example-code code {
+    font-family: var(--sl-font-mono);
+    background: none;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.25rem;
+    background: var(--sl-color-bg);
+    cursor: pointer;
+    color: var(--sl-color-gray-3);
+    z-index: 1;
+    transition: color 150ms ease, background-color 150ms ease;
+  }
+
+  .copy-btn:hover {
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-white);
+  }
+
+  .copy-btn:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+
+  .check-icon { display: none; }
+  .copy-btn[data-copied] .copy-icon { display: none; }
+  .copy-btn[data-copied] .check-icon { display: block; color: var(--sl-color-green); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const code = btn.dataset.copy ?? '';
+      await navigator.clipboard.writeText(code);
+      btn.dataset.copied = '';
+      setTimeout(() => delete btn.dataset.copied, 1500);
+    });
+  });
+</script>

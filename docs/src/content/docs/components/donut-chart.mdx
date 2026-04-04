@@ -1,0 +1,116 @@
+---
+title: DonutChart
+description: Donut chart for showing proportions. Supports a centre content slot for summary numbers. Zero dependencies — built with SVG arc path math. Keyboard navigable with screen reader fallback.
+---
+
+import Example from "../../../components/Example.astro";
+import { DonutChartBasicDemo, DonutChartSmallDemo } from "../../../components/DonutChartDemo.tsx";
+
+## Basic
+
+Each datum has a `label`, `value`, and `color`. Children render in the centre.
+
+<Example
+  code={`import { DonutChart } from '@eekodigital/raster';\n\n<DonutChart\n  data={[\n    { label: 'Pass', value: 42, color: 'var(--color-success)' },\n    { label: 'Fail', value: 8, color: 'var(--color-danger)' },\n    { label: 'N/A', value: 12, color: 'var(--color-inactive)' },\n    { label: 'To do', value: 24, color: 'var(--color-warning)' },\n  ]}\n  aria-label="Conformance summary"\n>\n  <strong>86</strong>\n  <span>criteria</span>\n</DonutChart>`}
+>
+  <DonutChartBasicDemo client:load />
+</Example>
+
+## Small / progress indicator
+
+Use smaller `size` and `thickness` for inline progress indicators.
+
+<Example
+  code={`<DonutChart\n  data={[\n    { label: 'Complete', value: 75, color: 'var(--color-success)' },\n    { label: 'Remaining', value: 25, color: 'var(--color-border)' },\n  ]}\n  size={80}\n  thickness={10}\n  aria-label="75% complete"\n>\n  <strong>75%</strong>\n</DonutChart>`}
+>
+  <DonutChartSmallDemo client:load />
+</Example>
+
+## Accessibility
+
+- SVG has `role="img"` with `aria-label`
+- Each segment is focusable with label, value, and percentage announced
+- Arrow keys navigate between segments (wraps around)
+- A hidden `<table>` provides the data with percentages for screen readers
+- Zero-value segments are skipped (not rendered or focusable)
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>data</code>
+      </td>
+      <td>
+        <code>DonutDatum[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Array of <code>{`{ label, value, color }`}</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>160</code>
+      </td>
+      <td>Diameter in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>thickness</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>24</code>
+      </td>
+      <td>Ring thickness in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>Centre content (summary text, number, etc.)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required. Describes the chart.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

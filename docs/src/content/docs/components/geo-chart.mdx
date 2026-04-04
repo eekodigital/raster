@@ -1,0 +1,83 @@
+---
+title: GeoChart
+description: Map visualisation supporting choropleth (colour regions by value) and bubble markers (sized dots at coordinates). Accepts TopoJSON data as a prop — no bundled map data. Supports mercator, equirectangular, and custom projections.
+---
+
+import Example from "../../../components/Example.astro";
+import { GeoChartBasicDemo, GeoChartMarkersDemo } from "../../../components/GeoChartDemo";
+
+## Choropleth
+
+Regions coloured by value using a three-colour scale (red → amber → green).
+
+<Example code={`import { GeoChart } from '@eekodigital/raster';
+import world from 'world-atlas/countries-110m.json';
+
+<GeoChart
+  topology={world}
+  data={[
+    { id: '826', value: 95, label: 'United Kingdom' },
+    { id: '840', value: 65, label: 'United States' },
+    { id: '392', value: 85, label: 'Japan' },
+  ]}
+  colorScale={['var(--color-danger)', 'var(--color-warning)', 'var(--color-success)']}
+  aria-label="Compliance by country"
+/>`}>
+  <GeoChartBasicDemo client:only="react" />
+</Example>
+
+## With markers
+
+Bubble markers at lat/lon coordinates overlaid on the choropleth.
+
+<Example
+  code={`<GeoChart
+  topology={world}
+  data={data}
+  markers={[
+    { lat: 51.5, lon: -0.1, size: 8, label: 'London' },
+    { lat: 48.9, lon: 2.3, size: 6, label: 'Paris' },
+    { lat: 40.7, lon: -74.0, size: 7, label: 'New York' },
+  ]}
+  aria-label="Compliance with office markers"
+/>`}
+>
+  <GeoChartMarkersDemo client:only="react" />
+</Example>
+
+<div class="callout">
+  <p>
+    GeoChart does not bundle any map data. Install <code>world-atlas</code> for world country
+    boundaries, or provide your own TopoJSON data.
+  </p>
+</div>
+
+## Projections
+
+`"mercator"` (default) — most recognisable, distorts area at poles.
+
+`"equirectangular"` — honest area representation, flat appearance.
+
+Custom function: `(lon, lat) => [x, y]` where x/y are 0-1 normalised.
+
+## Filtering regions
+
+Pass a `filter` array of feature IDs to show only specific regions:
+
+```tsx
+<GeoChart topology={world} filter={["GBR", "IRL"]} data={ukData} />
+```
+
+## Props
+
+| Prop            | Type                                    | Default           | Description                              |
+| --------------- | --------------------------------------- | ----------------- | ---------------------------------------- |
+| `topology`      | `Topology`                              | —                 | TopoJSON data (e.g. from world-atlas)    |
+| `data`          | `GeoRegionDatum[]`                      | `[]`              | `{ id, value, label? }` per region       |
+| `colorScale`    | `string[]`                              | Interactive scale | Colours from low to high value           |
+| `markers`       | `GeoMarker[]`                           | `[]`              | `{ lat, lon, size?, label, color? }`     |
+| `projection`    | `"mercator" \| "equirectangular" \| fn` | `"mercator"`      | Map projection                           |
+| `filter`        | `string[]`                              | —                 | Feature IDs to include (show only these) |
+| `onRegionClick` | `(datum, id) => void`                   | —                 | Click handler per region                 |
+| `onMarkerClick` | `(marker, index) => void`               | —                 | Click handler per marker                 |
+| `aria-label`    | `string`                                | —                 | Required.                                |

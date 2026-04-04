@@ -1,0 +1,21 @@
+---
+title: Accordion
+description: Vertically stacked sections that expand and collapse. Use for FAQs, settings groups, or any content where users need progressive disclosure.
+---
+
+import Example from "../../../components/Example.astro";
+import { AccordionSingleDemo, AccordionMultipleDemo } from "../../../components/AccordionDemo.tsx";
+
+## Single (one open at a time)
+
+<Example
+  code={`import { Accordion } from '@eekodigital/raster';\n\n<Accordion.Root type="single" collapsible>\n  <Accordion.Item value="a">\n    <Accordion.Header>\n      <Accordion.Trigger>What is a WCAG criterion?</Accordion.Trigger>\n    </Accordion.Header>\n    <Accordion.Content>\n      <p>A testable statement about web accessibility…</p>\n    </Accordion.Content>\n  </Accordion.Item>\n</Accordion.Root>`}
+>
+  <AccordionSingleDemo client:load />
+</Example>
+
+## Multiple (many open at once)
+
+<Example code={`<Accordion.Root type="multiple">\n  …\n</Accordion.Root>`}>
+  <AccordionMultipleDemo client:load />
+</Example>

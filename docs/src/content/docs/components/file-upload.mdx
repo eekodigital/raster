@@ -1,0 +1,117 @@
+---
+title: FileUpload
+description: A labelled file input with optional hint and error message. FileUploadField is the high-level component for most use cases; FileInput is the bare input for custom compositions.
+---
+
+import { FileInput, FileUploadField } from "@eekodigital/raster";
+import Example from "../../../components/Example.astro";
+
+## Basic usage
+
+<Example
+  code={`import { FileUploadField } from '@eekodigital/raster';\n\n<FileUploadField label="Upload supporting document" name="document" />`}
+>
+  <FileUploadField client:load label="Upload supporting document" name="document" />
+</Example>
+
+## With hint text
+
+<Example
+  code={`<FileUploadField\n  label="Upload supporting document"\n  name="document"\n  hint="PDF, DOCX or XLSX. Max 10 MB."\n/>`}
+>
+  <FileUploadField
+    client:load
+    label="Upload supporting document"
+    name="document"
+    hint="PDF, DOCX or XLSX. Max 10 MB."
+  />
+</Example>
+
+## With error
+
+<Example
+  code={`<FileUploadField\n  label="Upload supporting document"\n  name="document"\n  error="Select a file to upload"\n/>`}
+>
+  <FileUploadField
+    client:load
+    label="Upload supporting document"
+    name="document"
+    error="Select a file to upload"
+  />
+</Example>
+
+## Restricting file types and multiple selection
+
+Use the native `accept` attribute to restrict file types, and `multiple`
+to allow more than one file at once.
+
+<Example
+  code={`<FileUploadField\n  label="Upload images"\n  name="images"\n  hint="JPG or PNG only."\n  accept="image/jpeg,image/png"\n  multiple\n/>`}
+>
+  <FileUploadField
+    client:load
+    label="Upload images"
+    name="images"
+    hint="JPG or PNG only."
+    accept="image/jpeg,image/png"
+    multiple
+  />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Visible label for the file input.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Optional hint text below the label.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>error</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Validation error message.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>InputHTMLAttributes</code>
+      </td>
+      <td>—</td>
+      <td>
+        All native <code>&lt;input type="file"&gt;</code> attributes, including <code>accept</code>,
+        <code>multiple</code>, <code>disabled</code>, and <code>onChange</code>.
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,101 @@
+---
+title: Switch
+description: A toggle control for binary on/off settings. Visually distinct from a checkbox — use Switch for settings that take effect immediately, Checkbox for form fields that are submitted.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  SwitchDemo,
+  SwitchCheckedDemo,
+  SwitchLabelDemo,
+  SwitchDisabledDemo,
+} from "../../../components/SwitchDemo.tsx";
+
+## Default
+
+<Example
+  code={`import { Switch } from '@eekodigital/raster';\n\n<Switch.Root>\n  <Switch.Thumb />\n</Switch.Root>`}
+  center
+>
+  <SwitchDemo client:load />
+</Example>
+
+## On by default
+
+<Example code={`<Switch.Root defaultChecked>\n  <Switch.Thumb />\n</Switch.Root>`} center>
+  <SwitchCheckedDemo client:load />
+</Example>
+
+## With label
+
+<Example
+  code={`<label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>\n  Enable notifications\n  <Switch.Root name="notifications">\n    <Switch.Thumb />\n  </Switch.Root>\n</label>`}
+  center
+>
+  <SwitchLabelDemo client:load />
+</Example>
+
+## Disabled
+
+<Example code={`<Switch.Root disabled>\n  <Switch.Thumb />\n</Switch.Root>`} center>
+  <SwitchDisabledDemo client:load />
+</Example>
+
+## Props — Switch.Root
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>checked</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Controlled on/off state.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultChecked</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Initial state (uncontrolled).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onCheckedChange</code>
+      </td>
+      <td>
+        <code>(checked: boolean) =&gt; void</code>
+      </td>
+      <td>Called when state changes.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>disabled</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Disables the switch.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>name</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Form field name.</td>
+    </tr>
+  </tbody>
+</table>

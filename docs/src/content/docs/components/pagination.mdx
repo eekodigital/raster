@@ -1,0 +1,70 @@
+---
+title: Pagination
+description: Allows users to navigate through a multi-page data set. The current page is tracked externally via the page prop so it can be controlled by your routing or state layer.
+---
+
+import Example from "../../../components/Example.astro";
+import { PaginationDemo } from "../../../components/PaginationDemo.tsx";
+
+## Default
+
+A 10-page set with interactive prev/next and page number buttons.
+
+<Example
+  code={`import { useState } from 'react';\nimport { Pagination } from '@eekodigital/raster';\n\nfunction PaginationDemo() {\n  const [page, setPage] = useState(1);\n  return <Pagination page={page} totalPages={10} onPageChange={setPage} />;\n}`}
+>
+  <PaginationDemo client:load />
+</Example>
+
+## Few pages
+
+When there are only a handful of pages all page numbers are shown.
+
+<Example code={`<Pagination page={page} totalPages={3} onPageChange={setPage} />`}>
+  <PaginationDemo client:load totalPages={3} />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>page</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>The current active page (1-based).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>totalPages</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>The total number of pages.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onPageChange</code>
+      </td>
+      <td>
+        <code>(page: number) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Callback fired when the user selects a different page.</td>
+    </tr>
+  </tbody>
+</table>

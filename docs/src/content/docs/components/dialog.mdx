@@ -1,0 +1,55 @@
+---
+title: Dialog
+description: A modal that appears above the page content. Focus is trapped inside while open and restored to the trigger on close. Dismissed by pressing Escape or clicking outside.
+---
+
+import Example from "../../../components/Example.astro";
+import { ActionDialogDemo, DismissableDialogDemo } from "../../../components/DialogDemo.tsx";
+
+<div class="callout">
+  <p>
+    <strong>Two patterns.</strong> Use the right one for the context:
+  </p>
+  <ul>
+    <li>
+      <strong>Action dialog</strong> — requires a decision. Footer has Cancel + primary action. No
+      corner &#10005;.
+    </li>
+    <li>
+      <strong>Dismissable dialog</strong> — informational or read-only. A <code>Dialog.Close</code>{" "}
+      &#10005; in the top-right corner is the only close control.
+    </li>
+  </ul>
+</div>
+
+## Action dialog
+
+Use when the user must make a decision — e.g. confirming a save or destructive operation. Cancel lives in the footer alongside the primary action.
+
+<Example
+  code={`import { Dialog } from '@eekodigital/raster';\n\n<Dialog.Root>\n  <Dialog.Trigger>\n    {(props) => <Button {...props}>Edit project</Button>}\n  </Dialog.Trigger>\n  <Dialog.Portal>\n    <Dialog.Overlay />\n    <Dialog.Content>\n      <Dialog.Title>Edit project</Dialog.Title>\n      <Dialog.Description>Make changes to your project settings below.</Dialog.Description>\n      {/* form content */}\n      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>\n        <Dialog.Close>\n          {(props) => <Button variant="secondary" {...props}>Cancel</Button>}\n        </Dialog.Close>\n        <Button>Save changes</Button>\n      </div>\n    </Dialog.Content>\n  </Dialog.Portal>\n</Dialog.Root>`}
+  center
+>
+  <ActionDialogDemo client:load />
+</Example>
+
+## Dismissable dialog
+
+Use for informational content that requires no action. The &#10005; button in the top-right corner is the sole close control.
+
+<Example
+  code={`<Dialog.Root>\n  <Dialog.Trigger>\n    {(props) => <Button variant="secondary" {...props}>View details</Button>}\n  </Dialog.Trigger>\n  <Dialog.Portal>\n    <Dialog.Overlay />\n    <Dialog.Content>\n      <Dialog.Title>Audit summary</Dialog.Title>\n      <Dialog.Description>A read-only summary of the latest audit run.</Dialog.Description>\n      <Dialog.Close aria-label="Close">✕</Dialog.Close>\n      {/* informational content */}\n    </Dialog.Content>\n  </Dialog.Portal>\n</Dialog.Root>`}
+  center
+>
+  <DismissableDialogDemo client:load />
+</Example>
+
+## Usage notes
+
+<div class="callout">
+  <p>
+    Always include a <code>Dialog.Close</code> — either in the footer (action dialog) or as the
+    corner &#10005; (dismissable dialog). Don't rely solely on Escape or click-outside; users on
+    touch devices and screen readers need an explicit close target.
+  </p>
+</div>

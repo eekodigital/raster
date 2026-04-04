@@ -1,0 +1,23 @@
+---
+title: Tabs
+description: Organises content into tabbed sections. Only one tab panel is visible at a time. Built on Radix UI — keyboard navigation (arrow keys, Home, End) is handled automatically.
+---
+
+import Example from "../../../components/Example.astro";
+import { TabsDemo, TabsDisabledDemo } from "../../../components/TabsDemo.tsx";
+
+## Default
+
+<Example
+  code={`import { Tabs } from '@eekodigital/raster';\n\n<Tabs.Root defaultValue="overview">\n  <Tabs.List>\n    <Tabs.Trigger value="overview">Overview</Tabs.Trigger>\n    <Tabs.Trigger value="details">Details</Tabs.Trigger>\n    <Tabs.Trigger value="history">History</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value="overview">Overview content</Tabs.Content>\n  <Tabs.Content value="details">Details content</Tabs.Content>\n  <Tabs.Content value="history">History content</Tabs.Content>\n</Tabs.Root>`}
+>
+  <TabsDemo client:load />
+</Example>
+
+## With disabled tab
+
+<Example
+  code={`<Tabs.Root defaultValue="active">\n  <Tabs.List>\n    <Tabs.Trigger value="active">Active</Tabs.Trigger>\n    <Tabs.Trigger value="archived" disabled>Archived</Tabs.Trigger>\n  </Tabs.List>\n  …\n</Tabs.Root>`}
+>
+  <TabsDisabledDemo client:load />
+</Example>

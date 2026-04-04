@@ -1,0 +1,100 @@
+---
+title: Progress
+description: An animated progress bar for communicating ongoing operations. Built on Radix Progress for correct ARIA semantics. Supports determinate (0–100) and indeterminate states.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  ProgressBasicDemo,
+  ProgressLowDemo,
+  ProgressCompleteDemo,
+  ProgressIndeterminateDemo,
+} from "../../../components/ProgressDemo.tsx";
+
+## Basic
+
+<Example
+  code={`import { Progress } from '@eekodigital/raster';\n\n<Progress value={60} label="Upload progress" />`}
+>
+  <ProgressBasicDemo client:load />
+</Example>
+
+## Different values
+
+<Example
+  code={`<Progress value={15} label="Loading" />\n<Progress value={100} label="Complete" />`}
+>
+  <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+    <ProgressLowDemo client:load />
+    <ProgressCompleteDemo client:load />
+  </div>
+</Example>
+
+## Indeterminate
+
+Pass `value={null}` for an animated shimmer when the total duration is unknown.
+
+<Example code={`<Progress value={null} label="Loading" />`}>
+  <ProgressIndeterminateDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>number | null</code>
+      </td>
+      <td>—</td>
+      <td>
+        Current value. Pass <code>null</code> for indeterminate.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>max</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>100</code>
+      </td>
+      <td>Maximum value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Accessible label (<code>aria-label</code>).
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>

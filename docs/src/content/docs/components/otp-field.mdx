@@ -1,0 +1,109 @@
+---
+title: OneTimePasswordField
+description: An input for one-time codes — verification codes, 2FA codes, PINs. Each digit has its own cell. Paste support, auto-advance between cells, and mobile OTP autofill are built in.
+---
+
+import { OneTimePasswordField } from "@eekodigital/raster";
+import Example from "../../../components/Example.astro";
+
+## 6-digit (default)
+
+<Example
+  code={`import { OneTimePasswordField } from '@eekodigital/raster';\n\n<OneTimePasswordField />`}
+  center
+>
+  <OneTimePasswordField client:load />
+</Example>
+
+## 4-digit
+
+<Example code={`<OneTimePasswordField length={4} />`} center>
+  <OneTimePasswordField client:load length={4} />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>length</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>6</code>
+      </td>
+      <td>Number of input cells.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Controlled value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultValue</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Initial value (uncontrolled).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onValueChange</code>
+      </td>
+      <td>
+        <code>(value: string) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called on each change.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onComplete</code>
+      </td>
+      <td>
+        <code>(value: string) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called when all cells are filled.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>disabled</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>—</td>
+      <td>Disables all cells.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>passwordMask</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>—</td>
+      <td>Masks input like a password field.</td>
+    </tr>
+  </tbody>
+</table>
