@@ -1,0 +1,12 @@
+{
+  "z": {
+    "base": { "$type": "number", "$value": 0 },
+    "raised": { "$type": "number", "$value": 10, "$description": "Slightly elevated elements" },
+    "dropdown": { "$type": "number", "$value": 100, "$description": "Dropdowns, popovers" },
+    "sticky": { "$type": "number", "$value": 200, "$description": "Sticky headers/footers" },
+    "overlay": { "$type": "number", "$value": 300, "$description": "Backdrop overlays" },
+    "modal": { "$type": "number", "$value": 400, "$description": "Modal dialogs" },
+    "toast": { "$type": "number", "$value": 500, "$description": "Toast notifications" },
+    "tooltip": { "$type": "number", "$value": 600, "$description": "Tooltips — always on top" }
+  }
+}

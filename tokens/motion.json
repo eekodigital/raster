@@ -1,0 +1,29 @@
+{
+  "duration": {
+    "instant": { "$type": "duration", "$value": "50ms" },
+    "fast": { "$type": "duration", "$value": "150ms" },
+    "base": { "$type": "duration", "$value": "200ms" },
+    "slow": { "$type": "duration", "$value": "300ms" },
+    "slower": { "$type": "duration", "$value": "500ms" }
+  },
+  "easing": {
+    "linear": { "$type": "cubicBezier", "$value": [0.0, 0.0, 1.0, 1.0] },
+    "ease": { "$type": "cubicBezier", "$value": [0.25, 0.1, 0.25, 1.0] },
+    "ease-in": { "$type": "cubicBezier", "$value": [0.4, 0.0, 1.0, 1.0], "$description": "Exits" },
+    "ease-out": {
+      "$type": "cubicBezier",
+      "$value": [0.0, 0.0, 0.2, 1.0],
+      "$description": "Entrances"
+    },
+    "ease-in-out": {
+      "$type": "cubicBezier",
+      "$value": [0.4, 0.0, 0.2, 1.0],
+      "$description": "Standard transitions"
+    },
+    "spring": {
+      "$type": "cubicBezier",
+      "$value": [0.175, 0.885, 0.32, 1.275],
+      "$description": "Playful overshoot"
+    }
+  }
+}

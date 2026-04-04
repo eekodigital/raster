@@ -1,0 +1,85 @@
+{
+  "name": "@eekodigital/raster",
+  "version": "0.1.0",
+  "description": "Raster — design system by Eeko Digital",
+  "license": "MIT",
+  "author": "Eeko Digital <hello@eeko.digital>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eekodigital/raster"
+  },
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./data-table": {
+      "import": "./dist/data-table.mjs",
+      "types": "./dist/data-table.d.mts"
+    },
+    "./tokens.css": "./src/tokens/tokens.css"
+  },
+  "files": [
+    "dist",
+    "src/tokens",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:tokens": "node --import tsx/esm style-dictionary.config.ts",
+    "build": "pnpm build:tokens && tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check ."
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-table": {
+      "optional": true
+    },
+    "topojson-client": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.4",
+    "@tanstack/react-table": "^8.21.3",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/topojson-client": "^3.1.5",
+    "@types/topojson-specification": "^1.0.5",
+    "@vanilla-extract/css": "^1.20.1",
+    "@vanilla-extract/rollup-plugin": "^1.5.3",
+    "@vanilla-extract/vite-plugin": "^5.2.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "happy-dom": "^20.8.9",
+    "oxlint": "^1.1.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "style-dictionary": "^5.4.0",
+    "topojson-client": "^3.1.0",
+    "tsdown": "^0.21.7",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vite-plus": "^0.1.15",
+    "vitest": "^4.1.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

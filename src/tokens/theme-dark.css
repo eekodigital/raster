@@ -1,0 +1,35 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+[data-theme='dark'] {
+  --color-bg: #222122;
+  --color-surface: #494748;
+  --color-surface-raised: #6b6969;
+  --color-surface-overlay: #918e8f;
+  --color-border: #6b6969;
+  --color-border-strong: #a9a7a7;
+  --color-text: #fcfcfc;
+  --color-text-subtle: #d5d4d4;
+  --color-text-placeholder: #a9a7a7;
+  --color-text-disabled: #6b6969;
+  --color-text-inverse: #222122;
+  --color-interactive: #87c8ff;
+  --color-interactive-hover: #50aff9;
+  --color-interactive-active: #1096e9;
+  --color-interactive-subtle: #00243e;
+  --color-interactive-text: #222122;
+  --color-focus-ring: #87c8ff;
+  --color-success: #93d495;
+  --color-success-bg: #002b05;
+  --color-success-border: #00791e;
+  --color-danger: #ffa59e;
+  --color-danger-bg: #430709;
+  --color-danger-border: #b71824;
+  --color-inactive: #d5d4d4;
+  --color-inactive-bg: #494748;
+  --color-inactive-border: #6b6969;
+  --color-warning: #ebb76c;
+  --color-warning-bg: #301d00;
+  --color-warning-border: #865900;
+}

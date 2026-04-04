@@ -1,0 +1,9 @@
+{
+  "opacity": {
+    "0": { "$type": "number", "$value": 0 },
+    "disabled": { "$type": "number", "$value": 0.5, "$description": "Disabled UI elements" },
+    "subtle": { "$type": "number", "$value": 0.6, "$description": "De-emphasised elements" },
+    "muted": { "$type": "number", "$value": 0.75, "$description": "Secondary elements" },
+    "full": { "$type": "number", "$value": 1 }
+  }
+}

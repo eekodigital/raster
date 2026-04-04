@@ -1,0 +1,41 @@
+{
+  "color": {
+    "bg": { "$type": "color", "$value": "{color.primitive.gray.12}" },
+    "surface": { "$type": "color", "$value": "{color.primitive.gray.11}" },
+    "surface-raised": { "$type": "color", "$value": "{color.primitive.gray.9}" },
+    "surface-overlay": { "$type": "color", "$value": "{color.primitive.gray.8}" },
+
+    "border": { "$type": "color", "$value": "{color.primitive.gray.9}" },
+    "border-strong": { "$type": "color", "$value": "{color.primitive.gray.7}" },
+
+    "text": { "$type": "color", "$value": "{color.primitive.gray.1}" },
+    "text-subtle": { "$type": "color", "$value": "{color.primitive.gray.5}" },
+    "text-placeholder": { "$type": "color", "$value": "{color.primitive.gray.7}" },
+    "text-disabled": { "$type": "color", "$value": "{color.primitive.gray.9}" },
+    "text-inverse": { "$type": "color", "$value": "{color.primitive.gray.12}" },
+
+    "interactive": { "$type": "color", "$value": "{color.primitive.blue.6}" },
+    "interactive-hover": { "$type": "color", "$value": "{color.primitive.blue.7}" },
+    "interactive-active": { "$type": "color", "$value": "{color.primitive.blue.8}" },
+    "interactive-subtle": { "$type": "color", "$value": "{color.primitive.blue.12}" },
+    "interactive-text": { "$type": "color", "$value": "{color.primitive.gray.12}" },
+
+    "focus-ring": { "$type": "color", "$value": "{color.primitive.blue.6}" },
+
+    "success": { "$type": "color", "$value": "{color.primitive.green.6}" },
+    "success-bg": { "$type": "color", "$value": "{color.primitive.green.12}" },
+    "success-border": { "$type": "color", "$value": "{color.primitive.green.10}" },
+
+    "danger": { "$type": "color", "$value": "{color.primitive.red.6}" },
+    "danger-bg": { "$type": "color", "$value": "{color.primitive.red.12}" },
+    "danger-border": { "$type": "color", "$value": "{color.primitive.red.10}" },
+
+    "inactive": { "$type": "color", "$value": "{color.primitive.gray.5}" },
+    "inactive-bg": { "$type": "color", "$value": "{color.primitive.gray.11}" },
+    "inactive-border": { "$type": "color", "$value": "{color.primitive.gray.9}" },
+
+    "warning": { "$type": "color", "$value": "{color.primitive.amber.6}" },
+    "warning-bg": { "$type": "color", "$value": "{color.primitive.amber.12}" },
+    "warning-border": { "$type": "color", "$value": "{color.primitive.amber.10}" }
+  }
+}

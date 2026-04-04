@@ -1,0 +1,266 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --color-primitive-white: #ffffff;
+  --color-primitive-black: #000000;
+  --color-primitive-sand-1: #fefbf9;
+  --color-primitive-sand-2: #f8f4f1;
+  --color-primitive-sand-3: #efeae5;
+  --color-primitive-sand-4: #e6e0da;
+  --color-primitive-sand-5: #d9d3cc;
+  --color-primitive-sand-6: #c7c0b7;
+  --color-primitive-sand-7: #aea69d;
+  --color-primitive-sand-8: #978d84;
+  --color-primitive-sand-9: #797065;
+  --color-primitive-sand-10: #6c6156;
+  --color-primitive-sand-11: #50463a;
+  --color-primitive-sand-12: #282017;
+  --color-primitive-gray-1: #fcfcfc;
+  --color-primitive-gray-2: #f5f5f5;
+  --color-primitive-gray-3: #ecebeb;
+  --color-primitive-gray-4: #e2e1e1;
+  --color-primitive-gray-5: #d5d4d4;
+  --color-primitive-gray-6: #c2c0c1;
+  --color-primitive-gray-7: #a9a7a7;
+  --color-primitive-gray-8: #918e8f;
+  --color-primitive-gray-9: #6b6969;
+  --color-primitive-gray-10: #646363;
+  --color-primitive-gray-11: #494748;
+  --color-primitive-gray-12: #222122;
+  --color-primitive-slate-1: #fafcff;
+  --color-primitive-slate-2: #f3f5f9;
+  --color-primitive-slate-3: #e8ebf1;
+  --color-primitive-slate-4: #dde1e8;
+  --color-primitive-slate-5: #d0d4dc;
+  --color-primitive-slate-6: #bcc1ca;
+  --color-primitive-slate-7: #a2a8b2;
+  --color-primitive-slate-8: #89909a;
+  --color-primitive-slate-9: #6b727e;
+  --color-primitive-slate-10: #5d646e;
+  --color-primitive-slate-11: #434851;
+  --color-primitive-slate-12: #1e2228;
+  --color-primitive-red-1: #fffafa;
+  --color-primitive-red-2: #fff1f0;
+  --color-primitive-red-3: #ffe4e1;
+  --color-primitive-red-4: #ffd6d2;
+  --color-primitive-red-5: #ffc3bd;
+  --color-primitive-red-6: #ffa59e;
+  --color-primitive-red-7: #f3827a;
+  --color-primitive-red-8: #e0615c;
+  --color-primitive-red-9: #c92f33;
+  --color-primitive-red-10: #b71824;
+  --color-primitive-red-11: #861118;
+  --color-primitive-red-12: #430709;
+  --color-primitive-orange-1: #fffbf8;
+  --color-primitive-orange-2: #fff2ea;
+  --color-primitive-orange-3: #ffe6d5;
+  --color-primitive-orange-4: #ffd8bf;
+  --color-primitive-orange-5: #fec7a2;
+  --color-primitive-orange-6: #f8ae7b;
+  --color-primitive-orange-7: #ea8e49;
+  --color-primitive-orange-8: #d76f04;
+  --color-primitive-orange-9: #ac5700;
+  --color-primitive-orange-10: #974c00;
+  --color-primitive-orange-11: #6f3600;
+  --color-primitive-orange-12: #381800;
+  --color-primitive-amber-1: #fffbf6;
+  --color-primitive-amber-2: #fdf4e7;
+  --color-primitive-amber-3: #fbe8ce;
+  --color-primitive-amber-4: #f9dcb6;
+  --color-primitive-amber-5: #f4cd99;
+  --color-primitive-amber-6: #ebb76c;
+  --color-primitive-amber-7: #da992c;
+  --color-primitive-amber-8: #bf8100;
+  --color-primitive-amber-9: #986600;
+  --color-primitive-amber-10: #865900;
+  --color-primitive-amber-11: #624000;
+  --color-primitive-amber-12: #301d00;
+  --color-primitive-yellow-1: #fefcf4;
+  --color-primitive-yellow-2: #f9f5e6;
+  --color-primitive-yellow-3: #f3ecce;
+  --color-primitive-yellow-4: #ede2b5;
+  --color-primitive-yellow-5: #e4d498;
+  --color-primitive-yellow-6: #d7c06a;
+  --color-primitive-yellow-7: #c3a625;
+  --color-primitive-yellow-8: #a98d00;
+  --color-primitive-yellow-9: #867000;
+  --color-primitive-yellow-10: #766200;
+  --color-primitive-yellow-11: #564700;
+  --color-primitive-yellow-12: #292100;
+  --color-primitive-green-1: #f8fef8;
+  --color-primitive-green-2: #edf9ed;
+  --color-primitive-green-3: #dbf3db;
+  --color-primitive-green-4: #c9edc9;
+  --color-primitive-green-5: #b4e3b4;
+  --color-primitive-green-6: #93d495;
+  --color-primitive-green-7: #6abf6e;
+  --color-primitive-green-8: #43a84c;
+  --color-primitive-green-9: #008a23;
+  --color-primitive-green-10: #00791e;
+  --color-primitive-green-11: #005813;
+  --color-primitive-green-12: #002b05;
+  --color-primitive-teal-1: #f5fefb;
+  --color-primitive-teal-2: #e8faf4;
+  --color-primitive-teal-3: #d1f5ea;
+  --color-primitive-teal-4: #b8efdf;
+  --color-primitive-teal-5: #9be6d1;
+  --color-primitive-teal-6: #6ad8bd;
+  --color-primitive-teal-7: #00c3a3;
+  --color-primitive-teal-8: #00a78b;
+  --color-primitive-teal-9: #00856e;
+  --color-primitive-teal-10: #007460;
+  --color-primitive-teal-11: #005545;
+  --color-primitive-teal-12: #002920;
+  --color-primitive-cyan-1: #f5fefe;
+  --color-primitive-cyan-2: #e7faf9;
+  --color-primitive-cyan-3: #cdf4f3;
+  --color-primitive-cyan-4: #b3eeee;
+  --color-primitive-cyan-5: #93e5e4;
+  --color-primitive-cyan-6: #5ad7d7;
+  --color-primitive-cyan-7: #00bfc0;
+  --color-primitive-cyan-8: #00a4a4;
+  --color-primitive-cyan-9: #008282;
+  --color-primitive-cyan-10: #007272;
+  --color-primitive-cyan-11: #005353;
+  --color-primitive-cyan-12: #002828;
+  --color-primitive-blue-1: #f9fcff;
+  --color-primitive-blue-2: #f4faff;
+  --color-primitive-blue-3: #dbeeff;
+  --color-primitive-blue-4: #c8e5ff;
+  --color-primitive-blue-5: #afdaff;
+  --color-primitive-blue-6: #87c8ff;
+  --color-primitive-blue-7: #50aff9;
+  --color-primitive-blue-8: #1096e9;
+  --color-primitive-blue-9: #0070b3;
+  --color-primitive-blue-10: #0068a5;
+  --color-primitive-blue-11: #004b7a;
+  --color-primitive-blue-12: #00243e;
+  --color-primitive-indigo-1: #fafcff;
+  --color-primitive-indigo-2: #f1f5ff;
+  --color-primitive-indigo-3: #e3ebff;
+  --color-primitive-indigo-4: #d6e1ff;
+  --color-primitive-indigo-5: #c4d3ff;
+  --color-primitive-indigo-6: #a9beff;
+  --color-primitive-indigo-7: #86a2ff;
+  --color-primitive-indigo-8: #6a87f0;
+  --color-primitive-indigo-9: #4963de;
+  --color-primitive-indigo-10: #3c53cd;
+  --color-primitive-indigo-11: #2a3c97;
+  --color-primitive-indigo-12: #121c4c;
+  --color-primitive-purple-1: #fcfbff;
+  --color-primitive-purple-2: #f7f3ff;
+  --color-primitive-purple-3: #eee7ff;
+  --color-primitive-purple-4: #e6daff;
+  --color-primitive-purple-5: #dbcaff;
+  --color-primitive-purple-6: #ccb1fe;
+  --color-primitive-purple-7: #b692f2;
+  --color-primitive-purple-8: #9f75e1;
+  --color-primitive-purple-9: #854ece;
+  --color-primitive-purple-10: #763ebd;
+  --color-primitive-purple-11: #562c8b;
+  --color-primitive-purple-12: #291345;
+  --color-primitive-pink-1: #fffafc;
+  --color-primitive-pink-2: #fff1f7;
+  --color-primitive-pink-3: #ffe2ee;
+  --color-primitive-pink-4: #ffd3e6;
+  --color-primitive-pink-5: #febfdc;
+  --color-primitive-pink-6: #f7a3cb;
+  --color-primitive-pink-7: #e881b4;
+  --color-primitive-pink-8: #d4609d;
+  --color-primitive-pink-9: #bc3181;
+  --color-primitive-pink-10: #ab1d72;
+  --color-primitive-pink-11: #7d1453;
+  --color-primitive-pink-12: #3e0828;
+  --color-primitive-rose-1: #fffafb;
+  --color-primitive-rose-2: #fff1f3;
+  --color-primitive-rose-3: #ffe3e6;
+  --color-primitive-rose-4: #ffd5da;
+  --color-primitive-rose-5: #ffc1c9;
+  --color-primitive-rose-6: #ffa3b1;
+  --color-primitive-rose-7: #f18093;
+  --color-primitive-rose-8: #de5f79;
+  --color-primitive-rose-9: #c62c58;
+  --color-primitive-rose-10: #b4144a;
+  --color-primitive-rose-11: #840e35;
+  --color-primitive-rose-12: #420618;
+  --spacing-1: 0.25rem; /** 4px */
+  --spacing-2: 0.5rem; /** 8px */
+  --spacing-3: 0.75rem; /** 12px */
+  --spacing-4: 1rem; /** 16px */
+  --spacing-5: 1.25rem; /** 20px */
+  --spacing-6: 1.5rem; /** 24px */
+  --spacing-7: 1.75rem; /** 28px */
+  --spacing-8: 2rem; /** 32px */
+  --spacing-10: 2.5rem; /** 40px */
+  --spacing-12: 3rem; /** 48px */
+  --spacing-16: 4rem; /** 64px */
+  --spacing-20: 5rem; /** 80px */
+  --spacing-24: 6rem; /** 96px */
+  --spacing-1-5: 0.375rem; /** 6px */
+  --font-family-sans: Inter, system-ui, -apple-system, sans-serif; /** Primary UI font */
+  --font-family-serif: Lora, Georgia, serif; /** Heading / editorial font */
+  --font-family-logo: 'Work Sans', system-ui, sans-serif; /** Logo wordmark font */
+  --font-family-mono: ui-monospace, SFMono-Regular, monospace;
+  --font-size-xs: 0.75rem; /** 12px */
+  --font-size-sm: 0.875rem; /** 14px */
+  --font-size-base: 1rem; /** 16px */
+  --font-size-lg: 1.125rem; /** 18px */
+  --font-size-xl: 1.25rem; /** 20px */
+  --font-size-2xl: 1.5rem; /** 24px */
+  --font-size-3xl: 1.875rem; /** 30px */
+  --font-size-4xl: 2.25rem; /** 36px */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-leading-none: 1;
+  --font-leading-tight: 1.25;
+  --font-leading-snug: 1.375;
+  --font-leading-normal: 1.5;
+  --font-leading-relaxed: 1.625;
+  --font-leading-loose: 2;
+  --font-tracking-tight: -0.025em;
+  --font-tracking-normal: 0;
+  --font-tracking-wide: 0.025em;
+  --font-tracking-wider: 0.05em;
+  --radius-none: 0;
+  --radius-sm: 0.25rem; /** 4px */
+  --radius-md: 0.375rem; /** 6px */
+  --radius-lg: 0.5rem; /** 8px */
+  --radius-xl: 0.75rem; /** 12px */
+  --radius-2xl: 1rem; /** 16px */
+  --radius-full: 9999px;
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 4px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --easing-linear: cubic-bezier(0, 0, 1, 1);
+  --easing-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --easing-ease-in: cubic-bezier(0.4, 0, 1, 1); /** Exits */
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1); /** Entrances */
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /** Standard transitions */
+  --easing-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); /** Playful overshoot */
+  --opacity-0: 0;
+  --opacity-disabled: 0.5; /** Disabled UI elements */
+  --opacity-subtle: 0.6; /** De-emphasised elements */
+  --opacity-muted: 0.75; /** Secondary elements */
+  --opacity-full: 1;
+  --z-base: 0;
+  --z-raised: 10; /** Slightly elevated elements */
+  --z-dropdown: 100; /** Dropdowns, popovers */
+  --z-sticky: 200; /** Sticky headers/footers */
+  --z-overlay: 300; /** Backdrop overlays */
+  --z-modal: 400; /** Modal dialogs */
+  --z-toast: 500; /** Toast notifications */
+  --z-tooltip: 600; /** Tooltips — always on top */
+}
