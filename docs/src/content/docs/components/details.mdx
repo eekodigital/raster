@@ -1,0 +1,81 @@
+---
+title: Details
+description: A styled wrapper around the native details / summary disclosure pattern. Expanding and collapsing is handled by the browser with no JavaScript required.
+---
+
+import Example from "../../../components/Example.astro";
+import { Details as DetailsDS } from "@eekodigital/raster";
+
+## Basic usage
+
+Pass a `summary` prop for the clickable heading and place the body content as children.
+
+<Example
+  code={`import { Details } from '@eekodigital/raster';\n\n<Details summary="What is an audit?">\n  An audit is a systematic review of financial records to verify accuracy\n  and compliance with applicable standards.\n</Details>`}
+>
+  <DetailsDS client:load summary="What is an audit?">
+    An audit is a systematic review of financial records to verify accuracy and compliance with
+    applicable standards.
+  </DetailsDS>
+</Example>
+
+## Open by default
+
+Pass the native `open` attribute to render the panel expanded on first mount.
+
+<Example
+  code={`<Details summary="Guidance notes" open>\n  Complete all mandatory fields before submitting. Incomplete submissions\n  will not be processed.\n</Details>`}
+>
+  <DetailsDS client:load summary="Guidance notes" open>
+    Complete all mandatory fields before submitting. Incomplete submissions will not be processed.
+  </DetailsDS>
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>summary</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>
+        Content rendered inside the <code>&lt;summary&gt;</code> element.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>The collapsible body content.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>DetailsHTMLAttributes</code>
+      </td>
+      <td>—</td>
+      <td>
+        All native <code>&lt;details&gt;</code> attributes, including <code>open</code>.
+      </td>
+    </tr>
+  </tbody>
+</table>

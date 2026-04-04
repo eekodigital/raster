@@ -1,0 +1,162 @@
+---
+title: TextInput
+description: "Two levels of the same control. TextInput is the bare styled input — use it when you need full layout control. TextInputField adds a label, optional hint, and optional error message for the common form field pattern."
+---
+
+import Example from "../../../components/Example.astro";
+import { TextInputField } from "@eekodigital/raster";
+import {
+  TextInputDefault,
+  TextInputError,
+  TextInputDisabled,
+} from "../../../components/TextInputDemo.tsx";
+
+## TextInput
+
+### Default
+
+<Example
+  code={`import { TextInput } from '@eekodigital/raster';\n\n<TextInput name="query" placeholder="Search…" />`}
+>
+  <TextInputDefault client:load />
+</Example>
+
+### Error state
+
+<Example code={`<TextInput name="email" type="email" hasError placeholder="name@example.com" />`}>
+  <TextInputError client:load />
+</Example>
+
+### Disabled
+
+<Example code={`<TextInput name="ref" defaultValue="INV-0042" disabled />`}>
+  <TextInputDisabled client:load />
+</Example>
+
+## TextInputField
+
+### Default
+
+<Example
+  code={`import { TextInputField } from '@eekodigital/raster';\n\n<TextInputField label="Project name" name="name" />`}
+>
+  <TextInputField client:load label="Project name" name="name" />
+</Example>
+
+### With hint
+
+<Example
+  code={`<TextInputField label="Project name" name="name" hint="Use a short, memorable name." />`}
+>
+  <TextInputField
+    client:load
+    label="Project name"
+    name="name"
+    hint="Use a short, memorable name."
+  />
+</Example>
+
+### With error
+
+<Example
+  code={`<TextInputField label="Email" name="email" type="email" error="Please enter a valid email address." />`}
+>
+  <TextInputField
+    client:load
+    label="Email"
+    name="email"
+    type="email"
+    error="Please enter a valid email address."
+  />
+</Example>
+
+## Props
+
+### TextInput
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>hasError</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Applies error styling.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>InputHTMLAttributes</code>
+      </td>
+      <td>—</td>
+      <td>
+        All native <code>&lt;input&gt;</code> attributes.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### TextInputField
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Visible label text.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Optional hint text below the label.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>error</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Validation error message.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>InputHTMLAttributes</code>
+      </td>
+      <td>All native input attributes.</td>
+    </tr>
+  </tbody>
+</table>

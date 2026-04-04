@@ -1,0 +1,161 @@
+---
+title: DateInput
+description: Three separate day, month, and year fields for collecting a known date from the user. Follows the GOV.UK date input pattern for accessibility and usability.
+---
+
+import Example from "../../../components/Example.astro";
+import { DateInput as DateInputDS } from "@eekodigital/raster";
+import { DateInputDemo, DateInputErrorDemo } from "../../../components/DateInputDemo.tsx";
+
+<div class="callout">
+  <p>
+    Use <code>DateInput</code> when the user already knows the date they need to enter — date of
+    birth, start of an audit period, invoice date, reporting deadline.
+  </p>
+</div>
+
+## Default
+
+Controlled usage with `value` and `onChange`.
+
+<Example
+  code={`import { useState } from 'react';\nimport { DateInput } from '@eekodigital/raster';\nimport type { DateValue } from '@eekodigital/raster';\n\nfunction DateInputDemo() {\n  const [value, setValue] = useState<DateValue>({ day: '', month: '', year: '' });\n  return <DateInput label="Date of birth" value={value} onChange={setValue} />;\n}`}
+>
+  <DateInputDemo client:load />
+</Example>
+
+## With hint text
+
+Use `hint` to provide an example date format.
+
+<Example
+  code={`<DateInput\n  label="Date of audit"\n  hint="For example, 27 3 2025"\n  value={value}\n  onChange={setValue}\n/>`}
+>
+  <DateInputErrorDemo client:load />
+</Example>
+
+## Error state
+
+Pass an `error` string to show a validation message and highlight the fields.
+
+<Example
+  code={`<DateInput\n  label="Date of audit"\n  hint="For example, 27 3 2025"\n  error="Enter a valid date"\n  defaultValue={{ day: '32', month: '13', year: '2025' }}\n/>`}
+>
+  <DateInputErrorDemo client:load />
+</Example>
+
+## Disabled
+
+<Example
+  code={`<DateInput\n  label="Date of birth"\n  defaultValue={{ day: '12', month: '3', year: '1985' }}\n  disabled\n/>`}
+>
+  <DateInputDS
+    client:load
+    label="Date of birth"
+    defaultValue={{ day: "12", month: "3", year: "1985" }}
+    disabled
+  />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Visible label above the fields.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Optional hint text shown below the label.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>error</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Validation error message. Highlights the fields when present.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>name</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Base name used to derive field names (e.g. <code>dob-day</code>, <code>dob-month</code>,{" "}
+        <code>dob-year</code>).
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>DateValue</code>
+      </td>
+      <td>—</td>
+      <td>
+        Controlled value object with <code>day</code>, <code>month</code>, and <code>year</code>{" "}
+        string fields.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultValue</code>
+      </td>
+      <td>
+        <code>DateValue</code>
+      </td>
+      <td>—</td>
+      <td>Uncontrolled initial value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onChange</code>
+      </td>
+      <td>
+        <code>(value: DateValue) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Callback fired when any field changes.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>disabled</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Disables all three input fields.</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,61 @@
+---
+title: SkipLink
+description: A keyboard-accessible link that allows users to jump past repeated navigation directly to the main content. Required for WCAG 2.4.1 compliance on pages with navigation blocks.
+---
+
+import Example from "../../../components/Example.astro";
+import { SkipLink } from "@eekodigital/raster";
+
+## Default
+
+Renders a link pointing to `#main-content` with the label "Skip to main content". Normally hidden — only visible on keyboard focus. Forced visible here for demonstration.
+
+<Example code={`import { SkipLink } from '@eekodigital/raster';
+
+<SkipLink />`}>
+  <div style="position:relative;width:100%;height:3rem">
+    <SkipLink client:load style={{ position: 'relative', transform: 'none' }} />
+  </div>
+</Example>
+
+<div class="callout">
+  <p>
+    <strong>Visually hidden until focused.</strong> In production, the SkipLink is positioned
+    off-screen and only becomes visible when a keyboard user tabs to it — the very first focusable
+    element on the page.
+  </p>
+</div>
+
+## Custom href
+
+Override the default target anchor when your main landmark uses a different id.
+
+<Example code={`<SkipLink href="#content" />`}>
+  <div style="position:relative;width:100%;height:3rem">
+    <SkipLink client:load href="#content" style={{ position: "relative", transform: "none" }} />
+  </div>
+</Example>
+
+## Custom label
+
+Pass children to replace the default link text.
+
+<Example code={`<SkipLink>Skip to content</SkipLink>`}>
+  <div style="position:relative;width:100%;height:3rem">
+    <SkipLink client:load style={{ position: "relative", transform: "none" }}>
+      Skip to content
+    </SkipLink>
+  </div>
+</Example>
+
+## Placement guidance
+
+Always render `SkipLink` as the first child of `<body>` (or the first element inside your app root) so it is the first tab stop on every page.
+
+## Props
+
+| Prop       | Type                   | Default                  | Description                                  |
+| ---------- | ---------------------- | ------------------------ | -------------------------------------------- |
+| `href`     | `string`               | `'#main-content'`        | The anchor target to jump to when activated. |
+| `children` | `ReactNode`            | `'Skip to main content'` | Link label text.                             |
+| `...props` | `AnchorHTMLAttributes` | —                        | All native anchor attributes.                |

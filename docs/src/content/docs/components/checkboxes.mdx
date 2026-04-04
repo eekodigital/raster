@@ -1,0 +1,154 @@
+---
+title: Checkbox
+description: A single checkbox with a label. Use CheckboxGroup to wrap multiple related checkboxes in a semantically correct fieldset.
+---
+
+import Example from "../../../components/Example.astro";
+import { Checkbox } from "@eekodigital/raster";
+import { CheckboxGroupDemo, CheckboxGroupHintErrorDemo } from "../../../components/CheckboxDemo";
+
+## Single checkbox
+
+<Example
+  code={`import { Checkbox } from '@eekodigital/raster';\n\n<Checkbox label="Send me a summary email" name="email_summary" />`}
+>
+  <Checkbox client:load label="Send me a summary email" name="email_summary" />
+</Example>
+
+## CheckboxGroup
+
+<Example
+  code={`<CheckboxGroup legend="Notify me about">\n  <Checkbox label="New reports" name="notify_reports" />\n  <Checkbox label="Criterion status changes" name="notify_status" />\n  <Checkbox label="Report locks and unlocks" name="notify_locks" />\n</CheckboxGroup>`}
+>
+  <CheckboxGroupDemo client:load />
+</Example>
+
+## With hint and error
+
+<Example
+  code={`<CheckboxGroup\n  legend="Notify me about"\n  hint="You can change this later in settings."\n  error="Select at least one notification type."\n>\n  <Checkbox label="New reports" name="notify_reports" />\n  <Checkbox label="Criterion status changes" name="notify_status" />\n</CheckboxGroup>`}
+>
+  <CheckboxGroupHintErrorDemo client:load />
+</Example>
+
+## Props — Checkbox
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Label rendered to the right of the checkbox.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>checked</code>
+      </td>
+      <td>
+        <code>boolean | 'indeterminate'</code>
+      </td>
+      <td>Controlled checked state.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultChecked</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Initial checked state (uncontrolled).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onCheckedChange</code>
+      </td>
+      <td>
+        <code>(checked: boolean | 'indeterminate') =&gt; void</code>
+      </td>
+      <td>Called when checked state changes.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>disabled</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Disables the checkbox.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>name</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Form field name for submission.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Props — CheckboxGroup
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>legend</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        Group label rendered as a <code>&lt;legend&gt;</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Optional hint text.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>error</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Validation error message for the group.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>
+        <code>Checkbox</code> components.
+      </td>
+    </tr>
+  </tbody>
+</table>

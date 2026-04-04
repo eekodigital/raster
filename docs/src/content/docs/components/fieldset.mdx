@@ -1,0 +1,116 @@
+---
+title: Fieldset
+description: Groups related form controls under a shared legend. Provides the semantic structure required by screen readers to associate a label with a set of inputs.
+---
+
+import Example from "../../../components/Example.astro";
+import { Fieldset as FieldsetDS, TextInputField } from "@eekodigital/raster";
+
+<div class="callout">
+  <p>
+    <strong>Presentational only — compatible with any form library.</strong> <code>Fieldset</code>
+    renders a native <code>&lt;fieldset&gt;</code> and <code>&lt;legend&gt;</code> and places no
+    constraints on the children. It works seamlessly with React Hook Form, Formik, or uncontrolled
+    inputs.
+  </p>
+</div>
+
+## Grouping related text inputs
+
+Use `Fieldset` to semantically group a set of related inputs under a shared label — for example, the fields that make up a postal address.
+
+<Example code={`import { Fieldset, TextInputField } from '@eekodigital/raster';
+
+<Fieldset legend="Postal address">
+  <TextInputField label="Address line 1" name="address1" />
+  <TextInputField
+    label="Address line 2"
+    name="address2"
+    hint="Flat, suite, building, floor, etc."
+  />
+  <TextInputField label="City" name="city" />
+  <TextInputField label="Postcode" name="postcode" />
+</Fieldset>`}>
+  <FieldsetDS client:load legend="Postal address">
+    <TextInputField client:load label="Address line 1" name="address1" />
+    <TextInputField client:load label="Address line 2" name="address2" hint="Flat, suite, building, floor, etc." />
+    <TextInputField client:load label="City" name="city" />
+    <TextInputField client:load label="Postcode" name="postcode" />
+  </FieldsetDS>
+</Example>
+
+<div class="callout">
+  <p>
+    <strong>Checkboxes and radios:</strong> <code>Checkbox</code> includes its own built-in fieldset
+    when grouping multiple options. Use <code>RadioGroup</code> for radio buttons — it already
+    renders a fieldset with its own legend. Use <code>Fieldset</code> when you need to group text
+    inputs or other heterogeneous controls.
+  </p>
+</div>
+
+## With hint text
+
+Use the `hint` prop to add supplementary guidance below the legend.
+
+<Example
+  code={`<Fieldset legend="Emergency contact" hint="We'll only use this if we can't reach you directly.">
+  <TextInputField label="Full name" name="emergency_name" />
+  <TextInputField label="Phone number" name="emergency_phone" type="tel" />
+</Fieldset>`}
+>
+  <FieldsetDS
+    client:load
+    legend="Emergency contact"
+    hint="We'll only use this if we can't reach you directly."
+  >
+    <TextInputField client:load label="Full name" name="emergency_name" />
+    <TextInputField client:load label="Phone number" name="emergency_phone" type="tel" />
+  </FieldsetDS>
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>legend</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>
+        The visible label for the group, rendered as a <code>&lt;legend&gt;</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Optional hint text displayed below the legend.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>The form controls to group.</td>
+    </tr>
+  </tbody>
+</table>

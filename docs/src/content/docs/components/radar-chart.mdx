@@ -1,0 +1,104 @@
+---
+title: RadarChart
+description: Multi-axis comparison chart. Natural fit for WCAG POUR principles (Perceivable, Operable, Understandable, Robust) or any multi-dimensional scoring. Keyboard navigable with screen reader fallback.
+---
+
+import Example from "../../../components/Example.astro";
+import { RadarChartBasicDemo, RadarChartMultiDemo } from "../../../components/RadarChartDemo.tsx";
+
+## Basic
+
+<Example
+  code={`import { RadarChart } from '@eekodigital/raster';\n\n<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[{ name: 'Current', data: [80, 65, 90, 70] }]}\n  aria-label="POUR principle scores"\n/>`}
+>
+  <RadarChartBasicDemo client:load />
+</Example>
+
+## Multi-series comparison
+
+Compare current state against a target or another audit.
+
+<Example
+  code={`<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[\n    { name: 'Current', data: [80, 65, 90, 70], color: 'var(--color-interactive)' },\n    { name: 'Target', data: [100, 100, 100, 100], color: 'var(--color-success)' },\n  ]}\n  max={100}\n  aria-label="Current vs target"\n/>`}
+>
+  <RadarChartMultiDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>axes</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>—</td>
+      <td>Axis labels (one per data point)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>series</code>
+      </td>
+      <td>
+        <code>RadarSeries[]</code>
+      </td>
+      <td>—</td>
+      <td>{`{ name, data: number[], color? }`}</td>
+    </tr>
+    <tr>
+      <td>
+        <code>max</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>Auto</td>
+      <td>Maximum axis value. Auto-detected if not set.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>300</code>
+      </td>
+      <td>Chart size in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>levels</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>4</code>
+      </td>
+      <td>Number of grid levels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required.</td>
+    </tr>
+  </tbody>
+</table>

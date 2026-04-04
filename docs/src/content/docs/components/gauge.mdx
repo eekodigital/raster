@@ -1,0 +1,120 @@
+---
+title: Gauge
+description: Radial progress indicator showing a single value against a maximum. Uses role="meter" with proper aria-valuenow and aria-valuemax. Animated fill respects prefers-reduced-motion.
+---
+
+import Example from "../../../components/Example.astro";
+import { GaugeBasicDemo } from "../../../components/GaugeDemo.tsx";
+
+## Examples
+
+Different sizes, colours, and format functions.
+
+<Example
+  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<Gauge value={3.5} max={4} label="Score" format={(v) => v.toFixed(1)} color="var(--color-success)" aria-label="Score: 3.5/4" />\n<Gauge value={45} max={100} label="Complete" format={(v) => \`\${v}%\`} size={80} thickness={8} aria-label="45% complete" />`}
+>
+  <GaugeBasicDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Current value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>max</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Maximum value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Label below the value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>color</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>--color-interactive</code>
+      </td>
+      <td>Fill colour</td>
+    </tr>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>120</code>
+      </td>
+      <td>Diameter in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>thickness</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>10</code>
+      </td>
+      <td>Ring thickness</td>
+    </tr>
+    <tr>
+      <td>
+        <code>format</code>
+      </td>
+      <td>
+        <code>(v: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>String</code>
+      </td>
+      <td>Format the displayed value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required.</td>
+    </tr>
+  </tbody>
+</table>

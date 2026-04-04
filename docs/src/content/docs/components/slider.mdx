@@ -1,0 +1,163 @@
+---
+title: Slider
+description: A draggable range input for selecting a value or range within a defined interval. Built on Radix Slider for full keyboard and accessibility support.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  SliderBasicDemo,
+  SliderRangeDemo,
+  SliderDisabledDemo,
+  SliderStepDemo,
+} from "../../../components/SliderDemo.tsx";
+
+## Basic
+
+<Example
+  code={`import { Slider } from '@eekodigital/raster';\n\nconst [value, setValue] = useState([50]);\n\n<Slider.Root value={value} onValueChange={setValue} aria-label="Volume">\n  <Slider.Track />\n  <Slider.Thumb aria-label="Volume" />\n</Slider.Root>`}
+>
+  <SliderBasicDemo client:load />
+</Example>
+
+## Range
+
+Use two thumbs for selecting a range between a minimum and maximum.
+
+<Example
+  code={`const [value, setValue] = useState([20, 80]);\n\n<Slider.Root value={value} onValueChange={setValue} aria-label="Price range">\n  <Slider.Track />\n  <Slider.Thumb aria-label="Minimum price" />\n  <Slider.Thumb aria-label="Maximum price" />\n</Slider.Root>`}
+>
+  <SliderRangeDemo client:load />
+</Example>
+
+## Step
+
+The `step` prop snaps the thumb to discrete intervals.
+
+<Example
+  code={`<Slider.Root value={value} onValueChange={setValue} min={0} max={100} step={10} aria-label="Steps">\n  <Slider.Track />\n  <Slider.Thumb aria-label="Steps" />\n</Slider.Root>`}
+>
+  <SliderStepDemo client:load />
+</Example>
+
+## Disabled
+
+<Example
+  code={`<Slider.Root value={[40]} disabled aria-label="Volume">\n  <Slider.Track />\n  <Slider.Thumb aria-label="Volume" />\n</Slider.Root>`}
+>
+  <SliderDisabledDemo client:load />
+</Example>
+
+## Props — Root
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>number[]</code>
+      </td>
+      <td>—</td>
+      <td>Controlled value(s).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultValue</code>
+      </td>
+      <td>
+        <code>number[]</code>
+      </td>
+      <td>—</td>
+      <td>Uncontrolled initial value(s).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onValueChange</code>
+      </td>
+      <td>
+        <code>(value: number[]) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called when value changes.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>min</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>0</code>
+      </td>
+      <td>Minimum value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>max</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>100</code>
+      </td>
+      <td>Maximum value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>step</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>1</code>
+      </td>
+      <td>Step interval for snapping.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>disabled</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Prevents interaction.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>orientation</code>
+      </td>
+      <td>
+        <code>"horizontal" | "vertical"</code>
+      </td>
+      <td>
+        <code>"horizontal"</code>
+      </td>
+      <td>Slider orientation.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>

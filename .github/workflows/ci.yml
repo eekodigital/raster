@@ -20,3 +20,4 @@ jobs:
       - run: pnpm check
       - run: pnpm typecheck
       - run: pnpm test -- --coverage
+      - run: cd docs && pnpm build

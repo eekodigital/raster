@@ -1,0 +1,102 @@
+---
+title: Box
+description: A polymorphic element with token-constrained padding. Use Box when you need spacing without creating a custom CSS class. All padding values generate hashed vanilla-extract classes — no inline styles.
+---
+
+import Example from "../../../components/Example.astro";
+import { BoxPaddingDemo, BoxPaddingXYDemo, BoxAsDemo } from "../../../components/BoxDemo.tsx";
+
+## Padding
+
+The `padding` prop applies equal padding on all sides using the spacing token scale.
+
+<Example
+  code={`import { Box } from '@eekodigital/raster';\n\n<Box padding="4">\n  Content with padding "4" (1rem)\n</Box>`}
+>
+  <BoxPaddingDemo client:load />
+</Example>
+
+### Directional padding
+
+Use `paddingX` and `paddingY` for horizontal and vertical padding independently.
+
+<Example
+  code={`<Box paddingX="6" paddingY="3">\n  Different horizontal and vertical padding\n</Box>`}
+>
+  <BoxPaddingXYDemo client:load />
+</Example>
+
+## Semantic element
+
+Use the `as` prop to render as any HTML element.
+
+<Example code={`<Box as="section" padding="4">\n  Rendered as a section element\n</Box>`}>
+  <BoxAsDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>padding</code>
+      </td>
+      <td>
+        <code>"1"–"24"</code>
+      </td>
+      <td>—</td>
+      <td>Padding on all sides (spacing token).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>paddingX</code>
+      </td>
+      <td>
+        <code>"1"–"24"</code>
+      </td>
+      <td>—</td>
+      <td>Horizontal padding (spacing token).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>paddingY</code>
+      </td>
+      <td>
+        <code>"1"–"24"</code>
+      </td>
+      <td>—</td>
+      <td>Vertical padding (spacing token).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>as</code>
+      </td>
+      <td>
+        <code>ElementType</code>
+      </td>
+      <td>
+        <code>"div"</code>
+      </td>
+      <td>Rendered HTML element.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

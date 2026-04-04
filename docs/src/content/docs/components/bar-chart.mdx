@@ -1,0 +1,101 @@
+---
+title: BarChart
+description: Vertical bar chart for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Fully keyboard navigable with a hidden data table for screen readers.
+---
+
+import Example from "../../../components/Example.astro";
+import { BarChartBasicDemo, BarChartCustomDemo } from "../../../components/BarChartDemo.tsx";
+
+## Basic
+
+Pass data as an array of `{ label, value }` objects. Colours default to the interactive palette or can be set per bar.
+
+<Example
+  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--color-success)', 'var(--color-danger)', 'var(--color-inactive)', 'var(--color-warning)']}\n  aria-label="Conformance results by status"\n/>`}
+>
+  <BarChartBasicDemo client:load />
+</Example>
+
+## Custom height
+
+<Example
+  code={`<BarChart\n  data={[...]}\n  height={240}\n  aria-label="Criteria by WCAG principle"\n/>`}
+>
+  <BarChartCustomDemo client:load />
+</Example>
+
+## Accessibility
+
+- SVG has `role="img"` with `aria-label`
+- Each bar is focusable with a descriptive `aria-label` (e.g. "Pass: 42")
+- Arrow keys navigate between bars
+- A hidden `<table>` provides the same data for screen readers
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>data</code>
+      </td>
+      <td>
+        <code>BarDatum[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Array of <code>{`{ label: string, value: number }`}</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>colors</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>Interactive palette</td>
+      <td>Colours per bar (CSS values or custom properties)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>200</code>
+      </td>
+      <td>Chart height in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required. Describes the chart for screen readers.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,101 @@
+---
+title: Design principles
+description: These principles guide every design and implementation decision. They are intentionally opinionated. When in doubt, return to them.
+---
+
+## 1. Accessible by default
+
+Accessibility is not a feature or a compliance checklist — it is the foundation every decision
+is built on. Solid keyboard navigation, sensible tab order, sufficient contrast, and meaningful
+focus states are non-negotiable. We build an accessibility tool; we cannot be inconsistent with
+what we stand for. This means robust support and correct behaviour, not fancy shortcuts.
+
+## 2. Clarity over cleverness
+
+Every element on screen earns its place. Status (Pass, Fail, N/A, To Do) — and typography are
+always the most visually dominant things on a page. If something doesn't communicate information
+or enable an action, remove it.
+
+## 3. Do the hard work to make it simple
+
+Complexity is our problem to solve, not the user's. Simple flows, clear steps, and obvious next
+actions. More clicks is acceptable; confusion is not.
+
+## 4. Be consistent, not uniform
+
+The same patterns, language, and behaviours throughout — but applied with judgement. Context
+shapes how a pattern is used, not whether it is used.
+
+## 5. Errors and empty states are first-class moments
+
+Every error message says exactly what went wrong and exactly what to do next, in plain language,
+close to where the problem occurred. Every empty state explains why it's empty and what action
+moves things forward. These are not edge cases — they are part of the experience.
+
+## 6. Designed for focus
+
+This is a tool for careful, methodical work. The design supports concentration rather than
+competing for attention. Colour, motion, and visual weight are used sparingly and with intent.
+
+## 7. Every screen, every size
+
+Every screen is designed to work at every size. Desktop is the primary environment for most
+users, but nothing breaks, nothing is hidden, and nothing is confusing on mobile. Simple pages,
+single purposes, considered flows. More clicks is acceptable on mobile if each step is clear.
+
+## 8. Minimal, but warm
+
+Simplicity is clarity, not austerity. Friendly illustrations, considered typography, and subtle warmth
+make the product approachable without undermining its purpose. Rounded corners, considered
+whitespace, and careful use of colour are welcome. Decoration for its own sake is not.
+
+> Inntrig should feel like it was designed by someone who respects both the user's time and
+> their intelligence — calm, warm, purposeful, and completely unshowy.
+
+## Good UI engineering is good design
+
+We carry out principles into our code, here are some examples.
+
+### Accessible by default
+
+Every component is built to WCAG 2.2 AA as a baseline. This means correct colour contrast,
+keyboard navigability, focus indicators, and proper use of HTML semantics.
+
+The first rule of ARIA: don't use ARIA when native HTML does the job. Use `<h1>`–`<h6>` for headings, `<button>` for actions, `<a>` for navigation. Reach for `aria-*` attributes only when HTML falls short.
+
+### Semantic HTML over styling hacks
+
+HTML elements carry meaning. An `<a>` navigates; a `<button>` triggers an action. These are not interchangeable. If something navigates, it must be an anchor — even if it looks like a button. If it triggers an in-page action (form submission, toggle), it must be a button.
+
+The `Button` component supports a render prop precisely for this: pass a function as
+children to let a `Link` (which renders as `<a>`) carry button styles
+without wrapping it in a `<button>`, which would be invalid HTML.
+
+<div class="callout">
+  <p>
+    <strong>Rule:</strong> Never nest a <code>&lt;button&gt;</code> inside an <code>&lt;a&gt;</code>{" "}
+    or vice versa. Use a render prop with <code>Button</code> when a navigation link needs button
+    styling.
+  </p>
+</div>
+
+### Links are always underlined
+
+Text links must always be underlined. Underlines are the universally understood visual cue for a
+hyperlink. Relying on colour alone fails WCAG SC 1.4.1 (Use of Colour).
+
+The only exception: navigational links in discrete UI regions (top bar, breadcrumb nav, footer)
+where context makes the interactive nature unambiguous. These suppress the underline via the
+`nav a` rule but restore it on hover.
+
+### Colour communicates meaning, not decoration
+
+The token system defines semantic roles: `--color-success`, `--color-danger`,
+`--color-inactive`, `--color-warning`. These are used consistently across the
+results UI. New colour usage should map to a semantic token — not a raw hex value — so theming
+works correctly.
+
+### Layout lives in the app
+
+Design system components handle their own internal layout (padding, alignment). Page-level
+layout — grids, gaps between components, hero sections — belongs in the consuming app's CSS.

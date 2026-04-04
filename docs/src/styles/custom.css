@@ -1,0 +1,190 @@
+/* High-contrast theme — light-based chrome with stronger contrast */
+:root[data-theme="high-contrast"],
+[data-theme="high-contrast"] ::backdrop {
+  --sl-color-white: hsl(0, 0%, 0%);
+  --sl-color-gray-1: hsl(0, 0%, 7%);
+  --sl-color-gray-2: hsl(0, 0%, 13%);
+  --sl-color-gray-3: hsl(0, 0%, 25%);
+  --sl-color-gray-4: hsl(0, 0%, 44%);
+  --sl-color-gray-5: hsl(0, 0%, 68%);
+  --sl-color-gray-6: hsl(0, 0%, 90%);
+  --sl-color-gray-7: hsl(0, 0%, 96%);
+  --sl-color-black: hsl(0, 0%, 100%);
+  --sl-color-accent-high: hsl(234, 100%, 20%);
+  --sl-color-accent: hsl(234, 100%, 45%);
+  --sl-color-accent-low: hsl(234, 100%, 93%);
+  --sl-color-text-accent: var(--sl-color-accent);
+  --sl-color-text-invert: var(--sl-color-black);
+  --sl-color-bg: var(--sl-color-black);
+  --sl-color-bg-nav: var(--sl-color-gray-7);
+  --sl-color-bg-sidebar: var(--sl-color-bg);
+  --sl-color-bg-inline-code: var(--sl-color-gray-6);
+  --sl-color-bg-accent: var(--sl-color-accent);
+  --sl-color-hairline-light: var(--sl-color-gray-5);
+  --sl-color-hairline: hsl(0, 0%, 0%);
+  --sl-color-hairline-shade: hsl(0, 0%, 0%);
+  --sl-color-backdrop-overlay: hsla(0, 0%, 0%, 0.5);
+  --sl-shadow-sm: 0px 1px 1px hsla(0, 0%, 0%, 0.06), 0px 2px 1px hsla(0, 0%, 0%, 0.06);
+  --sl-shadow-md:
+    0px 8px 4px hsla(0, 0%, 0%, 0.03), 0px 5px 2px hsla(0, 0%, 0%, 0.03),
+    0px 3px 2px hsla(0, 0%, 0%, 0.06), 0px 1px 1px hsla(0, 0%, 0%, 0.06);
+  --sl-shadow-lg:
+    0px 25px 7px rgba(0, 0, 0, 0.01), 0px 16px 6px hsla(0, 0%, 0%, 0.03),
+    0px 9px 5px hsla(0, 0%, 0%, 0.08), 0px 4px 4px hsla(0, 0%, 0%, 0.16),
+    0px 4px 2px hsla(0, 0%, 0%, 0.04);
+}
+
+/* Sand palette for light mode — match the main website's warm tone */
+:root[data-theme="light"],
+:root:not([data-theme]) {
+  --sl-color-gray-7: #f8f4f1; /* sand-2 — page bg */
+  --sl-color-gray-6: #efeae5; /* sand-3 — subtle bg */
+  --sl-color-gray-5: #d9d3cc; /* sand-5 — borders */
+  --sl-color-gray-4: #c7c0b7; /* sand-6 */
+  --sl-color-gray-3: #70665c; /* adjusted sand for 4.5:1 contrast */
+  --sl-color-gray-2: #6c6156; /* sand-10 */
+  --sl-color-gray-1: #50463a; /* sand-11 */
+  --sl-color-white: #282017; /* sand-12 — text */
+  --sl-color-black: #fefbf9; /* sand-1 — inverse */
+}
+
+/* Example component — preview + code block */
+.example {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-block: 1rem;
+}
+
+.example-preview {
+  padding: 2rem 1.5rem;
+  background: var(--sl-color-gray-7);
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.example-preview--center {
+  justify-content: center;
+  align-items: center;
+}
+
+.example-code {
+  position: relative;
+}
+
+.example-code pre {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.25rem;
+  background: var(--sl-color-bg);
+  cursor: pointer;
+  color: var(--sl-color-gray-3);
+  z-index: 1;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+.copy-btn:hover {
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-white);
+}
+
+.check-icon {
+  display: none;
+}
+.copy-btn[data-copied] .copy-icon {
+  display: none;
+}
+.copy-btn[data-copied] .check-icon {
+  display: block;
+  color: var(--sl-color-green);
+}
+
+/* Props table */
+.props-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sl-text-sm);
+  margin-block: 1rem;
+}
+
+.props-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--sl-color-gray-5);
+  font-weight: 600;
+}
+
+.props-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--sl-color-gray-6);
+  vertical-align: top;
+}
+
+/* Callout */
+.callout {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--sl-color-gray-6);
+  border-left: 3px solid var(--sl-color-accent);
+  margin-block: 1rem;
+}
+
+.callout p {
+  margin: 0;
+}
+
+/* Colour swatches for foundations page */
+.colour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin-block: 1rem;
+}
+
+.colour-swatch {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--sl-color-gray-5);
+}
+
+.colour-swatch-block {
+  height: 4rem;
+}
+
+.colour-swatch-label {
+  padding: 0.5rem;
+  font-size: var(--sl-text-xs);
+}
+
+/* Preview (legacy compat) */
+.preview {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.5rem;
+  padding: 2rem 1.5rem;
+  background: var(--sl-color-gray-7);
+  margin-block: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}

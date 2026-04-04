@@ -1,0 +1,167 @@
+---
+title: Grid
+description: CSS Grid layout with flexible column widths. Each Grid.Col child specifies its width using fr units, pixel values, auto, or full. No artificial column system — values pass through to grid-template-columns directly.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  GridProportionalDemo,
+  GridEqualDemo,
+  GridFixedDemo,
+  GridResponsiveDemo,
+} from "../../../components/GridDemo.tsx";
+
+## Proportional columns
+
+Use `fr` units for proportional sizing. `2fr` takes twice the space of `1fr`.
+
+<Example
+  code={`import { Grid } from '@eekodigital/raster';\n\n<Grid gap="4">\n  <Grid.Col width="2fr">Main content</Grid.Col>\n  <Grid.Col width="1fr">Sidebar</Grid.Col>\n</Grid>`}
+>
+  <GridProportionalDemo client:load />
+</Example>
+
+## Equal columns
+
+Give every column `1fr` for equal widths.
+
+<Example
+  code={`<Grid gap="4">\n  <Grid.Col width="1fr">Card</Grid.Col>\n  <Grid.Col width="1fr">Card</Grid.Col>\n  <Grid.Col width="1fr">Card</Grid.Col>\n</Grid>`}
+>
+  <GridEqualDemo client:load />
+</Example>
+
+## Fixed + flexible
+
+Mix fixed pixel widths with `auto` to fill remaining space.
+
+<Example
+  code={`<Grid gap="4">\n  <Grid.Col width="200px">Fixed sidebar</Grid.Col>\n  <Grid.Col width="auto">Fills remaining</Grid.Col>\n</Grid>`}
+>
+  <GridFixedDemo client:load />
+</Example>
+
+## Responsive
+
+Column widths accept responsive objects with named breakpoints or custom pixel values.
+
+<Example
+  code={`<Grid gap="4">\n  <Grid.Col width={{ base: 'full', md: '2fr' }}>Main</Grid.Col>\n  <Grid.Col width={{ base: 'full', md: '1fr' }}>Sidebar</Grid.Col>\n</Grid>`}
+>
+  <GridResponsiveDemo client:load />
+</Example>
+
+## Props
+
+### Grid
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>gap</code>
+      </td>
+      <td>
+        <code>"1"–"24"</code>
+      </td>
+      <td>
+        <code>"4"</code>
+      </td>
+      <td>Gap between columns and rows (spacing token).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>align</code>
+      </td>
+      <td>
+        <code>"start" | "center" | "end" | "stretch"</code>
+      </td>
+      <td>
+        <code>"stretch"</code>
+      </td>
+      <td>Vertical alignment of items within rows.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>as</code>
+      </td>
+      <td>
+        <code>ElementType</code>
+      </td>
+      <td>
+        <code>"div"</code>
+      </td>
+      <td>Rendered HTML element.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+### Grid.Col
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>width</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>"1fr"</code>
+      </td>
+      <td>
+        Column width: <code>fr</code> values, <code>px</code>/<code>rem</code> lengths,{" "}
+        <code>auto</code>, or <code>full</code>. Accepts responsive values.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>as</code>
+      </td>
+      <td>
+        <code>ElementType</code>
+      </td>
+      <td>
+        <code>"div"</code>
+      </td>
+      <td>Rendered HTML element.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
