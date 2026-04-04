@@ -1,12 +1,12 @@
-import { createContext, useContext, useCallback, useMemo, useRef } from 'react';
-import type React from 'react';
-import { Portal as PortalComponent } from '../Portal/Portal.js';
-import { cn } from '../../utils/cn.js';
-import { positionOverlay } from '../../utils/position-overlay.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import { useClickOutside } from '../../utils/use-click-outside.js';
-import { useEscapeKey } from '../../utils/use-escape-key.js';
-import * as styles from './DropdownMenu.css.js';
+import { createContext, useContext, useCallback, useMemo, useRef } from "react";
+import type React from "react";
+import { Portal as PortalComponent } from "../Portal/Portal.js";
+import { cn } from "../../utils/cn.js";
+import { positionOverlay } from "../../utils/position-overlay.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import { useClickOutside } from "../../utils/use-click-outside.js";
+import { useEscapeKey } from "../../utils/use-escape-key.js";
+import * as styles from "./DropdownMenu.css.js";
 
 // --- Contexts ---
 
@@ -28,7 +28,7 @@ type RadioGroupCtx = {
 };
 
 const RadioGroupCtx = createContext<RadioGroupCtx>({
-  value: '',
+  value: "",
   onValueChange: () => {},
 });
 
@@ -56,8 +56,8 @@ type TriggerProps = {
     | React.ReactNode
     | ((props: {
         ref: (el: HTMLElement | null) => void;
-        'aria-expanded': boolean;
-        'aria-haspopup': 'menu';
+        "aria-expanded": boolean;
+        "aria-haspopup": "menu";
         onClick: () => void;
       }) => React.ReactElement);
 };
@@ -71,12 +71,12 @@ export function Trigger({ children }: TriggerProps) {
     ref: (el: HTMLElement | null) => {
       triggerRef.current = el;
     },
-    'aria-expanded': open,
-    'aria-haspopup': 'menu' as const,
+    "aria-expanded": open,
+    "aria-haspopup": "menu" as const,
     onClick: handleClick,
   };
 
-  if (typeof children === 'function') {
+  if (typeof children === "function") {
     return children(triggerProps);
   }
 
@@ -136,7 +136,7 @@ function ContentInner({
 
   // Arrow key navigation
   function handleMenuKeyDown(e: React.KeyboardEvent) {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
     e.preventDefault();
 
     const items = Array.from(
@@ -146,8 +146,8 @@ function ContentInner({
     const currentIdx = items.indexOf(document.activeElement as HTMLElement);
     let next = currentIdx;
 
-    if (e.key === 'ArrowDown') next = (currentIdx + 1) % items.length;
-    else if (e.key === 'ArrowUp') next = (currentIdx - 1 + items.length) % items.length;
+    if (e.key === "ArrowDown") next = (currentIdx + 1) % items.length;
+    else if (e.key === "ArrowUp") next = (currentIdx - 1 + items.length) % items.length;
 
     items[next]?.focus();
   }
@@ -162,7 +162,7 @@ function ContentInner({
       const trigger = triggerRef.current;
       if (!trigger) return;
 
-      positionOverlay(trigger, menu, 'bottom-end');
+      positionOverlay(trigger, menu, "bottom-end");
       const firstItem = menu.querySelector<HTMLElement>(
         '[role="menuitem"], [role="menuitemradio"]',
       );
@@ -203,7 +203,7 @@ export function Item({ className, inset, onSelect, disabled, children }: ItemPro
       role="menuitem"
       className={cls}
       tabIndex={-1}
-      data-disabled={disabled ? '' : undefined}
+      data-disabled={disabled ? "" : undefined}
       aria-disabled={disabled || undefined}
       onClick={() => {
         if (disabled) return;
@@ -211,7 +211,7 @@ export function Item({ className, inset, onSelect, disabled, children }: ItemPro
         setOpen(false);
       }}
       onKeyDown={(e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           if (disabled) return;
           onSelect?.();
@@ -260,13 +260,13 @@ export function RadioItem({ className, value, children }: RadioItemProps) {
       aria-checked={checked}
       className={cls}
       tabIndex={-1}
-      data-state={checked ? 'checked' : 'unchecked'}
+      data-state={checked ? "checked" : "unchecked"}
       onClick={() => {
         onValueChange(value);
         setOpen(false);
       }}
       onKeyDown={(e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onValueChange(value);
           setOpen(false);

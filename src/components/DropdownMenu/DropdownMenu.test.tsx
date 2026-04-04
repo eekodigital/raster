@@ -1,10 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
-import * as DropdownMenu from './DropdownMenu.js';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import * as DropdownMenu from "./DropdownMenu.js";
 
 function openMenu() {
-  const trigger = screen.getByRole('button', { name: 'Options' });
+  const trigger = screen.getByRole("button", { name: "Options" });
   fireEvent.pointerDown(trigger);
   fireEvent.click(trigger);
 }
@@ -15,78 +15,78 @@ function renderMenu({ onSelect }: { onSelect?: (value: string) => void } = {}) {
       <DropdownMenu.Trigger>Options</DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Label>Actions</DropdownMenu.Label>
-        <DropdownMenu.Item onSelect={() => onSelect?.('edit')}>Edit</DropdownMenu.Item>
-        <DropdownMenu.Item onSelect={() => onSelect?.('duplicate')}>Duplicate</DropdownMenu.Item>
+        <DropdownMenu.Item onSelect={() => onSelect?.("edit")}>Edit</DropdownMenu.Item>
+        <DropdownMenu.Item onSelect={() => onSelect?.("duplicate")}>Duplicate</DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item onSelect={() => onSelect?.('delete')}>Delete</DropdownMenu.Item>
+        <DropdownMenu.Item onSelect={() => onSelect?.("delete")}>Delete</DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>,
   );
 }
 
-describe('DropdownMenu', () => {
-  describe('opening and closing', () => {
-    it('is not visible before trigger click', () => {
+describe("DropdownMenu", () => {
+  describe("opening and closing", () => {
+    it("is not visible before trigger click", () => {
       renderMenu();
-      expect(screen.queryByRole('menu')).toBeNull();
+      expect(screen.queryByRole("menu")).toBeNull();
     });
 
-    it('opens on trigger click and shows items', () => {
-      renderMenu();
-      openMenu();
-      expect(screen.getByRole('menu')).toBeDefined();
-      expect(screen.getByRole('menuitem', { name: 'Edit' })).toBeDefined();
-      expect(screen.getByRole('menuitem', { name: 'Delete' })).toBeDefined();
-    });
-
-    it('shows label and separator', () => {
+    it("opens on trigger click and shows items", () => {
       renderMenu();
       openMenu();
-      expect(screen.getByText('Actions')).toBeDefined();
-      expect(screen.getByRole('separator')).toBeDefined();
+      expect(screen.getByRole("menu")).toBeDefined();
+      expect(screen.getByRole("menuitem", { name: "Edit" })).toBeDefined();
+      expect(screen.getByRole("menuitem", { name: "Delete" })).toBeDefined();
     });
 
-    it('closes when an item is selected', () => {
+    it("shows label and separator", () => {
       renderMenu();
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
-      expect(screen.queryByRole('menu')).toBeNull();
+      expect(screen.getByText("Actions")).toBeDefined();
+      expect(screen.getByRole("separator")).toBeDefined();
     });
 
-    it('calls onSelect when an item is clicked', () => {
+    it("closes when an item is selected", () => {
+      renderMenu();
+      openMenu();
+      fireEvent.click(screen.getByRole("menuitem", { name: "Edit" }));
+      expect(screen.queryByRole("menu")).toBeNull();
+    });
+
+    it("calls onSelect when an item is clicked", () => {
       const onSelect = vi.fn();
       renderMenu({ onSelect });
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
-      expect(onSelect).toHaveBeenCalledWith('edit');
+      fireEvent.click(screen.getByRole("menuitem", { name: "Edit" }));
+      expect(onSelect).toHaveBeenCalledWith("edit");
     });
   });
 
-  describe('keyboard interaction', () => {
-    it('closes on Escape', async () => {
+  describe("keyboard interaction", () => {
+    it("closes on Escape", async () => {
       renderMenu();
       openMenu();
-      expect(screen.getByRole('menu')).toBeDefined();
-      await userEvent.keyboard('{Escape}');
-      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+      expect(screen.getByRole("menu")).toBeDefined();
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
     });
 
-    it('moves focus into menu when opened', async () => {
+    it("moves focus into menu when opened", async () => {
       renderMenu();
       openMenu();
       await waitFor(() => {
-        const menu = screen.getByRole('menu');
+        const menu = screen.getByRole("menu");
         expect(menu.contains(document.activeElement)).toBe(true);
       });
     });
 
-    it('ArrowDown navigates to next item', async () => {
+    it("ArrowDown navigates to next item", async () => {
       renderMenu();
       openMenu();
       await waitFor(() =>
-        expect(screen.getByRole('menu').contains(document.activeElement)).toBe(true),
+        expect(screen.getByRole("menu").contains(document.activeElement)).toBe(true),
       );
-      await userEvent.keyboard('{ArrowDown}');
+      await userEvent.keyboard("{ArrowDown}");
       expect(document.activeElement?.textContent).toBeDefined();
     });
 
@@ -94,8 +94,8 @@ describe('DropdownMenu', () => {
     // Radix's pointer event handling. Verified manually in browser.
   });
 
-  describe('RadioGroup and RadioItem', () => {
-    it('clicking a RadioItem selects the value and closes the menu', () => {
+  describe("RadioGroup and RadioItem", () => {
+    it("clicking a RadioItem selects the value and closes the menu", () => {
       const onValueChange = vi.fn();
       render(
         <DropdownMenu.Root>
@@ -109,30 +109,30 @@ describe('DropdownMenu', () => {
         </DropdownMenu.Root>,
       );
       openMenu();
-      fireEvent.click(screen.getByRole('menuitemradio', { name: 'Option B' }));
-      expect(onValueChange).toHaveBeenCalledWith('b');
-      expect(screen.queryByRole('menu')).toBeNull();
+      fireEvent.click(screen.getByRole("menuitemradio", { name: "Option B" }));
+      expect(onValueChange).toHaveBeenCalledWith("b");
+      expect(screen.queryByRole("menu")).toBeNull();
     });
   });
 
-  describe('Label', () => {
-    it('renders label text', () => {
+  describe("Label", () => {
+    it("renders label text", () => {
       renderMenu();
       openMenu();
-      expect(screen.getByText('Actions')).toBeDefined();
+      expect(screen.getByText("Actions")).toBeDefined();
     });
   });
 
-  describe('Separator', () => {
+  describe("Separator", () => {
     it('renders with role="separator"', () => {
       renderMenu();
       openMenu();
-      expect(screen.getByRole('separator')).toBeDefined();
+      expect(screen.getByRole("separator")).toBeDefined();
     });
   });
 
-  describe('disabled item', () => {
-    it('clicking a disabled item does not fire onSelect', () => {
+  describe("disabled item", () => {
+    it("clicking a disabled item does not fire onSelect", () => {
       const onSelect = vi.fn();
       render(
         <DropdownMenu.Root>
@@ -145,13 +145,13 @@ describe('DropdownMenu', () => {
         </DropdownMenu.Root>,
       );
       openMenu();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Disabled Action' }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "Disabled Action" }));
       expect(onSelect).not.toHaveBeenCalled();
     });
   });
 
-  describe('Sub, SubTrigger, SubContent', () => {
-    it('renders Sub with SubTrigger and SubContent children', () => {
+  describe("Sub, SubTrigger, SubContent", () => {
+    it("renders Sub with SubTrigger and SubContent children", () => {
       render(
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>Options</DropdownMenu.Trigger>
@@ -166,13 +166,13 @@ describe('DropdownMenu', () => {
         </DropdownMenu.Root>,
       );
       openMenu();
-      expect(screen.getByText('More actions')).toBeDefined();
-      expect(screen.getByText('Nested item')).toBeDefined();
+      expect(screen.getByText("More actions")).toBeDefined();
+      expect(screen.getByText("Nested item")).toBeDefined();
     });
   });
 
-  describe('Group', () => {
-    it('renders children within a group role', () => {
+  describe("Group", () => {
+    it("renders children within a group role", () => {
       render(
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>Options</DropdownMenu.Trigger>
@@ -184,13 +184,13 @@ describe('DropdownMenu', () => {
         </DropdownMenu.Root>,
       );
       openMenu();
-      const groups = screen.getAllByRole('group');
+      const groups = screen.getAllByRole("group");
       expect(groups.length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('Grouped item')).toBeDefined();
+      expect(screen.getByText("Grouped item")).toBeDefined();
     });
   });
 
-  describe('CheckboxItem', () => {
+  describe("CheckboxItem", () => {
     it('renders with role="menuitemcheckbox"', () => {
       render(
         <DropdownMenu.Root>
@@ -201,22 +201,22 @@ describe('DropdownMenu', () => {
         </DropdownMenu.Root>,
       );
       openMenu();
-      expect(screen.getByRole('menuitemcheckbox', { name: 'Toggle me' })).toBeDefined();
+      expect(screen.getByRole("menuitemcheckbox", { name: "Toggle me" })).toBeDefined();
     });
   });
 
-  describe('click outside closes menu', () => {
-    it('closes the menu when clicking outside', async () => {
+  describe("click outside closes menu", () => {
+    it("closes the menu when clicking outside", async () => {
       renderMenu();
       openMenu();
-      expect(screen.getByRole('menu')).toBeDefined();
+      expect(screen.getByRole("menu")).toBeDefined();
       fireEvent.mouseDown(document.body);
-      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+      await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
     });
   });
 
-  describe('ItemIndicator', () => {
-    it('renders indicator children', () => {
+  describe("ItemIndicator", () => {
+    it("renders indicator children", () => {
       render(
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>Options</DropdownMenu.Trigger>
@@ -226,7 +226,7 @@ describe('DropdownMenu', () => {
         </DropdownMenu.Root>,
       );
       openMenu();
-      expect(screen.getByText('✓')).toBeDefined();
+      expect(screen.getByText("✓")).toBeDefined();
     });
   });
 });

@@ -1,8 +1,8 @@
-import { createContext, useContext, useCallback, useId, useMemo, useRef } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import * as styles from './Tabs.css.js';
+import { createContext, useContext, useCallback, useId, useMemo, useRef } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import * as styles from "./Tabs.css.js";
 
 // --- Context ---
 
@@ -18,14 +18,14 @@ type TabsCtx = {
 };
 
 const Ctx = createContext<TabsCtx>({
-  activeValue: '',
+  activeValue: "",
   activate: () => {},
   registerTrigger: () => {},
   handleKeyDown: () => {},
   onTriggerFocus: () => {},
   getTriggerTabIndex: () => -1,
-  getContentId: () => '',
-  getTriggerId: () => '',
+  getContentId: () => "",
+  getTriggerId: () => "",
 });
 
 // --- Root ---
@@ -77,17 +77,17 @@ export function Root({
 
       let next = focusedRef.current;
 
-      if (e.key === 'ArrowRight') next = (next + 1) % count;
-      else if (e.key === 'ArrowLeft') next = (next - 1 + count) % count;
-      else if (e.key === 'Home') next = 0;
-      else if (e.key === 'End') next = count - 1;
+      if (e.key === "ArrowRight") next = (next + 1) % count;
+      else if (e.key === "ArrowLeft") next = (next - 1 + count) % count;
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = count - 1;
       else return;
 
       // Skip disabled triggers
       let el = triggersRef.current.get(triggers[next]);
       if (el?.disabled) {
         // For Home/End, find the nearest enabled trigger
-        if (e.key === 'End') {
+        if (e.key === "End") {
           for (let i = next - 1; i >= 0; i--) {
             const candidate = triggersRef.current.get(triggers[i]);
             if (candidate && !candidate.disabled) {
@@ -96,7 +96,7 @@ export function Root({
               break;
             }
           }
-        } else if (e.key === 'Home') {
+        } else if (e.key === "Home") {
           for (let i = next + 1; i < count; i++) {
             const candidate = triggersRef.current.get(triggers[i]);
             if (candidate && !candidate.disabled) {
@@ -210,8 +210,8 @@ export function Trigger({ value, disabled = false, className, children }: Trigge
       ref={(el) => registerTrigger(value, el)}
       aria-selected={isActive}
       aria-controls={getContentId(value)}
-      data-state={isActive ? 'active' : 'inactive'}
-      data-disabled={disabled ? '' : undefined}
+      data-state={isActive ? "active" : "inactive"}
+      data-disabled={disabled ? "" : undefined}
       disabled={disabled}
       tabIndex={getTriggerTabIndex(value)}
       className={cls}

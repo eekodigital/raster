@@ -1,11 +1,11 @@
-import { createContext, useContext, useCallback, useEffect, useMemo, useRef } from 'react';
-import type React from 'react';
-import { Portal as PortalComponent } from '../Portal/Portal.js';
-import { cn } from '../../utils/cn.js';
-import { positionOverlay } from '../../utils/position-overlay.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import { useEscapeKey } from '../../utils/use-escape-key.js';
-import * as styles from './Tooltip.css.js';
+import { createContext, useContext, useCallback, useEffect, useMemo, useRef } from "react";
+import type React from "react";
+import { Portal as PortalComponent } from "../Portal/Portal.js";
+import { cn } from "../../utils/cn.js";
+import { positionOverlay } from "../../utils/position-overlay.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import { useEscapeKey } from "../../utils/use-escape-key.js";
+import * as styles from "./Tooltip.css.js";
 
 // --- Provider ---
 
@@ -105,7 +105,7 @@ export function Trigger({ children }: TriggerProps) {
     onBlur: hide,
   };
 
-  if (typeof children === 'function') {
+  if (typeof children === "function") {
     return children(triggerProps);
   }
 
@@ -142,7 +142,7 @@ export function Content({ className, children }: ContentProps) {
       if (!el) return;
       const trigger = triggerRef.current;
       if (!trigger) return;
-      positionOverlay(trigger, el, 'top', 6);
+      positionOverlay(trigger, el, "top", 6);
     },
     [triggerRef],
   );

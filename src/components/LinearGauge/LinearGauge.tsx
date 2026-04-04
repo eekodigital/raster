@@ -1,4 +1,4 @@
-import * as styles from './LinearGauge.css.js';
+import * as styles from "./LinearGauge.css.js";
 
 type LinearGaugeProps = {
   value: number;
@@ -8,7 +8,7 @@ type LinearGaugeProps = {
   height?: number;
   format?: (value: number) => string;
   formatLabel?: (value: number, max: number) => string;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
@@ -16,15 +16,15 @@ export function LinearGauge({
   value,
   max,
   label,
-  color = 'var(--color-interactive)',
+  color = "var(--color-interactive)",
   height = 8,
   format = (v) => String(v),
   formatLabel,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: LinearGaugeProps) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
     <div
@@ -50,7 +50,7 @@ export function LinearGauge({
             {
               width: `${pct}%`,
               background: color,
-              '--gauge-pct': `${pct}%`,
+              "--gauge-pct": `${pct}%`,
             } as React.CSSProperties
           }
         />

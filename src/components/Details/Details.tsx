@@ -1,4 +1,4 @@
-import * as styles from './Details.css.js';
+import * as styles from "./Details.css.js";
 
 type DetailsProps = React.DetailsHTMLAttributes<HTMLDetailsElement> & {
   summary: React.ReactNode;
@@ -6,7 +6,7 @@ type DetailsProps = React.DetailsHTMLAttributes<HTMLDetailsElement> & {
 };
 
 export function Details({ summary, children, className, ...props }: DetailsProps) {
-  const cls = [styles.details, className].filter(Boolean).join(' ');
+  const cls = [styles.details, className].filter(Boolean).join(" ");
   return (
     <details className={cls} {...props}>
       <summary className={styles.summary}>{summary}</summary>

@@ -1,8 +1,8 @@
-import { createContext, useContext, useCallback, useRef } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import * as styles from './Slider.css.js';
+import { createContext, useContext, useCallback, useRef } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import * as styles from "./Slider.css.js";
 
 // --- Utilities ---
 
@@ -29,7 +29,7 @@ type SliderCtx = {
   max: number;
   step: number;
   disabled: boolean;
-  orientation: 'horizontal' | 'vertical';
+  orientation: "horizontal" | "vertical";
   values: number[];
   onThumbValueChange: (index: number, value: number) => void;
   registerThumb: () => number;
@@ -42,7 +42,7 @@ const Ctx = createContext<SliderCtx>({
   max: 100,
   step: 1,
   disabled: false,
-  orientation: 'horizontal',
+  orientation: "horizontal",
   values: [],
   onThumbValueChange: () => {},
   registerThumb: () => 0,
@@ -60,10 +60,10 @@ type RootProps = {
   max?: number;
   step?: number;
   disabled?: boolean;
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: "horizontal" | "vertical";
   className?: string;
   children?: React.ReactNode;
-  'aria-label'?: string;
+  "aria-label"?: string;
 };
 
 export function Root({
@@ -74,10 +74,10 @@ export function Root({
   max = 100,
   step = 1,
   disabled = false,
-  orientation = 'horizontal',
+  orientation = "horizontal",
   className,
   children,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
 }: RootProps) {
   const [values, setValues] = useControllableState(controlledValue, defaultValue, onValueChange);
   const thumbCount = useRef(0);
@@ -121,7 +121,7 @@ export function Root({
       <span
         dir="ltr"
         data-orientation={orientation}
-        data-disabled={disabled ? '' : undefined}
+        data-disabled={disabled ? "" : undefined}
         aria-label={ariaLabel}
         aria-disabled={disabled || undefined}
         className={cn(styles.root, className)}
@@ -144,7 +144,7 @@ export function Track({ className }: TrackProps) {
   const maxPercent = ((values[values.length - 1] - min) / (max - min)) * 100;
 
   const rangeStyle: React.CSSProperties =
-    orientation === 'horizontal'
+    orientation === "horizontal"
       ? { left: `${minPercent}%`, right: `${100 - maxPercent}%` }
       : { bottom: `${minPercent}%`, top: `${100 - maxPercent}%` };
 
@@ -159,10 +159,10 @@ export function Track({ className }: TrackProps) {
 
 type ThumbProps = {
   className?: string;
-  'aria-label'?: string;
+  "aria-label"?: string;
 };
 
-export function Thumb({ className, 'aria-label': ariaLabel }: ThumbProps) {
+export function Thumb({ className, "aria-label": ariaLabel }: ThumbProps) {
   const { min, max, step, disabled, orientation, values, onThumbValueChange, trackRef } =
     useContext(Ctx);
 
@@ -178,9 +178,9 @@ export function Thumb({ className, 'aria-label': ariaLabel }: ThumbProps) {
   const percent = ((value - min) / (max - min)) * 100;
 
   const posStyle: React.CSSProperties =
-    orientation === 'horizontal'
-      ? { left: `${percent}%`, transform: 'translateX(-50%)' }
-      : { bottom: `${percent}%`, transform: 'translateY(50%)' };
+    orientation === "horizontal"
+      ? { left: `${percent}%`, transform: "translateX(-50%)" }
+      : { bottom: `${percent}%`, transform: "translateY(50%)" };
 
   // Keyboard handling
   const handleKeyDown = useCallback(
@@ -191,24 +191,24 @@ export function Thumb({ className, 'aria-label': ariaLabel }: ThumbProps) {
       const bigStep = step * 10;
 
       switch (e.key) {
-        case 'ArrowRight':
-        case 'ArrowUp':
+        case "ArrowRight":
+        case "ArrowUp":
           newValue = value + step;
           break;
-        case 'ArrowLeft':
-        case 'ArrowDown':
+        case "ArrowLeft":
+        case "ArrowDown":
           newValue = value - step;
           break;
-        case 'PageUp':
+        case "PageUp":
           newValue = value + bigStep;
           break;
-        case 'PageDown':
+        case "PageDown":
           newValue = value - bigStep;
           break;
-        case 'Home':
+        case "Home":
           newValue = min;
           break;
-        case 'End':
+        case "End":
           newValue = max;
           break;
         default:
@@ -233,7 +233,7 @@ export function Thumb({ className, 'aria-label': ariaLabel }: ThumbProps) {
         if (!track) return value;
         const rect = track.getBoundingClientRect();
 
-        if (orientation === 'horizontal') {
+        if (orientation === "horizontal") {
           const scale = linearScale([0, rect.width], [min, max]);
           return scale(clientX - rect.left);
         } else {
@@ -248,12 +248,12 @@ export function Thumb({ className, 'aria-label': ariaLabel }: ThumbProps) {
 
       function onPointerUp() {
         target.releasePointerCapture(e.pointerId);
-        target.removeEventListener('pointermove', onPointerMove);
-        target.removeEventListener('pointerup', onPointerUp);
+        target.removeEventListener("pointermove", onPointerMove);
+        target.removeEventListener("pointerup", onPointerUp);
       }
 
-      target.addEventListener('pointermove', onPointerMove);
-      target.addEventListener('pointerup', onPointerUp);
+      target.addEventListener("pointermove", onPointerMove);
+      target.addEventListener("pointerup", onPointerUp);
     },
     [disabled, value, orientation, min, max, index, onThumbValueChange, trackRef],
   );
@@ -269,9 +269,9 @@ export function Thumb({ className, 'aria-label': ariaLabel }: ThumbProps) {
       aria-label={ariaLabel}
       aria-disabled={disabled || undefined}
       data-orientation={orientation}
-      data-disabled={disabled ? '' : undefined}
+      data-disabled={disabled ? "" : undefined}
       className={cn(styles.thumb, className)}
-      style={{ position: 'absolute', ...posStyle }}
+      style={{ position: "absolute", ...posStyle }}
       onKeyDown={handleKeyDown}
       onPointerDown={handlePointerDown}
     />

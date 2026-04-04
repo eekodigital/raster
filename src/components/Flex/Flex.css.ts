@@ -1,50 +1,50 @@
-import { style, styleVariants } from '@vanilla-extract/css';
+import { style, styleVariants } from "@vanilla-extract/css";
 
 export const base = style({
-  display: 'flex',
+  display: "flex",
 });
 
 export const directions = styleVariants({
-  row: { flexDirection: 'row' },
-  column: { flexDirection: 'column' },
+  row: { flexDirection: "row" },
+  column: { flexDirection: "column" },
 });
 
 export const wrapping = styleVariants({
-  wrap: { flexWrap: 'wrap' },
-  nowrap: { flexWrap: 'nowrap' },
+  wrap: { flexWrap: "wrap" },
+  nowrap: { flexWrap: "nowrap" },
 });
 
 export const alignments = styleVariants({
-  start: { alignItems: 'flex-start' },
-  center: { alignItems: 'center' },
-  end: { alignItems: 'flex-end' },
-  baseline: { alignItems: 'baseline' },
-  stretch: { alignItems: 'stretch' },
+  start: { alignItems: "flex-start" },
+  center: { alignItems: "center" },
+  end: { alignItems: "flex-end" },
+  baseline: { alignItems: "baseline" },
+  stretch: { alignItems: "stretch" },
 });
 
 export const justifications = styleVariants({
-  start: { justifyContent: 'flex-start' },
-  center: { justifyContent: 'center' },
-  end: { justifyContent: 'flex-end' },
-  between: { justifyContent: 'space-between' },
-  around: { justifyContent: 'space-around' },
+  start: { justifyContent: "flex-start" },
+  center: { justifyContent: "center" },
+  end: { justifyContent: "flex-end" },
+  between: { justifyContent: "space-between" },
+  around: { justifyContent: "space-around" },
 });
 
 const spacingScale = [
-  '1',
-  '1-5',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '10',
-  '12',
-  '16',
-  '20',
-  '24',
+  "1",
+  "1-5",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "10",
+  "12",
+  "16",
+  "20",
+  "24",
 ] as const;
 
 function gapEntries() {

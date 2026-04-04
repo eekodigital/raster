@@ -1,4 +1,4 @@
-import * as styles from './SkipLink.css.js';
+import * as styles from "./SkipLink.css.js";
 
 type SkipLinkProps = {
   href?: string;
@@ -6,8 +6,8 @@ type SkipLinkProps = {
 };
 
 export function SkipLink({
-  href = '#main-content',
-  children = 'Skip to main content',
+  href = "#main-content",
+  children = "Skip to main content",
 }: SkipLinkProps) {
   return (
     <a href={href} className={styles.skipLink}>

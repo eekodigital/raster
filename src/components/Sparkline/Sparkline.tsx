@@ -1,8 +1,8 @@
-import { useRef, useImperativeHandle } from 'react';
-import { extent, linearScale } from '../../utils/chart-math.js';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import * as styles from './Sparkline.css.js';
+import { useRef, useImperativeHandle } from "react";
+import { extent, linearScale } from "../../utils/chart-math.js";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import * as styles from "./Sparkline.css.js";
 
 type SparklineProps = {
   data: number[];
@@ -11,7 +11,7 @@ type SparklineProps = {
   color?: string;
   fill?: boolean;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
@@ -19,10 +19,10 @@ export function Sparkline({
   data,
   width = 80,
   height = 24,
-  color = 'var(--color-interactive)',
+  color = "var(--color-interactive)",
   fill = false,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: SparklineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,16 +42,16 @@ export function Sparkline({
     y: padding + yScale(v),
   }));
 
-  const polyline = points.map((p) => `${p.x},${p.y}`).join(' ');
+  const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
 
   const areaPath = fill
-    ? `M ${points.map((p) => `${p.x} ${p.y}`).join(' L ')} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`
+    ? `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`
     : undefined;
 
-  const cls = [styles.svg, className].filter(Boolean).join(' ');
+  const cls = [styles.svg, className].filter(Boolean).join(" ");
 
   return (
-    <div ref={containerRef} style={{ display: 'inline-block' }} data-chart-container>
+    <div ref={containerRef} style={{ display: "inline-block" }} data-chart-container>
       <svg
         className={cls}
         width={width}

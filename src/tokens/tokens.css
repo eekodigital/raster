@@ -1,7 +1,7 @@
-@import './primitives.css';
-@import './theme-light.css';
-@import './theme-dark.css';
-@import './theme-high-contrast.css';
+@import "./primitives.css";
+@import "./theme-light.css";
+@import "./theme-dark.css";
+@import "./theme-high-contrast.css";
 
 /* Composite tokens — derived from generated tokens, not expressible in DTCG */
 :root {

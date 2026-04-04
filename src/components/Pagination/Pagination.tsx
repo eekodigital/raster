@@ -1,4 +1,4 @@
-import * as styles from './Pagination.css.js';
+import * as styles from "./Pagination.css.js";
 
 type PaginationProps = {
   page: number;
@@ -7,18 +7,18 @@ type PaginationProps = {
   className?: string;
 };
 
-function getPageNumbers(page: number, totalPages: number): (number | 'ellipsis')[] {
+function getPageNumbers(page: number, totalPages: number): (number | "ellipsis")[] {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  const pages: (number | 'ellipsis')[] = [1];
+  const pages: (number | "ellipsis")[] = [1];
 
-  if (page > 3) pages.push('ellipsis');
+  if (page > 3) pages.push("ellipsis");
 
   const start = Math.max(2, page - 1);
   const end = Math.min(totalPages - 1, page + 1);
   for (let i = start; i <= end; i++) pages.push(i);
 
-  if (page < totalPages - 2) pages.push('ellipsis');
+  if (page < totalPages - 2) pages.push("ellipsis");
 
   pages.push(totalPages);
   return pages;
@@ -30,7 +30,7 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
   const pageNumbers = getPageNumbers(page, totalPages);
 
   return (
-    <nav aria-label="Pagination" className={[styles.nav, className].filter(Boolean).join(' ')}>
+    <nav aria-label="Pagination" className={[styles.nav, className].filter(Boolean).join(" ")}>
       <button
         className={styles.button}
         onClick={() => onPageChange(page - 1)}
@@ -41,7 +41,7 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
       </button>
 
       {pageNumbers.map((p, i) =>
-        p === 'ellipsis' ? (
+        p === "ellipsis" ? (
           <span key={`ellipsis-${i}`} className={styles.ellipsis} aria-hidden>
             …
           </span>
@@ -50,10 +50,10 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
             key={p}
             className={[styles.button, p === page ? styles.buttonCurrent : undefined]
               .filter(Boolean)
-              .join(' ')}
+              .join(" ")}
             onClick={() => onPageChange(p)}
             aria-label={`Page ${p}`}
-            aria-current={p === page ? 'page' : undefined}
+            aria-current={p === page ? "page" : undefined}
           >
             {p}
           </button>

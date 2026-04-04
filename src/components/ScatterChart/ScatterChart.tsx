@@ -1,9 +1,9 @@
-import { useRef, useCallback, useImperativeHandle } from 'react';
-import { extent, linearScale, ticks, labelSkip } from '../../utils/chart-math.js';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import { ChartTooltip, useChartTooltip } from '../ChartTooltip/ChartTooltip.js';
-import * as styles from './ScatterChart.css.js';
+import { useRef, useCallback, useImperativeHandle } from "react";
+import { extent, linearScale, ticks, labelSkip } from "../../utils/chart-math.js";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import * as styles from "./ScatterChart.css.js";
 
 export type ScatterPoint = {
   x: number;
@@ -17,7 +17,7 @@ export type ScatterSeries = {
   color?: string;
 };
 
-type GridOption = 'horizontal' | 'vertical' | 'both' | 'none';
+type GridOption = "horizontal" | "vertical" | "both" | "none";
 
 type ScatterChartProps = {
   /** Single series — pass an array of points. */
@@ -31,16 +31,16 @@ type ScatterChartProps = {
   onPointClick?: (point: ScatterPoint, seriesIndex: number, pointIndex: number) => void;
   height?: number;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
 const DEFAULT_COLORS = [
-  'var(--color-interactive)',
-  'var(--color-success)',
-  'var(--color-danger)',
-  'var(--color-warning)',
-  'var(--color-inactive)',
+  "var(--color-interactive)",
+  "var(--color-success)",
+  "var(--color-danger)",
+  "var(--color-warning)",
+  "var(--color-inactive)",
 ];
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
@@ -50,12 +50,12 @@ export function ScatterChart({
   series: seriesProp,
   xLabel,
   yLabel,
-  grid = 'both',
+  grid = "both",
   formatValue = String,
   onPointClick,
   height = 240,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: ScatterChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,7 +66,7 @@ export function ScatterChart({
   const { tooltipId, tooltipProps, hide, handlers } = useChartTooltip();
 
   // Normalise single data to a series
-  const series: ScatterSeries[] = seriesProp ?? (data ? [{ name: 'Data', data }] : []);
+  const series: ScatterSeries[] = seriesProp ?? (data ? [{ name: "Data", data }] : []);
   const allPoints = series.flatMap((s) => s.data);
 
   const chartWidth = 400;
@@ -84,8 +84,8 @@ export function ScatterChart({
   const yTicks = ticks(yMin, yMax, 5);
   const xTickSkip = labelSkip(xTicks.length, plotWidth, 40);
 
-  const showHGrid = grid === 'horizontal' || grid === 'both';
-  const showVGrid = grid === 'vertical' || grid === 'both';
+  const showHGrid = grid === "horizontal" || grid === "both";
+  const showVGrid = grid === "vertical" || grid === "both";
 
   const handleKeyDown = useCallback(
     (si: number, pi: number, e: React.KeyboardEvent) => {
@@ -93,10 +93,10 @@ export function ScatterChart({
       let nextPi = pi;
       const len = series[si]?.data.length ?? 0;
 
-      if (e.key === 'ArrowRight') nextPi = Math.min(pi + 1, len - 1);
-      else if (e.key === 'ArrowLeft') nextPi = Math.max(pi - 1, 0);
-      else if (e.key === 'ArrowDown') nextSi = Math.min(si + 1, series.length - 1);
-      else if (e.key === 'ArrowUp') nextSi = Math.max(si - 1, 0);
+      if (e.key === "ArrowRight") nextPi = Math.min(pi + 1, len - 1);
+      else if (e.key === "ArrowLeft") nextPi = Math.max(pi - 1, 0);
+      else if (e.key === "ArrowDown") nextSi = Math.min(si + 1, series.length - 1);
+      else if (e.key === "ArrowUp") nextSi = Math.max(si - 1, 0);
       else return;
 
       e.preventDefault();
@@ -106,10 +106,10 @@ export function ScatterChart({
     [series],
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: 'relative' }}>
+    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
         viewBox={`0 0 ${chartWidth} ${height}`}
@@ -204,8 +204,8 @@ export function ScatterChart({
                       tabIndex={si === 0 && pi === 0 ? 0 : -1}
                       role="img"
                       aria-label={tooltipContent}
-                      aria-describedby={tip['aria-describedby']}
-                      data-clickable={onPointClick ? '' : undefined}
+                      aria-describedby={tip["aria-describedby"]}
+                      data-clickable={onPointClick ? "" : undefined}
                       onClick={onPointClick ? () => onPointClick(p, si, pi) : undefined}
                       onKeyDown={(e) => handleKeyDown(si, pi, e)}
                       onFocus={(e) => {
@@ -253,8 +253,8 @@ export function ScatterChart({
           <tr>
             {series.length > 1 && <th>Series</th>}
             {allPoints.some((p) => p.label) && <th>Label</th>}
-            <th>{xLabel ?? 'X'}</th>
-            <th>{yLabel ?? 'Y'}</th>
+            <th>{xLabel ?? "X"}</th>
+            <th>{yLabel ?? "Y"}</th>
           </tr>
         </thead>
         <tbody>
@@ -262,7 +262,7 @@ export function ScatterChart({
             s.data.map((p, i) => (
               <tr key={`${s.name}-${i}`}>
                 {series.length > 1 && <td>{s.name}</td>}
-                {allPoints.some((pt) => pt.label) && <td>{p.label ?? ''}</td>}
+                {allPoints.some((pt) => pt.label) && <td>{p.label ?? ""}</td>}
                 <td>{formatValue(p.x)}</td>
                 <td>{formatValue(p.y)}</td>
               </tr>

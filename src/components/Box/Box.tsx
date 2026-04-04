@@ -1,21 +1,21 @@
-import type { CSSProperties, ElementType, ReactNode } from 'react';
-import * as styles from './Box.css.js';
+import type { CSSProperties, ElementType, ReactNode } from "react";
+import * as styles from "./Box.css.js";
 
 type SpacingToken =
-  | '1'
-  | '1-5'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '10'
-  | '12'
-  | '16'
-  | '20'
-  | '24';
+  | "1"
+  | "1-5"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "10"
+  | "12"
+  | "16"
+  | "20"
+  | "24";
 
 export type BoxProps = {
   children: ReactNode;
@@ -29,7 +29,7 @@ export type BoxProps = {
 
 export function Box({
   children,
-  as: Tag = 'div',
+  as: Tag = "div",
   padding,
   paddingX,
   paddingY,
@@ -44,7 +44,7 @@ export function Box({
     className,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <Tag className={cls} style={style}>

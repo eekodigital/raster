@@ -1,11 +1,11 @@
-import { feature } from 'topojson-client';
-import type { Topology } from 'topojson-specification';
-import { useRef, useCallback, useMemo, useImperativeHandle } from 'react';
-import { extent, linearScale } from '../../utils/chart-math.js';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import { ChartTooltip, useChartTooltip } from '../ChartTooltip/ChartTooltip.js';
-import * as styles from './GeoChart.css.js';
+import { feature } from "topojson-client";
+import type { Topology } from "topojson-specification";
+import { useRef, useCallback, useMemo, useImperativeHandle } from "react";
+import { extent, linearScale } from "../../utils/chart-math.js";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import * as styles from "./GeoChart.css.js";
 
 export type GeoRegionDatum = {
   id: string;
@@ -29,7 +29,7 @@ type GeoChartProps = {
   data?: GeoRegionDatum[];
   colorScale?: string[];
   markers?: GeoMarker[];
-  projection?: 'mercator' | 'equirectangular' | ProjectionFn;
+  projection?: "mercator" | "equirectangular" | ProjectionFn;
   filter?: string[];
   onRegionClick?: (datum: GeoRegionDatum | undefined, featureId: string) => void;
   onMarkerClick?: (marker: GeoMarker, index: number) => void;
@@ -38,7 +38,7 @@ type GeoChartProps = {
   width?: number;
   height?: number;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
@@ -54,9 +54,9 @@ function equirectangular(lon: number, lat: number): [number, number] {
   return [(lon + 180) / 360, (90 - lat) / 180];
 }
 
-function getProjection(p: GeoChartProps['projection']): ProjectionFn {
-  if (typeof p === 'function') return p;
-  if (p === 'equirectangular') return equirectangular;
+function getProjection(p: GeoChartProps["projection"]): ProjectionFn {
+  if (typeof p === "function") return p;
+  if (p === "equirectangular") return equirectangular;
   return mercator;
 }
 
@@ -64,15 +64,15 @@ function getProjection(p: GeoChartProps['projection']): ProjectionFn {
 type ScaleParams = { scaleX: number; scaleY: number; offsetX: number; offsetY: number };
 
 function getScaleParams(
-  projection: GeoChartProps['projection'],
+  projection: GeoChartProps["projection"],
   width: number,
   height: number,
 ): ScaleParams {
-  if (typeof projection === 'function') {
+  if (typeof projection === "function") {
     // Custom projection: preserve current behaviour (caller controls aspect)
     return { scaleX: width, scaleY: height, offsetX: 0, offsetY: 0 };
   }
-  if (projection === 'equirectangular') {
+  if (projection === "equirectangular") {
     // 2:1 natural aspect (360° lon × 180° lat, both normalised to [0,1])
     const scaleX = width;
     const scaleY = width / 2;
@@ -103,16 +103,16 @@ function geoPath(coordinates: number[][][], project: ProjectionFn, s: ScaleParam
       }
       return segments
         .filter((seg) => seg.length > 1)
-        .map((seg) => `M ${seg.join(' L ')} Z`)
-        .join(' ');
+        .map((seg) => `M ${seg.join(" L ")} Z`)
+        .join(" ");
     })
-    .join(' ');
+    .join(" ");
 }
 
 const DEFAULT_COLOR_SCALE = [
-  'var(--color-surface-raised)',
-  'var(--color-interactive-subtle)',
-  'var(--color-interactive)',
+  "var(--color-surface-raised)",
+  "var(--color-interactive-subtle)",
+  "var(--color-interactive)",
 ];
 
 export function GeoChart({
@@ -121,7 +121,7 @@ export function GeoChart({
   data = [],
   colorScale = DEFAULT_COLOR_SCALE,
   markers = [],
-  projection = 'mercator',
+  projection = "mercator",
   filter,
   onRegionClick,
   onMarkerClick,
@@ -130,7 +130,7 @@ export function GeoChart({
   width = 800,
   height = 450,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: GeoChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -156,7 +156,7 @@ export function GeoChart({
     const all: any[] = geojson.features ?? [];
     if (!filter) return all;
     const filterSet = new Set(filter);
-    return all.filter((f: any) => filterSet.has(String(f.id ?? f.properties?.name ?? '')));
+    return all.filter((f: any) => filterSet.has(String(f.id ?? f.properties?.name ?? "")));
   }, [geojson, filter]);
 
   // Build data lookup
@@ -181,9 +181,9 @@ export function GeoChart({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       let next = focusedRef.current;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown')
+      if (e.key === "ArrowRight" || e.key === "ArrowDown")
         next = Math.min(next + 1, features.length - 1);
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = Math.max(next - 1, 0);
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = Math.max(next - 1, 0);
       else return;
       e.preventDefault();
       focusedRef.current = next;
@@ -191,10 +191,10 @@ export function GeoChart({
     [features.length],
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: 'relative' }}>
+    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
         viewBox={`0 0 ${width} ${height}`}
@@ -211,11 +211,11 @@ export function GeoChart({
 
           // Handle both Polygon and MultiPolygon
           const coords: number[][][][] =
-            f.geometry.type === 'MultiPolygon'
+            f.geometry.type === "MultiPolygon"
               ? (f.geometry.coordinates as number[][][][])
               : [f.geometry.coordinates as number[][][]];
 
-          const pathD = coords.map((poly) => geoPath(poly, project, scale)).join(' ');
+          const pathD = coords.map((poly) => geoPath(poly, project, scale)).join(" ");
 
           return (
             <path
@@ -226,8 +226,8 @@ export function GeoChart({
               tabIndex={i === 0 ? 0 : -1}
               role="img"
               aria-label={tooltipContent}
-              aria-describedby={tip['aria-describedby']}
-              data-clickable={onRegionClick ? '' : undefined}
+              aria-describedby={tip["aria-describedby"]}
+              data-clickable={onRegionClick ? "" : undefined}
               onClick={onRegionClick ? () => onRegionClick(datum, id) : undefined}
               onKeyDown={handleKeyDown}
               onFocus={tip.onFocus}
@@ -248,13 +248,13 @@ export function GeoChart({
               cx={x * scale.scaleX + scale.offsetX}
               cy={y * scale.scaleY + scale.offsetY}
               r={m.size ?? 4}
-              fill={m.color ?? 'var(--color-interactive)'}
+              fill={m.color ?? "var(--color-interactive)"}
               className={styles.marker}
               tabIndex={-1}
               role="img"
               aria-label={m.label}
-              aria-describedby={tip['aria-describedby']}
-              data-clickable={onMarkerClick ? '' : undefined}
+              aria-describedby={tip["aria-describedby"]}
+              data-clickable={onMarkerClick ? "" : undefined}
               onClick={onMarkerClick ? () => onMarkerClick(m, i) : undefined}
               onFocus={tip.onFocus}
               onBlur={hide}
@@ -280,7 +280,7 @@ export function GeoChart({
           <span>{formatValue ? formatValue(minVal) : minVal}</span>
           <div
             className={styles.gradientBar}
-            style={{ background: `linear-gradient(to right, ${colorScale.join(', ')})` }}
+            style={{ background: `linear-gradient(to right, ${colorScale.join(", ")})` }}
           />
           <span>{formatValue ? formatValue(maxVal) : maxVal}</span>
         </div>

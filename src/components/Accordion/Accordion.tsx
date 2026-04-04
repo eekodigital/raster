@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useCallback, useId, useMemo, useRef } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import * as styles from './Accordion.css.js';
+import { createContext, useContext, useState, useCallback, useId, useMemo, useRef } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import * as styles from "./Accordion.css.js";
 
 // --- Context ---
 
@@ -24,12 +24,12 @@ const Ctx = createContext<AccordionCtx>({
 });
 
 type ItemCtx = { value: string; contentId: string };
-const ItemCtx = createContext<ItemCtx>({ value: '', contentId: '' });
+const ItemCtx = createContext<ItemCtx>({ value: "", contentId: "" });
 
 // --- Root ---
 
 type RootProps = {
-  type: 'single' | 'multiple';
+  type: "single" | "multiple";
   collapsible?: boolean;
   defaultValue?: string | string[];
   value?: string | string[];
@@ -69,10 +69,10 @@ export function Root({
         : internalItems;
       const next = new Set(prev);
       if (next.has(itemValue)) {
-        if (type === 'single' && !collapsible) return;
+        if (type === "single" && !collapsible) return;
         next.delete(itemValue);
       } else {
-        if (type === 'single') next.clear();
+        if (type === "single") next.clear();
         next.add(itemValue);
       }
 
@@ -80,8 +80,8 @@ export function Root({
         setInternalItems(next);
       }
 
-      if (type === 'single') {
-        onValueChange?.(next.size > 0 ? [...next][0] : '');
+      if (type === "single") {
+        onValueChange?.(next.size > 0 ? [...next][0] : "");
       } else {
         onValueChange?.([...next]);
       }
@@ -106,10 +106,10 @@ export function Root({
 
     let next = focusedRef.current;
 
-    if (e.key === 'ArrowDown') next = (next + 1) % count;
-    else if (e.key === 'ArrowUp') next = (next - 1 + count) % count;
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = count - 1;
+    if (e.key === "ArrowDown") next = (next + 1) % count;
+    else if (e.key === "ArrowUp") next = (next - 1 + count) % count;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = count - 1;
     else return;
 
     e.preventDefault();
@@ -166,7 +166,7 @@ export function Item({ value, className, children }: ItemProps) {
 
   return (
     <ItemCtx.Provider value={{ value, contentId }}>
-      <div className={cls} data-state={isOpen ? 'open' : 'closed'}>
+      <div className={cls} data-state={isOpen ? "open" : "closed"}>
         {children}
       </div>
     </ItemCtx.Provider>
@@ -200,7 +200,7 @@ export function Trigger({ className, children }: TriggerProps) {
       className={cls}
       aria-expanded={isOpen}
       aria-controls={contentId}
-      data-state={isOpen ? 'open' : 'closed'}
+      data-state={isOpen ? "open" : "closed"}
       tabIndex={getTriggerTabIndex(value)}
       onClick={() => toggle(value)}
       onKeyDown={handleKeyDown}

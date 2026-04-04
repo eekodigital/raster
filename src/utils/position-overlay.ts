@@ -1,4 +1,4 @@
-export type Placement = 'top' | 'bottom-start' | 'bottom-end';
+export type Placement = "top" | "bottom-start" | "bottom-end";
 
 /**
  * Positions an overlay element relative to a trigger element.
@@ -8,7 +8,7 @@ export type Placement = 'top' | 'bottom-start' | 'bottom-end';
 export function positionOverlay(
   trigger: HTMLElement,
   overlay: HTMLElement,
-  placement: Placement = 'bottom-start',
+  placement: Placement = "bottom-start",
   gap = 4,
 ) {
   const triggerRect = trigger.getBoundingClientRect();
@@ -19,10 +19,10 @@ export function positionOverlay(
   let top: number;
   let left: number;
 
-  if (placement === 'top') {
+  if (placement === "top") {
     top = triggerRect.top - overlayHeight - gap;
     left = triggerRect.left + triggerRect.width / 2 - overlayWidth / 2;
-  } else if (placement === 'bottom-end') {
+  } else if (placement === "bottom-end") {
     top = triggerRect.bottom + gap;
     left = triggerRect.right - overlayWidth;
   } else {
@@ -31,10 +31,10 @@ export function positionOverlay(
   }
 
   // Flip: if overflows bottom, try top (and vice versa)
-  if (placement !== 'top' && top + overlayHeight > window.innerHeight) {
+  if (placement !== "top" && top + overlayHeight > window.innerHeight) {
     const flipped = triggerRect.top - overlayHeight - gap;
     if (flipped >= 0) top = flipped;
-  } else if (placement === 'top' && top < 0) {
+  } else if (placement === "top" && top < 0) {
     const flipped = triggerRect.bottom + gap;
     if (flipped + overlayHeight <= window.innerHeight) top = flipped;
   }

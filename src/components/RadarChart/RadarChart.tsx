@@ -1,7 +1,7 @@
-import { useRef, useCallback, useImperativeHandle } from 'react';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import * as styles from './RadarChart.css.js';
+import { useRef, useCallback, useImperativeHandle } from "react";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import * as styles from "./RadarChart.css.js";
 
 export type RadarSeries = {
   name: string;
@@ -17,16 +17,16 @@ type RadarChartProps = {
   levels?: number;
   onPointClick?: (seriesIndex: number, axisIndex: number, value: number) => void;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
 const DEFAULT_COLORS = [
-  'var(--color-interactive)',
-  'var(--color-success)',
-  'var(--color-danger)',
-  'var(--color-warning)',
-  'var(--color-inactive)',
+  "var(--color-interactive)",
+  "var(--color-success)",
+  "var(--color-danger)",
+  "var(--color-warning)",
+  "var(--color-inactive)",
 ];
 
 function polarToCartesian(cx: number, cy: number, r: number, angleIndex: number, total: number) {
@@ -41,7 +41,7 @@ export function RadarChart({
   size = 300,
   levels = 4,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: RadarChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,10 +62,10 @@ export function RadarChart({
       let nextSi = si;
       let nextPi = pi;
 
-      if (e.key === 'ArrowRight') nextPi = (pi + 1) % count;
-      else if (e.key === 'ArrowLeft') nextPi = (pi - 1 + count) % count;
-      else if (e.key === 'ArrowDown') nextSi = Math.min(si + 1, series.length - 1);
-      else if (e.key === 'ArrowUp') nextSi = Math.max(si - 1, 0);
+      if (e.key === "ArrowRight") nextPi = (pi + 1) % count;
+      else if (e.key === "ArrowLeft") nextPi = (pi - 1 + count) % count;
+      else if (e.key === "ArrowDown") nextSi = Math.min(si + 1, series.length - 1);
+      else if (e.key === "ArrowUp") nextSi = Math.max(si - 1, 0);
       else return;
 
       e.preventDefault();
@@ -78,7 +78,7 @@ export function RadarChart({
   // Grid circles
   const gridLevels = Array.from({ length: levels }, (_, i) => ((i + 1) / levels) * radius);
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
     <div ref={containerRef} className={cls}>
@@ -88,7 +88,7 @@ export function RadarChart({
           const points = Array.from({ length: count }, (_, i) =>
             polarToCartesian(cx, cy, r, i, count),
           );
-          const polygon = points.map((p) => `${p.x},${p.y}`).join(' ');
+          const polygon = points.map((p) => `${p.x},${p.y}`).join(" ");
           return <polygon key={r} points={polygon} className={styles.gridLine} />;
         })}
 
@@ -113,7 +113,7 @@ export function RadarChart({
             const r = (v / maxVal) * radius;
             return polarToCartesian(cx, cy, r, i, count);
           });
-          const polygon = points.map((p) => `${p.x},${p.y}`).join(' ');
+          const polygon = points.map((p) => `${p.x},${p.y}`).join(" ");
 
           return (
             <g key={s.name} role="region" aria-label={s.name}>

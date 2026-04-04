@@ -2,13 +2,18 @@
   "name": "@eekodigital/raster",
   "version": "0.1.0",
   "description": "Raster — design system by Eeko Digital",
-  "packageManager": "pnpm@10.33.0",
   "license": "MIT",
   "author": "Eeko Digital <hello@eeko.digital>",
   "repository": {
     "type": "git",
     "url": "https://github.com/eekodigital/raster"
   },
+  "files": [
+    "dist",
+    "src/tokens",
+    "README.md",
+    "LICENSE"
+  ],
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -26,12 +31,9 @@
     },
     "./tokens.css": "./src/tokens/tokens.css"
   },
-  "files": [
-    "dist",
-    "src/tokens",
-    "README.md",
-    "LICENSE"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:tokens": "node --import tsx/esm style-dictionary.config.ts",
     "build": "pnpm build:tokens && tsdown",
@@ -41,18 +43,6 @@
     "check": "vp check",
     "test": "vitest run",
     "test:watch": "vitest"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@tanstack/react-table": {
-      "optional": true
-    },
-    "topojson-client": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
@@ -79,7 +69,17 @@
     "vite-plus": "^0.1.15",
     "vitest": "^4.1.2"
   },
-  "publishConfig": {
-    "access": "public"
-  }
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-table": {
+      "optional": true
+    },
+    "topojson-client": {
+      "optional": true
+    }
+  },
+  "packageManager": "pnpm@10.33.0"
 }

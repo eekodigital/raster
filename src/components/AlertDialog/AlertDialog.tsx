@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useId, useMemo, useRef } from 'react';
-import type React from 'react';
-import { Portal as PortalComponent } from '../Portal/Portal.js';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import { useEscapeKey } from '../../utils/use-escape-key.js';
-import { useFocusTrap } from '../../utils/use-focus-trap.js';
-import * as styles from './AlertDialog.css.js';
+import { createContext, useContext, useEffect, useId, useMemo, useRef } from "react";
+import type React from "react";
+import { Portal as PortalComponent } from "../Portal/Portal.js";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import { useEscapeKey } from "../../utils/use-escape-key.js";
+import { useFocusTrap } from "../../utils/use-focus-trap.js";
+import * as styles from "./AlertDialog.css.js";
 
 type AlertDialogCtx = {
   open: boolean;
@@ -20,9 +20,9 @@ const Ctx = createContext<AlertDialogCtx>({
   open: false,
   setOpen: () => {},
   triggerRef: { current: null },
-  contentId: '',
-  titleId: '',
-  descriptionId: '',
+  contentId: "",
+  titleId: "",
+  descriptionId: "",
 });
 
 type RootProps = {
@@ -76,7 +76,7 @@ export function Trigger({ children }: TriggerProps) {
     onClick: () => setOpen(true),
   };
 
-  if (typeof children === 'function') {
+  if (typeof children === "function") {
     return children(triggerProps);
   }
 
@@ -112,7 +112,7 @@ export function Content({ className, children }: ContentProps) {
 
   useEffect(() => {
     const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = original;
       triggerRef.current?.focus();

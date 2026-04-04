@@ -1,26 +1,26 @@
-import { style, styleVariants } from '@vanilla-extract/css';
+import { style, styleVariants } from "@vanilla-extract/css";
 
 export const grid = style({
-  display: 'grid',
-  boxSizing: 'border-box',
-  width: '100%',
+  display: "grid",
+  boxSizing: "border-box",
+  width: "100%",
 });
 
 const spacingScale = [
-  '1',
-  '1-5',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '10',
-  '12',
-  '16',
-  '20',
-  '24',
+  "1",
+  "1-5",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "10",
+  "12",
+  "16",
+  "20",
+  "24",
 ] as const;
 
 function gapEntries() {
@@ -34,13 +34,13 @@ function gapEntries() {
 export const gaps = styleVariants(gapEntries());
 
 export const alignments = styleVariants({
-  start: { alignItems: 'start' },
-  center: { alignItems: 'center' },
-  end: { alignItems: 'end' },
-  stretch: { alignItems: 'stretch' },
+  start: { alignItems: "start" },
+  center: { alignItems: "center" },
+  end: { alignItems: "end" },
+  stretch: { alignItems: "stretch" },
 });
 
 export const col = style({
-  boxSizing: 'border-box',
+  boxSizing: "border-box",
   minWidth: 0,
 });

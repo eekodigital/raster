@@ -1,7 +1,7 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
-import * as AlertDialog from './AlertDialog.js';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import * as AlertDialog from "./AlertDialog.js";
 
 function renderAlertDialog({
   onAction,
@@ -23,71 +23,71 @@ function renderAlertDialog({
   );
 }
 
-describe('AlertDialog', () => {
-  describe('opening and closing', () => {
-    it('is not visible before opening', () => {
+describe("AlertDialog", () => {
+  describe("opening and closing", () => {
+    it("is not visible before opening", () => {
       renderAlertDialog();
-      expect(screen.queryByRole('alertdialog')).toBeNull();
+      expect(screen.queryByRole("alertdialog")).toBeNull();
     });
 
-    it('opens on trigger click and shows content', () => {
+    it("opens on trigger click and shows content", () => {
       renderAlertDialog();
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-      expect(screen.getByRole('alertdialog')).toBeDefined();
-      expect(screen.getByText('Delete project?')).toBeDefined();
-      expect(screen.getByText('This cannot be undone.')).toBeDefined();
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      expect(screen.getByRole("alertdialog")).toBeDefined();
+      expect(screen.getByText("Delete project?")).toBeDefined();
+      expect(screen.getByText("This cannot be undone.")).toBeDefined();
     });
 
-    it('closes on Cancel click', () => {
+    it("closes on Cancel click", () => {
       renderAlertDialog();
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-      expect(screen.queryByRole('alertdialog')).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(screen.queryByRole("alertdialog")).toBeNull();
     });
 
-    it('calls onAction and closes on Confirm click', () => {
+    it("calls onAction and closes on Confirm click", () => {
       const onAction = vi.fn();
       renderAlertDialog({ onAction });
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
       expect(onAction).toHaveBeenCalledTimes(1);
-      expect(screen.queryByRole('alertdialog')).toBeNull();
+      expect(screen.queryByRole("alertdialog")).toBeNull();
     });
   });
 
-  describe('keyboard interaction', () => {
-    it('closes on Escape', async () => {
+  describe("keyboard interaction", () => {
+    it("closes on Escape", async () => {
       renderAlertDialog();
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-      expect(screen.getByRole('alertdialog')).toBeDefined();
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      expect(screen.getByRole("alertdialog")).toBeDefined();
 
-      await userEvent.keyboard('{Escape}');
-      await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     });
 
-    it('moves focus into the dialog when opened', async () => {
+    it("moves focus into the dialog when opened", async () => {
       renderAlertDialog();
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
 
       await waitFor(() => {
-        const dialog = screen.getByRole('alertdialog');
+        const dialog = screen.getByRole("alertdialog");
         expect(dialog.contains(document.activeElement)).toBe(true);
       });
     });
 
-    it('returns focus to the trigger when closed', async () => {
+    it("returns focus to the trigger when closed", async () => {
       renderAlertDialog();
-      const trigger = screen.getByRole('button', { name: 'Delete' });
+      const trigger = screen.getByRole("button", { name: "Delete" });
       fireEvent.click(trigger);
 
-      await userEvent.keyboard('{Escape}');
+      await userEvent.keyboard("{Escape}");
       await waitFor(() => expect(document.activeElement).toBe(trigger));
     });
 
-    it('traps focus within the dialog', async () => {
+    it("traps focus within the dialog", async () => {
       renderAlertDialog();
-      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-      const dialog = await waitFor(() => screen.getByRole('alertdialog'));
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      const dialog = await waitFor(() => screen.getByRole("alertdialog"));
 
       await userEvent.tab();
       expect(dialog.contains(document.activeElement)).toBe(true);

@@ -1,7 +1,7 @@
-import type React from 'react';
-import * as styles from './Skeleton.css.js';
+import type React from "react";
+import * as styles from "./Skeleton.css.js";
 
-type SkeletonVariant = 'text' | 'heading' | 'circular' | 'rectangular';
+type SkeletonVariant = "text" | "heading" | "circular" | "rectangular";
 
 type SkeletonProps = {
   variant?: SkeletonVariant;
@@ -11,11 +11,11 @@ type SkeletonProps = {
   style?: React.CSSProperties;
 };
 
-export function Skeleton({ variant = 'text', width, height, className, style }: SkeletonProps) {
+export function Skeleton({ variant = "text", width, height, className, style }: SkeletonProps) {
   return (
     <span
       aria-hidden="true"
-      className={[styles.root, styles.variants[variant], className].filter(Boolean).join(' ')}
+      className={[styles.root, styles.variants[variant], className].filter(Boolean).join(" ")}
       style={{ width, height, ...style }}
     />
   );

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useImperativeHandle, useEffect } from 'react';
+import { useState, useRef, useCallback, useImperativeHandle, useEffect } from "react";
 import {
   bandScale,
   linearScale,
@@ -6,23 +6,23 @@ import {
   sum,
   shouldRotateLabels,
   labelSkip,
-} from '../../utils/chart-math.js';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import { ChartTooltip, useChartTooltip } from '../ChartTooltip/ChartTooltip.js';
-import * as styles from './BarChart.css.js';
+} from "../../utils/chart-math.js";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import * as styles from "./BarChart.css.js";
 
 export type BarDatum = {
   label: string;
   value: number;
 };
 
-type GridOption = 'horizontal' | 'vertical' | 'both' | 'none';
+type GridOption = "horizontal" | "vertical" | "both" | "none";
 
 type BarChartProps = {
   data: BarDatum[];
   colors?: string[];
-  direction?: 'vertical' | 'horizontal';
+  direction?: "vertical" | "horizontal";
   stacked?: boolean;
   grouped?: boolean;
   series?: string[];
@@ -36,16 +36,16 @@ type BarChartProps = {
   onSelect?: (index: number | null) => void;
   height?: number;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
 const DEFAULT_COLORS = [
-  'var(--color-interactive)',
-  'var(--color-success)',
-  'var(--color-danger)',
-  'var(--color-warning)',
-  'var(--color-inactive)',
+  "var(--color-interactive)",
+  "var(--color-success)",
+  "var(--color-danger)",
+  "var(--color-warning)",
+  "var(--color-inactive)",
 ];
 
 const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
@@ -54,21 +54,21 @@ const MARGIN_H = { top: 8, right: 8, bottom: 28, left: 80 };
 export function BarChart({
   data,
   colors = DEFAULT_COLORS,
-  direction = 'vertical',
+  direction = "vertical",
   stacked = false,
   grouped = false,
   series,
   values,
   xLabel,
   yLabel,
-  grid = 'horizontal',
+  grid = "horizontal",
   formatValue = String,
   onBarClick,
   selectedIndex: controlledSelected,
   onSelect,
   height: heightProp,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: BarChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,13 +92,13 @@ export function BarChart({
   useEffect(() => {
     if (selected === null) return;
     function handleEsc(e: KeyboardEvent) {
-      if (e.key === 'Escape') setSelected(null);
+      if (e.key === "Escape") setSelected(null);
     }
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
   }, [selected, setSelected]);
 
-  const isHorizontal = direction === 'horizontal';
+  const isHorizontal = direction === "horizontal";
   const isMulti = !!series && !!values;
   const needsRotation =
     !isHorizontal && shouldRotateLabels(data.length, 400 - MARGIN_V.left - MARGIN_V.right);
@@ -133,8 +133,8 @@ export function BarChart({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       let next = focusedRef.current;
-      const fwd = isHorizontal ? 'ArrowDown' : 'ArrowRight';
-      const bwd = isHorizontal ? 'ArrowUp' : 'ArrowLeft';
+      const fwd = isHorizontal ? "ArrowDown" : "ArrowRight";
+      const bwd = isHorizontal ? "ArrowUp" : "ArrowLeft";
       if (e.key === fwd) next = Math.min(next + 1, data.length - 1);
       else if (e.key === bwd) next = Math.max(next - 1, 0);
       else return;
@@ -145,7 +145,7 @@ export function BarChart({
     [data.length, isHorizontal],
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   // Simple single-value bars
   function renderSimpleBars() {
@@ -174,9 +174,9 @@ export function BarChart({
               tabIndex={i === 0 ? 0 : -1}
               role="img"
               aria-label={tooltipContent}
-              aria-describedby={tip['aria-describedby']}
-              data-selected={isSelected ? '' : undefined}
-              data-dimmed={isDimmed ? '' : undefined}
+              aria-describedby={tip["aria-describedby"]}
+              data-selected={isSelected ? "" : undefined}
+              data-dimmed={isDimmed ? "" : undefined}
               onClick={() => {
                 setSelected(isSelected ? null : i);
                 onBarClick?.(d, i);
@@ -228,9 +228,9 @@ export function BarChart({
             tabIndex={i === 0 ? 0 : -1}
             role="img"
             aria-label={tooltipContent}
-            aria-describedby={tip['aria-describedby']}
-            data-selected={isSelected ? '' : undefined}
-            data-dimmed={isDimmed ? '' : undefined}
+            aria-describedby={tip["aria-describedby"]}
+            data-selected={isSelected ? "" : undefined}
+            data-dimmed={isDimmed ? "" : undefined}
             onClick={() => {
               setSelected(isSelected ? null : i);
               onBarClick?.(d, i);
@@ -252,7 +252,7 @@ export function BarChart({
             <text
               x={labelX}
               y={plotHeight + 16}
-              textAnchor={rotateLabels ? 'end' : 'middle'}
+              textAnchor={rotateLabels ? "end" : "middle"}
               className={styles.tickLabel}
               transform={rotateLabels ? `rotate(-45, ${labelX}, ${plotHeight + 16})` : undefined}
             >
@@ -290,7 +290,7 @@ export function BarChart({
                 tabIndex={i === 0 && si === 0 ? 0 : -1}
                 role="img"
                 aria-label={tooltipContent}
-                aria-describedby={tip['aria-describedby']}
+                aria-describedby={tip["aria-describedby"]}
                 onMouseEnter={tip.onMouseEnter}
                 onMouseLeave={tip.onMouseLeave}
                 onFocus={tip.onFocus}
@@ -302,7 +302,7 @@ export function BarChart({
             <text
               x={categoryScale.offset(i) + categoryScale.bandwidth / 2}
               y={plotHeight + 16}
-              textAnchor={rotateLabels ? 'end' : 'middle'}
+              textAnchor={rotateLabels ? "end" : "middle"}
               className={styles.tickLabel}
               transform={
                 rotateLabels
@@ -345,8 +345,8 @@ export function BarChart({
                 tabIndex={i === 0 && si === 0 ? 0 : -1}
                 role="img"
                 aria-label={tooltipContent}
-                aria-describedby={tip['aria-describedby']}
-                data-clickable={onBarClick ? '' : undefined}
+                aria-describedby={tip["aria-describedby"]}
+                data-clickable={onBarClick ? "" : undefined}
                 onClick={onBarClick ? () => onBarClick(d, i, si) : undefined}
                 onMouseEnter={tip.onMouseEnter}
                 onMouseLeave={tip.onMouseLeave}
@@ -359,7 +359,7 @@ export function BarChart({
             <text
               x={categoryScale.offset(i) + categoryScale.bandwidth / 2}
               y={plotHeight + 16}
-              textAnchor={rotateLabels ? 'end' : 'middle'}
+              textAnchor={rotateLabels ? "end" : "middle"}
               className={styles.tickLabel}
               transform={
                 rotateLabels
@@ -375,11 +375,11 @@ export function BarChart({
     });
   }
 
-  const showHGrid = grid === 'horizontal' || grid === 'both';
-  const showVGrid = grid === 'vertical' || grid === 'both';
+  const showHGrid = grid === "horizontal" || grid === "both";
+  const showVGrid = grid === "vertical" || grid === "both";
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: 'relative' }}>
+    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
         viewBox={`0 0 ${chartWidth} ${height}`}

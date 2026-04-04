@@ -1,4 +1,4 @@
-import * as styles from './Textarea.css.js';
+import * as styles from "./Textarea.css.js";
 
 type TextareaProps = {
   hasError?: boolean;
@@ -7,9 +7,9 @@ type TextareaProps = {
 export function Textarea({ hasError, className, ...props }: TextareaProps) {
   return (
     <textarea
-      className={[styles.textarea, hasError ? styles.error : '', className]
+      className={[styles.textarea, hasError ? styles.error : "", className]
         .filter(Boolean)
-        .join(' ')}
+        .join(" ")}
       {...props}
     />
   );

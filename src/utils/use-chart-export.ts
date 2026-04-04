@@ -1,22 +1,22 @@
-import { useCallback } from 'react';
-import type React from 'react';
+import { useCallback } from "react";
+import type React from "react";
 
 /** CSS properties to inline on SVG elements for standalone export. */
 const SVG_STYLE_PROPS = [
-  'fill',
-  'stroke',
-  'stroke-width',
-  'stroke-linecap',
-  'stroke-linejoin',
-  'stroke-dasharray',
-  'stroke-dashoffset',
-  'opacity',
-  'font-family',
-  'font-size',
-  'font-weight',
-  'text-anchor',
-  'dominant-baseline',
-  'color',
+  "fill",
+  "stroke",
+  "stroke-width",
+  "stroke-linecap",
+  "stroke-linejoin",
+  "stroke-dasharray",
+  "stroke-dashoffset",
+  "opacity",
+  "font-family",
+  "font-size",
+  "font-weight",
+  "text-anchor",
+  "dominant-baseline",
+  "color",
 ] as const;
 
 /**
@@ -25,8 +25,8 @@ const SVG_STYLE_PROPS = [
  * correctly when opened outside the browser.
  */
 function inlineComputedStyles(svgClone: SVGElement, sourceRoot: SVGElement) {
-  const cloneEls = svgClone.querySelectorAll('*');
-  const sourceEls = sourceRoot.querySelectorAll('*');
+  const cloneEls = svgClone.querySelectorAll("*");
+  const sourceEls = sourceRoot.querySelectorAll("*");
 
   // Inline styles on root
   inlineElement(svgClone, sourceRoot);
@@ -43,7 +43,7 @@ function inlineElement(cloneEl: SVGElement, sourceEl: SVGElement) {
   const computed = getComputedStyle(sourceEl);
   for (const prop of SVG_STYLE_PROPS) {
     const value = computed.getPropertyValue(prop);
-    if (value && value !== 'none' && value !== 'normal' && value !== '0px') {
+    if (value && value !== "none" && value !== "normal" && value !== "0px") {
       cloneEl.setAttribute(prop, value);
     }
   }
@@ -52,14 +52,14 @@ function inlineElement(cloneEl: SVGElement, sourceEl: SVGElement) {
 /** Converts an SVG string to a PNG blob via canvas. */
 function svgToPng(svgString: string, width: number, height: number, scale: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = width * scale;
     canvas.height = height * scale;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return reject(new Error('Canvas 2D context unavailable'));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return reject(new Error("Canvas 2D context unavailable"));
 
     const img = new Image();
-    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
     img.onload = () => {
@@ -67,12 +67,12 @@ function svgToPng(svgString: string, width: number, height: number, scale: numbe
       URL.revokeObjectURL(url);
       canvas.toBlob((pngBlob) => {
         if (pngBlob) resolve(pngBlob);
-        else reject(new Error('Canvas toBlob failed'));
-      }, 'image/png');
+        else reject(new Error("Canvas toBlob failed"));
+      }, "image/png");
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('Failed to load SVG into image'));
+      reject(new Error("Failed to load SVG into image"));
     };
     img.src = url;
   });
@@ -80,7 +80,7 @@ function svgToPng(svgString: string, width: number, height: number, scale: numbe
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();
@@ -90,15 +90,15 @@ function downloadBlob(blob: Blob, filename: string) {
 function prepareExportSvg(
   container: HTMLElement,
 ): { clone: SVGElement; source: SVGSVGElement } | null {
-  const source = container.querySelector('svg');
+  const source = container.querySelector("svg");
   if (!source) return null;
   const clone = source.cloneNode(true) as SVGElement;
 
   // Set explicit dimensions for standalone rendering
   const { width, height } = source.getBoundingClientRect();
-  clone.setAttribute('width', String(width));
-  clone.setAttribute('height', String(height));
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute("width", String(width));
+  clone.setAttribute("height", String(height));
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
   inlineComputedStyles(clone, source);
   return { clone, source };
@@ -117,18 +117,18 @@ export function useChartExport(
   containerRef: React.RefObject<HTMLElement | null>,
 ): ChartExportHandle {
   const exportSVG = useCallback(
-    (filename = 'chart.svg') => {
+    (filename = "chart.svg") => {
       if (!containerRef.current) return;
       const result = prepareExportSvg(containerRef.current);
       if (!result) return;
       const svgString = new XMLSerializer().serializeToString(result.clone);
-      downloadBlob(new Blob([svgString], { type: 'image/svg+xml' }), filename);
+      downloadBlob(new Blob([svgString], { type: "image/svg+xml" }), filename);
     },
     [containerRef],
   );
 
   const exportPNG = useCallback(
-    async (filename = 'chart.png', scale = 2) => {
+    async (filename = "chart.png", scale = 2) => {
       if (!containerRef.current) return;
       const result = prepareExportSvg(containerRef.current);
       if (!result) return;

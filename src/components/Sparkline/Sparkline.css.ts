@@ -1,15 +1,15 @@
-import { style } from '@vanilla-extract/css';
+import { style } from "@vanilla-extract/css";
 
 export const svg = style({
-  display: 'inline-block',
-  verticalAlign: 'middle',
+  display: "inline-block",
+  verticalAlign: "middle",
 });
 
 export const line = style({
-  fill: 'none',
+  fill: "none",
   strokeWidth: 1.5,
-  strokeLinejoin: 'round',
-  strokeLinecap: 'round',
+  strokeLinejoin: "round",
+  strokeLinecap: "round",
 });
 
 export const area = style({

@@ -1,6 +1,6 @@
-import * as styles from './Tag.css.js';
+import * as styles from "./Tag.css.js";
 
-export type TagVariant = 'neutral' | 'success' | 'danger' | 'warning' | 'info';
+export type TagVariant = "neutral" | "success" | "danger" | "warning" | "info";
 
 const variantClass: Record<TagVariant, string> = {
   neutral: styles.variantNeutral,
@@ -16,7 +16,7 @@ type TagProps = {
   className?: string;
 };
 
-export function Tag({ children, variant = 'neutral', className }: TagProps) {
-  const cls = [styles.tag, variantClass[variant], className].filter(Boolean).join(' ');
+export function Tag({ children, variant = "neutral", className }: TagProps) {
+  const cls = [styles.tag, variantClass[variant], className].filter(Boolean).join(" ");
   return <span className={cls}>{children}</span>;
 }

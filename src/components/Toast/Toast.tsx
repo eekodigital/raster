@@ -1,9 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
-import type React from 'react';
-import { Portal as PortalComponent } from '../Portal/Portal.js';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import * as styles from './Toast.css.js';
+import { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import type React from "react";
+import { Portal as PortalComponent } from "../Portal/Portal.js";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import * as styles from "./Toast.css.js";
 
 // --- Provider ---
 
@@ -20,7 +20,7 @@ const Ctx = createContext<ToastCtx>({
 });
 
 type ProviderProps = {
-  swipeDirection?: 'right' | 'left' | 'up' | 'down';
+  swipeDirection?: "right" | "left" | "up" | "down";
   children?: React.ReactNode;
 };
 
@@ -145,10 +145,10 @@ export function Action({ className, children, onClick }: ActionProps) {
 type CloseProps = {
   className?: string;
   children?: React.ReactNode;
-  'aria-label'?: string;
+  "aria-label"?: string;
 };
 
-export function Close({ className, children, 'aria-label': ariaLabel }: CloseProps) {
+export function Close({ className, children, "aria-label": ariaLabel }: CloseProps) {
   const { setOpen } = useContext(ToastInternalCtx);
   const cls = cn(styles.close, className);
   return (

@@ -1,4 +1,4 @@
-import * as styles from './Table.css.js';
+import * as styles from "./Table.css.js";
 
 export type Column<T> = {
   key: string;

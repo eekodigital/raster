@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect, useRef, useId } from 'react';
-import type React from 'react';
-import { Portal as PortalComponent } from '../Portal/Portal.js';
-import { cn } from '../../utils/cn.js';
-import { positionOverlay } from '../../utils/position-overlay.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import { useEscapeKey } from '../../utils/use-escape-key.js';
-import * as styles from './Select.css.js';
+import { useState, useCallback, useEffect, useRef, useId } from "react";
+import type React from "react";
+import { Portal as PortalComponent } from "../Portal/Portal.js";
+import { cn } from "../../utils/cn.js";
+import { positionOverlay } from "../../utils/position-overlay.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import { useEscapeKey } from "../../utils/use-escape-key.js";
+import * as styles from "./Select.css.js";
 
 export type SelectOption = {
   value: string;
@@ -25,8 +25,8 @@ type SelectProps = {
   name?: string;
   required?: boolean;
   id?: string;
-  'aria-label'?: string;
-  'aria-labelledby'?: string;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
 };
 
 export function Select({
@@ -40,8 +40,8 @@ export function Select({
   name,
   required,
   id: explicitId,
-  'aria-label': ariaLabel,
-  'aria-labelledby': ariaLabelledby,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
 }: SelectProps) {
   const generatedId = useId();
   const id = explicitId ?? generatedId;
@@ -49,7 +49,7 @@ export function Select({
 
   const [value, setValue] = useControllableState(
     controlledValue,
-    defaultValue ?? '',
+    defaultValue ?? "",
     onValueChange,
   );
 
@@ -84,8 +84,8 @@ export function Select({
         setOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
   // Close on Escape
@@ -107,7 +107,7 @@ export function Select({
     const el = listRef.current;
     const trigger = triggerRef.current;
     if (!el || !trigger) return;
-    positionOverlay(trigger, el, 'bottom-start');
+    positionOverlay(trigger, el, "bottom-start");
     el.style.minWidth = `${trigger.getBoundingClientRect().width}px`;
     el.focus({ preventScroll: true });
   }, [open]);
@@ -116,12 +116,12 @@ export function Select({
   useEffect(() => {
     if (!open || focusedIndex < 0) return;
     const items = listRef.current?.querySelectorAll<HTMLElement>('[role="option"]');
-    items?.[focusedIndex]?.scrollIntoView({ block: 'nearest' });
+    items?.[focusedIndex]?.scrollIntoView({ block: "nearest" });
   }, [open, focusedIndex]);
 
   function handleTriggerKeyDown(e: React.KeyboardEvent) {
     if (disabled) return;
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
       e.preventDefault();
       setOpen(true);
     }
@@ -130,25 +130,25 @@ export function Select({
   function handleListKeyDown(e: React.KeyboardEvent) {
     const count = options.length;
 
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       setFocusedIndex((prev) => {
         let next = (prev + 1) % count;
         while (options[next]?.disabled && next !== prev) next = (next + 1) % count;
         return next;
       });
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setFocusedIndex((prev) => {
         let next = (prev - 1 + count) % count;
         while (options[next]?.disabled && next !== prev) next = (next - 1 + count) % count;
         return next;
       });
-    } else if (e.key === 'Home') {
+    } else if (e.key === "Home") {
       e.preventDefault();
       const idx = options.findIndex((o) => !o.disabled);
       if (idx >= 0) setFocusedIndex(idx);
-    } else if (e.key === 'End') {
+    } else if (e.key === "End") {
       e.preventDefault();
       for (let i = count - 1; i >= 0; i--) {
         if (!options[i].disabled) {
@@ -156,7 +156,7 @@ export function Select({
           break;
         }
       }
-    } else if (e.key === 'Enter' || e.key === ' ') {
+    } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       if (focusedIndex >= 0 && !options[focusedIndex]?.disabled) {
         selectValue(options[focusedIndex].value);
@@ -228,8 +228,8 @@ export function Select({
                     role="option"
                     aria-selected={isSelected}
                     aria-disabled={opt.disabled || undefined}
-                    data-disabled={opt.disabled ? '' : undefined}
-                    data-highlighted={isFocused ? '' : undefined}
+                    data-disabled={opt.disabled ? "" : undefined}
+                    data-highlighted={isFocused ? "" : undefined}
                     className={styles.item}
                     onClick={() => {
                       if (!opt.disabled) selectValue(opt.value);

@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useId, useMemo, useRef } from 'react';
-import type React from 'react';
-import { Portal as PortalComponent } from '../Portal/Portal.js';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import { useEscapeKey } from '../../utils/use-escape-key.js';
-import { useFocusTrap } from '../../utils/use-focus-trap.js';
-import * as styles from './Dialog.css.js';
+import { createContext, useContext, useEffect, useId, useMemo, useRef } from "react";
+import type React from "react";
+import { Portal as PortalComponent } from "../Portal/Portal.js";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import { useEscapeKey } from "../../utils/use-escape-key.js";
+import { useFocusTrap } from "../../utils/use-focus-trap.js";
+import * as styles from "./Dialog.css.js";
 
 // --- Context ---
 
@@ -22,9 +22,9 @@ const Ctx = createContext<DialogCtx>({
   open: false,
   setOpen: () => {},
   triggerRef: { current: null },
-  contentId: '',
-  titleId: '',
-  descriptionId: '',
+  contentId: "",
+  titleId: "",
+  descriptionId: "",
 });
 
 // --- Root ---
@@ -82,7 +82,7 @@ export function Trigger({ children }: TriggerProps) {
     onClick: () => setOpen(true),
   };
 
-  if (typeof children === 'function') {
+  if (typeof children === "function") {
     return children(triggerProps);
   }
 
@@ -131,7 +131,7 @@ export function Content({ className, children }: ContentProps) {
   // Scroll lock + focus restore to trigger
   useEffect(() => {
     const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = original;
       triggerRef.current?.focus();
@@ -193,14 +193,14 @@ export function Description({ className, children }: DescriptionProps) {
 type CloseProps = {
   className?: string;
   children?: React.ReactNode | ((props: { onClick: () => void }) => React.ReactElement);
-  'aria-label'?: string;
+  "aria-label"?: string;
 };
 
-export function Close({ className, children, 'aria-label': ariaLabel }: CloseProps) {
+export function Close({ className, children, "aria-label": ariaLabel }: CloseProps) {
   const { setOpen } = useContext(Ctx);
   const close = () => setOpen(false);
 
-  if (typeof children === 'function') {
+  if (typeof children === "function") {
     return children({ onClick: close });
   }
 

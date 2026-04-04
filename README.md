@@ -13,14 +13,14 @@ pnpm add @eekodigital/raster
 Import the CSS tokens once at the root of your app, then import components as needed:
 
 ```tsx
-import '@eekodigital/raster/tokens.css';
-import { Button, TextInput } from '@eekodigital/raster';
+import "@eekodigital/raster/tokens.css";
+import { Button, TextInput } from "@eekodigital/raster";
 ```
 
 DataTable is a separate export to avoid bundling `@tanstack/react-table` for consumers who don't need it:
 
 ```tsx
-import { DataTable } from '@eekodigital/raster/data-table';
+import { DataTable } from "@eekodigital/raster/data-table";
 ```
 
 ## Theming
@@ -28,10 +28,10 @@ import { DataTable } from '@eekodigital/raster/data-table';
 Raster uses CSS custom properties for theming. Override semantic tokens after importing `tokens.css`:
 
 ```css
-@import '@eekodigital/raster/tokens.css';
+@import "@eekodigital/raster/tokens.css";
 
 :root,
-[data-theme='light'] {
+[data-theme="light"] {
   --color-interactive: #e63946;
   --color-bg: #f1faee;
 }

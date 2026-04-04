@@ -1,7 +1,7 @@
-import { useRef, useImperativeHandle } from 'react';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import * as styles from './Gauge.css.js';
+import { useRef, useImperativeHandle } from "react";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import * as styles from "./Gauge.css.js";
 
 type GaugeProps = {
   value: number;
@@ -13,7 +13,7 @@ type GaugeProps = {
   thickness?: number;
   format?: (value: number) => string;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
@@ -21,13 +21,13 @@ export function Gauge({
   value,
   max,
   label,
-  color = 'var(--color-interactive)',
-  trackColor = 'var(--color-border)',
+  color = "var(--color-interactive)",
+  trackColor = "var(--color-border)",
   size = 120,
   thickness = 10,
   format = (v) => String(v),
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: GaugeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export function Gauge({
   const cx = size / 2;
   const cy = size / 2;
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
     <div

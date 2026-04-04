@@ -1,7 +1,7 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
-import * as Tooltip from './Tooltip.js';
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import * as Tooltip from "./Tooltip.js";
 
 function renderTooltip({ defaultOpen = false }: { defaultOpen?: boolean } = {}) {
   return render(
@@ -37,66 +37,66 @@ function renderTooltipWithDelay({ delayDuration = 700 }: { delayDuration?: numbe
   );
 }
 
-describe('Tooltip', () => {
-  describe('show and hide', () => {
-    it('is not visible by default', () => {
+describe("Tooltip", () => {
+  describe("show and hide", () => {
+    it("is not visible by default", () => {
       renderTooltip();
-      expect(screen.queryByRole('tooltip')).toBeNull();
+      expect(screen.queryByRole("tooltip")).toBeNull();
     });
 
-    it('shows content when defaultOpen is true', () => {
+    it("shows content when defaultOpen is true", () => {
       renderTooltip({ defaultOpen: true });
-      expect(screen.getAllByText('Tooltip text').length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Tooltip text").length).toBeGreaterThan(0);
     });
 
-    it('shows on focus', async () => {
+    it("shows on focus", async () => {
       renderTooltip();
-      screen.getByRole('button', { name: 'Hover me' }).focus();
-      await waitFor(() => expect(screen.getByRole('tooltip')).toBeDefined());
+      screen.getByRole("button", { name: "Hover me" }).focus();
+      await waitFor(() => expect(screen.getByRole("tooltip")).toBeDefined());
     });
 
-    it('shows on mouseEnter (with zero delay)', async () => {
+    it("shows on mouseEnter (with zero delay)", async () => {
       renderTooltip();
-      fireEvent.mouseEnter(screen.getByRole('button', { name: 'Hover me' }));
-      await waitFor(() => expect(screen.getByRole('tooltip')).toBeDefined());
+      fireEvent.mouseEnter(screen.getByRole("button", { name: "Hover me" }));
+      await waitFor(() => expect(screen.getByRole("tooltip")).toBeDefined());
     });
 
-    it('hides on mouseLeave', async () => {
+    it("hides on mouseLeave", async () => {
       renderTooltip();
-      const trigger = screen.getByRole('button', { name: 'Hover me' });
+      const trigger = screen.getByRole("button", { name: "Hover me" });
       fireEvent.mouseEnter(trigger);
-      await waitFor(() => expect(screen.getByRole('tooltip')).toBeDefined());
+      await waitFor(() => expect(screen.getByRole("tooltip")).toBeDefined());
       fireEvent.mouseLeave(trigger);
-      await waitFor(() => expect(screen.queryByRole('tooltip')).toBeNull());
+      await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
     });
 
-    it('hides on blur', async () => {
+    it("hides on blur", async () => {
       renderTooltip();
-      const trigger = screen.getByRole('button', { name: 'Hover me' });
+      const trigger = screen.getByRole("button", { name: "Hover me" });
       trigger.focus();
-      await waitFor(() => expect(screen.getByRole('tooltip')).toBeDefined());
+      await waitFor(() => expect(screen.getByRole("tooltip")).toBeDefined());
       fireEvent.blur(trigger);
-      await waitFor(() => expect(screen.queryByRole('tooltip')).toBeNull());
+      await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
     });
 
-    it('shows on mouseEnter after delay', async () => {
+    it("shows on mouseEnter after delay", async () => {
       vi.useFakeTimers();
       renderTooltipWithDelay({ delayDuration: 500 });
-      fireEvent.mouseEnter(screen.getByRole('button', { name: 'Hover me' }));
+      fireEvent.mouseEnter(screen.getByRole("button", { name: "Hover me" }));
       // Not visible yet
-      expect(screen.queryByRole('tooltip')).toBeNull();
+      expect(screen.queryByRole("tooltip")).toBeNull();
       // Advance past the delay
       await act(async () => {
         vi.advanceTimersByTime(500);
       });
-      expect(screen.getByRole('tooltip')).toBeDefined();
+      expect(screen.getByRole("tooltip")).toBeDefined();
       vi.useRealTimers();
     });
 
-    it('cancels delay timer on mouseLeave before it fires', async () => {
+    it("cancels delay timer on mouseLeave before it fires", async () => {
       vi.useFakeTimers();
       renderTooltipWithDelay({ delayDuration: 500 });
-      const trigger = screen.getByRole('button', { name: 'Hover me' });
+      const trigger = screen.getByRole("button", { name: "Hover me" });
       fireEvent.mouseEnter(trigger);
       // Leave before delay fires
       await act(async () => {
@@ -106,22 +106,22 @@ describe('Tooltip', () => {
       await act(async () => {
         vi.advanceTimersByTime(500);
       });
-      expect(screen.queryByRole('tooltip')).toBeNull();
+      expect(screen.queryByRole("tooltip")).toBeNull();
       vi.useRealTimers();
     });
   });
 
-  describe('keyboard interaction', () => {
-    it('dismisses on Escape', async () => {
+  describe("keyboard interaction", () => {
+    it("dismisses on Escape", async () => {
       renderTooltip({ defaultOpen: true });
-      expect(screen.getByRole('tooltip')).toBeDefined();
-      await userEvent.keyboard('{Escape}');
-      await waitFor(() => expect(screen.queryByRole('tooltip')).toBeNull());
+      expect(screen.getByRole("tooltip")).toBeDefined();
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
     });
   });
 
-  describe('Arrow component', () => {
-    it('renders an SVG arrow inside an open tooltip', () => {
+  describe("Arrow component", () => {
+    it("renders an SVG arrow inside an open tooltip", () => {
       const { container } = render(
         <Tooltip.Provider delayDuration={0}>
           <Tooltip.Root defaultOpen>
@@ -138,8 +138,8 @@ describe('Tooltip', () => {
     });
   });
 
-  describe('Content className', () => {
-    it('applies a custom className to the content', () => {
+  describe("Content className", () => {
+    it("applies a custom className to the content", () => {
       render(
         <Tooltip.Provider delayDuration={0}>
           <Tooltip.Root defaultOpen>
@@ -148,8 +148,8 @@ describe('Tooltip', () => {
           </Tooltip.Root>
         </Tooltip.Provider>,
       );
-      const tooltip = screen.getByRole('tooltip');
-      expect(tooltip.className).toContain('custom-tip');
+      const tooltip = screen.getByRole("tooltip");
+      expect(tooltip.className).toContain("custom-tip");
     });
   });
 });

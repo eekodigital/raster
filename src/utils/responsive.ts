@@ -6,7 +6,7 @@
  * Custom pixel breakpoints: any string ending in "px", e.g. "600px".
  */
 
-export type Breakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
+export type Breakpoint = "base" | "sm" | "md" | "lg" | "xl";
 
 const NAMED_BREAKPOINTS: Record<Breakpoint, number> = {
   base: 0,
@@ -20,7 +20,7 @@ export type ResponsiveValue<T> = T | Partial<Record<Breakpoint | (string & {}), 
 
 /** Checks whether a value is a responsive object (not a plain string/boolean/number). */
 export function isResponsive<T>(value: ResponsiveValue<T>): value is Record<string, T> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /** Resolves a breakpoint key to its pixel value. */
@@ -79,7 +79,7 @@ export function responsiveCSS<T>(
     }
   }
 
-  return { style, mediaCSS: mediaParts.join(' ') };
+  return { style, mediaCSS: mediaParts.join(" ") };
 }
 
 /**

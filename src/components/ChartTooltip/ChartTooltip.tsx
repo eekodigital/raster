@@ -1,5 +1,5 @@
-import { useState, useCallback, useId } from 'react';
-import * as styles from './ChartTooltip.css.js';
+import { useState, useCallback, useId } from "react";
+import * as styles from "./ChartTooltip.css.js";
 
 type TooltipState = {
   visible: boolean;
@@ -19,7 +19,7 @@ export function useChartTooltip() {
     visible: false,
     x: 0,
     y: 0,
-    content: '',
+    content: "",
   });
 
   const show = useCallback((content: string, rect: DOMRect, containerRect: DOMRect) => {
@@ -38,7 +38,7 @@ export function useChartTooltip() {
   const handleMouseEnter = useCallback(
     (content: string) => (e: React.MouseEvent<SVGElement>) => {
       const el = e.currentTarget;
-      const container = el.closest('[data-chart-container]');
+      const container = el.closest("[data-chart-container]");
       if (!container) return;
       show(content, el.getBoundingClientRect(), container.getBoundingClientRect());
     },
@@ -48,7 +48,7 @@ export function useChartTooltip() {
   const handleFocus = useCallback(
     (content: string) => (e: React.FocusEvent<SVGElement>) => {
       const el = e.currentTarget;
-      const container = el.closest('[data-chart-container]');
+      const container = el.closest("[data-chart-container]");
       if (!container) return;
       show(content, el.getBoundingClientRect(), container.getBoundingClientRect());
     },
@@ -65,7 +65,7 @@ export function useChartTooltip() {
       onMouseLeave: hide,
       onFocus: handleFocus(content),
       onBlur: hide,
-      'aria-describedby': tooltipId,
+      "aria-describedby": tooltipId,
     }),
   };
 }
@@ -88,7 +88,7 @@ export function ChartTooltip({ id, visible, x, y, content }: ChartTooltipProps) 
       style={{
         left: x,
         top: y,
-        transform: 'translate(-50%, -100%)',
+        transform: "translate(-50%, -100%)",
       }}
     >
       {content}

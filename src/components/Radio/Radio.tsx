@@ -1,6 +1,6 @@
-import { createContext, useContext, useId, useCallback, useRef } from 'react';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import * as styles from './Radio.css.js';
+import { createContext, useContext, useId, useCallback, useRef } from "react";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import * as styles from "./Radio.css.js";
 
 type RadioGroupCtx = {
   value: string;
@@ -12,8 +12,8 @@ type RadioGroupCtx = {
 };
 
 const Ctx = createContext<RadioGroupCtx>({
-  value: '',
-  name: '',
+  value: "",
+  name: "",
   disabled: false,
   onValueChange: () => {},
   registerRadio: () => {},
@@ -49,8 +49,8 @@ export function Radio({ label, value, disabled: itemDisabled, id: explicitId }: 
         id={id}
         className={styles.root}
         aria-checked={checked}
-        data-state={checked ? 'checked' : 'unchecked'}
-        data-disabled={disabled ? '' : undefined}
+        data-state={checked ? "checked" : "unchecked"}
+        data-disabled={disabled ? "" : undefined}
         disabled={disabled}
         tabIndex={checked ? 0 : -1}
         ref={(el) => {
@@ -88,7 +88,7 @@ export function RadioGroup({
   hint,
   error,
   value: controlledValue,
-  defaultValue = '',
+  defaultValue = "",
   onValueChange,
   name,
   disabled = false,
@@ -125,9 +125,9 @@ export function RadioGroup({
       const currentIdx = order.indexOf(currentValue);
       let nextIdx = currentIdx;
 
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         nextIdx = (currentIdx + 1) % count;
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         nextIdx = (currentIdx - 1 + count) % count;
       } else {
         return;
@@ -138,7 +138,7 @@ export function RadioGroup({
       while (attempts < count) {
         const el = radiosRef.current.get(order[nextIdx]);
         if (el && !el.disabled) break;
-        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        if (e.key === "ArrowDown" || e.key === "ArrowRight") {
           nextIdx = (nextIdx + 1) % count;
         } else {
           nextIdx = (nextIdx - 1 + count) % count;
@@ -184,7 +184,7 @@ export function RadioGroup({
         role="radiogroup"
         className={styles.items}
         aria-labelledby={legendId}
-        aria-describedby={[hintId, errorId].filter(Boolean).join(' ') || undefined}
+        aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined}
       >
         <Ctx.Provider
           value={{

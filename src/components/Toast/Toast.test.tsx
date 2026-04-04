@@ -1,7 +1,7 @@
-import { act, render, screen } from '@testing-library/react';
-import { fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import * as Toast from './Toast.js';
+import { act, render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import * as Toast from "./Toast.js";
 
 function renderToast({ open = true }: { open?: boolean } = {}) {
   return render(
@@ -16,31 +16,31 @@ function renderToast({ open = true }: { open?: boolean } = {}) {
   );
 }
 
-describe('Toast', () => {
-  it('shows title and description when open', () => {
+describe("Toast", () => {
+  it("shows title and description when open", () => {
     renderToast();
-    expect(screen.getByText('File saved')).toBeDefined();
-    expect(screen.getByText('Your changes have been saved.')).toBeDefined();
+    expect(screen.getByText("File saved")).toBeDefined();
+    expect(screen.getByText("Your changes have been saved.")).toBeDefined();
   });
 
-  it('is not visible when closed', () => {
+  it("is not visible when closed", () => {
     renderToast({ open: false });
-    expect(screen.queryByText('File saved')).toBeNull();
+    expect(screen.queryByText("File saved")).toBeNull();
   });
 
-  it('has a dismiss button', () => {
+  it("has a dismiss button", () => {
     renderToast();
-    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Dismiss" })).toBeDefined();
   });
 
-  it('dismiss button is focusable', () => {
+  it("dismiss button is focusable", () => {
     renderToast();
-    const dismiss = screen.getByRole('button', { name: 'Dismiss' });
+    const dismiss = screen.getByRole("button", { name: "Dismiss" });
     dismiss.focus();
     expect(document.activeElement).toBe(dismiss);
   });
 
-  it('auto-dismisses after the specified duration', () => {
+  it("auto-dismisses after the specified duration", () => {
     vi.useFakeTimers();
     render(
       <Toast.Provider>
@@ -49,15 +49,15 @@ describe('Toast', () => {
         </Toast.Root>
       </Toast.Provider>,
     );
-    expect(screen.getByText('Temp')).toBeDefined();
+    expect(screen.getByText("Temp")).toBeDefined();
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(screen.queryByText('Temp')).toBeNull();
+    expect(screen.queryByText("Temp")).toBeNull();
     vi.useRealTimers();
   });
 
-  it('does not auto-dismiss when duration is Infinity', () => {
+  it("does not auto-dismiss when duration is Infinity", () => {
     vi.useFakeTimers();
     render(
       <Toast.Provider>
@@ -69,11 +69,11 @@ describe('Toast', () => {
     act(() => {
       vi.advanceTimersByTime(60000);
     });
-    expect(screen.getByText('Persistent')).toBeDefined();
+    expect(screen.getByText("Persistent")).toBeDefined();
     vi.useRealTimers();
   });
 
-  it('renders an action button that fires onClick', () => {
+  it("renders an action button that fires onClick", () => {
     const onClick = vi.fn();
     render(
       <Toast.Provider>
@@ -83,12 +83,12 @@ describe('Toast', () => {
         </Toast.Root>
       </Toast.Provider>,
     );
-    const btn = screen.getByRole('button', { name: 'Undo' });
+    const btn = screen.getByRole("button", { name: "Undo" });
     fireEvent.click(btn);
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it('controlled open={false} hides the toast', () => {
+  it("controlled open={false} hides the toast", () => {
     render(
       <Toast.Provider>
         <Toast.Root open={false}>
@@ -96,10 +96,10 @@ describe('Toast', () => {
         </Toast.Root>
       </Toast.Provider>,
     );
-    expect(screen.queryByText('Hidden')).toBeNull();
+    expect(screen.queryByText("Hidden")).toBeNull();
   });
 
-  it('controlled open={true} shows the toast', () => {
+  it("controlled open={true} shows the toast", () => {
     render(
       <Toast.Provider>
         <Toast.Root open={true}>
@@ -107,6 +107,6 @@ describe('Toast', () => {
         </Toast.Root>
       </Toast.Provider>,
     );
-    expect(screen.getByText('Visible')).toBeDefined();
+    expect(screen.getByText("Visible")).toBeDefined();
   });
 });

@@ -1,6 +1,6 @@
-import { useId, useState } from 'react';
-import { Textarea } from './Textarea.js';
-import * as styles from '../shared/field.css.js';
+import { useId, useState } from "react";
+import { Textarea } from "./Textarea.js";
+import * as styles from "../shared/field.css.js";
 
 type TextareaFieldProps = {
   label: string;
@@ -8,7 +8,7 @@ type TextareaFieldProps = {
   error?: string;
 } & Omit<
   React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-  'aria-describedby' | 'aria-invalid' | 'aria-errormessage'
+  "aria-describedby" | "aria-invalid" | "aria-errormessage"
 >;
 
 export function TextareaField({
@@ -32,7 +32,7 @@ export function TextareaField({
     value != null ? String(value).length : defaultValue != null ? String(defaultValue).length : 0;
   const [charCount, setCharCount] = useState(initialLength);
 
-  const describedBy = [hintId, errorId, countId].filter(Boolean).join(' ') || undefined;
+  const describedBy = [hintId, errorId, countId].filter(Boolean).join(" ") || undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCharCount(e.target.value.length);
@@ -78,12 +78,12 @@ export function TextareaField({
           id={countId}
           className={[styles.characterCount, isOver ? styles.characterCountOver : undefined]
             .filter(Boolean)
-            .join(' ')}
+            .join(" ")}
           aria-live="polite"
         >
           {remaining != null && remaining >= 0
-            ? `${remaining} character${remaining === 1 ? '' : 's'} remaining`
-            : `${Math.abs(remaining!)} character${Math.abs(remaining!) === 1 ? '' : 's'} too many`}
+            ? `${remaining} character${remaining === 1 ? "" : "s"} remaining`
+            : `${Math.abs(remaining!)} character${Math.abs(remaining!) === 1 ? "" : "s"} too many`}
         </span>
       )}
     </div>

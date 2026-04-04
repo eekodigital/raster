@@ -1,4 +1,4 @@
-import * as styles from './Fieldset.css.js';
+import * as styles from "./Fieldset.css.js";
 
 type FieldsetProps = {
   legend: React.ReactNode;
@@ -8,7 +8,7 @@ type FieldsetProps = {
 };
 
 export function Fieldset({ legend, hint, children, className }: FieldsetProps) {
-  const cls = [styles.fieldset, className].filter(Boolean).join(' ');
+  const cls = [styles.fieldset, className].filter(Boolean).join(" ");
   return (
     <fieldset className={cls}>
       <legend className={styles.legend}>

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import * as styles from './ErrorSummary.css.js';
+import { useEffect, useRef } from "react";
+import * as styles from "./ErrorSummary.css.js";
 
 type Props = {
   /** Map of fieldName → error message. Only entries with a non-empty message are rendered. */

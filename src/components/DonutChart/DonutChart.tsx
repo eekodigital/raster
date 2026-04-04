@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback, useImperativeHandle, useEffect } from 'react';
-import { pieAngles, strokeArcPath, sum } from '../../utils/chart-math.js';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import { ChartTooltip, useChartTooltip } from '../ChartTooltip/ChartTooltip.js';
-import * as styles from './DonutChart.css.js';
+import { useState, useRef, useCallback, useImperativeHandle, useEffect } from "react";
+import { pieAngles, strokeArcPath, sum } from "../../utils/chart-math.js";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import * as styles from "./DonutChart.css.js";
 
 export type DonutDatum = {
   label: string;
@@ -21,7 +21,7 @@ type DonutChartProps = {
   selectedIndex?: number | null;
   onSelect?: (index: number | null) => void;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
@@ -35,7 +35,7 @@ export function DonutChart({
   thickness = 24,
   children,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: DonutChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,10 +58,10 @@ export function DonutChart({
   useEffect(() => {
     if (selected === null) return;
     function handleEsc(e: KeyboardEvent) {
-      if (e.key === 'Escape') setSelected(null);
+      if (e.key === "Escape") setSelected(null);
     }
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
   }, [selected, setSelected]);
 
   const cx = size / 2;
@@ -75,9 +75,9 @@ export function DonutChart({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       let next = focusedRef.current;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         next = (next + 1) % data.length;
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         next = (next - 1 + data.length) % data.length;
       } else {
         return;
@@ -89,7 +89,7 @@ export function DonutChart({
     [data.length],
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
     <div
@@ -140,9 +140,9 @@ export function DonutChart({
               tabIndex={i === 0 ? 0 : -1}
               role="img"
               aria-label={tooltipContent}
-              aria-describedby={tip['aria-describedby']}
-              data-selected={isSelected ? '' : undefined}
-              data-dimmed={isDimmed ? '' : undefined}
+              aria-describedby={tip["aria-describedby"]}
+              data-selected={isSelected ? "" : undefined}
+              data-dimmed={isDimmed ? "" : undefined}
               onClick={() => {
                 setSelected(isSelected ? null : i);
                 onSegmentClick?.(d, i);
@@ -163,7 +163,7 @@ export function DonutChart({
                 strokeDasharray: 1,
                 strokeDashoffset: 1,
                 animation: `draw ${duration}ms linear ${delayMs}ms forwards`,
-                cursor: 'pointer',
+                cursor: "pointer",
               }}
             />
           );

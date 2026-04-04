@@ -1,6 +1,6 @@
-import * as styles from './NotificationBanner.css.js';
+import * as styles from "./NotificationBanner.css.js";
 
-export type NotificationBannerVariant = 'info' | 'success' | 'warning' | 'danger';
+export type NotificationBannerVariant = "info" | "success" | "warning" | "danger";
 
 const variantClass: Record<NotificationBannerVariant, string> = {
   info: styles.variantInfo,
@@ -14,26 +14,26 @@ type NotificationBannerProps = {
   title?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
-  role?: 'alert' | 'status' | 'region';
-  'aria-label'?: string;
+  role?: "alert" | "status" | "region";
+  "aria-label"?: string;
 };
 
 export function NotificationBanner({
-  variant = 'info',
+  variant = "info",
   title,
   children,
   className,
-  role = 'region',
-  'aria-label': ariaLabel,
+  role = "region",
+  "aria-label": ariaLabel,
 }: NotificationBannerProps) {
-  const resolvedLabel = ariaLabel ?? (typeof title === 'string' ? title : undefined);
-  const cls = [styles.banner, variantClass[variant], className].filter(Boolean).join(' ');
+  const resolvedLabel = ariaLabel ?? (typeof title === "string" ? title : undefined);
+  const cls = [styles.banner, variantClass[variant], className].filter(Boolean).join(" ");
   return (
     <div
       className={cls}
       role={role}
-      aria-label={role === 'region' ? resolvedLabel : undefined}
-      aria-live={role === 'alert' ? 'assertive' : role === 'status' ? 'polite' : undefined}
+      aria-label={role === "region" ? resolvedLabel : undefined}
+      aria-live={role === "alert" ? "assertive" : role === "status" ? "polite" : undefined}
     >
       <div className={styles.body}>
         {title && <p className={styles.title}>{title}</p>}

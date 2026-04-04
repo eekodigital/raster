@@ -1,26 +1,26 @@
-import type React from 'react';
-import * as styles from './Typography.css.js';
+import type React from "react";
+import * as styles from "./Typography.css.js";
 
-type HeadingLevel = '1' | '2' | '3' | '4' | '5' | '6';
+type HeadingLevel = "1" | "2" | "3" | "4" | "5" | "6";
 
 type HeadingProps = {
   level?: HeadingLevel;
-  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   className?: string;
   children: React.ReactNode;
 };
 
-export function Heading({ level = '2', as, className, children }: HeadingProps) {
+export function Heading({ level = "2", as, className, children }: HeadingProps) {
   const Tag = (as ?? (`h${level}` as const)) as React.ElementType;
   return (
-    <Tag className={[styles.base, styles.headingSizes[level], className].filter(Boolean).join(' ')}>
+    <Tag className={[styles.base, styles.headingSizes[level], className].filter(Boolean).join(" ")}>
       {children}
     </Tag>
   );
 }
 
-type TextSize = 'sm' | 'base' | 'lg';
-type TextVariant = 'default' | 'subtle' | 'strong' | 'danger';
+type TextSize = "sm" | "base" | "lg";
+type TextVariant = "default" | "subtle" | "strong" | "danger";
 
 type TextProps = {
   size?: TextSize;
@@ -31,9 +31,9 @@ type TextProps = {
 };
 
 export function Text({
-  size = 'base',
-  variant = 'default',
-  as: Tag = 'p',
+  size = "base",
+  variant = "default",
+  as: Tag = "p",
   className,
   children,
 }: TextProps) {
@@ -41,7 +41,7 @@ export function Text({
     <Tag
       className={[styles.base, styles.textSizes[size], styles.textVariants[variant], className]
         .filter(Boolean)
-        .join(' ')}
+        .join(" ")}
     >
       {children}
     </Tag>

@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback, useImperativeHandle, useEffect } from 'react';
-import { catmullRomPath, extent, linearScale, ticks, labelSkip } from '../../utils/chart-math.js';
-import { useChartExport } from '../../utils/use-chart-export.js';
-import type { ChartExportHandle } from '../../utils/use-chart-export.js';
-import { ChartTooltip, useChartTooltip } from '../ChartTooltip/ChartTooltip.js';
-import * as styles from './LineChart.css.js';
+import { useState, useRef, useCallback, useImperativeHandle, useEffect } from "react";
+import { catmullRomPath, extent, linearScale, ticks, labelSkip } from "../../utils/chart-math.js";
+import { useChartExport } from "../../utils/use-chart-export.js";
+import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import * as styles from "./LineChart.css.js";
 
 export type LineSeries = {
   name: string;
@@ -11,14 +11,14 @@ export type LineSeries = {
   color?: string;
 };
 
-type GridOption = 'horizontal' | 'vertical' | 'both' | 'none';
+type GridOption = "horizontal" | "vertical" | "both" | "none";
 
 type LineChartProps = {
   series: LineSeries[];
   labels: string[];
   area?: boolean;
   stacked?: boolean;
-  curve?: 'linear' | 'smooth';
+  curve?: "linear" | "smooth";
   xLabel?: string;
   yLabel?: string;
   grid?: GridOption;
@@ -28,16 +28,16 @@ type LineChartProps = {
   onSelect?: (index: { series: number; point: number } | null) => void;
   height?: number;
   exportRef?: React.Ref<ChartExportHandle>;
-  'aria-label': string;
+  "aria-label": string;
   className?: string;
 };
 
 const DEFAULT_COLORS = [
-  'var(--color-interactive)',
-  'var(--color-success)',
-  'var(--color-danger)',
-  'var(--color-warning)',
-  'var(--color-inactive)',
+  "var(--color-interactive)",
+  "var(--color-success)",
+  "var(--color-danger)",
+  "var(--color-warning)",
+  "var(--color-inactive)",
 ];
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
@@ -47,17 +47,17 @@ export function LineChart({
   labels,
   area = false,
   stacked = false,
-  curve = 'linear',
+  curve = "linear",
   xLabel,
   yLabel,
-  grid = 'horizontal',
+  grid = "horizontal",
   formatValue = String,
   onPointClick,
   selectedIndex: controlledSelected,
   onSelect,
   height = 200,
   exportRef,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: LineChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,10 +81,10 @@ export function LineChart({
   useEffect(() => {
     if (selected === null) return;
     function handleEsc(e: KeyboardEvent) {
-      if (e.key === 'Escape') setSelected(null);
+      if (e.key === "Escape") setSelected(null);
     }
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
   }, [selected, setSelected]);
 
   const chartWidth = 400;
@@ -105,8 +105,8 @@ export function LineChart({
   const yMin = Math.min(0, minVal);
   const yMax = Math.max(maxVal, 1);
 
-  const showHGrid = grid === 'horizontal' || grid === 'both';
-  const showVGrid = grid === 'vertical' || grid === 'both';
+  const showHGrid = grid === "horizontal" || grid === "both";
+  const showVGrid = grid === "vertical" || grid === "both";
 
   const xScale = (i: number) =>
     labels.length <= 1 ? plotWidth / 2 : (i / (labels.length - 1)) * plotWidth;
@@ -119,10 +119,10 @@ export function LineChart({
       let si = seriesIdx;
       let pi = pointIdx;
 
-      if (e.key === 'ArrowRight') pi = Math.min(pi + 1, labels.length - 1);
-      else if (e.key === 'ArrowLeft') pi = Math.max(pi - 1, 0);
-      else if (e.key === 'ArrowDown') si = Math.min(si + 1, series.length - 1);
-      else if (e.key === 'ArrowUp') si = Math.max(si - 1, 0);
+      if (e.key === "ArrowRight") pi = Math.min(pi + 1, labels.length - 1);
+      else if (e.key === "ArrowLeft") pi = Math.max(pi - 1, 0);
+      else if (e.key === "ArrowDown") si = Math.min(si + 1, series.length - 1);
+      else if (e.key === "ArrowUp") si = Math.max(si - 1, 0);
       else return;
 
       e.preventDefault();
@@ -132,10 +132,10 @@ export function LineChart({
     [labels.length, series.length],
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(' ');
+  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: 'relative' }}>
+    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
         viewBox={`0 0 ${chartWidth} ${height}`}
@@ -216,10 +216,10 @@ export function LineChart({
 
             // Build line path
             let linePath: string;
-            if (curve === 'smooth') {
+            if (curve === "smooth") {
               linePath = catmullRomPath(points);
             } else {
-              linePath = `M ${points.map((p) => `${p.x} ${p.y}`).join(' L ')}`;
+              linePath = `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")}`;
             }
 
             // Build area path
@@ -233,14 +233,14 @@ export function LineChart({
                       { x: points[0].x, y: plotHeight },
                     ];
 
-              if (curve === 'smooth') {
+              if (curve === "smooth") {
                 const baselinePath =
                   stacked && si > 0
-                    ? catmullRomPath(baseline.toReversed()).replace(/^M/, 'L')
-                    : `L ${baseline.map((p) => `${p.x} ${p.y}`).join(' L ')}`;
+                    ? catmullRomPath(baseline.toReversed()).replace(/^M/, "L")
+                    : `L ${baseline.map((p) => `${p.x} ${p.y}`).join(" L ")}`;
                 areaPath = `${linePath} ${baselinePath} Z`;
               } else {
-                areaPath = `${linePath} L ${baseline.map((p) => `${p.x} ${p.y}`).join(' L ')} Z`;
+                areaPath = `${linePath} L ${baseline.map((p) => `${p.x} ${p.y}`).join(" L ")} Z`;
               }
             }
 
@@ -261,7 +261,7 @@ export function LineChart({
                   className={styles.line}
                   style={
                     {
-                      '--line-length': `${lineLength}`,
+                      "--line-length": `${lineLength}`,
                       strokeDasharray: `${lineLength}`,
                     } as React.CSSProperties
                   }
@@ -286,9 +286,9 @@ export function LineChart({
                       tabIndex={si === 0 && pi === 0 ? 0 : -1}
                       role="img"
                       aria-label={tooltipContent}
-                      aria-describedby={tip['aria-describedby']}
-                      data-selected={isSelected ? '' : undefined}
-                      data-dimmed={isDimmed ? '' : undefined}
+                      aria-describedby={tip["aria-describedby"]}
+                      data-selected={isSelected ? "" : undefined}
+                      data-dimmed={isDimmed ? "" : undefined}
                       onClick={() => {
                         setSelected(isSelected ? null : { series: si, point: pi });
                         onPointClick?.(si, pi, originalValue);

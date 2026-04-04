@@ -1,25 +1,25 @@
-import { Children, useId } from 'react';
-import type { CSSProperties, ElementType, ReactNode } from 'react';
-import { isResponsive, resolveResponsive } from '../../utils/responsive.js';
-import type { ResponsiveValue } from '../../utils/responsive.js';
-import * as styles from './Grid.css.js';
+import { Children, useId } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
+import { isResponsive, resolveResponsive } from "../../utils/responsive.js";
+import type { ResponsiveValue } from "../../utils/responsive.js";
+import * as styles from "./Grid.css.js";
 
 type Space =
-  | '1'
-  | '1-5'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '10'
-  | '12'
-  | '16'
-  | '20'
-  | '24';
-type Align = 'start' | 'center' | 'end' | 'stretch';
+  | "1"
+  | "1-5"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "10"
+  | "12"
+  | "16"
+  | "20"
+  | "24";
+type Align = "start" | "center" | "end" | "stretch";
 
 // -- Grid.Col ----------------------------------------------------------------
 
@@ -35,12 +35,12 @@ type ColProps = {
 
 /** Resolve a width value to a CSS grid track value. */
 function resolveWidth(w: string): string {
-  if (w === 'full') return '1fr';
+  if (w === "full") return "1fr";
   return w;
 }
 
-function Col({ children, width: _width, as: Tag = 'div', className, style: styleProp }: ColProps) {
-  const cls = [styles.col, className].filter(Boolean).join(' ');
+function Col({ children, width: _width, as: Tag = "div", className, style: styleProp }: ColProps) {
+  const cls = [styles.col, className].filter(Boolean).join(" ");
   return (
     <Tag className={cls} style={styleProp}>
       {children}
@@ -48,7 +48,7 @@ function Col({ children, width: _width, as: Tag = 'div', className, style: style
   );
 }
 
-Col.displayName = 'Grid.Col';
+Col.displayName = "Grid.Col";
 
 // -- Grid --------------------------------------------------------------------
 
@@ -64,9 +64,9 @@ type GridProps = {
 function extractColWidths(children: ReactNode): ResponsiveValue<ColWidth>[] {
   const widths: ResponsiveValue<ColWidth>[] = [];
   Children.forEach(children, (child) => {
-    if (child && typeof child === 'object' && 'props' in child) {
+    if (child && typeof child === "object" && "props" in child) {
       const props = (child as { props: { width?: ResponsiveValue<ColWidth> } }).props;
-      widths.push(props.width ?? '1fr');
+      widths.push(props.width ?? "1fr");
     }
   });
   return widths;
@@ -82,7 +82,7 @@ function buildTemplateColumns(widths: ResponsiveValue<ColWidth>[]): {
   if (!hasResponsive) {
     // All static — simple case
     const cols = widths.map((w) => resolveWidth(w as string));
-    return { baseTemplate: cols.join(' '), mediaParts: [] };
+    return { baseTemplate: cols.join(" "), mediaParts: [] };
   }
 
   // Collect all breakpoints across all children
@@ -99,7 +99,7 @@ function buildTemplateColumns(widths: ResponsiveValue<ColWidth>[]): {
 
   const breakpoints = [...breakpointSet].toSorted((a, b) => a - b);
   const mediaParts: string[] = [];
-  let baseTemplate = '';
+  let baseTemplate = "";
 
   for (const bp of breakpoints) {
     // For each breakpoint, build the full template-columns value
@@ -114,7 +114,7 @@ function buildTemplateColumns(widths: ResponsiveValue<ColWidth>[]): {
       return resolveWidth(String(match.value));
     });
 
-    const template = cols.join(' ');
+    const template = cols.join(" ");
     if (bp === 0) {
       baseTemplate = template;
     } else {
@@ -129,9 +129,9 @@ function buildTemplateColumns(widths: ResponsiveValue<ColWidth>[]): {
 
 function GridRoot({
   children,
-  gap = '4',
-  align = 'stretch',
-  as: Tag = 'div',
+  gap = "4",
+  align = "stretch",
+  as: Tag = "div",
   className,
   style: styleProp,
 }: GridProps) {
@@ -142,7 +142,7 @@ function GridRoot({
 
   const cls = [styles.grid, styles.gaps[gap], styles.alignments[align], className]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   const gridStyle: CSSProperties = {
     gridTemplateColumns: baseTemplate,
@@ -157,7 +157,7 @@ function GridRoot({
     );
   }
 
-  const css = mediaParts.map((p) => p.replaceAll('%ID%', id)).join('');
+  const css = mediaParts.map((p) => p.replaceAll("%ID%", id)).join("");
 
   return (
     <>
@@ -169,6 +169,6 @@ function GridRoot({
   );
 }
 
-GridRoot.displayName = 'Grid';
+GridRoot.displayName = "Grid";
 
 export const Grid = Object.assign(GridRoot, { Col });

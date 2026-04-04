@@ -1,15 +1,15 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import {
   SummaryList,
   SummaryListActions,
   SummaryListKey,
   SummaryListRow,
   SummaryListValue,
-} from './SummaryList.js';
+} from "./SummaryList.js";
 
-describe('SummaryList', () => {
-  it('renders key-value pairs', () => {
+describe("SummaryList", () => {
+  it("renders key-value pairs", () => {
     render(
       <SummaryList>
         <SummaryListRow>
@@ -18,11 +18,11 @@ describe('SummaryList', () => {
         </SummaryListRow>
       </SummaryList>,
     );
-    expect(screen.getByText('Name')).toBeDefined();
-    expect(screen.getByText('Alice')).toBeDefined();
+    expect(screen.getByText("Name")).toBeDefined();
+    expect(screen.getByText("Alice")).toBeDefined();
   });
 
-  it('renders action links', () => {
+  it("renders action links", () => {
     render(
       <SummaryList>
         <SummaryListRow>
@@ -34,6 +34,6 @@ describe('SummaryList', () => {
         </SummaryListRow>
       </SummaryList>,
     );
-    expect(screen.getByRole('link', { name: 'Change' })).toBeDefined();
+    expect(screen.getByRole("link", { name: "Change" })).toBeDefined();
   });
 });

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import type React from 'react';
+import { useEffect, useRef } from "react";
+import type React from "react";
 
 /**
  * Detects clicks outside a referenced element and calls the handler.
@@ -23,8 +23,8 @@ export function useClickOutside(
       }
     }
 
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, [handler, active, excludeRefs]);
 
   return ref;

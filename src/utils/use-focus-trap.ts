@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 /**
  * Traps focus within a container element.
@@ -25,7 +25,7 @@ export function useFocusTrap(active: boolean) {
     firstFocusable?.focus();
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key !== 'Tab' || !container) return;
+      if (e.key !== "Tab" || !container) return;
 
       const focusable = Array.from(container.querySelectorAll<HTMLElement>(focusableSelector));
       if (focusable.length === 0) return;
@@ -46,10 +46,10 @@ export function useFocusTrap(active: boolean) {
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
       // Restore focus
       previousFocusRef.current?.focus();
     };

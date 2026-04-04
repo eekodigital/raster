@@ -1,5 +1,5 @@
-import { cn } from '../../utils/cn.js';
-import * as styles from './Progress.css.js';
+import { cn } from "../../utils/cn.js";
+import * as styles from "./Progress.css.js";
 
 interface ProgressProps {
   value?: number | null;
@@ -18,7 +18,7 @@ export function Progress({ value, max = 100, label, className }: ProgressProps) 
       aria-valuemin={0}
       aria-valuemax={max}
       aria-label={label}
-      data-state={isIndeterminate ? 'indeterminate' : 'complete'}
+      data-state={isIndeterminate ? "indeterminate" : "complete"}
       className={cn(styles.root, className)}
     >
       <div

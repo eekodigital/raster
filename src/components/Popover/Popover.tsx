@@ -1,11 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import { positionOverlay } from '../../utils/position-overlay.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import { useClickOutside } from '../../utils/use-click-outside.js';
-import { useEscapeKey } from '../../utils/use-escape-key.js';
-import * as styles from './Popover.css.js';
+import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import { positionOverlay } from "../../utils/position-overlay.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import { useClickOutside } from "../../utils/use-click-outside.js";
+import { useEscapeKey } from "../../utils/use-escape-key.js";
+import * as styles from "./Popover.css.js";
 
 type PopoverCtx = {
   open: boolean;
@@ -18,7 +18,7 @@ const Ctx = createContext<PopoverCtx>({
   open: false,
   setOpen: () => {},
   triggerRef: { current: null },
-  contentId: '',
+  contentId: "",
 });
 
 type RootProps = {
@@ -45,7 +45,7 @@ export function Root({
 
   return (
     <Ctx.Provider value={ctxValue}>
-      <div style={{ position: 'relative', display: 'inline-block' }}>{children}</div>
+      <div style={{ position: "relative", display: "inline-block" }}>{children}</div>
     </Ctx.Provider>
   );
 }
@@ -136,7 +136,7 @@ function ContentInner({
       const trigger = triggerRef.current;
       if (!trigger) return;
 
-      positionOverlay(trigger, el, 'bottom-start');
+      positionOverlay(trigger, el, "bottom-start");
       const first = el.querySelector<HTMLElement>(focusableSelector);
       first?.focus({ preventScroll: true });
     },

@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import * as styles from './Switch.css.js';
+import { useCallback } from "react";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import * as styles from "./Switch.css.js";
 
 type RootProps = {
   checked?: boolean;
@@ -21,7 +21,7 @@ export function Root({
   onCheckedChange,
   disabled = false,
   name,
-  value = 'on',
+  value = "on",
   required,
   className,
   children,
@@ -42,8 +42,8 @@ export function Root({
       type="button"
       role="switch"
       aria-checked={checked}
-      data-state={checked ? 'checked' : 'unchecked'}
-      data-disabled={disabled ? '' : undefined}
+      data-state={checked ? "checked" : "unchecked"}
+      data-disabled={disabled ? "" : undefined}
       disabled={disabled}
       className={cn(styles.root, className)}
       onClick={toggle}

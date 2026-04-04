@@ -1,5 +1,5 @@
-import { createPortal } from 'react-dom';
-import type React from 'react';
+import { createPortal } from "react-dom";
+import type React from "react";
 
 type PortalProps = {
   children: React.ReactNode;
@@ -11,6 +11,6 @@ type PortalProps = {
  * SSR-safe: renders nothing on the server.
  */
 export function Portal({ children, container }: PortalProps) {
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
   return createPortal(children, container ?? document.body);
 }

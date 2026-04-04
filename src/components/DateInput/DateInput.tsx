@@ -1,6 +1,6 @@
-import { useId, useRef } from 'react';
-import * as fieldStyles from '../shared/field.css.js';
-import * as styles from './DateInput.css.js';
+import { useId, useRef } from "react";
+import * as fieldStyles from "../shared/field.css.js";
+import * as styles from "./DateInput.css.js";
 
 export type DateValue = {
   day: string;
@@ -35,16 +35,16 @@ export function DateInput({
   const id = explicitId ?? generatedId;
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
-  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   const dayRef = useRef<HTMLInputElement>(null);
   const monthRef = useRef<HTMLInputElement>(null);
   const yearRef = useRef<HTMLInputElement>(null);
 
   const current = (): DateValue => ({
-    day: dayRef.current?.value ?? '',
-    month: monthRef.current?.value ?? '',
-    year: yearRef.current?.value ?? '',
+    day: dayRef.current?.value ?? "",
+    month: monthRef.current?.value ?? "",
+    year: yearRef.current?.value ?? "",
   });
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +92,7 @@ export function DateInput({
             onChange={handleDayChange}
             disabled={disabled}
             data-error={error ? true : undefined}
-            className={[styles.input, styles.inputDay].join(' ')}
+            className={[styles.input, styles.inputDay].join(" ")}
             aria-invalid={error ? true : undefined}
           />
         </div>
@@ -115,7 +115,7 @@ export function DateInput({
             onChange={handleMonthChange}
             disabled={disabled}
             data-error={error ? true : undefined}
-            className={[styles.input, styles.inputMonth].join(' ')}
+            className={[styles.input, styles.inputMonth].join(" ")}
             aria-invalid={error ? true : undefined}
           />
         </div>
@@ -138,7 +138,7 @@ export function DateInput({
             onChange={() => onChange?.(current())}
             disabled={disabled}
             data-error={error ? true : undefined}
-            className={[styles.input, styles.inputYear].join(' ')}
+            className={[styles.input, styles.inputYear].join(" ")}
             aria-invalid={error ? true : undefined}
           />
         </div>

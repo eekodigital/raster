@@ -1,16 +1,16 @@
-import { useId, useState } from 'react';
-import * as styles from './PasswordToggleField.css.js';
-import * as fieldStyles from '../shared/field.css.js';
+import { useId, useState } from "react";
+import * as styles from "./PasswordToggleField.css.js";
+import * as fieldStyles from "../shared/field.css.js";
 
 type PasswordToggleFieldProps = {
   label: string;
   hint?: string;
   error?: string;
   id?: string;
-  autoComplete?: 'current-password' | 'new-password';
+  autoComplete?: "current-password" | "new-password";
 } & Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  'type' | 'aria-describedby' | 'aria-invalid' | 'aria-errormessage' | 'autoComplete'
+  "type" | "aria-describedby" | "aria-invalid" | "aria-errormessage" | "autoComplete"
 >;
 
 export function PasswordToggleField({
@@ -25,7 +25,7 @@ export function PasswordToggleField({
   const id = explicitId ?? generatedId;
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
-  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
   const [visible, setVisible] = useState(false);
 
   return (
@@ -49,9 +49,9 @@ export function PasswordToggleField({
       <div className={styles.inputWrapper}>
         <input
           id={id}
-          type={visible ? 'text' : 'password'}
+          type={visible ? "text" : "password"}
           autoComplete={autoComplete}
-          className={[styles.input, error ? styles.inputError : ''].filter(Boolean).join(' ')}
+          className={[styles.input, error ? styles.inputError : ""].filter(Boolean).join(" ")}
           aria-invalid={error ? true : undefined}
           aria-errormessage={errorId}
           aria-describedby={describedBy}

@@ -1,13 +1,13 @@
-import { createContext, useContext, useMemo, useState, useEffect } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import * as styles from './Avatar.css.js';
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import * as styles from "./Avatar.css.js";
 
-type ImageStatus = 'loading' | 'loaded' | 'error';
+type ImageStatus = "loading" | "loaded" | "error";
 type AvatarCtx = { status: ImageStatus; setStatus: (s: ImageStatus) => void };
-const AvatarCtx = createContext<AvatarCtx>({ status: 'loading', setStatus: () => {} });
+const AvatarCtx = createContext<AvatarCtx>({ status: "loading", setStatus: () => {} });
 
-type AvatarSize = 'sm' | 'md' | 'lg';
+type AvatarSize = "sm" | "md" | "lg";
 
 interface AvatarRootProps {
   size?: AvatarSize;
@@ -16,8 +16,8 @@ interface AvatarRootProps {
   children: React.ReactNode;
 }
 
-export function Root({ size = 'md', square = false, className, children }: AvatarRootProps) {
-  const [status, setStatus] = useState<ImageStatus>('loading');
+export function Root({ size = "md", square = false, className, children }: AvatarRootProps) {
+  const [status, setStatus] = useState<ImageStatus>("loading");
   const ctx = useMemo(() => ({ status, setStatus }), [status]);
 
   return (
@@ -40,14 +40,14 @@ export function Image({ src, alt, className }: AvatarImageProps) {
 
   // Preload the image off-screen so onload fires reliably
   useEffect(() => {
-    setStatus('loading');
+    setStatus("loading");
     const img = new globalThis.Image();
-    img.onload = () => setStatus('loaded');
-    img.onerror = () => setStatus('error');
+    img.onload = () => setStatus("loaded");
+    img.onerror = () => setStatus("error");
     img.src = src;
   }, [src, setStatus]);
 
-  if (status !== 'loaded') return null;
+  if (status !== "loaded") return null;
 
   return <img src={src} alt={alt} className={cn(styles.image, className)} />;
 }
@@ -68,7 +68,7 @@ export function Fallback({ children, delayMs = 600, className }: AvatarFallbackP
     return () => clearTimeout(timer);
   }, [delayMs]);
 
-  if (status === 'loaded') return null;
+  if (status === "loaded") return null;
   if (!show) return null;
   return <span className={cn(styles.fallback, className)}>{children}</span>;
 }

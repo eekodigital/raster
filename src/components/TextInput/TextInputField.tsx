@@ -1,6 +1,6 @@
-import { useId } from 'react';
-import { TextInput } from './TextInput.js';
-import * as styles from './TextInputField.css.js';
+import { useId } from "react";
+import { TextInput } from "./TextInput.js";
+import * as styles from "./TextInputField.css.js";
 
 type TextInputFieldProps = {
   label: string;
@@ -8,7 +8,7 @@ type TextInputFieldProps = {
   error?: string;
 } & Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  'aria-describedby' | 'aria-invalid' | 'aria-errormessage'
+  "aria-describedby" | "aria-invalid" | "aria-errormessage"
 >;
 
 export function TextInputField({
@@ -23,7 +23,7 @@ export function TextInputField({
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
 
-  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className={styles.field} data-error={error ? true : undefined}>

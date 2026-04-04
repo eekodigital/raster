@@ -8,11 +8,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from '@tanstack/react-table';
-import { useState } from 'react';
-import * as styles from './DataTable.css.js';
+} from "@tanstack/react-table";
+import { useState } from "react";
+import * as styles from "./DataTable.css.js";
 
-export type { ColumnDef as DataTableColumnDef } from '@tanstack/react-table';
+export type { ColumnDef as DataTableColumnDef } from "@tanstack/react-table";
 
 type Props<TData> = {
   columns: ColumnDef<TData>[];
@@ -48,12 +48,12 @@ export function DataTable<TData>({
   caption,
   pageSize,
   filter = false,
-  filterPlaceholder = 'Filter…',
+  filterPlaceholder = "Filter…",
   resizable = false,
   pinnedColumns,
 }: Props<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
   const [pageIndex, setPageIndex] = useState(0);
 
   const columnPinning: ColumnPinningState = {
@@ -85,13 +85,13 @@ export function DataTable<TData>({
       getPaginationRowModel: getPaginationRowModel(),
       onPaginationChange: (updater) => {
         const next =
-          typeof updater === 'function' ? updater({ pageIndex, pageSize: pageSize! }) : updater;
+          typeof updater === "function" ? updater({ pageIndex, pageSize: pageSize! }) : updater;
         setPageIndex(next.pageIndex);
       },
       manualPagination: false,
     }),
     ...(resizable && {
-      columnResizeMode: 'onChange' as const,
+      columnResizeMode: "onChange" as const,
       enableColumnResizing: true,
     }),
   });
@@ -129,20 +129,20 @@ export function DataTable<TData>({
                     const sorted = header.column.getIsSorted();
                     const pinned = header.column.getIsPinned();
                     const isLastLeftPinned =
-                      pinned === 'left' && header.column.getPinnedIndex() === leftPinnedCount - 1;
+                      pinned === "left" && header.column.getPinnedIndex() === leftPinnedCount - 1;
                     const isFirstRightPinned =
-                      pinned === 'right' && header.column.getPinnedIndex() === 0;
+                      pinned === "right" && header.column.getPinnedIndex() === 0;
                     return (
                       <th
                         key={header.id}
                         scope="col"
                         aria-sort={
                           canSort
-                            ? sorted === 'asc'
-                              ? 'ascending'
-                              : sorted === 'desc'
-                                ? 'descending'
-                                : 'none'
+                            ? sorted === "asc"
+                              ? "ascending"
+                              : sorted === "desc"
+                                ? "descending"
+                                : "none"
                             : undefined
                         }
                         className={[
@@ -150,7 +150,7 @@ export function DataTable<TData>({
                           pinned ? styles.pinned : undefined,
                         ]
                           .filter(Boolean)
-                          .join(' ')}
+                          .join(" ")}
                         data-sorted={sorted || undefined}
                         data-pin-last-left={isLastLeftPinned || undefined}
                         data-pin-first-right={isFirstRightPinned || undefined}
@@ -159,14 +159,14 @@ export function DataTable<TData>({
                         }
                         style={{
                           ...(resizable && { width: header.getSize() }),
-                          ...(pinned === 'left' && {
-                            position: 'sticky',
-                            left: header.column.getStart('left'),
+                          ...(pinned === "left" && {
+                            position: "sticky",
+                            left: header.column.getStart("left"),
                             zIndex: 2,
                           }),
-                          ...(pinned === 'right' && {
-                            position: 'sticky',
-                            right: header.column.getAfter('right'),
+                          ...(pinned === "right" && {
+                            position: "sticky",
+                            right: header.column.getAfter("right"),
                             zIndex: 2,
                           }),
                         }}
@@ -179,7 +179,7 @@ export function DataTable<TData>({
                           >
                             {flexRender(header.column.columnDef.header, header.getContext())}
                             <span aria-hidden="true" className={styles.sortIcon}>
-                              {sorted === 'asc' ? '▲' : sorted === 'desc' ? '▼' : '⇅'}
+                              {sorted === "asc" ? "▲" : sorted === "desc" ? "▼" : "⇅"}
                             </span>
                           </button>
                         ) : (
@@ -207,9 +207,9 @@ export function DataTable<TData>({
                   {row.getVisibleCells().map((cell) => {
                     const pinned = cell.column.getIsPinned();
                     const isLastLeftPinned =
-                      pinned === 'left' && cell.column.getPinnedIndex() === leftPinnedCount - 1;
+                      pinned === "left" && cell.column.getPinnedIndex() === leftPinnedCount - 1;
                     const isFirstRightPinned =
-                      pinned === 'right' && cell.column.getPinnedIndex() === 0;
+                      pinned === "right" && cell.column.getPinnedIndex() === 0;
                     return (
                       <td
                         key={cell.id}
@@ -220,14 +220,14 @@ export function DataTable<TData>({
                           (cell.column.columnDef.meta as { align?: string })?.align || undefined
                         }
                         style={{
-                          ...(pinned === 'left' && {
-                            position: 'sticky',
-                            left: cell.column.getStart('left'),
+                          ...(pinned === "left" && {
+                            position: "sticky",
+                            left: cell.column.getStart("left"),
                             zIndex: 1,
                           }),
-                          ...(pinned === 'right' && {
-                            position: 'sticky',
-                            right: cell.column.getAfter('right'),
+                          ...(pinned === "right" && {
+                            position: "sticky",
+                            right: cell.column.getAfter("right"),
                             zIndex: 1,
                           }),
                         }}

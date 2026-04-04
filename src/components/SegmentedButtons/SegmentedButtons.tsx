@@ -1,6 +1,6 @@
-import { useRef, type CSSProperties } from 'react';
-import { cn } from '../../utils/cn.js';
-import * as styles from './SegmentedButtons.css.js';
+import { useRef, type CSSProperties } from "react";
+import { cn } from "../../utils/cn.js";
+import * as styles from "./SegmentedButtons.css.js";
 
 export type SegmentedOption = {
   value: string;
@@ -17,7 +17,7 @@ type SegmentedButtonsProps = {
   onValueChange: (value: string) => void;
   disabled?: boolean;
   name?: string;
-  'aria-label'?: string;
+  "aria-label"?: string;
   className?: string;
 };
 
@@ -27,7 +27,7 @@ export function SegmentedButtons({
   onValueChange,
   disabled,
   name,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   className,
 }: SegmentedButtonsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
@@ -42,9 +42,9 @@ export function SegmentedButtons({
     const currentIdx = buttons.indexOf(document.activeElement as HTMLButtonElement);
 
     let nextIdx = currentIdx;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       nextIdx = (currentIdx + 1) % count;
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       nextIdx = (currentIdx - 1 + count) % count;
     } else {
       return;
@@ -69,8 +69,8 @@ export function SegmentedButtons({
       {options.map((opt) => {
         const checked = value === opt.value;
         const itemStyle: CSSProperties = {};
-        if (opt.color) (itemStyle as Record<string, string>)['--segment-color'] = opt.color;
-        if (opt.bg) (itemStyle as Record<string, string>)['--segment-bg'] = opt.bg;
+        if (opt.color) (itemStyle as Record<string, string>)["--segment-color"] = opt.color;
+        if (opt.bg) (itemStyle as Record<string, string>)["--segment-bg"] = opt.bg;
 
         return (
           <button
@@ -78,7 +78,7 @@ export function SegmentedButtons({
             type="button"
             role="radio"
             aria-checked={checked}
-            data-state={checked ? 'checked' : 'unchecked'}
+            data-state={checked ? "checked" : "unchecked"}
             className={styles.item}
             style={Object.keys(itemStyle).length > 0 ? itemStyle : undefined}
             tabIndex={value === opt.value ? 0 : -1}

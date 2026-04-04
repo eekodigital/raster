@@ -1,7 +1,7 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import * as styles from './ScrollArea.css.js';
+import { useRef, useState, useCallback, useEffect } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import * as styles from "./ScrollArea.css.js";
 
 // --- Root ---
 
@@ -9,7 +9,7 @@ type RootProps = {
   className?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
-  type?: 'auto' | 'always' | 'scroll' | 'hover';
+  type?: "auto" | "always" | "scroll" | "hover";
   scrollHideDelay?: number;
 };
 
@@ -17,7 +17,7 @@ export function Root({
   className,
   style,
   children,
-  type = 'hover',
+  type = "hover",
   scrollHideDelay = 600,
 }: RootProps) {
   return (
@@ -44,7 +44,7 @@ export function Viewport({ className, style, children }: ViewportProps) {
   return (
     <div
       className={cn(styles.viewport, className)}
-      style={{ overflow: 'scroll', scrollbarWidth: 'none', ...style }}
+      style={{ overflow: "scroll", scrollbarWidth: "none", ...style }}
     >
       {children}
     </div>
@@ -54,11 +54,11 @@ export function Viewport({ className, style, children }: ViewportProps) {
 // --- Scrollbar ---
 
 type ScrollbarProps = {
-  orientation?: 'vertical' | 'horizontal';
+  orientation?: "vertical" | "horizontal";
   className?: string;
 };
 
-export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProps) {
+export function Scrollbar({ orientation = "vertical", className }: ScrollbarProps) {
   const scrollbarRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
   const [thumbSize, setThumbSize] = useState(0);
@@ -78,7 +78,7 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
     const viewport = getViewport();
     if (!viewport) return;
 
-    if (orientation === 'vertical') {
+    if (orientation === "vertical") {
       const ratio = viewport.clientHeight / viewport.scrollHeight;
       if (ratio >= 1) {
         setThumbSize(0);
@@ -110,10 +110,10 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
 
   const scheduleHide = useCallback(() => {
     const root = scrollbarRef.current?.parentElement;
-    const type = root?.getAttribute('data-scroll-type') ?? 'hover';
-    const delay = Number(root?.getAttribute('data-scroll-hide-delay') ?? 600);
+    const type = root?.getAttribute("data-scroll-type") ?? "hover";
+    const delay = Number(root?.getAttribute("data-scroll-hide-delay") ?? 600);
 
-    if (type === 'always') return;
+    if (type === "always") return;
     clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => setVisible(false), delay);
   }, []);
@@ -126,27 +126,27 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
     function onScroll() {
       updateThumb();
       const root = scrollbarRef.current?.parentElement;
-      const type = root?.getAttribute('data-scroll-type') ?? 'hover';
-      if (type === 'scroll' || type === 'auto') {
+      const type = root?.getAttribute("data-scroll-type") ?? "hover";
+      if (type === "scroll" || type === "auto") {
         showScrollbar();
         scheduleHide();
       }
     }
 
-    viewport.addEventListener('scroll', onScroll, { passive: true });
+    viewport.addEventListener("scroll", onScroll, { passive: true });
     // Initial measurement
     updateThumb();
 
     const root = scrollbarRef.current?.parentElement;
-    const type = root?.getAttribute('data-scroll-type') ?? 'hover';
-    if (type === 'always') setVisible(true);
+    const type = root?.getAttribute("data-scroll-type") ?? "hover";
+    if (type === "always") setVisible(true);
 
     // Observe resize
     const observer = new ResizeObserver(() => updateThumb());
     observer.observe(viewport);
 
     return () => {
-      viewport.removeEventListener('scroll', onScroll);
+      viewport.removeEventListener("scroll", onScroll);
       observer.disconnect();
       clearTimeout(hideTimerRef.current);
     };
@@ -156,8 +156,8 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
   useEffect(() => {
     const root = scrollbarRef.current?.parentElement;
     if (!root) return;
-    const type = root.getAttribute('data-scroll-type') ?? 'hover';
-    if (type !== 'hover' && type !== 'auto') return;
+    const type = root.getAttribute("data-scroll-type") ?? "hover";
+    if (type !== "hover" && type !== "auto") return;
 
     function onEnter() {
       showScrollbar();
@@ -166,11 +166,11 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
       scheduleHide();
     }
 
-    root.addEventListener('mouseenter', onEnter);
-    root.addEventListener('mouseleave', onLeave);
+    root.addEventListener("mouseenter", onEnter);
+    root.addEventListener("mouseleave", onLeave);
     return () => {
-      root.removeEventListener('mouseenter', onEnter);
-      root.removeEventListener('mouseleave', onLeave);
+      root.removeEventListener("mouseenter", onEnter);
+      root.removeEventListener("mouseleave", onLeave);
     };
   }, [showScrollbar, scheduleHide]);
 
@@ -183,22 +183,22 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
       const viewport = getViewport();
       if (!viewport) return;
 
-      const startPos = orientation === 'vertical' ? e.clientY : e.clientX;
-      const startScroll = orientation === 'vertical' ? viewport.scrollTop : viewport.scrollLeft;
+      const startPos = orientation === "vertical" ? e.clientY : e.clientX;
+      const startScroll = orientation === "vertical" ? viewport.scrollTop : viewport.scrollLeft;
 
       function onPointerMove(ev: PointerEvent) {
-        const delta = (orientation === 'vertical' ? ev.clientY : ev.clientX) - startPos;
+        const delta = (orientation === "vertical" ? ev.clientY : ev.clientX) - startPos;
         const trackSize =
-          orientation === 'vertical'
+          orientation === "vertical"
             ? (scrollbarRef.current?.clientHeight ?? 0)
             : (scrollbarRef.current?.clientWidth ?? 0);
         const scrollSize =
-          orientation === 'vertical'
+          orientation === "vertical"
             ? viewport!.scrollHeight - viewport!.clientHeight
             : viewport!.scrollWidth - viewport!.clientWidth;
         const scrollDelta = (delta / (trackSize - thumbSize)) * scrollSize;
 
-        if (orientation === 'vertical') {
+        if (orientation === "vertical") {
           viewport!.scrollTop = startScroll + scrollDelta;
         } else {
           viewport!.scrollLeft = startScroll + scrollDelta;
@@ -207,28 +207,28 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
 
       function onPointerUp() {
         target.releasePointerCapture(e.pointerId);
-        target.removeEventListener('pointermove', onPointerMove);
-        target.removeEventListener('pointerup', onPointerUp);
+        target.removeEventListener("pointermove", onPointerMove);
+        target.removeEventListener("pointerup", onPointerUp);
       }
 
-      target.addEventListener('pointermove', onPointerMove);
-      target.addEventListener('pointerup', onPointerUp);
+      target.addEventListener("pointermove", onPointerMove);
+      target.addEventListener("pointerup", onPointerUp);
     },
     [orientation, getViewport, thumbSize],
   );
 
   const thumbStyle: React.CSSProperties =
-    orientation === 'vertical'
+    orientation === "vertical"
       ? { height: `${thumbSize}px`, transform: `translateY(${thumbOffset}px)` }
       : { width: `${thumbSize}px`, transform: `translateX(${thumbOffset}px)` };
 
   const scrollbarStyle: React.CSSProperties = {
-    position: 'absolute',
-    ...(orientation === 'vertical'
+    position: "absolute",
+    ...(orientation === "vertical"
       ? { top: 0, right: 0, bottom: 0 }
       : { bottom: 0, left: 0, right: 0 }),
     opacity: visible ? 1 : 0,
-    transition: 'opacity var(--duration-fast) var(--easing-ease)',
+    transition: "opacity var(--duration-fast) var(--easing-ease)",
   };
 
   // Always render so the ref is attached and the useEffect can measure the viewport.
@@ -243,7 +243,7 @@ export function Scrollbar({ orientation = 'vertical', className }: ScrollbarProp
       style={{
         ...scrollbarStyle,
         opacity: thumbSize > 0 && visible ? 1 : 0,
-        pointerEvents: noOverflow ? 'none' : undefined,
+        pointerEvents: noOverflow ? "none" : undefined,
       }}
     >
       {thumbSize > 0 && (

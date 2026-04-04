@@ -148,8 +148,8 @@ export function arcPath(
     `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y}`,
     `L ${innerStart.x} ${innerStart.y}`,
     `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerEnd.x} ${innerEnd.y}`,
-    'Z',
-  ].join(' ');
+    "Z",
+  ].join(" ");
 }
 
 /**
@@ -200,7 +200,7 @@ export function pieAngles(values: number[]): { start: number; end: number }[] {
  * Tension controls curvature (0 = straight lines, 1 = full catmull-rom).
  */
 export function catmullRomPath(points: { x: number; y: number }[], tension = 0.5): string {
-  if (points.length < 2) return '';
+  if (points.length < 2) return "";
   if (points.length === 2) return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
 
   const parts: string[] = [`M ${points[0].x} ${points[0].y}`];
@@ -219,5 +219,5 @@ export function catmullRomPath(points: { x: number; y: number }[], tension = 0.5
     parts.push(`C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`);
   }
 
-  return parts.join(' ');
+  return parts.join(" ");
 }

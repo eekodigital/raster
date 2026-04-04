@@ -1,42 +1,42 @@
-import { useId } from 'react';
-import type { CSSProperties, ElementType, ReactNode } from 'react';
-import { baseValue, isResponsive, resolveResponsive } from '../../utils/responsive.js';
-import type { ResponsiveValue } from '../../utils/responsive.js';
-import * as styles from './Flex.css.js';
+import { useId } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
+import { baseValue, isResponsive, resolveResponsive } from "../../utils/responsive.js";
+import type { ResponsiveValue } from "../../utils/responsive.js";
+import * as styles from "./Flex.css.js";
 
 type Space =
-  | '1'
-  | '1-5'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '10'
-  | '12'
-  | '16'
-  | '20'
-  | '24';
-type Direction = 'row' | 'column';
-type Align = 'start' | 'center' | 'end' | 'baseline' | 'stretch';
-type Justify = 'start' | 'center' | 'end' | 'between' | 'around';
+  | "1"
+  | "1-5"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "10"
+  | "12"
+  | "16"
+  | "20"
+  | "24";
+type Direction = "row" | "column";
+type Align = "start" | "center" | "end" | "baseline" | "stretch";
+type Justify = "start" | "center" | "end" | "between" | "around";
 
 const ALIGN_MAP: Record<Align, string> = {
-  start: 'flex-start',
-  center: 'center',
-  end: 'flex-end',
-  baseline: 'baseline',
-  stretch: 'stretch',
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  baseline: "baseline",
+  stretch: "stretch",
 };
 
 const JUSTIFY_MAP: Record<Justify, string> = {
-  start: 'flex-start',
-  center: 'center',
-  end: 'flex-end',
-  between: 'space-between',
-  around: 'space-around',
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  between: "space-between",
+  around: "space-around",
 };
 
 type FlexProps = {
@@ -53,12 +53,12 @@ type FlexProps = {
 
 export function Flex({
   children,
-  direction = 'row',
-  gap = '4',
-  align = 'stretch',
-  justify = 'start',
+  direction = "row",
+  gap = "4",
+  align = "stretch",
+  justify = "start",
   wrap = false,
-  as: Tag = 'div',
+  as: Tag = "div",
   className,
   style: styleProp,
 }: FlexProps) {
@@ -81,7 +81,7 @@ export function Flex({
       className,
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
 
     return (
       <Tag className={cls} style={styleProp}>
@@ -98,7 +98,7 @@ export function Flex({
   if (dirResponsive) {
     for (const { minWidth, value } of resolveResponsive(direction)) {
       if (minWidth === 0) {
-        inlineVars['--flex-dir'] = String(value);
+        inlineVars["--flex-dir"] = String(value);
       } else {
         mediaParts.push(
           `@media(min-width:${minWidth}px){[data-flex-id="${id}"]{--flex-dir:${value}}}`,
@@ -110,7 +110,7 @@ export function Flex({
   if (gapResponsive) {
     for (const { minWidth, value } of resolveResponsive(gap)) {
       if (minWidth === 0) {
-        inlineVars['--flex-gap'] = `var(--spacing-${value})`;
+        inlineVars["--flex-gap"] = `var(--spacing-${value})`;
       } else {
         mediaParts.push(
           `@media(min-width:${minWidth}px){[data-flex-id="${id}"]{--flex-gap:var(--spacing-${value})}}`,
@@ -120,18 +120,18 @@ export function Flex({
   }
 
   const responsiveStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: (inlineVars['--flex-dir'] ?? baseDir) as CSSProperties['flexDirection'],
-    gap: inlineVars['--flex-gap'] ?? `var(--spacing-${baseGap})`,
+    display: "flex",
+    flexDirection: (inlineVars["--flex-dir"] ?? baseDir) as CSSProperties["flexDirection"],
+    gap: inlineVars["--flex-gap"] ?? `var(--spacing-${baseGap})`,
     alignItems: ALIGN_MAP[align],
     justifyContent: JUSTIFY_MAP[justify],
-    flexWrap: wrap ? 'wrap' : 'nowrap',
+    flexWrap: wrap ? "wrap" : "nowrap",
     ...styleProp,
   };
 
   return (
     <>
-      {mediaParts.length > 0 && <style dangerouslySetInnerHTML={{ __html: mediaParts.join('') }} />}
+      {mediaParts.length > 0 && <style dangerouslySetInnerHTML={{ __html: mediaParts.join("") }} />}
       <Tag className={className} style={responsiveStyle} data-flex-id={id}>
         {children}
       </Tag>

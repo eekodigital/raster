@@ -1,7 +1,7 @@
-import { useId } from 'react';
-import { Select } from './Select.js';
-import type { SelectOption } from './Select.js';
-import * as styles from '../shared/field.css.js';
+import { useId } from "react";
+import { Select } from "./Select.js";
+import type { SelectOption } from "./Select.js";
+import * as styles from "../shared/field.css.js";
 
 type SelectFieldProps = {
   label: string;

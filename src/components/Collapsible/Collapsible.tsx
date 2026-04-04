@@ -1,8 +1,8 @@
-import { createContext, useContext, useCallback, useId, useMemo } from 'react';
-import type React from 'react';
-import { cn } from '../../utils/cn.js';
-import { useControllableState } from '../../utils/use-controllable-state.js';
-import * as styles from './Collapsible.css.js';
+import { createContext, useContext, useCallback, useId, useMemo } from "react";
+import type React from "react";
+import { cn } from "../../utils/cn.js";
+import { useControllableState } from "../../utils/use-controllable-state.js";
+import * as styles from "./Collapsible.css.js";
 
 type CollapsibleContext = {
   open: boolean;
@@ -10,7 +10,7 @@ type CollapsibleContext = {
   contentId: string;
 };
 
-const Ctx = createContext<CollapsibleContext>({ open: false, toggle: () => {}, contentId: '' });
+const Ctx = createContext<CollapsibleContext>({ open: false, toggle: () => {}, contentId: "" });
 
 type RootProps = {
   defaultOpen?: boolean;
@@ -41,7 +41,7 @@ export function Root({
       <div
         className={cn(styles.root, className)}
         style={style}
-        data-state={open ? 'open' : 'closed'}
+        data-state={open ? "open" : "closed"}
       >
         {children}
       </div>
@@ -62,7 +62,7 @@ export function Trigger({ children, className }: TriggerProps) {
       className={cn(styles.trigger, className)}
       aria-expanded={open}
       aria-controls={contentId}
-      data-state={open ? 'open' : 'closed'}
+      data-state={open ? "open" : "closed"}
       onClick={toggle}
     >
       {children}

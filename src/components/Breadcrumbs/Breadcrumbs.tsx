@@ -1,4 +1,4 @@
-import * as styles from './Breadcrumbs.css.js';
+import * as styles from "./Breadcrumbs.css.js";
 
 export type BreadcrumbItem = {
   label: string;
@@ -8,16 +8,16 @@ export type BreadcrumbItem = {
 type BreadcrumbsProps = {
   items: BreadcrumbItem[];
   className?: string;
-  'aria-label'?: string;
+  "aria-label"?: string;
 };
 
 export function Breadcrumbs({
   items,
   className,
-  'aria-label': ariaLabel = 'Breadcrumb',
+  "aria-label": ariaLabel = "Breadcrumb",
 }: BreadcrumbsProps) {
   return (
-    <nav aria-label={ariaLabel} className={[styles.nav, className].filter(Boolean).join(' ')}>
+    <nav aria-label={ariaLabel} className={[styles.nav, className].filter(Boolean).join(" ")}>
       <ol className={styles.list}>
         {items.map((item, i) => {
           const isCurrent = i === items.length - 1;
@@ -26,7 +26,7 @@ export function Breadcrumbs({
               {isCurrent || !item.href ? (
                 <span
                   className={isCurrent ? styles.current : undefined}
-                  aria-current={isCurrent ? 'page' : undefined}
+                  aria-current={isCurrent ? "page" : undefined}
                 >
                   {item.label}
                 </span>
