@@ -34,6 +34,20 @@
     0px 4px 2px hsla(0, 0%, 0%, 0.04);
 }
 
+/* Dark mode — pure neutral grays */
+:root[data-theme="dark"] {
+  --sl-color-white: hsl(0, 0%, 90%);
+  --sl-color-gray-1: hsl(0, 0%, 82%);
+  --sl-color-gray-2: hsl(0, 0%, 70%);
+  --sl-color-gray-3: hsl(0, 0%, 55%);
+  --sl-color-gray-4: hsl(0, 0%, 40%);
+  --sl-color-gray-5: hsl(0, 0%, 28%);
+  --sl-color-gray-6: hsl(0, 0%, 18%);
+  --sl-color-gray-7: hsl(0, 0%, 12%);
+  --sl-color-black: hsl(0, 0%, 7%);
+  --sl-color-text-accent: var(--sl-color-white);
+}
+
 /* Light mode — neutral grays, black headings */
 :root[data-theme="light"],
 :root:not([data-theme]) {
