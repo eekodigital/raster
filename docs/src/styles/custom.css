@@ -183,6 +183,15 @@
   padding: 0.5rem 0.75rem;
 }
 
+.status-bar {
+  display: flex;
+  height: 4rem;
+}
+
+.status-bar > * {
+  margin-top: 0 !important;
+}
+
 /* Primitive colour scales */
 .scale-block {
   margin-block: 1rem;

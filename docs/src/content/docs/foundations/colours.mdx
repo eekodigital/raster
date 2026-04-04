@@ -104,7 +104,7 @@ Each status colour comes with a base, background, and border variant for use in 
 <div class="swatch-grid">
   {statusVariants.map(({ base, bg, border, label }) => (
     <div class="swatch-card">
-      <div style="display:flex;height:4rem">
+      <div class="status-bar">
         <div style={`flex:2;background:var(${bg})`} />
         <div style={`flex:1;background:var(${base})`} />
         <div style={`flex:0.5;background:var(${border})`} />
