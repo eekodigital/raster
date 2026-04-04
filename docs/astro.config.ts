@@ -1,12 +1,9 @@
-import node from "@astrojs/node";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  output: "server",
-  adapter: node({ mode: "standalone" }),
-  server: { host: true, port: 4322 },
+  site: "https://raster.eeko.digital",
   integrations: [
     starlight({
       title: "Raster",
