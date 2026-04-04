@@ -34,18 +34,10 @@
     0px 4px 2px hsla(0, 0%, 0%, 0.04);
 }
 
-/* Sand palette for light mode — match the main website's warm tone */
+/* Light mode — neutral grays, black headings */
 :root[data-theme="light"],
 :root:not([data-theme]) {
-  --sl-color-gray-7: #f8f4f1; /* sand-2 — page bg */
-  --sl-color-gray-6: #efeae5; /* sand-3 — subtle bg */
-  --sl-color-gray-5: #d9d3cc; /* sand-5 — borders */
-  --sl-color-gray-4: #c7c0b7; /* sand-6 */
-  --sl-color-gray-3: #70665c; /* adjusted sand for 4.5:1 contrast */
-  --sl-color-gray-2: #6c6156; /* sand-10 */
-  --sl-color-gray-1: #50463a; /* sand-11 */
-  --sl-color-white: #282017; /* sand-12 — text */
-  --sl-color-black: #fefbf9; /* sand-1 — inverse */
+  --sl-color-text-accent: var(--sl-color-white);
 }
 
 /* Example component — preview + code block */
