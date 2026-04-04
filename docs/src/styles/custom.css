@@ -165,6 +165,10 @@
   margin-block: 1rem;
 }
 
+.swatch-grid > * {
+  margin-top: 0 !important;
+}
+
 .swatch-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
