@@ -38,7 +38,7 @@
   "scripts": {
     "build:tokens": "node --import tsx/esm style-dictionary.config.ts && pnpm exec vp check --fix src/tokens",
     "build": "pnpm build:tokens && tsdown",
-    "dev": "pnpm build && pnpm --filter @eekodigital/raster-docs dev",
+    "dev": "pnpm build:tokens && concurrently -n lib,docs \"tsdown --watch\" \"pnpm --filter @eekodigital/raster-docs dev\"",
     "dev:lib": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
+    "concurrently": "^9.1.2",
     "@tanstack/react-table": "^8.21.3",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
