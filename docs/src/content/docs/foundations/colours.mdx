@@ -82,11 +82,11 @@ export const shadeLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "
 
 ## Palette
 
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:var(--spacing-3);margin-block:var(--spacing-4)">
+<div class="swatch-grid">
   {swatches.map(({ token, label, use }) => (
-    <div style="border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden">
+    <div class="swatch-card">
       <div style={`height:4rem;background:var(${token})`} />
-      <div style="padding:var(--spacing-2) var(--spacing-3)">
+      <div class="swatch-body">
         <p style="margin:0;font-weight:var(--font-weight-medium);color:var(--color-text);font-size:var(--font-size-sm)">
           {label}
         </p>
@@ -101,15 +101,15 @@ export const shadeLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "
 
 Each status colour comes with a base, background, and border variant for use in badges, banners, and notification states.
 
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:var(--spacing-3);margin-block:var(--spacing-4)">
+<div class="swatch-grid">
   {statusVariants.map(({ base, bg, border, label }) => (
-    <div style="border:1px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden">
-      <div style="display:flex;height:4rem">
+    <div class="swatch-card">
+      <div class="status-bar">
         <div style={`flex:2;background:var(${bg})`} />
         <div style={`flex:1;background:var(${base})`} />
         <div style={`flex:0.5;background:var(${border})`} />
       </div>
-      <div style="padding:var(--spacing-2) var(--spacing-3)">
+      <div class="swatch-body">
         <p style="margin:0;font-weight:var(--font-weight-medium);color:var(--color-text);font-size:var(--font-size-sm)">
           {label}
         </p>
@@ -141,9 +141,9 @@ Steps 11-12 meet WCAG AA contrast (4.5:1) against steps 1-2.
 
 {primitiveScales.map(({ name, prefix, steps }) => (
 
-  <div style="margin-block:var(--spacing-4)">
+  <div class="scale-block">
     <h3>{name}</h3>
-    <div style="display:flex;border-radius:var(--radius-md);overflow:hidden;height:3rem">
+    <div class="scale-bar">
       {shadeLabels.map((shade) => (
         <div
           style={`flex:1;background:var(${prefix}-${shade})`}
@@ -151,9 +151,9 @@ Steps 11-12 meet WCAG AA contrast (4.5:1) against steps 1-2.
         />
       ))}
     </div>
-    <div style="display:flex;margin-top:var(--spacing-1)">
+    <div class="scale-labels">
       {shadeLabels.map((shade) => (
-        <code style="flex:1;font-size:0.6rem;color:var(--color-text-subtle);text-align:center">{shade}</code>
+        <code>{shade}</code>
       ))}
     </div>
   </div>

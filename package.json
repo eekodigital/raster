@@ -38,7 +38,7 @@
   "scripts": {
     "build:tokens": "node --import tsx/esm style-dictionary.config.ts && pnpm exec vp check --fix src/tokens",
     "build": "pnpm build:tokens && tsdown",
-    "dev": "pnpm build && pnpm --filter @eekodigital/raster-docs dev",
+    "dev": "pnpm build:tokens && concurrently -n lib,docs \"tsdown --watch\" \"pnpm --filter @eekodigital/raster-docs dev\"",
     "dev:lib": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
@@ -59,6 +59,7 @@
     "@vanilla-extract/rollup-plugin": "^1.5.3",
     "@vanilla-extract/vite-plugin": "^5.2.2",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.1.2",
     "happy-dom": "^20.8.9",
     "oxlint": "^1.1.0",
     "react": "^19.2.4",
