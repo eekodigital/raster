@@ -13,7 +13,7 @@
   --sl-color-accent-high: hsl(234, 100%, 20%);
   --sl-color-accent: hsl(234, 100%, 45%);
   --sl-color-accent-low: hsl(234, 100%, 93%);
-  --sl-color-text-accent: var(--sl-color-accent);
+  --sl-color-text-accent: var(--sl-color-white);
   --sl-color-text-invert: var(--sl-color-black);
   --sl-color-bg: var(--sl-color-black);
   --sl-color-bg-nav: var(--sl-color-gray-7);
