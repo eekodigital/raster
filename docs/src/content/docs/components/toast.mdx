@@ -1,0 +1,189 @@
+---
+title: Toast
+description: "Transient notification messages that appear in the corner of the screen. Toast requires Toast.Provider and Toast.Viewport in your app root. Individual toasts are rendered by your state management layer."
+---
+
+import Example from "../../../components/Example.astro";
+import ToastDemo from "../../../components/ToastDemo.tsx";
+
+## Default
+
+<Example
+  code={`import { Toast } from '@eekodigital/raster';\n\n// In your app root:\n// <Toast.Provider>\n//   {children}\n//   <Toast.Viewport />\n// </Toast.Provider>\n\n// Triggering a toast:\nconst [open, setOpen] = useState(false);\n\n<button onClick={() => setOpen(true)}>Show toast</button>\n\n<Toast.Root open={open} onOpenChange={setOpen}>\n  <Toast.Title>Report saved</Toast.Title>\n  <Toast.Description>Your changes have been saved.</Toast.Description>\n  <Toast.Close>✕</Toast.Close>\n</Toast.Root>`}
+  center
+>
+  <ToastDemo client:load />
+</Example>
+
+## Setup
+
+<div class="callout">
+  <p>
+    Add <code>Toast.Provider</code> and <code>Toast.Viewport</code> once in your app root. The
+    viewport is the fixed portal that renders toasts — position it after your main content.
+  </p>
+</div>
+
+<Example
+  code={`// app/root.tsx or layout component\nimport { Toast } from '@eekodigital/raster';\n\nexport function AppLayout() {\n  return (\n    <Toast.Provider swipeDirection="right">\n      <App />\n      <Toast.Viewport />\n    </Toast.Provider>\n  );\n}`}
+  lang="tsx"
+>
+  <p style="margin:0;font-size:var(--font-size-sm);color:var(--color-text-subtle)">
+    Setup code — see above.
+  </p>
+</Example>
+
+## When to use
+
+<div class="callout">
+  <p>
+    <strong>Use Toast for</strong> transient, non-blocking feedback — "Report saved", "Link copied",
+    "Changes applied". The user doesn't need to act; the message auto-dismisses.
+  </p>
+  <p>
+    <strong>Don't use Toast for</strong> errors that require action. Use inline validation for form
+    errors, or <a href="/components/alert-dialog">AlertDialog</a> for destructive confirmations.
+  </p>
+  <p>
+    <strong>Don't use Toast for</strong> information the user must not miss. Toasts can be dismissed
+    before they're read — use a persistent banner or callout instead.
+  </p>
+</div>
+
+## Props
+
+### Toast.Provider
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>duration</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>5000</code>
+      </td>
+      <td>Default auto-dismiss delay in milliseconds for all toasts.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>swipeDirection</code>
+      </td>
+      <td>
+        <code>'up' | 'down' | 'left' | 'right'</code>
+      </td>
+      <td>
+        <code>'right'</code>
+      </td>
+      <td>Direction of the swipe-to-dismiss gesture.</td>
+    </tr>
+  </tbody>
+</table>
+
+### Toast.Root
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>open</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>—</td>
+      <td>Controlled open state.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onOpenChange</code>
+      </td>
+      <td>
+        <code>(open: boolean) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called when the toast opens or closes.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>duration</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>5000</code>
+      </td>
+      <td>Auto-dismiss delay in milliseconds. Overrides the provider default.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>type</code>
+      </td>
+      <td>
+        <code>'foreground' | 'background'</code>
+      </td>
+      <td>
+        <code>'foreground'</code>
+      </td>
+      <td>
+        Accessibility hint: <code>foreground</code> for user-initiated actions,{" "}
+        <code>background</code> for system events.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Toast.Title, Toast.Description, Toast.Close, Toast.Action
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>Content of the element.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>

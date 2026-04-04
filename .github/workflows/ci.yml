@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
 
 jobs:
@@ -19,4 +19,5 @@ jobs:
       - run: pnpm build
       - run: pnpm check
       - run: pnpm typecheck
-      - run: pnpm test -- --coverage
+      - run: pnpm --filter @eekodigital/raster test -- --coverage
+      - run: cd docs && pnpm build

@@ -1,0 +1,88 @@
+
+> @inntrig/docs-design-system@0.0.1 build /Users/craig/code/inntrig/apps/docs-design-system
+> astro build
+
+16:49:51 [@astrojs/node] Enabling sessions with filesystem storage
+16:49:51 [vite] Re-optimizing dependencies because lockfile has changed
+16:49:51 [content] Syncing content
+16:49:51 [content] Synced content
+16:49:51 [types] Generated 300ms
+16:49:51 [build] output: "server"
+16:49:51 [build] mode: "server"
+16:49:51 [build] directory: /Users/craig/code/inntrig/apps/docs-design-system/dist/
+16:49:51 [build] adapter: @astrojs/node
+16:49:51 [build] Collecting build info...
+16:49:51 [build] ✓ Completed in 541ms.
+16:49:51 [build] Building server entrypoints...
+16:49:54 [vite] ✓ built in 2.33s
+16:49:55 [vite] ✓ built in 1.07s
+16:49:55 [vite] ✓ built in 357ms
+
+ prerendering static routes 
+Entry docs → 404 was not found.
+16:49:55   ├─ /404.html (+8ms) 
+16:49:55   ├─ /components/accordion/index.html (+67ms) 
+16:49:55   ├─ /components/alert-dialog/index.html (+17ms) 
+16:49:55   ├─ /components/avatar/index.html (+5ms) 
+16:49:55   ├─ /components/badge/index.html (+12ms) 
+16:49:55   ├─ /components/bar-chart/index.html (+11ms) 
+16:49:55   ├─ /components/box/index.html (+3ms) 
+16:49:55   ├─ /components/breadcrumbs/index.html (+4ms) 
+16:49:55   ├─ /components/buttons/index.html (+4ms) 
+16:49:55   ├─ /components/checkboxes/index.html (+3ms) 
+16:49:55   ├─ /components/collapsible/index.html (+3ms) 
+16:49:55   ├─ /components/data-table/index.html (+34ms) 
+16:49:55   ├─ /components/date-input/index.html (+26ms) 
+16:49:55   ├─ /components/details/index.html (+8ms) 
+16:49:55   ├─ /components/dialog/index.html (+4ms) 
+16:49:55   ├─ /components/donut-chart/index.html (+4ms) 
+16:49:55   ├─ /components/dropdown-menu/index.html (+3ms) 
+16:49:55   ├─ /components/fieldset/index.html (+3ms) 
+16:49:55   ├─ /components/file-upload/index.html (+3ms) 
+16:49:55   ├─ /components/flex/index.html (+3ms) 
+16:49:55   ├─ /components/gauge/index.html (+8ms) 
+16:49:55   ├─ /components/geo-chart/index.html (+3ms) 
+16:49:55   ├─ /components/grid/index.html (+4ms) 
+16:49:55   ├─ /components/line-chart/index.html (+5ms) 
+16:49:55   ├─ /components/linear-gauge/index.html (+3ms) 
+16:49:55   ├─ /components/notification-banner/index.html (+3ms) 
+16:49:55   ├─ /components/otp-field/index.html (+2ms) 
+16:49:55   ├─ /components/pagination/index.html (+2ms) 
+16:49:55   ├─ /components/password-toggle-field/index.html (+2ms) 
+16:49:56   ├─ /components/popover/index.html (+2ms) 
+16:49:56   ├─ /components/progress/index.html (+2ms) 
+16:49:56   ├─ /components/radar-chart/index.html (+7ms) 
+16:49:56   ├─ /components/radios/index.html (+4ms) 
+16:49:56   ├─ /components/scatter-chart/index.html (+4ms) 
+16:49:56   ├─ /components/scroll-area/index.html (+3ms) 
+16:49:56   ├─ /components/select/index.html (+3ms) 
+16:49:56   ├─ /components/separator/index.html (+2ms) 
+16:49:56   ├─ /components/skeleton/index.html (+3ms) 
+16:49:56   ├─ /components/skip-link/index.html (+2ms) 
+16:49:56   ├─ /components/slider/index.html (+3ms) 
+16:49:56   ├─ /components/sparkline/index.html (+3ms) 
+16:49:56   ├─ /components/spinner/index.html (+2ms) 
+16:49:56   ├─ /components/summary-list/index.html (+4ms) 
+16:49:56   ├─ /components/switch/index.html (+3ms) 
+16:49:56   ├─ /components/tables/index.html (+3ms) 
+16:49:56   ├─ /components/tabs/index.html (+3ms) 
+16:49:56   ├─ /components/tags/index.html (+3ms) 
+16:49:56   ├─ /components/text-input/index.html (+3ms) 
+16:49:56   ├─ /components/textarea/index.html (+7ms) 
+16:49:56   ├─ /components/toast/index.html (+12ms) 
+16:49:56   ├─ /components/tooltip/index.html (+2ms) 
+16:49:56   ├─ /components/typography/index.html (+3ms) 
+16:49:56   ├─ /foundations/colours/index.html (+3ms) 
+16:49:56   ├─ /foundations/principles/index.html (+2ms) 
+16:49:56   ├─ /foundations/typography/index.html (+2ms) 
+16:49:56   ├─ /index.html (+1ms) 
+16:49:56 ✓ Completed in 394ms.
+
+16:49:56 [build] Rearranging server assets...
+16:49:56 [build] ✓ Completed in 4.20s.
+16:49:56 [starlight:pagefind] Building search index with Pagefind...
+16:49:56 [starlight:pagefind] Found 56 HTML files.
+16:49:56 [starlight:pagefind] Finished building search index in 93ms.
+16:49:56 [WARN] [@astrojs/sitemap] The Sitemap integration requires the `site` astro.config option. Skipping.
+16:49:56 [build] Server built in 4.85s
+16:49:56 [build] Complete!

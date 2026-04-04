@@ -1,0 +1,24 @@
+---
+title: Tooltip
+description: "Contextual text that appears on hover or focus. Use for supplementary information — never for content essential to completing a task. Wrap your app in Tooltip.Provider."
+---
+
+import Example from "../../../components/Example.astro";
+import { TooltipDemo } from "../../../components/OverlayDemos.tsx";
+
+## Default
+
+<Example
+  code={`import { Tooltip } from '@eekodigital/raster';\n\n// In your app root:\n// <Tooltip.Provider>\n\n<Tooltip.Root>\n  <Tooltip.Trigger>\n    {(props) => <Button variant="secondary" {...props}>Hover me</Button>}\n  </Tooltip.Trigger>\n  <Tooltip.Portal>\n    <Tooltip.Content>\n      Saves the current draft\n    </Tooltip.Content>\n  </Tooltip.Portal>\n</Tooltip.Root>`}
+  center
+>
+  <TooltipDemo client:load />
+</Example>
+
+<div class="callout">
+  <p>
+    Add <code>&lt;Tooltip.Provider&gt;</code> once near the root of your app (e.g. in your layout
+    component) to control global delay and skip-delay settings. Individual tooltips don't need their
+    own provider.
+  </p>
+</div>

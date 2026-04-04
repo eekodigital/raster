@@ -1,0 +1,94 @@
+---
+title: Skeleton
+description: Animated placeholder for content that is still loading. Use Skeleton to preserve layout and reduce perceived load time while data fetches. Always replace with real content once loaded.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  SkeletonTextDemo,
+  SkeletonCardDemo,
+  SkeletonVariantsDemo,
+} from "../../../components/SkeletonDemo.tsx";
+
+## Text skeleton
+
+<Example
+  code={`import { Skeleton } from '@eekodigital/raster';\n\n<Skeleton variant="heading" width="60%" />\n<Skeleton variant="text" />\n<Skeleton variant="text" />\n<Skeleton variant="text" width="75%" />`}
+>
+  <SkeletonTextDemo client:load />
+</Example>
+
+## Card skeleton
+
+Combine Skeleton with layout primitives to mock complex loading states.
+
+<Example
+  code={`<div style={{ display: 'flex', gap: '1rem' }}>\n  <Skeleton variant="circular" width="3rem" height="3rem" />\n  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>\n    <Skeleton variant="text" width="50%" />\n    <Skeleton variant="text" />\n    <Skeleton variant="text" width="80%" />\n  </div>\n</div>`}
+>
+  <SkeletonCardDemo client:load />
+</Example>
+
+## Variants
+
+<Example
+  code={`<Skeleton variant="text" />\n<Skeleton variant="heading" />\n<Skeleton variant="circular" width="3rem" height="3rem" />\n<Skeleton variant="rectangular" width="12rem" height="4rem" />`}
+>
+  <SkeletonVariantsDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>variant</code>
+      </td>
+      <td>
+        <code>"text" | "heading" | "circular" | "rectangular"</code>
+      </td>
+      <td>
+        <code>"text"</code>
+      </td>
+      <td>Shape and size intent.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>width</code>
+      </td>
+      <td>
+        <code>string | number</code>
+      </td>
+      <td>—</td>
+      <td>Override width. Defaults to 100% for text/heading.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>string | number</code>
+      </td>
+      <td>—</td>
+      <td>Override height. Required for circular/rectangular.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,10 @@
+
+> @inntrig/docs-design-system@0.0.1 typecheck /Users/craig/code/inntrig/apps/docs-design-system
+> astro check
+
+09:24:57 [@astrojs/node] Enabling sessions with filesystem storage
+09:24:58 [content] Syncing content
+09:24:58 [content] Synced content
+09:24:58 [types] Generated 714ms
+09:24:58 [check] Getting diagnostics for Astro files in /Users/craig/code/inntrig/apps/docs-design-system...
+ ELIFECYCLE  Command failed.

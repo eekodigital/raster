@@ -1,0 +1,106 @@
+---
+title: LinearGauge
+description: Horizontal progress bar with label and value display. Uses role="meter" with proper aria-valuenow and aria-valuemax. Animated fill respects prefers-reduced-motion.
+---
+
+import Example from "../../../components/Example.astro";
+import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
+
+## Examples
+
+<Example
+  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<LinearGauge value={45} max={100} label="Complete" color="var(--color-warning)" formatLabel={(v) => \`\${v}%\`} aria-label="45% complete" />\n<LinearGauge value={86} max={86} label="Criteria" color="var(--color-success)" aria-label="All criteria assessed" />`}
+>
+  <LinearGaugeDemo client:load />
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Current value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>max</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Maximum value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Label above the bar</td>
+    </tr>
+    <tr>
+      <td>
+        <code>color</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>--color-interactive</code>
+      </td>
+      <td>Fill colour</td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>8</code>
+      </td>
+      <td>Bar height in pixels</td>
+    </tr>
+    <tr>
+      <td>
+        <code>format</code>
+      </td>
+      <td>
+        <code>(v: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>String</code>
+      </td>
+      <td>Format the displayed value</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required.</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "pnpm turbo build --filter=@inntrig/docs-design-system"
+  },
+  "deploy": {
+    "startCommand": "sh -c 'cd apps/docs-design-system && node dist/server/entry.mjs'",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 30,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "watchPatterns": ["apps/docs-design-system/**", "packages/design-system/**"]
+}

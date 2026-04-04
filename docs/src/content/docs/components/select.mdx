@@ -1,0 +1,293 @@
+---
+title: Select
+description: Two levels of the same control. Select is the bare styled select — use it for custom layouts, table cells, or inline editors. SelectField adds a label, optional hint, and optional error for the standard form field pattern.
+---
+
+import Example from "../../../components/Example.astro";
+import { SelectField } from "@eekodigital/raster";
+import {
+  SelectDemo,
+  SelectErrorDemo,
+  SelectDisabledDemo,
+} from "../../../components/SelectDemo.tsx";
+
+## Select
+
+### Default
+
+<Example code={`import { Select } from '@eekodigital/raster';
+
+<Select
+  name="standard"
+  placeholder="Choose a standard…"
+  options={[
+    { value: 'wcag-2.2', label: 'WCAG 2.2' },
+    { value: 'wcag-3.0', label: 'WCAG 3.0 (beta)' },
+  ]}
+/>`}>
+  <SelectDemo client:only="react" />
+</Example>
+
+### Error state
+
+<Example
+  code={`<Select name="standard" hasError placeholder="Choose a standard…" options={[...]} />`}
+>
+  <SelectErrorDemo client:only="react" />
+</Example>
+
+### Disabled
+
+<Example code={`<Select name="standard" defaultValue="wcag-2.2" disabled options={[...]} />`}>
+  <SelectDisabledDemo client:only="react" />
+</Example>
+
+## SelectField
+
+### Default
+
+<Example code={`import { SelectField } from '@eekodigital/raster';
+
+<SelectField
+  label="Standard"
+  name="standard"
+  placeholder="Choose a standard…"
+  options={[
+    { value: 'wcag-2.2', label: 'WCAG 2.2' },
+    { value: 'wcag-3.0', label: 'WCAG 3.0 (beta)' },
+  ]}
+/>`}>
+  <SelectField
+    client:only="react"
+    label="Standard"
+    name="standard"
+    placeholder="Choose a standard…"
+    options={[
+      { value: 'wcag-2.2', label: 'WCAG 2.2' },
+      { value: 'wcag-3.0', label: 'WCAG 3.0 (beta)' },
+    ]}
+  />
+</Example>
+
+### With hint
+
+<Example
+  code={`<SelectField label="Standard" name="standard" hint="The standard all results will be evaluated against." options={[...]} />`}
+>
+  <SelectField
+    client:only="react"
+    label="Standard"
+    name="standard"
+    hint="The standard all results in this audit will be evaluated against."
+    placeholder="Choose a standard…"
+    options={[
+      { value: "wcag-2.2", label: "WCAG 2.2" },
+      { value: "wcag-3.0", label: "WCAG 3.0 (beta)" },
+    ]}
+  />
+</Example>
+
+### With error
+
+<Example
+  code={`<SelectField label="Standard" name="standard" error="Please select a standard." options={[...]} />`}
+>
+  <SelectField
+    client:only="react"
+    label="Standard"
+    name="standard"
+    error="Please select a standard."
+    placeholder="Choose a standard…"
+    options={[
+      { value: "wcag-2.2", label: "WCAG 2.2" },
+      { value: "wcag-3.0", label: "WCAG 3.0 (beta)" },
+    ]}
+  />
+</Example>
+
+## Props
+
+### Select
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>options</code>
+      </td>
+      <td>
+        <code>SelectOption[]</code>
+      </td>
+      <td>
+        Array of <code>{`{ value, label, icon?, disabled? }`}</code> objects.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>placeholder</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Text shown when no value is selected.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Controlled selected value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultValue</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Initial value for uncontrolled usage.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onValueChange</code>
+      </td>
+      <td>
+        <code>(value: string) =&gt; void</code>
+      </td>
+      <td>Called when the selected value changes.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hasError</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Applies error styling to the trigger.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>disabled</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>Disables the control.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>name</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Form field name.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>id</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>ID for label association.</td>
+    </tr>
+  </tbody>
+</table>
+
+### SelectField
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Visible label text.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>options</code>
+      </td>
+      <td>
+        <code>SelectOption[]</code>
+      </td>
+      <td>
+        Array of <code>{`{ value, label, icon?, disabled? }`}</code> objects.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>placeholder</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Placeholder shown when no value is selected.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Optional hint text below the label.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>error</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Validation error message.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>value</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Controlled selected value.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>defaultValue</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Initial value for uncontrolled usage.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onValueChange</code>
+      </td>
+      <td>
+        <code>(value: string) =&gt; void</code>
+      </td>
+      <td>Called when the selected value changes.</td>
+    </tr>
+  </tbody>
+</table>

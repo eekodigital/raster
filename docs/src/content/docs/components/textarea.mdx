@@ -1,0 +1,188 @@
+---
+title: Textarea
+description: "Two levels of the same control. Textarea is the bare styled element — use it when you need custom layout or to attach accessories. TextareaField adds a label, optional hint, optional error, and optional character counter."
+---
+
+import Example from "../../../components/Example.astro";
+import { TextareaField } from "@eekodigital/raster";
+import {
+  TextareaDefault,
+  TextareaError,
+  TextareaDisabled,
+} from "../../../components/TextareaDemo.tsx";
+import {
+  TextareaCharCountDemo,
+  TextareaCharCountOverDemo,
+} from "../../../components/TextareaCharCountDemo.tsx";
+
+## Textarea
+
+### Default
+
+<Example
+  code={`import { Textarea } from '@eekodigital/raster';\n\n<Textarea name="notes" rows={4} placeholder="Add notes…" />`}
+>
+  <TextareaDefault client:load />
+</Example>
+
+### Error state
+
+<Example
+  code={`<Textarea name="description" hasError rows={3} placeholder="Description required" />`}
+>
+  <TextareaError client:load />
+</Example>
+
+### Disabled
+
+<Example code={`<Textarea name="notes" defaultValue="Read-only content" disabled rows={3} />`}>
+  <TextareaDisabled client:load />
+</Example>
+
+## TextareaField
+
+### Default
+
+<Example
+  code={`import { TextareaField } from '@eekodigital/raster';\n\n<TextareaField label="Notes" name="notes" rows={4} />`}
+>
+  <TextareaField client:load label="Notes" name="notes" rows={4} />
+</Example>
+
+### With hint
+
+<Example
+  code={`<TextareaField label="Notes" name="notes" hint="Add any observations about this criterion." rows={4} />`}
+>
+  <TextareaField
+    client:load
+    label="Notes"
+    name="notes"
+    hint="Add any observations about this criterion."
+    rows={4}
+  />
+</Example>
+
+### With error
+
+<Example
+  code={`<TextareaField label="Notes" name="notes" error="Notes cannot be empty." rows={4} />`}
+>
+  <TextareaField client:load label="Notes" name="notes" error="Notes cannot be empty." rows={4} />
+</Example>
+
+### Character count
+
+Pass `maxLength` to display a live character counter. It switches to error styling when the limit is exceeded.
+
+<Example
+  code={`<TextareaField label="Description" maxLength={200} hint="Describe the issue in detail" />`}
+>
+  <TextareaCharCountDemo client:load />
+</Example>
+
+<Example
+  code={`<TextareaField label="Short note" maxLength={20} defaultValue="This text is too long and will overflow the limit" />`}
+>
+  <TextareaCharCountOverDemo client:load />
+</Example>
+
+## Props
+
+### Textarea
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>hasError</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Applies error styling.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>TextareaHTMLAttributes</code>
+      </td>
+      <td>—</td>
+      <td>
+        All native <code>&lt;textarea&gt;</code> attributes.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### TextareaField
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Visible label text.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hint</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Optional hint text below the label.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>error</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Validation error message.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>maxLength</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>Enables the live character counter when set.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>TextareaHTMLAttributes</code>
+      </td>
+      <td>All native textarea attributes.</td>
+    </tr>
+  </tbody>
+</table>

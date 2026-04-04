@@ -1,0 +1,91 @@
+---
+title: Spinner
+description: An animated loading indicator for async states. Uses role="status" with an aria-label so screen readers announce the loading state without visual output.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  SpinnerDefaultDemo,
+  SpinnerSizesDemo,
+  SpinnerInlineDemo,
+} from "../../../components/SpinnerDemo.tsx";
+
+## Default
+
+<Example code={`import { Spinner } from '@eekodigital/raster';\n\n<Spinner />`} center>
+  <SpinnerDefaultDemo client:load />
+</Example>
+
+## Sizes
+
+Three sizes: `sm` (1rem), `md` (1.5rem, default), `lg` (2rem).
+
+<Example code={`<Spinner size="sm" />\n<Spinner size="md" />\n<Spinner size="lg" />`} center>
+  <SpinnerSizesDemo client:load />
+</Example>
+
+## Inline with text
+
+Pair `sm` with text for inline loading states, e.g. inside a button or form feedback.
+
+<Example
+  code={`<div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>\n  <Spinner size="sm" />\n  <span>Saving changes…</span>\n</div>`}
+  center
+>
+  <SpinnerInlineDemo client:load />
+</Example>
+
+## Accessibility
+
+The spinner renders as `role="status"`, which is an implicit ARIA live region.
+Screen readers will announce the `aria-label` ("Loading" by default) when the spinner mounts.
+Provide a descriptive label when context matters: `label="Submitting form"`.
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>"sm" | "md" | "lg"</code>
+      </td>
+      <td>
+        <code>"md"</code>
+      </td>
+      <td>Controls the diameter of the spinner.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>"Loading"</code>
+      </td>
+      <td>Accessible label announced by screen readers.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,255 @@
+---
+title: SummaryList
+description: Displays a structured set of key-value pairs, similar to a definition list. Commonly used on review and confirmation screens to summarise entered data before submission.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  SummaryList as SummaryListDS,
+  SummaryListRow,
+  SummaryListKey,
+  SummaryListValue,
+  SummaryListActions,
+} from "@eekodigital/raster";
+
+## Basic key/value list
+
+<Example
+  code={`import {\n  SummaryList,\n  SummaryListRow,\n  SummaryListKey,\n  SummaryListValue,\n} from '@eekodigital/raster';\n\n<SummaryList>\n  <SummaryListRow>\n    <SummaryListKey>Full name</SummaryListKey>\n    <SummaryListValue>Sarah Johnson</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Date of birth</SummaryListKey>\n    <SummaryListValue>12 March 1985</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Email address</SummaryListKey>\n    <SummaryListValue>sarah.johnson@example.com</SummaryListValue>\n  </SummaryListRow>\n</SummaryList>`}
+>
+  <SummaryListDS client:load>
+    <SummaryListRow>
+      <SummaryListKey>Full name</SummaryListKey>
+      <SummaryListValue>Sarah Johnson</SummaryListValue>
+    </SummaryListRow>
+    <SummaryListRow>
+      <SummaryListKey>Date of birth</SummaryListKey>
+      <SummaryListValue>12 March 1985</SummaryListValue>
+    </SummaryListRow>
+    <SummaryListRow>
+      <SummaryListKey>Email address</SummaryListKey>
+      <SummaryListValue>sarah.johnson@example.com</SummaryListValue>
+    </SummaryListRow>
+  </SummaryListDS>
+</Example>
+
+## With action links
+
+Add a `SummaryListActions` cell to each row to provide contextual change links.
+
+<Example
+  code={`import {\n  SummaryList,\n  SummaryListRow,\n  SummaryListKey,\n  SummaryListValue,\n  SummaryListActions,\n} from '@eekodigital/raster';\n\n<SummaryList>\n  <SummaryListRow>\n    <SummaryListKey>Full name</SummaryListKey>\n    <SummaryListValue>Sarah Johnson</SummaryListValue>\n    <SummaryListActions>\n      <a href="#">Change<span class="sr-only"> full name</span></a>\n    </SummaryListActions>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Date of birth</SummaryListKey>\n    <SummaryListValue>12 March 1985</SummaryListValue>\n    <SummaryListActions>\n      <a href="#">Change<span class="sr-only"> date of birth</span></a>\n    </SummaryListActions>\n  </SummaryListRow>\n</SummaryList>`}
+>
+  <SummaryListDS client:load>
+    <SummaryListRow>
+      <SummaryListKey>Full name</SummaryListKey>
+      <SummaryListValue>Sarah Johnson</SummaryListValue>
+      <SummaryListActions>
+        <a href="#">Change</a>
+      </SummaryListActions>
+    </SummaryListRow>
+    <SummaryListRow>
+      <SummaryListKey>Date of birth</SummaryListKey>
+      <SummaryListValue>12 March 1985</SummaryListValue>
+      <SummaryListActions>
+        <a href="#">Change</a>
+      </SummaryListActions>
+    </SummaryListRow>
+  </SummaryListDS>
+</Example>
+
+## Plain variant
+
+A lighter style with bold labels, regular-weight values, and no separator lines.
+
+<Example
+  code={`<SummaryList variant="plain">\n  <SummaryListRow>\n    <SummaryListKey>Full name</SummaryListKey>\n    <SummaryListValue>Sarah Johnson</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Date of birth</SummaryListKey>\n    <SummaryListValue>12 March 1985</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Email address</SummaryListKey>\n    <SummaryListValue>sarah.johnson@example.com</SummaryListValue>\n  </SummaryListRow>\n</SummaryList>`}
+>
+  <SummaryListDS client:load variant="plain">
+    <SummaryListRow>
+      <SummaryListKey>Full name</SummaryListKey>
+      <SummaryListValue>Sarah Johnson</SummaryListValue>
+    </SummaryListRow>
+    <SummaryListRow>
+      <SummaryListKey>Date of birth</SummaryListKey>
+      <SummaryListValue>12 March 1985</SummaryListValue>
+    </SummaryListRow>
+    <SummaryListRow>
+      <SummaryListKey>Email address</SummaryListKey>
+      <SummaryListValue>sarah.johnson@example.com</SummaryListValue>
+    </SummaryListRow>
+  </SummaryListDS>
+</Example>
+
+## When to use
+
+<div class="callout">
+  <p>
+    <strong>Use SummaryList for</strong> key-value pairs on review, confirmation, or detail screens
+    — showing a user their submitted data before they confirm, or summarising a record's attributes.
+  </p>
+  <p>
+    <strong>
+      Use <a href="/components/data-table">DataTable</a> or <a href="/components/tables">Table</a>{" "}
+      instead
+    </strong>{" "}
+    when you have multiple rows of comparable records rather than a single record's fields.
+  </p>
+</div>
+
+## Props
+
+### SummaryList
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>variant</code>
+      </td>
+      <td>
+        <code>"default" | "plain"</code>
+      </td>
+      <td>
+        <code>"default"</code>
+      </td>
+      <td>
+        Visual style. <code>"plain"</code> uses bold labels, regular-weight values, and no separator
+        lines.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>
+        One or more <code>SummaryListRow</code> elements.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS class names.</td>
+    </tr>
+  </tbody>
+</table>
+
+### SummaryListRow
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>
+        A <code>SummaryListKey</code>, <code>SummaryListValue</code>, and optionally{" "}
+        <code>SummaryListActions</code>.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### SummaryListKey
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>The label for the row.</td>
+    </tr>
+  </tbody>
+</table>
+
+### SummaryListValue
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>The data value for the row.</td>
+    </tr>
+  </tbody>
+</table>
+
+### SummaryListActions
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>Action links or buttons for the row.</td>
+    </tr>
+  </tbody>
+</table>

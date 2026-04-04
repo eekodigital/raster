@@ -1,0 +1,16 @@
+---
+title: Popover
+description: A floating content panel anchored to a trigger. Good for forms, filters, or rich contextual content that's too large for a tooltip. Dismissed by clicking outside or pressing Escape.
+---
+
+import Example from "../../../components/Example.astro";
+import { PopoverDemo } from "../../../components/OverlayDemos.tsx";
+
+## Default
+
+<Example
+  code={`import { Popover } from '@eekodigital/raster';\n\n<Popover.Root>\n  <Popover.Trigger>\n    <Button variant="secondary">Filters</Button>\n  </Popover.Trigger>\n  <Popover.Portal>\n    <Popover.Content>\n      <p>Filter by status</p>\n      <p>Filter controls go here.</p>\n    </Popover.Content>\n  </Popover.Portal>\n</Popover.Root>`}
+  center
+>
+  <PopoverDemo client:load />
+</Example>

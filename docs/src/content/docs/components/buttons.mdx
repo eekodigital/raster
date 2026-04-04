@@ -1,0 +1,150 @@
+---
+title: Button
+description: "Triggers an action or submits a form. For navigation, pass a render prop to Button with a router Link — never nest a <button> inside <a>."
+---
+
+import Example from "../../../components/Example.astro";
+import { Button } from "@eekodigital/raster";
+
+## Variants
+
+### Primary
+
+The most important action on a page.
+
+<Example
+  code={`import { Button } from '@eekodigital/raster';\n\n<Button>Save report</Button>\n<Button size="sm">Save report</Button>\n<Button size="lg">Save report</Button>`}
+>
+  <Button client:load>Save report</Button>
+  <Button client:load size="sm">
+    Save report
+  </Button>
+  <Button client:load size="lg">
+    Save report
+  </Button>
+</Example>
+
+### Secondary
+
+Supporting or lower-priority actions.
+
+<Example
+  code={`<Button variant="secondary">Cancel</Button>\n<Button variant="secondary" size="sm">Cancel</Button>`}
+>
+  <Button client:load variant="secondary">
+    Cancel
+  </Button>
+  <Button client:load variant="secondary" size="sm">
+    Cancel
+  </Button>
+</Example>
+
+### Danger
+
+Destructive or irreversible actions.
+
+<Example code={`<Button variant="danger">Delete project</Button>`}>
+  <Button client:load variant="danger">
+    Delete project
+  </Button>
+</Example>
+
+## Disabled state
+
+<Example
+  code={`<Button disabled>Save report</Button>\n<Button variant="secondary" disabled>Cancel</Button>`}
+>
+  <Button client:load disabled>
+    Save report
+  </Button>
+  <Button client:load variant="secondary" disabled>
+    Cancel
+  </Button>
+</Example>
+
+## Render prop
+
+<div class="callout">
+  <p>
+    <strong>Why does this exist?</strong> An <code>&lt;a&gt;</code> inside a{" "}
+    <code>&lt;button&gt;</code>
+    is invalid HTML. Passing a render prop applies button styles to any element — typically a router{" "}
+    <code>Link</code> — so the rendered HTML is a single <code>&lt;a&gt;</code>, not a button
+    wrapping a link.
+  </p>
+</div>
+
+<Example
+  code={`// Navigates to a new page → use render prop + Link\n<Button>\n  {(props) => <Link to="/projects/new" {...props}>New project</Link>}\n</Button>\n\n// Submits a form → plain button\n<Button type="submit">Create project</Button>`}
+  lang="tsx"
+>
+  <Button client:load>
+    {(props) => (
+      <a href="#" {...props}>
+        View project
+      </a>
+    )}
+  </Button>
+</Example>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>variant</code>
+      </td>
+      <td>
+        <code>'primary' | 'secondary' | 'danger'</code>
+      </td>
+      <td>
+        <code>'primary'</code>
+      </td>
+      <td>Visual style</td>
+    </tr>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>'sm' | 'md' | 'lg'</code>
+      </td>
+      <td>
+        <code>'md'</code>
+      </td>
+      <td>Button size</td>
+    </tr>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode | (props) =&gt; ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>
+        Pass a render prop to apply button styles to a custom element instead of a{" "}
+        <code>&lt;button&gt;</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>...props</code>
+      </td>
+      <td>
+        <code>ButtonHTMLAttributes</code>
+      </td>
+      <td>—</td>
+      <td>All native button attributes</td>
+    </tr>
+  </tbody>
+</table>

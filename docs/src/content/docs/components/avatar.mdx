@@ -1,0 +1,176 @@
+---
+title: Avatar
+description: A circular (or square) representation of a user or organisation. Built on Radix Avatar for graceful image loading — shows the image when available, falls back to initials otherwise.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  AvatarInitialsDemo,
+  AvatarSizesDemo,
+  AvatarSquareDemo,
+  AvatarImageDemo,
+} from "../../../components/AvatarDemo.tsx";
+
+## Initials fallback
+
+When no image is provided (or the image fails to load), the fallback renders instead.
+
+<Example
+  code={`import { Avatar } from '@eekodigital/raster';\n\n<Avatar.Root>\n  <Avatar.Fallback>JD</Avatar.Fallback>\n</Avatar.Root>`}
+  center
+>
+  <AvatarInitialsDemo client:load />
+</Example>
+
+## With image
+
+Provide an `Avatar.Image`. Radix handles the load/error state and shows the `Fallback` if the image fails.
+
+<Example
+  code={`<Avatar.Root>\n  <Avatar.Image src="/avatar.jpg" alt="Jane Doe" />\n  <Avatar.Fallback>JD</Avatar.Fallback>\n</Avatar.Root>`}
+  center
+>
+  <AvatarImageDemo client:load />
+</Example>
+
+## Sizes
+
+Three sizes: `sm` (2rem), `md` (2.5rem, default), `lg` (3.5rem).
+
+<Example
+  code={`<Avatar.Root size="sm"><Avatar.Fallback>SM</Avatar.Fallback></Avatar.Root>\n<Avatar.Root size="md"><Avatar.Fallback>MD</Avatar.Fallback></Avatar.Root>\n<Avatar.Root size="lg"><Avatar.Fallback>LG</Avatar.Fallback></Avatar.Root>`}
+  center
+>
+  <AvatarSizesDemo client:load />
+</Example>
+
+## Square
+
+Use `square` for organisation logos and non-person avatars.
+
+<Example
+  code={`<Avatar.Root square size="md"><Avatar.Fallback>OG</Avatar.Fallback></Avatar.Root>`}
+  center
+>
+  <AvatarSquareDemo client:load />
+</Example>
+
+## Props
+
+### Avatar.Root
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>"sm" | "md" | "lg"</code>
+      </td>
+      <td>
+        <code>"md"</code>
+      </td>
+      <td>Diameter of the avatar.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>square</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Rounded square instead of circle.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>
+
+### Avatar.Image
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>src</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Image URL.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>alt</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>Accessible alt text.</td>
+    </tr>
+  </tbody>
+</table>
+
+### Avatar.Fallback
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>children</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>—</td>
+      <td>Typically 1–2 initials.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>delayMs</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>600</code>
+      </td>
+      <td>Delay before fallback renders (avoids flash on slow images).</td>
+    </tr>
+  </tbody>
+</table>

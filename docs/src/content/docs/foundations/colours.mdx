@@ -1,0 +1,167 @@
+---
+title: Colours
+description: All colours are CSS custom properties defined in the theme files. Components consume semantic tokens, not raw hex values, so themes can be swapped without touching component code.
+---
+
+export const swatches = [
+  { token: "--color-interactive", label: "Interactive", use: "Buttons, links, focus rings" },
+  {
+    token: "--color-interactive-hover",
+    label: "Interactive hover",
+    use: "Hover and pressed states",
+  },
+  { token: "--color-text", label: "Text", use: "Body copy, headings" },
+  { token: "--color-text-subtle", label: "Text subtle", use: "Captions, secondary labels" },
+  { token: "--color-surface", label: "Surface", use: "Cards, form inputs" },
+  { token: "--color-surface-raised", label: "Surface raised", use: "Code blocks, inline code" },
+  { token: "--color-border", label: "Border", use: "Dividers, card borders" },
+  {
+    token: "--color-success",
+    label: "Success",
+    use: "Positive outcomes, confirmations, pass states",
+  },
+  { token: "--color-danger", label: "Danger", use: "Errors, destructive actions, failures" },
+  {
+    token: "--color-inactive",
+    label: "Inactive",
+    use: "Disabled, skipped, or not-applicable states",
+  },
+  {
+    token: "--color-warning",
+    label: "Warning",
+    use: "Pending actions, to-do items, caution states",
+  },
+];
+
+export const statusVariants = [
+  {
+    base: "--color-success",
+    bg: "--color-success-bg",
+    border: "--color-success-border",
+    label: "Success",
+  },
+  {
+    base: "--color-danger",
+    bg: "--color-danger-bg",
+    border: "--color-danger-border",
+    label: "Danger",
+  },
+  {
+    base: "--color-inactive",
+    bg: "--color-inactive-bg",
+    border: "--color-inactive-border",
+    label: "Inactive",
+  },
+  {
+    base: "--color-warning",
+    bg: "--color-warning-bg",
+    border: "--color-warning-border",
+    label: "Warning",
+  },
+];
+
+export const primitiveScales = [
+  { name: "Sand (warm)", prefix: "--color-primitive-sand", steps: 12 },
+  { name: "Gray (neutral)", prefix: "--color-primitive-gray", steps: 12 },
+  { name: "Slate (cool)", prefix: "--color-primitive-slate", steps: 12 },
+  { name: "Red", prefix: "--color-primitive-red", steps: 12 },
+  { name: "Orange", prefix: "--color-primitive-orange", steps: 12 },
+  { name: "Amber", prefix: "--color-primitive-amber", steps: 12 },
+  { name: "Yellow", prefix: "--color-primitive-yellow", steps: 12 },
+  { name: "Green", prefix: "--color-primitive-green", steps: 12 },
+  { name: "Teal", prefix: "--color-primitive-teal", steps: 12 },
+  { name: "Cyan", prefix: "--color-primitive-cyan", steps: 12 },
+  { name: "Blue", prefix: "--color-primitive-blue", steps: 12 },
+  { name: "Indigo", prefix: "--color-primitive-indigo", steps: 12 },
+  { name: "Purple", prefix: "--color-primitive-purple", steps: 12 },
+  { name: "Pink", prefix: "--color-primitive-pink", steps: 12 },
+  { name: "Rose", prefix: "--color-primitive-rose", steps: 12 },
+];
+
+export const shadeLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+
+## Palette
+
+<div class="swatch-grid">
+  {swatches.map(({ token, label, use }) => (
+    <div class="swatch-card">
+      <div style={`height:4rem;background:var(${token})`} />
+      <div class="swatch-body">
+        <p style="margin:0;font-weight:var(--font-weight-medium);color:var(--color-text);font-size:var(--font-size-sm)">
+          {label}
+        </p>
+        <code style="font-size:var(--font-size-xs)">{token}</code>
+        <p style="margin:var(--spacing-1) 0 0;font-size:var(--font-size-xs)">{use}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+## Status variants
+
+Each status colour comes with a base, background, and border variant for use in badges, banners, and notification states.
+
+<div class="swatch-grid">
+  {statusVariants.map(({ base, bg, border, label }) => (
+    <div class="swatch-card">
+      <div class="status-bar">
+        <div style={`flex:2;background:var(${bg})`} />
+        <div style={`flex:1;background:var(${base})`} />
+        <div style={`flex:0.5;background:var(${border})`} />
+      </div>
+      <div class="swatch-body">
+        <p style="margin:0;font-weight:var(--font-weight-medium);color:var(--color-text);font-size:var(--font-size-sm)">
+          {label}
+        </p>
+        <code style="font-size:var(--font-size-xs)">{base}</code>
+        <br />
+        <code style="font-size:var(--font-size-xs)">{bg}</code>
+        <br />
+        <code style="font-size:var(--font-size-xs)">{border}</code>
+      </div>
+    </div>
+  ))}
+</div>
+
+## Primitive scales
+
+Primitives are the raw palette — OKLCH-defined, perceptually uniform values that don't change between themes. Components should never reference primitives directly; use semantic tokens instead. These are shown here for reference when creating new semantic mappings.
+
+### Scale structure (12 steps)
+
+| Steps | Role                     | Example usage                    |
+| ----- | ------------------------ | -------------------------------- |
+| 1-2   | App & subtle backgrounds | Page background, hover tint      |
+| 3-5   | Component backgrounds    | Card, input, button states       |
+| 6-8   | Borders                  | Subtle, normal, strong borders   |
+| 9-10  | Solid backgrounds        | Primary button fill, badge       |
+| 11-12 | Text                     | Low-contrast, high-contrast text |
+
+Steps 11-12 meet WCAG AA contrast (4.5:1) against steps 1-2.
+
+{primitiveScales.map(({ name, prefix, steps }) => (
+
+  <div class="scale-block">
+    <h3>{name}</h3>
+    <div class="scale-bar">
+      {shadeLabels.map((shade) => (
+        <div
+          style={`flex:1;background:var(${prefix}-${shade})`}
+          title={`${prefix}-${shade}`}
+        />
+      ))}
+    </div>
+    <div class="scale-labels">
+      {shadeLabels.map((shade) => (
+        <code>{shade}</code>
+      ))}
+    </div>
+  </div>
+))}
+
+## Semantic colour rules
+
+- Never use raw hex values in component or app CSS — always reference a semantic token.
+- Use `--color-interactive` for interactive elements (buttons, links, focus rings). Use `--color-interactive-hover` for hover and pressed states.
+- Status colours (`success`, `danger`, `inactive`, `warning`) each come with a `-bg` and `-border` variant.
+- Primitives (`--color-primitive-*`) are only for defining new semantic tokens in theme files — never use them in components.

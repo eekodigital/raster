@@ -1,0 +1,39 @@
+---
+title: Raster
+description: Design system by Eeko Digital — components, tokens, and patterns for building accessible web applications.
+template: splash
+hero:
+  title: Raster
+  tagline: Design system by Eeko Digital — components, tokens, and patterns for building accessible web applications.
+  actions:
+    - text: Get started
+      link: /foundations/principles/
+      icon: right-arrow
+    - text: Components
+      link: /components/buttons/
+      variant: minimal
+---
+
+## Quick links
+
+- [Design principles](/foundations/principles/)
+- [Button](/components/buttons/)
+- [Table](/components/tables/)
+- [TextInputField](/components/text-input/)
+- [TextareaField](/components/textarea/)
+- [SelectField](/components/select/)
+- [Checkbox](/components/checkboxes/)
+- [Radio](/components/radios/)
+
+## Using the design system
+
+Install the package and import what you need. The CSS tokens must be loaded once at the root of your app.
+
+```sh
+pnpm add @eekodigital/raster
+```
+
+```ts
+import "@eekodigital/raster/tokens.css"; // CSS custom properties (colours, spacing, type)
+import { Button, Table, TextInputField } from "@eekodigital/raster";
+```

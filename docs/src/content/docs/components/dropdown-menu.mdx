@@ -1,0 +1,25 @@
+---
+title: DropdownMenu
+description: A menu that opens from a trigger. Good for actions lists, contextual menus, and secondary navigation. Keyboard navigation (arrows, Enter, Escape) is handled automatically.
+---
+
+import Example from "../../../components/Example.astro";
+import { DropdownMenuDemo, DropdownMenuSectionsDemo } from "../../../components/OverlayDemos.tsx";
+
+## Default
+
+<Example
+  code={`import { DropdownMenu } from '@eekodigital/raster';\n\n<DropdownMenu.Root>\n  <DropdownMenu.Trigger>\n    {(props) => <Button variant="secondary" {...props}>Actions</Button>}\n  </DropdownMenu.Trigger>\n  <DropdownMenu.Portal>\n    <DropdownMenu.Content>\n      <DropdownMenu.Item>Edit</DropdownMenu.Item>\n      <DropdownMenu.Item>Duplicate</DropdownMenu.Item>\n      <DropdownMenu.Separator />\n      <DropdownMenu.Item>Delete</DropdownMenu.Item>\n    </DropdownMenu.Content>\n  </DropdownMenu.Portal>\n</DropdownMenu.Root>`}
+  center
+>
+  <DropdownMenuDemo client:load />
+</Example>
+
+## With labels and sections
+
+<Example
+  code={`<DropdownMenu.Content>\n  <DropdownMenu.Label>Project</DropdownMenu.Label>\n  <DropdownMenu.Item>Settings</DropdownMenu.Item>\n  <DropdownMenu.Item>Archive</DropdownMenu.Item>\n  <DropdownMenu.Separator />\n  <DropdownMenu.Label>Danger zone</DropdownMenu.Label>\n  <DropdownMenu.Item>Delete project</DropdownMenu.Item>\n</DropdownMenu.Content>`}
+  center
+>
+  <DropdownMenuSectionsDemo client:load />
+</Example>

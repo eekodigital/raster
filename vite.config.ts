@@ -8,6 +8,7 @@ export default defineConfig({
     name: "raster",
     environment: "happy-dom",
     setupFiles: ["./src/test-setup.ts"],
+    exclude: ["docs/**", "node_modules/**"],
     coverage: {
       exclude: ["**/*.css.ts", "**/index.ts"],
       thresholds: {

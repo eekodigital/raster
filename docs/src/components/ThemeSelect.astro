@@ -1,0 +1,197 @@
+---
+/**
+ * Starlight ThemeSelect override — system/light/dark/high-contrast with icons.
+ */
+---
+
+<starlight-theme-select>
+  <details>
+    <summary aria-label="Select theme">
+      <svg class="icon icon-system" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </svg>
+      <svg class="icon icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </svg>
+      <svg class="icon icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg class="icon icon-highcontrast" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+        <path d="M12 2a10 10 0 0 1 0 20V2z" fill="currentColor" />
+      </svg>
+    </summary>
+    <ul role="listbox">
+      <li role="option" data-value="system">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4" />
+        </svg>
+        System
+      </li>
+      <li role="option" data-value="light">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+        Light
+      </li>
+      <li role="option" data-value="dark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        Dark
+      </li>
+      <li role="option" data-value="high-contrast">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M12 2a10 10 0 0 1 0 20V2z" fill="currentColor" />
+        </svg>
+        High contrast
+      </li>
+    </ul>
+  </details>
+</starlight-theme-select>
+
+{/* Sync pickers with stored theme on initial render */}
+<script is:inline>
+  StarlightThemeProvider.updatePickers();
+</script>
+
+<script>
+  declare const StarlightThemeProvider: { updatePickers(pref?: string): void };
+
+  const storageKey = 'starlight-theme';
+
+  type Theme = 'system' | 'light' | 'dark' | 'high-contrast';
+
+  function parseTheme(value: unknown): Theme {
+    if (value === 'light' || value === 'dark' || value === 'high-contrast') return value;
+    return 'system';
+  }
+
+  function resolveTheme(pref: Theme): string {
+    if (pref === 'light' || pref === 'dark' || pref === 'high-contrast') return pref;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function loadTheme(): Theme {
+    return parseTheme(typeof localStorage !== 'undefined' && localStorage.getItem(storageKey));
+  }
+
+  function storeTheme(theme: Theme): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(storageKey, theme);
+    }
+  }
+
+  function applyTheme(pref: Theme): void {
+    document.documentElement.dataset.theme = resolveTheme(pref);
+    StarlightThemeProvider.updatePickers(pref);
+    storeTheme(pref);
+  }
+
+  // Listen for system preference changes when set to "system"
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (loadTheme() === 'system') applyTheme('system');
+  });
+
+  class StarlightThemeSelect extends HTMLElement {
+    constructor() {
+      super();
+      const current = loadTheme();
+      applyTheme(current);
+
+      this.querySelectorAll<HTMLLIElement>('[role="option"]').forEach((li) => {
+        li.addEventListener('click', () => {
+          const value = parseTheme(li.dataset.value);
+          applyTheme(value);
+          this.querySelector('details')!.open = false;
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!this.contains(e.target as Node)) {
+          const d = this.querySelector('details');
+          if (d) d.open = false;
+        }
+      });
+    }
+  }
+
+  customElements.define('starlight-theme-select', StarlightThemeSelect);
+</script>
+
+<style>
+  details {
+    position: relative;
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--sl-color-gray-1);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+
+  summary:hover {
+    background: var(--sl-color-gray-6);
+  }
+
+  summary:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+
+  .icon { display: none; }
+  .icon.active { display: block; }
+
+  ul {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    right: 0;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    background: var(--sl-color-bg);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    min-width: 10rem;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+    cursor: pointer;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  li:hover {
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-white);
+  }
+
+  li[aria-selected="true"] {
+    color: var(--sl-color-accent);
+    font-weight: 600;
+  }
+</style>

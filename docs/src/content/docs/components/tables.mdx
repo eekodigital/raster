@@ -1,0 +1,124 @@
+---
+title: Table
+description: A static, zero-JS table for displaying content. No sorting, filtering, or interactivity — just structured data rendered server-side. For interactive data grids use DataTable.
+---
+
+import Example from "../../../components/Example.astro";
+import { Table } from "@eekodigital/raster";
+
+export const rows = [
+  { id: "1", feature: "Sorting", table: "—", dataTable: "✓" },
+  { id: "2", feature: "Filtering", table: "—", dataTable: "✓" },
+  { id: "3", feature: "Pagination", table: "—", dataTable: "✓" },
+  { id: "4", feature: "Zero JS", table: "✓", dataTable: "—" },
+];
+
+export const columns = [
+  { key: "feature", header: "Feature", render: (r) => r.feature },
+  { key: "table", header: "Table", render: (r) => r.table },
+  { key: "dataTable", header: "DataTable", render: (r) => r.dataTable },
+];
+
+## Basic
+
+<Example
+  code={`import { Table } from '@eekodigital/raster';\n\nconst columns = [\n  { key: 'feature', header: 'Feature', render: (r) => r.feature },\n  { key: 'table', header: 'Table', render: (r) => r.table },\n  { key: 'dataTable', header: 'DataTable', render: (r) => r.dataTable },\n];\n\n<Table columns={columns} rows={rows} getRowKey={(r) => r.id} />`}
+>
+  <Table client:load columns={columns} rows={rows} getRowKey={(r) => r.id} />
+</Example>
+
+## Caption
+
+Pass a `caption` to render a visible `<caption>` element that identifies the table for screen reader users.
+
+<Example
+  code={`<Table columns={columns} rows={rows} getRowKey={(r) => r.id} caption="Feature comparison" />`}
+>
+  <Table
+    client:load
+    columns={columns}
+    rows={rows}
+    getRowKey={(r) => r.id}
+    caption="Feature comparison"
+  />
+</Example>
+
+## When to use
+
+<div class="callout">
+  <p>
+    <strong>Use Table for</strong> static content — changelogs, pricing grids, comparison tables,
+    blog posts. It renders server-side with zero JavaScript.
+  </p>
+  <p>
+    <strong>
+      Use <a href="/components/data-table">DataTable</a> instead
+    </strong>{" "}
+    when you need sorting, filtering, or pagination.
+  </p>
+  <p>
+    <strong>
+      Use <a href="/components/summary-list">SummaryList</a> instead
+    </strong>{" "}
+    when displaying key-value pairs rather than rows of comparable data.
+  </p>
+</div>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>columns</code>
+      </td>
+      <td>
+        <code>Column&lt;T&gt;[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Column definitions. Each has <code>key</code>, <code>header</code>, and <code>render</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>rows</code>
+      </td>
+      <td>
+        <code>T[]</code>
+      </td>
+      <td>—</td>
+      <td>Data rows.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>getRowKey</code>
+      </td>
+      <td>
+        <code>(row: T) =&gt; string</code>
+      </td>
+      <td>—</td>
+      <td>Returns a unique key for each row.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>caption</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Optional visible <code>&lt;caption&gt;</code> for screen readers.
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,146 @@
+---
+title: AlertDialog
+description: A confirmation dialog for destructive or irreversible actions. Unlike Dialog, clicking outside or pressing Escape does not dismiss it — the user must explicitly choose an action. Use it to guard any action that cannot be undone.
+---
+
+import Example from "../../../components/Example.astro";
+import { AlertDialogDemo } from "../../../components/DialogDemo.tsx";
+
+## Default
+
+<Example
+  code={`import { AlertDialog, Button } from '@eekodigital/raster';\n\n<AlertDialog.Root>\n  <AlertDialog.Trigger>\n    {(props) => <Button variant="danger" {...props}>Delete project</Button>}\n  </AlertDialog.Trigger>\n  <AlertDialog.Portal>\n    <AlertDialog.Overlay />\n    <AlertDialog.Content>\n      <AlertDialog.Title>Delete project?</AlertDialog.Title>\n      <AlertDialog.Description>\n        This will permanently delete the project and all its audits.\n        This action cannot be undone.\n      </AlertDialog.Description>\n      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>\n      <AlertDialog.Action>Delete project</AlertDialog.Action>\n    </AlertDialog.Content>\n  </AlertDialog.Portal>\n</AlertDialog.Root>`}
+  center
+>
+  <AlertDialogDemo client:load />
+</Example>
+
+## Submitting a form on confirm
+
+When the confirmed action needs to submit to a server, use `useSubmit` from
+React Router in the `AlertDialog.Action`'s `onClick` handler.
+This avoids a hidden form and keeps the intent explicit.
+
+<div class="callout">
+  <pre><code>{`import { useSubmit } from 'react-router';
+import { AlertDialog, Button } from '@eekodigital/raster';
+
+function DeleteProjectButton({ project }) {
+const submit = useSubmit();
+return (
+
+<AlertDialog.Root>
+<AlertDialog.Trigger>
+{(props) => <Button variant="danger" size="sm" {...props}>Delete project</Button>}
+</AlertDialog.Trigger>
+<AlertDialog.Portal>
+<AlertDialog.Overlay />
+<AlertDialog.Content>
+<AlertDialog.Title>Delete project?</AlertDialog.Title>
+<AlertDialog.Description>
+"{project.name}" and all its audits will be permanently
+deleted. This cannot be undone.
+</AlertDialog.Description>
+<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+<AlertDialog.Action
+onClick={() =>
+submit({ \_intent: 'delete' }, { method: 'post' })
+} >
+Delete project
+</AlertDialog.Action>
+</AlertDialog.Content>
+</AlertDialog.Portal>
+</AlertDialog.Root>
+);
+}`}</code></pre>
+
+</div>
+
+## When to use
+
+<div class="callout">
+  <p>
+    <strong>Use AlertDialog for:</strong> deleting records, revoking access, bulk destructive
+    operations, publishing irreversible changes.
+  </p>
+  <p>
+    <strong>Don't use AlertDialog for:</strong> routine confirmations, navigating away from unsaved
+    forms (use a <code>beforeunload</code> guard instead), or anything reversible — those suit a
+    Toast undo pattern better.
+  </p>
+</div>
+
+## Sub-components
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>AlertDialog.Root</code>
+      </td>
+      <td>State provider. No visual output.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Trigger</code>
+      </td>
+      <td>
+        The element that opens the dialog. Pass a render prop to render as a <code>Button</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Portal</code>
+      </td>
+      <td>
+        Renders overlay and content into <code>document.body</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Overlay</code>
+      </td>
+      <td>
+        Dimmed backdrop. Clicking it does <em>not</em> close the dialog.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Content</code>
+      </td>
+      <td>The dialog panel. Focus is trapped here while open.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Title</code>
+      </td>
+      <td>Required. Names the dialog for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Description</code>
+      </td>
+      <td>Required. Explains the consequences of the action.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Cancel</code>
+      </td>
+      <td>Styled dismiss button. Closes without taking action.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>AlertDialog.Action</code>
+      </td>
+      <td>
+        Styled confirm button. Wire up your action in <code>onClick</code>.
+      </td>
+    </tr>
+  </tbody>
+</table>

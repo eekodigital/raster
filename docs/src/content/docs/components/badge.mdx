@@ -1,0 +1,79 @@
+---
+title: Badge
+description: A compact pill for counts, statuses, and numeric indicators. Badges are inline and designed to sit alongside labels, nav items, or table cells. For longer text labels and audit statuses, use Tag instead.
+---
+
+import Example from "../../../components/Example.astro";
+import { BadgeVariantsDemo, BadgeInContextDemo } from "../../../components/BadgeDemo.tsx";
+
+## Variants
+
+<Example
+  code={`import { Badge } from '@eekodigital/raster';\n\n<Badge>12</Badge>\n<Badge variant="primary">New</Badge>\n<Badge variant="success">Passed</Badge>\n<Badge variant="danger">3</Badge>\n<Badge variant="warning">7</Badge>`}
+>
+  <BadgeVariantsDemo client:load />
+</Example>
+
+## In context
+
+Badges typically appear alongside a label to communicate counts or states at a glance.
+
+<Example
+  code={`<div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>\n  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n    <span>Open findings</span>\n    <Badge variant="danger">14</Badge>\n  </div>\n  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n    <span>Pending review</span>\n    <Badge variant="warning">7</Badge>\n  </div>\n  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n    <span>Passed controls</span>\n    <Badge variant="success">98</Badge>\n  </div>\n  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n    <span>Not applicable</span>\n    <Badge>5</Badge>\n  </div>\n</div>`}
+>
+  <BadgeInContextDemo client:load />
+</Example>
+
+## When to use
+
+<div class="callout">
+  <p>
+    <strong>Use Badge for</strong> compact numeric counts and single-word statuses that sit inline
+    alongside a label, nav item, or table cell — unread messages, open findings, pass/fail
+    indicators.
+  </p>
+  <p>
+    <strong>
+      Use <a href="/components/tags">Tag</a> instead
+    </strong>{" "}
+    for longer text labels or multi-word statuses where a pill with more breathing room is
+    appropriate.
+  </p>
+</div>
+
+## Props
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>variant</code>
+      </td>
+      <td>
+        <code>"neutral" | "primary" | "success" | "danger" | "warning"</code>
+      </td>
+      <td>
+        <code>"neutral"</code>
+      </td>
+      <td>Visual intent.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>

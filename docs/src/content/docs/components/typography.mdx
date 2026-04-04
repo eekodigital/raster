@@ -1,0 +1,158 @@
+---
+title: Typography
+description: Semantic typography primitives for headings and body text. Both components apply design tokens for font family, size, weight, and line-height — keeping type consistent across the system.
+---
+
+import Example from "../../../components/Example.astro";
+import {
+  HeadingScaleDemo,
+  HeadingAsDemo,
+  TextScaleDemo,
+  TextVariantsDemo,
+} from "../../../components/TypographyDemo.tsx";
+
+## Heading scale
+
+Six heading levels. Levels 1-2 use the serif family (`Newsreader`) for editorial weight; levels 3-6 use the sans-serif family.
+
+<Example
+  code={`import { Heading } from '@eekodigital/raster';\n\n<Heading level="1">Heading 1</Heading>\n<Heading level="2">Heading 2</Heading>\n<Heading level="3">Heading 3</Heading>`}
+>
+  <HeadingScaleDemo client:load />
+</Example>
+
+## Decoupling tag from visual level
+
+Use the `as` prop to render a different HTML tag without changing the visual style. Useful when the document outline and visual hierarchy diverge.
+
+<Example
+  code={`{/* Visually looks like an h3, but contributes an h2 to the document outline */}\n<Heading level="3" as="h2">Section title</Heading>`}
+>
+  <HeadingAsDemo client:load />
+</Example>
+
+## Text scale
+
+<Example
+  code={`import { Text } from '@eekodigital/raster';\n\n<Text size="lg">Large</Text>\n<Text size="base">Base</Text>\n<Text size="sm">Small</Text>`}
+>
+  <TextScaleDemo client:load />
+</Example>
+
+## Text variants
+
+<Example
+  code={`<Text variant="default">Default</Text>\n<Text variant="subtle">Subtle</Text>\n<Text variant="strong">Strong</Text>\n<Text variant="danger">Danger</Text>`}
+>
+  <TextVariantsDemo client:load />
+</Example>
+
+## Props — Heading
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>level</code>
+      </td>
+      <td>
+        <code>"1" | "2" | "3" | "4" | "5" | "6"</code>
+      </td>
+      <td>
+        <code>"2"</code>
+      </td>
+      <td>Visual size and font style.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>as</code>
+      </td>
+      <td>
+        <code>"h1" ... "h6"</code>
+      </td>
+      <td>—</td>
+      <td>
+        Override the HTML tag (defaults to matching <code>h[level]</code>).
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Props — Text
+
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>size</code>
+      </td>
+      <td>
+        <code>"sm" | "base" | "lg"</code>
+      </td>
+      <td>
+        <code>"base"</code>
+      </td>
+      <td>Font size.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>variant</code>
+      </td>
+      <td>
+        <code>"default" | "subtle" | "strong" | "danger"</code>
+      </td>
+      <td>
+        <code>"default"</code>
+      </td>
+      <td>Colour and weight intent.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>as</code>
+      </td>
+      <td>
+        <code>React.ElementType</code>
+      </td>
+      <td>
+        <code>"p"</code>
+      </td>
+      <td>HTML tag to render.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Additional CSS classes.</td>
+    </tr>
+  </tbody>
+</table>
