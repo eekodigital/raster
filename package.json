@@ -2,6 +2,7 @@
   "name": "@eekodigital/raster",
   "version": "0.1.0",
   "description": "Raster — design system by Eeko Digital",
+  "packageManager": "pnpm@10.33.0",
   "license": "MIT",
   "author": "Eeko Digital <hello@eeko.digital>",
   "repository": {
@@ -37,10 +38,9 @@
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
+    "check": "vp check",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "format": "oxfmt --write .",
-    "format:check": "oxfmt --check ."
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "react": "^19.0.0",
