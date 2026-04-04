@@ -183,6 +183,39 @@
   padding: 0.5rem 0.75rem;
 }
 
+/* Primitive colour scales */
+.scale-block {
+  margin-block: 1rem;
+}
+
+.scale-block > * {
+  margin-top: 0 !important;
+}
+
+.scale-bar {
+  display: flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 3rem;
+}
+
+.scale-bar > * {
+  margin-top: 0 !important;
+}
+
+.scale-labels {
+  display: flex;
+  margin-top: 0.25rem !important;
+}
+
+.scale-labels > code {
+  flex: 1;
+  font-size: 0.6rem;
+  color: var(--color-text-subtle);
+  text-align: center;
+  margin-top: 0 !important;
+}
+
 /* Preview (legacy compat) */
 .preview {
   border: 1px solid var(--sl-color-gray-5);

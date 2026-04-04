@@ -141,9 +141,9 @@ Steps 11-12 meet WCAG AA contrast (4.5:1) against steps 1-2.
 
 {primitiveScales.map(({ name, prefix, steps }) => (
 
-  <div style="margin-block:var(--spacing-4)">
+  <div class="scale-block">
     <h3>{name}</h3>
-    <div style="display:flex;border-radius:var(--radius-md);overflow:hidden;height:3rem">
+    <div class="scale-bar">
       {shadeLabels.map((shade) => (
         <div
           style={`flex:1;background:var(${prefix}-${shade})`}
@@ -151,9 +151,9 @@ Steps 11-12 meet WCAG AA contrast (4.5:1) against steps 1-2.
         />
       ))}
     </div>
-    <div style="display:flex;margin-top:var(--spacing-1)">
+    <div class="scale-labels">
       {shadeLabels.map((shade) => (
-        <code style="flex:1;font-size:0.6rem;color:var(--color-text-subtle);text-align:center">{shade}</code>
+        <code>{shade}</code>
       ))}
     </div>
   </div>
