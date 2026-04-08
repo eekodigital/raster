@@ -5,7 +5,10 @@ const TOKENS_DIR = new URL("../tokens", import.meta.url).pathname;
 const OUTPUT = join(TOKENS_DIR, "tokens.json");
 const THEME_DIR = join(TOKENS_DIR, "themes");
 
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
+function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
+): Record<string, unknown> {
   for (const key of Object.keys(source)) {
     if (
       target[key] &&
@@ -25,7 +28,9 @@ function deepMerge(target: Record<string, unknown>, source: Record<string, unkno
 const merged: Record<string, unknown> = {};
 
 // Merge all top-level token files (excluding output)
-for (const file of readdirSync(TOKENS_DIR).filter((f) => f.endsWith(".json") && f !== "tokens.json")) {
+for (const file of readdirSync(TOKENS_DIR).filter(
+  (f) => f.endsWith(".json") && f !== "tokens.json",
+)) {
   const data = JSON.parse(readFileSync(join(TOKENS_DIR, file), "utf-8"));
   deepMerge(merged, data);
 }
