@@ -54,6 +54,49 @@ When the user is at the top level, a single item is sufficient.
   />
 </Example>
 
+## Router integration
+
+By default, non-current items render as plain `<a>` tags, which trigger full page navigations. To use a framework-specific link component (React Router, Next, TanStack Router, etc.) for client-side navigation, pass a `renderLink` adapter. The component receives `href`, `className`, and `children` — pre-bind any additional props (prefetch hints, analytics, transitions) in the adapter itself so `Breadcrumbs` stays framework-agnostic.
+
+```tsx
+// app/components/BreadcrumbLink.tsx
+import type { ReactNode } from 'react';
+import { Link } from 'react-router';
+
+export function BreadcrumbLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link prefetch="intent" to={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+```
+
+```tsx
+// Usage
+import { Breadcrumbs } from '@eekodigital/raster';
+import { BreadcrumbLink } from './components/BreadcrumbLink';
+
+<Breadcrumbs
+  items={[
+    { label: 'Home', href: '/' },
+    { label: 'Projects', href: '/projects' },
+    { label: 'Acme audit' },
+  ]}
+  renderLink={BreadcrumbLink}
+/>;
+```
+
+The current (last) item and any items without an `href` are always rendered as a plain `<span>`, regardless of `renderLink`.
+
 ## Props
 
 <table class="props-table">
@@ -89,6 +132,34 @@ When the user is at the top level, a single item is sufficient.
       <td>—</td>
       <td>
         Additional CSS class names on the outer <code>&lt;nav&gt;</code> element.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>"Breadcrumb"</code>
+      </td>
+      <td>Accessible label for the navigation landmark.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>renderLink</code>
+      </td>
+      <td>
+        <code>
+          ComponentType&lt;&#123; href: string; className: string; children: ReactNode &#125;&gt;
+        </code>
+      </td>
+      <td>—</td>
+      <td>
+        Optional custom renderer for non-current items with an <code>href</code>. Lets consumers
+        plug in a router-aware link component without <code>Breadcrumbs</code> depending on any
+        specific router.
       </td>
     </tr>
   </tbody>
