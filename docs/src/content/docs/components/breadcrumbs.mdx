@@ -60,8 +60,8 @@ By default, non-current items render as plain `<a>` tags, which trigger full pag
 
 ```tsx
 // app/components/BreadcrumbLink.tsx
-import type { ReactNode } from 'react';
-import { Link } from 'react-router';
+import type { ReactNode } from "react";
+import { Link } from "react-router";
 
 export function BreadcrumbLink({
   href,
@@ -82,14 +82,14 @@ export function BreadcrumbLink({
 
 ```tsx
 // Usage
-import { Breadcrumbs } from '@eekodigital/raster';
-import { BreadcrumbLink } from './components/BreadcrumbLink';
+import { Breadcrumbs } from "@eekodigital/raster";
+import { BreadcrumbLink } from "./components/BreadcrumbLink";
 
 <Breadcrumbs
   items={[
-    { label: 'Home', href: '/' },
-    { label: 'Projects', href: '/projects' },
-    { label: 'Acme audit' },
+    { label: "Home", href: "/" },
+    { label: "Projects", href: "/projects" },
+    { label: "Acme audit" },
   ]}
   renderLink={BreadcrumbLink}
 />;
