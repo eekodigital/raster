@@ -40,7 +40,7 @@
     "dev": "pnpm build:tokens && concurrently -n lib,docs \"tsdown --watch\" \"pnpm --filter @eekodigital/raster-docs dev\"",
     "dev:lib": "tsdown --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint .",
+    "lint": "vp lint",
     "check": "vp check",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -60,7 +60,6 @@
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.1.2",
     "happy-dom": "^20.8.9",
-    "oxlint": "^1.1.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "style-dictionary": "^5.4.0",
