@@ -1,7 +1,7 @@
 import {
-  type ColumnDef,
   type ColumnPinningState,
   type SortingState,
+  type TableOptions,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -14,8 +14,18 @@ import * as styles from "./DataTable.css.js";
 
 export type { ColumnDef as DataTableColumnDef } from "@tanstack/react-table";
 
+// TanStack's own `columns` option type for a table. Using this alias instead of
+// `ColumnDef<TData>[]` avoids a v8 invariance trap: a column helper typed as
+// `ColumnDef<TData, string>` is not assignable to `ColumnDef<TData, unknown>`
+// because the `TValue` parameter is invariant (cell/header templates are
+// contravariant in it while `accessorFn` is covariant). `TableOptions<TData>`
+// resolves `columns` to `ColumnDef<TData, any>[]` — the same type
+// `useReactTable` itself accepts — which is what we need to support mixed
+// column helpers (string, number, display, ...) in a single array.
+type DataTableColumns<TData> = TableOptions<TData>["columns"];
+
 type Props<TData> = {
-  columns: ColumnDef<TData>[];
+  columns: DataTableColumns<TData>;
   data: TData[];
   caption?: string;
   /**
