@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import * as Popover from "./Popover.js";
 
 function renderPopover() {
@@ -54,6 +54,61 @@ describe("Popover", () => {
 
       await userEvent.keyboard("{Escape}");
       await waitFor(() => expect(document.activeElement).toBe(trigger));
+    });
+  });
+
+  describe("asChild", () => {
+    it("Trigger renders consumer's element without a wrapper button", () => {
+      const { container } = render(
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <button type="button" data-testid="custom-trigger" className="mine">
+              Open
+            </button>
+          </Popover.Trigger>
+          <Popover.Content>hi</Popover.Content>
+        </Popover.Root>,
+      );
+      const buttons = container.querySelectorAll("button");
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].dataset.testid).toBe("custom-trigger");
+      expect(buttons[0].className).toContain("mine");
+      expect(buttons[0].getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("Trigger asChild: consumer onClick fires and popover opens", () => {
+      const onClick = vi.fn();
+      render(
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <button type="button" onClick={onClick}>
+              Open
+            </button>
+          </Popover.Trigger>
+          <Popover.Content>
+            <span>content</span>
+          </Popover.Content>
+        </Popover.Root>,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Open" }));
+      expect(onClick).toHaveBeenCalled();
+      expect(screen.getByText("content")).toBeDefined();
+    });
+
+    it("Close asChild renders consumer's element", () => {
+      const { container } = render(
+        <Popover.Root defaultOpen>
+          <Popover.Trigger>Open</Popover.Trigger>
+          <Popover.Content>
+            <Popover.Close asChild>
+              <a href="#close" data-testid="close-link">
+                Close
+              </a>
+            </Popover.Close>
+          </Popover.Content>
+        </Popover.Root>,
+      );
+      expect(container.querySelector('[data-testid="close-link"]')).toBeTruthy();
     });
   });
 });

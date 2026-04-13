@@ -3,6 +3,7 @@ import type React from "react";
 import { Portal as PortalComponent } from "../Portal/Portal.js";
 import { cn } from "../../utils/cn.js";
 import { positionOverlay } from "../../utils/position-overlay.js";
+import { Slot } from "../../utils/slot.js";
 import { useControllableState } from "../../utils/use-controllable-state.js";
 import { useEscapeKey } from "../../utils/use-escape-key.js";
 import * as styles from "./Tooltip.css.js";
@@ -63,19 +64,9 @@ export function Root({
 
 // --- Trigger ---
 
-type TriggerProps = {
-  children:
-    | React.ReactNode
-    | ((props: {
-        ref: (el: HTMLElement | null) => void;
-        onMouseEnter: () => void;
-        onMouseLeave: () => void;
-        onFocus: () => void;
-        onBlur: () => void;
-      }) => React.ReactElement);
-};
+type TriggerProps = { asChild?: boolean; children?: React.ReactNode };
 
-export function Trigger({ children }: TriggerProps) {
+export function Trigger({ asChild = false, children }: TriggerProps) {
   const { setOpen, triggerRef, delayDuration } = useContext(Ctx);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -105,8 +96,8 @@ export function Trigger({ children }: TriggerProps) {
     onBlur: hide,
   };
 
-  if (typeof children === "function") {
-    return children(triggerProps);
+  if (asChild) {
+    return <Slot {...triggerProps}>{children}</Slot>;
   }
 
   return (

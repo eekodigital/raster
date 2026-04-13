@@ -7,12 +7,8 @@ function renderTooltip({ defaultOpen = false }: { defaultOpen?: boolean } = {}) 
   return render(
     <Tooltip.Provider delayDuration={0}>
       <Tooltip.Root defaultOpen={defaultOpen}>
-        <Tooltip.Trigger>
-          {(props) => (
-            <button type="button" {...props}>
-              Hover me
-            </button>
-          )}
+        <Tooltip.Trigger asChild>
+          <button type="button">Hover me</button>
         </Tooltip.Trigger>
         <Tooltip.Content>Tooltip text</Tooltip.Content>
       </Tooltip.Root>
@@ -24,12 +20,8 @@ function renderTooltipWithDelay({ delayDuration = 700 }: { delayDuration?: numbe
   return render(
     <Tooltip.Provider delayDuration={delayDuration}>
       <Tooltip.Root>
-        <Tooltip.Trigger>
-          {(props) => (
-            <button type="button" {...props}>
-              Hover me
-            </button>
-          )}
+        <Tooltip.Trigger asChild>
+          <button type="button">Hover me</button>
         </Tooltip.Trigger>
         <Tooltip.Content>Tooltip text</Tooltip.Content>
       </Tooltip.Root>

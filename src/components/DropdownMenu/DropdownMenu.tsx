@@ -3,6 +3,7 @@ import type React from "react";
 import { Portal as PortalComponent } from "../Portal/Portal.js";
 import { cn } from "../../utils/cn.js";
 import { positionOverlay } from "../../utils/position-overlay.js";
+import { Slot } from "../../utils/slot.js";
 import { useControllableState } from "../../utils/use-controllable-state.js";
 import { useClickOutside } from "../../utils/use-click-outside.js";
 import { useEscapeKey } from "../../utils/use-escape-key.js";
@@ -51,18 +52,9 @@ export function Root({ open: controlledOpen, onOpenChange, children }: RootProps
 
 // --- Trigger ---
 
-type TriggerProps = {
-  children:
-    | React.ReactNode
-    | ((props: {
-        ref: (el: HTMLElement | null) => void;
-        "aria-expanded": boolean;
-        "aria-haspopup": "menu";
-        onClick: () => void;
-      }) => React.ReactElement);
-};
+type TriggerProps = { asChild?: boolean; children?: React.ReactNode };
 
-export function Trigger({ children }: TriggerProps) {
+export function Trigger({ asChild = false, children }: TriggerProps) {
   const { open, setOpen, triggerRef } = useContext(MenuCtx);
 
   const handleClick = useCallback(() => setOpen(!open), [open, setOpen]);
@@ -76,8 +68,8 @@ export function Trigger({ children }: TriggerProps) {
     onClick: handleClick,
   };
 
-  if (typeof children === "function") {
-    return children(triggerProps);
+  if (asChild) {
+    return <Slot {...triggerProps}>{children}</Slot>;
   }
 
   return (

@@ -9,7 +9,7 @@ import { PopoverDemo } from "../../../components/OverlayDemos.tsx";
 ## Default
 
 <Example
-  code={`import { Popover } from '@eekodigital/raster';\n\n<Popover.Root>\n  <Popover.Trigger>\n    <Button variant="secondary">Filters</Button>\n  </Popover.Trigger>\n  <Popover.Portal>\n    <Popover.Content>\n      <p>Filter by status</p>\n      <p>Filter controls go here.</p>\n    </Popover.Content>\n  </Popover.Portal>\n</Popover.Root>`}
+  code={`import { Popover, Button } from '@eekodigital/raster';\n\n<Popover.Root>\n  <Popover.Trigger asChild>\n    <Button variant="secondary">Filters</Button>\n  </Popover.Trigger>\n  <Popover.Portal>\n    <Popover.Content>\n      <p>Filter by status</p>\n      <p>Filter controls go here.</p>\n    </Popover.Content>\n  </Popover.Portal>\n</Popover.Root>`}
   center
 >
   <PopoverDemo client:load />

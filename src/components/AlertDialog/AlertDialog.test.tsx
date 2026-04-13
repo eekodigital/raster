@@ -9,7 +9,9 @@ function renderAlertDialog({
 }: { onAction?: () => void; onCancel?: () => void } = {}) {
   return render(
     <AlertDialog.Root>
-      <AlertDialog.Trigger>{(props) => <button {...props}>Delete</button>}</AlertDialog.Trigger>
+      <AlertDialog.Trigger asChild>
+        <button type="button">Delete</button>
+      </AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay />
         <AlertDialog.Content>

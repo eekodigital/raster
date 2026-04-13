@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useId, useMemo, useR
 import type React from "react";
 import { cn } from "../../utils/cn.js";
 import { positionOverlay } from "../../utils/position-overlay.js";
+import { Slot } from "../../utils/slot.js";
 import { useControllableState } from "../../utils/use-controllable-state.js";
 import { useClickOutside } from "../../utils/use-click-outside.js";
 import { useEscapeKey } from "../../utils/use-escape-key.js";
@@ -50,19 +51,24 @@ export function Root({
   );
 }
 
-type TriggerProps = { children: React.ReactNode };
+type TriggerProps = { asChild?: boolean; children: React.ReactNode };
 
-export function Trigger({ children }: TriggerProps) {
+export function Trigger({ asChild = false, children }: TriggerProps) {
   const { open, setOpen, triggerRef } = useContext(Ctx);
+  const triggerProps = {
+    ref: (el: HTMLElement | null) => {
+      triggerRef.current = el;
+    },
+    "aria-expanded": open,
+    onClick: () => setOpen(!open),
+  };
+
+  if (asChild) {
+    return <Slot {...triggerProps}>{children}</Slot>;
+  }
+
   return (
-    <button
-      type="button"
-      ref={(el) => {
-        triggerRef.current = el;
-      }}
-      aria-expanded={open}
-      onClick={() => setOpen(!open)}
-    >
+    <button type="button" {...triggerProps}>
       {children}
     </button>
   );
@@ -154,13 +160,19 @@ export function Arrow(_props: { className?: string }) {
   return null;
 }
 
-type CloseProps = { className?: string; children?: React.ReactNode };
+type CloseProps = { asChild?: boolean; className?: string; children?: React.ReactNode };
 
-export function Close({ className, children }: CloseProps) {
+export function Close({ asChild = false, className, children }: CloseProps) {
   const { setOpen } = useContext(Ctx);
   const cls = cn(styles.close, className);
+  const closeProps = { className: cls, onClick: () => setOpen(false) };
+
+  if (asChild) {
+    return <Slot {...closeProps}>{children}</Slot>;
+  }
+
   return (
-    <button type="button" className={cls} onClick={() => setOpen(false)}>
+    <button type="button" {...closeProps}>
       {children}
     </button>
   );

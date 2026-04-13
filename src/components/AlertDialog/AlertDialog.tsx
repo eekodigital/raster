@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useId, useMemo, useRef } from "re
 import type React from "react";
 import { Portal as PortalComponent } from "../Portal/Portal.js";
 import { cn } from "../../utils/cn.js";
+import { Slot } from "../../utils/slot.js";
 import { useControllableState } from "../../utils/use-controllable-state.js";
 import { useEscapeKey } from "../../utils/use-escape-key.js";
 import { useFocusTrap } from "../../utils/use-focus-trap.js";
@@ -57,16 +58,9 @@ export function Root({
   return <Ctx.Provider value={ctxValue}>{children}</Ctx.Provider>;
 }
 
-type TriggerProps = {
-  children:
-    | React.ReactNode
-    | ((props: {
-        ref: (el: HTMLElement | null) => void;
-        onClick: () => void;
-      }) => React.ReactElement);
-};
+type TriggerProps = { asChild?: boolean; children?: React.ReactNode };
 
-export function Trigger({ children }: TriggerProps) {
+export function Trigger({ asChild = false, children }: TriggerProps) {
   const { setOpen, triggerRef } = useContext(Ctx);
 
   const triggerProps = {
@@ -76,8 +70,8 @@ export function Trigger({ children }: TriggerProps) {
     onClick: () => setOpen(true),
   };
 
-  if (typeof children === "function") {
-    return children(triggerProps);
+  if (asChild) {
+    return <Slot {...triggerProps}>{children}</Slot>;
   }
 
   return (
@@ -157,37 +151,51 @@ export function Description({ className, children }: DescriptionProps) {
   );
 }
 
-type ActionProps = { className?: string; children?: React.ReactNode; onClick?: () => void };
-export function Action({ className, children, onClick }: ActionProps) {
+type ActionProps = {
+  asChild?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+  onClick?: () => void;
+};
+export function Action({ asChild = false, className, children, onClick }: ActionProps) {
   const { setOpen } = useContext(Ctx);
+  const handleClick = () => {
+    onClick?.();
+    setOpen(false);
+  };
+
+  if (asChild) {
+    return <Slot onClick={handleClick}>{children}</Slot>;
+  }
+
   const cls = cn(styles.action, className);
   return (
-    <button
-      type="button"
-      className={cls}
-      onClick={() => {
-        onClick?.();
-        setOpen(false);
-      }}
-    >
+    <button type="button" className={cls} onClick={handleClick}>
       {children}
     </button>
   );
 }
 
-type CancelProps = { className?: string; children?: React.ReactNode; onClick?: () => void };
-export function Cancel({ className, children, onClick }: CancelProps) {
+type CancelProps = {
+  asChild?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+  onClick?: () => void;
+};
+export function Cancel({ asChild = false, className, children, onClick }: CancelProps) {
   const { setOpen } = useContext(Ctx);
+  const handleClick = () => {
+    onClick?.();
+    setOpen(false);
+  };
+
+  if (asChild) {
+    return <Slot onClick={handleClick}>{children}</Slot>;
+  }
+
   const cls = cn(styles.cancel, className);
   return (
-    <button
-      type="button"
-      className={cls}
-      onClick={() => {
-        onClick?.();
-        setOpen(false);
-      }}
-    >
+    <button type="button" className={cls} onClick={handleClick}>
       {children}
     </button>
   );

@@ -9,7 +9,7 @@ import { DropdownMenuDemo, DropdownMenuSectionsDemo } from "../../../components/
 ## Default
 
 <Example
-  code={`import { DropdownMenu } from '@eekodigital/raster';\n\n<DropdownMenu.Root>\n  <DropdownMenu.Trigger>\n    {(props) => <Button variant="secondary" {...props}>Actions</Button>}\n  </DropdownMenu.Trigger>\n  <DropdownMenu.Portal>\n    <DropdownMenu.Content>\n      <DropdownMenu.Item>Edit</DropdownMenu.Item>\n      <DropdownMenu.Item>Duplicate</DropdownMenu.Item>\n      <DropdownMenu.Separator />\n      <DropdownMenu.Item>Delete</DropdownMenu.Item>\n    </DropdownMenu.Content>\n  </DropdownMenu.Portal>\n</DropdownMenu.Root>`}
+  code={`import { DropdownMenu, Button } from '@eekodigital/raster';\n\n<DropdownMenu.Root>\n  <DropdownMenu.Trigger asChild>\n    <Button variant="secondary">Actions</Button>\n  </DropdownMenu.Trigger>\n  <DropdownMenu.Portal>\n    <DropdownMenu.Content>\n      <DropdownMenu.Item>Edit</DropdownMenu.Item>\n      <DropdownMenu.Item>Duplicate</DropdownMenu.Item>\n      <DropdownMenu.Separator />\n      <DropdownMenu.Item>Delete</DropdownMenu.Item>\n    </DropdownMenu.Content>\n  </DropdownMenu.Portal>\n</DropdownMenu.Root>`}
   center
 >
   <DropdownMenuDemo client:load />
