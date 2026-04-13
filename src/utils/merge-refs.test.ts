@@ -20,7 +20,9 @@ describe("mergeRefs", () => {
 
   it("skips null/undefined refs", () => {
     const a = vi.fn();
-    expect(() => mergeRefs(undefined, null as never, a)("el" as unknown as HTMLElement)).not.toThrow();
+    expect(() =>
+      mergeRefs(undefined, null as never, a)("el" as unknown as HTMLElement),
+    ).not.toThrow();
     expect(a).toHaveBeenCalled();
   });
 });

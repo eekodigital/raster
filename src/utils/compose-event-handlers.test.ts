@@ -25,6 +25,8 @@ describe("composeEventHandlers", () => {
   });
 
   it("tolerates undefined handlers", () => {
-    expect(() => composeEventHandlers(undefined, undefined)({ defaultPrevented: false })).not.toThrow();
+    expect(() =>
+      composeEventHandlers(undefined, undefined)({ defaultPrevented: false }),
+    ).not.toThrow();
   });
 });
