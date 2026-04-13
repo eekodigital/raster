@@ -9,7 +9,7 @@ import { TooltipDemo } from "../../../components/OverlayDemos.tsx";
 ## Default
 
 <Example
-  code={`import { Tooltip } from '@eekodigital/raster';\n\n// In your app root:\n// <Tooltip.Provider>\n\n<Tooltip.Root>\n  <Tooltip.Trigger>\n    {(props) => <Button variant="secondary" {...props}>Hover me</Button>}\n  </Tooltip.Trigger>\n  <Tooltip.Portal>\n    <Tooltip.Content>\n      Saves the current draft\n    </Tooltip.Content>\n  </Tooltip.Portal>\n</Tooltip.Root>`}
+  code={`import { Tooltip, Button } from '@eekodigital/raster';\n\n// In your app root:\n// <Tooltip.Provider>\n\n<Tooltip.Root>\n  <Tooltip.Trigger asChild>\n    <Button variant="secondary">Hover me</Button>\n  </Tooltip.Trigger>\n  <Tooltip.Portal>\n    <Tooltip.Content>\n      Saves the current draft\n    </Tooltip.Content>\n  </Tooltip.Portal>\n</Tooltip.Root>`}
   center
 >
   <TooltipDemo client:load />

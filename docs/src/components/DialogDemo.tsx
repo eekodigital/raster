@@ -3,7 +3,9 @@ import { Dialog, AlertDialog, Button } from "@eekodigital/raster";
 export function ActionDialogDemo() {
   return (
     <Dialog.Root>
-      <Dialog.Trigger>{(props) => <Button {...props}>Edit project</Button>}</Dialog.Trigger>
+      <Dialog.Trigger asChild>
+        <Button>Edit project</Button>
+      </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>
@@ -20,12 +22,8 @@ export function ActionDialogDemo() {
           </p>
           <Dialog.Close aria-label="Close">✕</Dialog.Close>
           <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
-            <Dialog.Close>
-              {(props) => (
-                <Button variant="secondary" {...props}>
-                  Cancel
-                </Button>
-              )}
+            <Dialog.Close asChild>
+              <Button variant="secondary">Cancel</Button>
             </Dialog.Close>
             <Button>Save changes</Button>
           </div>
@@ -38,12 +36,8 @@ export function ActionDialogDemo() {
 export function DismissableDialogDemo() {
   return (
     <Dialog.Root>
-      <Dialog.Trigger>
-        {(props) => (
-          <Button {...props} variant="secondary">
-            View details
-          </Button>
-        )}
+      <Dialog.Trigger asChild>
+        <Button variant="secondary">View details</Button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
@@ -69,12 +63,8 @@ export function DismissableDialogDemo() {
 export function AlertDialogDemo() {
   return (
     <AlertDialog.Root>
-      <AlertDialog.Trigger>
-        {(props) => (
-          <Button {...props} variant="danger">
-            Delete project
-          </Button>
-        )}
+      <AlertDialog.Trigger asChild>
+        <Button variant="danger">Delete project</Button>
       </AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay />

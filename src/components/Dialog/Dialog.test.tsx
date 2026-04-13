@@ -6,7 +6,9 @@ import * as Dialog from "./Dialog.js";
 function renderDialog() {
   return render(
     <Dialog.Root>
-      <Dialog.Trigger>{(props) => <button {...props}>Open</button>}</Dialog.Trigger>
+      <Dialog.Trigger asChild>
+        <button type="button">Open</button>
+      </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>

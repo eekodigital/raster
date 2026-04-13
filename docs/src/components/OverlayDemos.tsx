@@ -4,12 +4,8 @@ export function TooltipDemo() {
   return (
     <Tooltip.Provider>
       <Tooltip.Root>
-        <Tooltip.Trigger>
-          {(props) => (
-            <Button {...props} variant="secondary">
-              Hover me
-            </Button>
-          )}
+        <Tooltip.Trigger asChild>
+          <Button variant="secondary">Hover me</Button>
         </Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Content>Saves the current draft</Tooltip.Content>
@@ -22,7 +18,7 @@ export function TooltipDemo() {
 export function PopoverDemo() {
   return (
     <Popover.Root>
-      <Popover.Trigger>
+      <Popover.Trigger asChild>
         <Button variant="secondary">Filters</Button>
       </Popover.Trigger>
       <Popover.Portal>
@@ -54,12 +50,8 @@ export function PopoverDemo() {
 export function DropdownMenuDemo() {
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
-        {(props) => (
-          <Button {...props} variant="secondary">
-            Actions
-          </Button>
-        )}
+      <DropdownMenu.Trigger asChild>
+        <Button variant="secondary">Actions</Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content>
@@ -76,12 +68,8 @@ export function DropdownMenuDemo() {
 export function DropdownMenuSectionsDemo() {
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
-        {(props) => (
-          <Button {...props} variant="secondary">
-            More options
-          </Button>
-        )}
+      <DropdownMenu.Trigger asChild>
+        <Button variant="secondary">More options</Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content>

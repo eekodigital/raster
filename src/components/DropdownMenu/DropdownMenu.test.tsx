@@ -229,4 +229,25 @@ describe("DropdownMenu", () => {
       expect(screen.getByText("✓")).toBeDefined();
     });
   });
+
+  describe("asChild", () => {
+    it("renders consumer element with aria-haspopup merged in", () => {
+      const { container } = render(
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button type="button" data-testid="x">
+              Options
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <DropdownMenu.Item>Edit</DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>,
+      );
+      const btns = container.querySelectorAll("button");
+      expect(btns).toHaveLength(1);
+      expect(btns[0].dataset.testid).toBe("x");
+      expect(btns[0].getAttribute("aria-haspopup")).toBe("menu");
+    });
+  });
 });

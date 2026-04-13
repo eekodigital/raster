@@ -9,7 +9,7 @@ import { AlertDialogDemo } from "../../../components/DialogDemo.tsx";
 ## Default
 
 <Example
-  code={`import { AlertDialog, Button } from '@eekodigital/raster';\n\n<AlertDialog.Root>\n  <AlertDialog.Trigger>\n    {(props) => <Button variant="danger" {...props}>Delete project</Button>}\n  </AlertDialog.Trigger>\n  <AlertDialog.Portal>\n    <AlertDialog.Overlay />\n    <AlertDialog.Content>\n      <AlertDialog.Title>Delete project?</AlertDialog.Title>\n      <AlertDialog.Description>\n        This will permanently delete the project and all its audits.\n        This action cannot be undone.\n      </AlertDialog.Description>\n      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>\n      <AlertDialog.Action>Delete project</AlertDialog.Action>\n    </AlertDialog.Content>\n  </AlertDialog.Portal>\n</AlertDialog.Root>`}
+  code={`import { AlertDialog, Button } from '@eekodigital/raster';\n\n<AlertDialog.Root>\n  <AlertDialog.Trigger asChild>\n    <Button variant="danger">Delete project</Button>\n  </AlertDialog.Trigger>\n  <AlertDialog.Portal>\n    <AlertDialog.Overlay />\n    <AlertDialog.Content>\n      <AlertDialog.Title>Delete project?</AlertDialog.Title>\n      <AlertDialog.Description>\n        This will permanently delete the project and all its audits.\n        This action cannot be undone.\n      </AlertDialog.Description>\n      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>\n      <AlertDialog.Action>Delete project</AlertDialog.Action>\n    </AlertDialog.Content>\n  </AlertDialog.Portal>\n</AlertDialog.Root>`}
   center
 >
   <AlertDialogDemo client:load />
@@ -30,8 +30,8 @@ const submit = useSubmit();
 return (
 
 <AlertDialog.Root>
-<AlertDialog.Trigger>
-{(props) => <Button variant="danger" size="sm" {...props}>Delete project</Button>}
+<AlertDialog.Trigger asChild>
+<Button variant="danger" size="sm">Delete project</Button>
 </AlertDialog.Trigger>
 <AlertDialog.Portal>
 <AlertDialog.Overlay />
@@ -91,7 +91,8 @@ Delete project
         <code>AlertDialog.Trigger</code>
       </td>
       <td>
-        The element that opens the dialog. Pass a render prop to render as a <code>Button</code>.
+        The element that opens the dialog. Use <code>asChild</code> to render as a custom element
+        like <code>Button</code>.
       </td>
     </tr>
     <tr>

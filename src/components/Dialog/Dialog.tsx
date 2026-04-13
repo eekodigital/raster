@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useId, useMemo, useRef } from "re
 import type React from "react";
 import { Portal as PortalComponent } from "../Portal/Portal.js";
 import { cn } from "../../utils/cn.js";
+import { Slot } from "../../utils/slot.js";
 import { useControllableState } from "../../utils/use-controllable-state.js";
 import { useEscapeKey } from "../../utils/use-escape-key.js";
 import { useFocusTrap } from "../../utils/use-focus-trap.js";
@@ -63,16 +64,9 @@ export function Root({
 
 // --- Trigger ---
 
-type TriggerProps = {
-  children:
-    | React.ReactNode
-    | ((props: {
-        ref: (el: HTMLElement | null) => void;
-        onClick: () => void;
-      }) => React.ReactElement);
-};
+type TriggerProps = { asChild?: boolean; children?: React.ReactNode };
 
-export function Trigger({ children }: TriggerProps) {
+export function Trigger({ asChild = false, children }: TriggerProps) {
   const { setOpen, triggerRef } = useContext(Ctx);
 
   const triggerProps = {
@@ -82,8 +76,8 @@ export function Trigger({ children }: TriggerProps) {
     onClick: () => setOpen(true),
   };
 
-  if (typeof children === "function") {
-    return children(triggerProps);
+  if (asChild) {
+    return <Slot {...triggerProps}>{children}</Slot>;
   }
 
   return (
@@ -191,17 +185,23 @@ export function Description({ className, children }: DescriptionProps) {
 // --- Close ---
 
 type CloseProps = {
+  asChild?: boolean;
   className?: string;
-  children?: React.ReactNode | ((props: { onClick: () => void }) => React.ReactElement);
+  children?: React.ReactNode;
   "aria-label"?: string;
 };
 
-export function Close({ className, children, "aria-label": ariaLabel }: CloseProps) {
+export function Close({
+  asChild = false,
+  className,
+  children,
+  "aria-label": ariaLabel,
+}: CloseProps) {
   const { setOpen } = useContext(Ctx);
   const close = () => setOpen(false);
 
-  if (typeof children === "function") {
-    return children({ onClick: close });
+  if (asChild) {
+    return <Slot onClick={close}>{children}</Slot>;
   }
 
   const cls = cn(styles.close, className);
