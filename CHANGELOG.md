@@ -9,7 +9,6 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
-
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`
