@@ -7,7 +7,6 @@ export const wrapper = style({
 
 export const svg = style({
   display: "block",
-  width: "100%",
 });
 
 export const gridLine = style({

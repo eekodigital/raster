@@ -1,6 +1,7 @@
 import { useRef, useCallback, useImperativeHandle } from "react";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useContainerWidth } from "../../utils/use-container-width.js";
 import * as styles from "./RadarChart.css.js";
 
 export type RadarSeries = {
@@ -38,7 +39,7 @@ export function RadarChart({
   axes,
   series,
   max: maxProp,
-  size = 300,
+  size: sizeProp,
   levels = 4,
   exportRef,
   "aria-label": ariaLabel,
@@ -50,6 +51,10 @@ export function RadarChart({
   const focusedRef = useRef({ series: 0, point: 0 });
   const pointsRef = useRef<Map<string, SVGCircleElement>>(new Map());
 
+  // If `size` is passed, respect it (controlled); otherwise measure the
+  // container so the chart fits whatever width the caller gave us.
+  const measured = useContainerWidth(containerRef, 300);
+  const size = sizeProp ?? measured;
   const cx = size / 2;
   const cy = size / 2;
   const radius = size / 2 - 40; // margin for labels
@@ -82,7 +87,7 @@ export function RadarChart({
 
   return (
     <div ref={containerRef} className={cls}>
-      <svg className={styles.svg} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={ariaLabel}>
+      <svg className={styles.svg} width={size} height={size} role="img" aria-label={ariaLabel}>
         {/* Grid levels */}
         {gridLevels.map((r) => {
           const points = Array.from({ length: count }, (_, i) =>

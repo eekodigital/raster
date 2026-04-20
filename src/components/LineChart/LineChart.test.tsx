@@ -148,4 +148,28 @@ describe("LineChart", () => {
     const regions = screen.getAllByRole("region");
     expect(regions.length).toBe(2);
   });
+
+  it("renders with a fixed-px width and no viewBox so internals don't scale", () => {
+    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
+    const svg = screen.getByRole("img", { name: "Progress" });
+    expect(svg.getAttribute("width")).toBe("720");
+    expect(svg.getAttribute("viewBox")).toBeNull();
+  });
+
+  it("omits empty-string labels so consumers can decimate semantically", () => {
+    const data = Array.from({ length: 10 }, (_, i) => i);
+    const decimated = data.map((_, i) => (i % 5 === 0 ? `D${i}` : ""));
+    const { container } = render(
+      <LineChart series={[{ name: "Series", data }]} labels={decimated} aria-label="Sparse" />,
+    );
+    // Count <text> elements whose content matches our label pattern — these
+    // are the rendered x-axis labels. The hidden sr-only data table uses <td>
+    // for the period column, so it doesn't match.
+    const texts = Array.from(container.querySelectorAll("svg text")).map(
+      (el) => el.textContent ?? "",
+    );
+    expect(texts).toContain("D0");
+    expect(texts).toContain("D5");
+    expect(texts.some((t) => /^D[1-46-9]$/.test(t))).toBe(false);
+  });
 });

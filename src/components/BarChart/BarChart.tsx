@@ -9,6 +9,7 @@ import {
 } from "../../utils/chart-math.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useContainerWidth } from "../../utils/use-container-width.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import * as styles from "./BarChart.css.js";
 
@@ -100,13 +101,13 @@ export function BarChart({
 
   const isHorizontal = direction === "horizontal";
   const isMulti = !!series && !!values;
+  const chartWidth = useContainerWidth(containerRef, 720);
   const needsRotation =
-    !isHorizontal && shouldRotateLabels(data.length, 400 - MARGIN_V.left - MARGIN_V.right);
+    !isHorizontal && shouldRotateLabels(data.length, chartWidth - MARGIN_V.left - MARGIN_V.right);
   const MARGIN = isHorizontal
     ? MARGIN_H
     : { ...MARGIN_V, bottom: needsRotation ? 52 : MARGIN_V.bottom };
   const height = heightProp ?? (isHorizontal ? Math.max(120, data.length * 36) : 200);
-  const chartWidth = 400;
   const plotWidth = chartWidth - MARGIN.left - MARGIN.right;
   const plotHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -382,7 +383,8 @@ export function BarChart({
     <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
-        viewBox={`0 0 ${chartWidth} ${height}`}
+        width={chartWidth}
+        height={height}
         role="img"
         aria-label={ariaLabel}
       >

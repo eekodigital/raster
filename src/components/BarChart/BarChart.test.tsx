@@ -155,4 +155,13 @@ describe("BarChart", () => {
       expect(onClick).toHaveBeenCalledWith({ label: "Q1", value: 0 }, 0, 1);
     });
   });
+
+  describe("responsive sizing", () => {
+    it("renders with a fixed-px width and no viewBox", () => {
+      render(<BarChart data={DATA} aria-label="Results" />);
+      const svg = screen.getByRole("img", { name: "Results" });
+      expect(svg.getAttribute("width")).toBe("720");
+      expect(svg.getAttribute("viewBox")).toBeNull();
+    });
+  });
 });
