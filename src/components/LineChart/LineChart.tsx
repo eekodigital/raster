@@ -125,6 +125,14 @@ export function LineChart({
   // entirely to them. Otherwise fall back to width-based auto-skipping.
   const hasManualXLabels = labels.some((l) => l === "");
   const xLabelSkip = hasManualXLabels ? 1 : labelSkip(labels.length, plotWidth, xLabelMinSpacing);
+  // Edge labels anchor to their x position rather than centering on it, so a
+  // wide label at index 0 or at the last shown index doesn't extend past the
+  // plot area and overlap the chart's container border.
+  const visibleLabelIndices = labels
+    .map((label, i) => (label !== "" && i % xLabelSkip === 0 ? i : -1))
+    .filter((i) => i !== -1);
+  const firstVisibleLabelIndex = visibleLabelIndices[0];
+  const lastVisibleLabelIndex = visibleLabelIndices[visibleLabelIndices.length - 1];
 
   const handleKeyDown = useCallback(
     (seriesIdx: number, pointIdx: number, e: React.KeyboardEvent) => {
@@ -185,7 +193,13 @@ export function LineChart({
                 <text
                   x={xScale(i)}
                   y={plotHeight + 20}
-                  textAnchor="middle"
+                  textAnchor={
+                    i === firstVisibleLabelIndex
+                      ? "start"
+                      : i === lastVisibleLabelIndex
+                        ? "end"
+                        : "middle"
+                  }
                   className={styles.tickLabel}
                 >
                   {label}
