@@ -2,6 +2,7 @@ import { useRef, useCallback, useImperativeHandle } from "react";
 import { extent, linearScale, ticks, labelSkip } from "../../utils/chart-math.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useContainerWidth } from "../../utils/use-container-width.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import * as styles from "./ScatterChart.css.js";
 
@@ -69,7 +70,7 @@ export function ScatterChart({
   const series: ScatterSeries[] = seriesProp ?? (data ? [{ name: "Data", data }] : []);
   const allPoints = series.flatMap((s) => s.data);
 
-  const chartWidth = 400;
+  const chartWidth = useContainerWidth(containerRef, 720);
   const plotWidth = chartWidth - MARGIN.left - MARGIN.right;
   const plotHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -112,7 +113,8 @@ export function ScatterChart({
     <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
-        viewBox={`0 0 ${chartWidth} ${height}`}
+        width={chartWidth}
+        height={height}
         role="img"
         aria-label={ariaLabel}
       >

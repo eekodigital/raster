@@ -60,4 +60,11 @@ describe("ScatterChart", () => {
       expect(document.activeElement).toBe(screen.getByRole("img", { name: /Page B/ }));
     });
   });
+
+  it("renders with a fixed-px width and no viewBox", () => {
+    render(<ScatterChart data={DATA} aria-label="Scatter" />);
+    const svg = screen.getByRole("img", { name: "Scatter" });
+    expect(svg.getAttribute("width")).toBe("720");
+    expect(svg.getAttribute("viewBox")).toBeNull();
+  });
 });

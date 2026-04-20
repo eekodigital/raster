@@ -148,4 +148,11 @@ describe("LineChart", () => {
     const regions = screen.getAllByRole("region");
     expect(regions.length).toBe(2);
   });
+
+  it("renders with a fixed-px width and no viewBox so internals don't scale", () => {
+    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
+    const svg = screen.getByRole("img", { name: "Progress" });
+    expect(svg.getAttribute("width")).toBe("720");
+    expect(svg.getAttribute("viewBox")).toBeNull();
+  });
 });

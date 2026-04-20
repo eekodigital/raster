@@ -17,7 +17,6 @@ export const wrapper = style({
 
 export const svg = style({
   display: "block",
-  width: "100%",
   overflow: "visible",
 });
 

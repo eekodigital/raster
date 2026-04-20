@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useImperativeHandle, useEffect } from "r
 import { catmullRomPath, extent, linearScale, ticks, labelSkip } from "../../utils/chart-math.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useContainerWidth } from "../../utils/use-container-width.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import * as styles from "./LineChart.css.js";
 
@@ -87,7 +88,7 @@ export function LineChart({
     return () => document.removeEventListener("keydown", handleEsc);
   }, [selected, setSelected]);
 
-  const chartWidth = 400;
+  const chartWidth = useContainerWidth(containerRef, 720);
   const plotWidth = chartWidth - MARGIN.left - MARGIN.right;
   const plotHeight = height - MARGIN.top - MARGIN.bottom;
 
@@ -138,7 +139,8 @@ export function LineChart({
     <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
       <svg
         className={styles.svg}
-        viewBox={`0 0 ${chartWidth} ${height}`}
+        width={chartWidth}
+        height={height}
         role="img"
         aria-label={ariaLabel}
       >

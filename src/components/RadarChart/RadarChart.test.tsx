@@ -96,4 +96,17 @@ describe("RadarChart", () => {
     const regions = screen.getAllByRole("region");
     expect(regions.length).toBe(1);
   });
+
+  it("falls back to the measurement default when size is omitted and no viewBox is set", () => {
+    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
+    const svg = screen.getByRole("img", { name: "POUR scores" });
+    expect(svg.getAttribute("width")).toBe("300");
+    expect(svg.getAttribute("viewBox")).toBeNull();
+  });
+
+  it("respects an explicit size prop", () => {
+    render(<RadarChart axes={AXES} series={SERIES} size={420} aria-label="POUR scores" />);
+    const svg = screen.getByRole("img", { name: "POUR scores" });
+    expect(svg.getAttribute("width")).toBe("420");
+  });
 });
