@@ -1,5 +1,14 @@
 # @eekodigital/raster
 
+## 0.3.1
+
+### Patch Changes
+
+- ee7a6ff: `LineChart`: the leftmost visible x-axis label now anchors to `start` and the
+  rightmost to `end`, so wide labels (e.g. full ISO dates) no longer extend
+  past the plot area and overlap the chart's container border. Middle labels
+  stay centered as before.
+
 ## 0.3.0
 
 ### Minor Changes
@@ -13,6 +22,7 @@
   tick labels rendered as 48px. After this change strokes stay at 2px, points
   at their configured radius, and labels at their CSS-specified font-size
   regardless of container width.
+
   - `LineChart`, `BarChart`, `ScatterChart`: `viewBox` removed; the SVG now
     has explicit `width` / `height` attributes driven by a measured container
     width (720px fallback until measured).
@@ -31,6 +41,7 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
+
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`
