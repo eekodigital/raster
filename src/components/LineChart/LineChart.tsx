@@ -24,6 +24,12 @@ type LineChartProps = {
   yLabel?: string;
   grid?: GridOption;
   formatValue?: (value: number) => string;
+  /**
+   * Minimum horizontal space (in display px) between adjacent x-axis labels.
+   * When labels are wider than the default 30px budget (e.g. full dates like
+   * "2026-04-20"), bump this so labels thin out enough not to overlap.
+   */
+  xLabelMinSpacing?: number;
   onPointClick?: (seriesIndex: number, pointIndex: number, value: number) => void;
   selectedIndex?: { series: number; point: number } | null;
   onSelect?: (index: { series: number; point: number } | null) => void;
@@ -53,6 +59,7 @@ export function LineChart({
   yLabel,
   grid = "horizontal",
   formatValue = String,
+  xLabelMinSpacing = 30,
   onPointClick,
   selectedIndex: controlledSelected,
   onSelect,
@@ -113,7 +120,11 @@ export function LineChart({
     labels.length <= 1 ? plotWidth / 2 : (i / (labels.length - 1)) * plotWidth;
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const yTicks = ticks(yMin, yMax, 4);
-  const xLabelSkip = labelSkip(labels.length, plotWidth);
+  // If the consumer has pre-decimated their labels (passing "" for positions
+  // they want to hide — e.g. every Monday, or the first of each month), defer
+  // entirely to them. Otherwise fall back to width-based auto-skipping.
+  const hasManualXLabels = labels.some((l) => l === "");
+  const xLabelSkip = hasManualXLabels ? 1 : labelSkip(labels.length, plotWidth, xLabelMinSpacing);
 
   const handleKeyDown = useCallback(
     (seriesIdx: number, pointIdx: number, e: React.KeyboardEvent) => {
@@ -159,7 +170,7 @@ export function LineChart({
 
           {/* X-axis labels + vertical grid */}
           {labels.map((label, i) => (
-            <g key={label}>
+            <g key={`${i}-${label}`}>
               {showVGrid && (
                 <line
                   x1={xScale(i)}
@@ -170,10 +181,10 @@ export function LineChart({
                   strokeDasharray="2,4"
                 />
               )}
-              {i % xLabelSkip === 0 && (
+              {label !== "" && i % xLabelSkip === 0 && (
                 <text
                   x={xScale(i)}
-                  y={plotHeight + 16}
+                  y={plotHeight + 20}
                   textAnchor="middle"
                   className={styles.tickLabel}
                 >
@@ -190,7 +201,7 @@ export function LineChart({
           {xLabel && (
             <text
               x={plotWidth / 2}
-              y={plotHeight + 32}
+              y={plotHeight + 36}
               textAnchor="middle"
               className={styles.tickLabel}
             >
