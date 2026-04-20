@@ -160,11 +160,7 @@ describe("LineChart", () => {
     const data = Array.from({ length: 10 }, (_, i) => i);
     const decimated = data.map((_, i) => (i % 5 === 0 ? `D${i}` : ""));
     const { container } = render(
-      <LineChart
-        series={[{ name: "Series", data }]}
-        labels={decimated}
-        aria-label="Sparse"
-      />,
+      <LineChart series={[{ name: "Series", data }]} labels={decimated} aria-label="Sparse" />,
     );
     // Count <text> elements whose content matches our label pattern — these
     // are the rendered x-axis labels. The hidden sr-only data table uses <td>
