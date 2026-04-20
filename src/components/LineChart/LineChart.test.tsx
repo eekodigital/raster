@@ -156,6 +156,15 @@ describe("LineChart", () => {
     expect(svg.getAttribute("viewBox")).toBeNull();
   });
 
+  it("anchors the first and last visible labels so they don't extend past the plot", () => {
+    const { container } = render(<LineChart series={SERIES} labels={LABELS} aria-label="Edges" />);
+    const texts = Array.from(container.querySelectorAll("svg text"));
+    const first = texts.find((t) => t.textContent === "Week 1");
+    const last = texts.find((t) => t.textContent === "Week 5");
+    expect(first?.getAttribute("text-anchor")).toBe("start");
+    expect(last?.getAttribute("text-anchor")).toBe("end");
+  });
+
   it("omits empty-string labels so consumers can decimate semantically", () => {
     const data = Array.from({ length: 10 }, (_, i) => i);
     const decimated = data.map((_, i) => (i % 5 === 0 ? `D${i}` : ""));
