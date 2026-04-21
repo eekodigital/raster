@@ -69,13 +69,14 @@ export const legend = style({
 });
 
 export const srOnly = style({
+  display: "block",
   position: "absolute",
   width: "1px",
   height: "1px",
   padding: 0,
   margin: "-1px",
   overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
+  clipPath: "inset(50%)",
   whiteSpace: "nowrap",
   borderWidth: 0,
 });

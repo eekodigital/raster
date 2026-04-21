@@ -94,4 +94,10 @@ describe("DonutChart", () => {
     fireEvent.click(segment);
     expect(onClick).toHaveBeenCalledWith(DATA[1], 1);
   });
+
+  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
+    render(<DonutChart data={DATA} aria-label="Test donut" />);
+    const table = screen.getByRole("table", { name: "Test donut" });
+    expect(table.className).toMatch(/srOnly/);
+  });
 });

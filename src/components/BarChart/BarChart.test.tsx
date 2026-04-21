@@ -164,4 +164,10 @@ describe("BarChart", () => {
       expect(svg.getAttribute("viewBox")).toBeNull();
     });
   });
+
+  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
+    render(<BarChart data={DATA} aria-label="Results" />);
+    const table = screen.getByRole("table", { name: "Results" });
+    expect(table.className).toMatch(/srOnly/);
+  });
 });

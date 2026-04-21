@@ -160,4 +160,16 @@ describe("GeoChart", () => {
     const paths = container.querySelectorAll("path");
     expect(paths.length).toBe(1);
   });
+
+  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
+    render(
+      <GeoChart
+        topology={minimalTopology}
+        data={[{ id: "GBR", value: 92, label: "UK" }]}
+        aria-label="Map"
+      />,
+    );
+    const table = screen.getByRole("table", { name: "Map" });
+    expect(table.className).toMatch(/srOnly/);
+  });
 });
