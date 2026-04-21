@@ -51,6 +51,14 @@ export const root = style({
       animation: `${slideOut} var(--duration-fast) var(--easing-ease)`,
     },
   },
+  "@media": {
+    "(prefers-reduced-motion: reduce)": {
+      selectors: {
+        '&[data-state="open"]': { animation: "none" },
+        '&[data-state="closed"]': { animation: "none" },
+      },
+    },
+  },
 });
 
 export const title = style({

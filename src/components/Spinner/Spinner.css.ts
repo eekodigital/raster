@@ -12,6 +12,9 @@ export const root = style({
   borderTopColor: "var(--color-interactive)",
   animation: `${spin} 0.7s linear infinite`,
   flexShrink: 0,
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { animation: "none" },
+  },
 });
 
 export const sizes = styleVariants({
