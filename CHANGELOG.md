@@ -1,5 +1,11 @@
 # @eekodigital/raster
 
+## 0.3.2
+
+### Patch Changes
+
+- e5196a7: LineChart, BarChart, ScatterChart, RadarChart, GeoChart, and DonutChart: the sr-only accessibility fallback `<table>` now uses `display: block` so its intrinsic table-layout size doesn't contribute to the parent container's `scrollHeight` in Chromium. Firefox was unaffected. Also replaces the deprecated `clip: rect(…)` with `clip-path: inset(50%)`. No API change.
+
 ## 0.3.1
 
 ### Patch Changes
@@ -22,6 +28,7 @@
   tick labels rendered as 48px. After this change strokes stay at 2px, points
   at their configured radius, and labels at their CSS-specified font-size
   regardless of container width.
+
   - `LineChart`, `BarChart`, `ScatterChart`: `viewBox` removed; the SVG now
     has explicit `width` / `height` attributes driven by a measured container
     width (720px fallback until measured).
@@ -40,6 +47,7 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
+
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`
