@@ -67,4 +67,10 @@ describe("ScatterChart", () => {
     expect(svg.getAttribute("width")).toBe("720");
     expect(svg.getAttribute("viewBox")).toBeNull();
   });
+
+  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
+    render(<ScatterChart data={DATA} aria-label="Scatter" />);
+    const table = screen.getByRole("table", { name: "Scatter" });
+    expect(table.className).toMatch(/srOnly/);
+  });
 });

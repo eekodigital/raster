@@ -109,4 +109,10 @@ describe("RadarChart", () => {
     const svg = screen.getByRole("img", { name: "POUR scores" });
     expect(svg.getAttribute("width")).toBe("420");
   });
+
+  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
+    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
+    const table = screen.getByRole("table", { name: "POUR scores" });
+    expect(table.className).toMatch(/srOnly/);
+  });
 });

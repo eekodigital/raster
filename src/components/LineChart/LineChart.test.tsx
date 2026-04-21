@@ -181,4 +181,10 @@ describe("LineChart", () => {
     expect(texts).toContain("D5");
     expect(texts.some((t) => /^D[1-46-9]$/.test(t))).toBe(false);
   });
+
+  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
+    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
+    const table = screen.getByRole("table", { name: "Progress" });
+    expect(table.className).toMatch(/srOnly/);
+  });
 });
