@@ -36,9 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Publish with OIDC trusted publishing (no NPM_TOKEN needed).
-      # Pinned to npm@11.5.1 (minimum for trusted publishing) rather than
-      # @latest to avoid transient broken releases on the registry.
+      # pnpm >= 8 supports --provenance and respects the same trusted-publisher
+      # setup; using it here keeps the whole workflow on one package manager.
       - if: steps.changesets.outputs.hasChangesets == 'false'
-        run: |
-          npm install -g npm@11.5.1
-          npm publish --provenance --access public
+        run: pnpm publish --provenance --access public --no-git-checks
