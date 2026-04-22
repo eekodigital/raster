@@ -26,9 +26,7 @@ describe("ChartTooltip", () => {
   });
 
   it("drops role=tooltip when visible but content is empty", () => {
-    const { container } = render(
-      <ChartTooltip id="tip-1" visible={true} x={0} y={0} content="" />,
-    );
+    const { container } = render(<ChartTooltip id="tip-1" visible={true} x={0} y={0} content="" />);
     const el = container.querySelector("#tip-1") as HTMLElement;
     expect(el.getAttribute("role")).toBeNull();
     expect(el.getAttribute("aria-hidden")).toBe("true");
