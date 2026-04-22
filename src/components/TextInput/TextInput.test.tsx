@@ -20,4 +20,10 @@ describe("TextInput", () => {
     render(<TextInput disabled aria-label="Field" />);
     expect((screen.getByRole("textbox") as HTMLInputElement).disabled).toBe(true);
   });
+
+  it("applies the error style when hasError is set", () => {
+    render(<TextInput hasError aria-label="Field" />);
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input.className).toMatch(/error/i);
+  });
 });

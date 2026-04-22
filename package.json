@@ -43,6 +43,7 @@
     "lint": "vp lint",
     "check": "vp check",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest"
   },
   "devDependencies": {
@@ -58,6 +59,7 @@
     "@vanilla-extract/rollup-plugin": "^1.5.3",
     "@vanilla-extract/vite-plugin": "^5.2.2",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "concurrently": "^9.2.1",
     "happy-dom": "^20.9.0",
     "react": "^19.2.5",
