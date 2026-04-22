@@ -19,7 +19,7 @@ jobs:
       - run: pnpm build
       - run: pnpm check
       - run: pnpm typecheck
-      - run: pnpm --filter @eekodigital/raster test -- --coverage
+      - run: pnpm --filter @eekodigital/raster test:coverage
       - run: cd docs && pnpm build
       - run: cd docs && pnpm exec playwright install --with-deps chromium
       - run: cd docs && pnpm test:e2e
