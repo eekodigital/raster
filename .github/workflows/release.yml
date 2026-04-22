@@ -36,7 +36,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Publish with OIDC trusted publishing (no NPM_TOKEN needed).
-      # pnpm >= 8 supports --provenance and respects the same trusted-publisher
-      # setup; using it here keeps the whole workflow on one package manager.
+      # Trusted publishing requires npm >= 11.5.1 and npm's own publish path —
+      # pnpm publish currently doesn't forward the OIDC identity correctly,
+      # and Node 22 ships with npm 10.x. Install a modern npm and use it.
       - if: steps.changesets.outputs.hasChangesets == 'false'
-        run: pnpm publish --provenance --access public --no-git-checks
+        run: |
+          npm install -g npm@11.5.1
+          npm publish --provenance --access public
