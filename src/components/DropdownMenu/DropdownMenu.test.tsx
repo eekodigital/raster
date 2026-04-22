@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import * as DropdownMenu from "./DropdownMenu.js";
 
 function openMenu() {
@@ -248,6 +249,15 @@ describe("DropdownMenu", () => {
       expect(btns).toHaveLength(1);
       expect(btns[0].dataset.testid).toBe("x");
       expect(btns[0].getAttribute("aria-haspopup")).toBe("menu");
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no axe violations when open", async () => {
+      const { baseElement } = renderMenu();
+      openMenu();
+      await waitFor(() => screen.getByRole("menu"));
+      expect(await axe(baseElement)).toHaveNoViolations();
     });
   });
 });

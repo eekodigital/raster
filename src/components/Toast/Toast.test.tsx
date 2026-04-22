@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import { fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import * as Toast from "./Toast.js";
 
 function renderToast({ open = true }: { open?: boolean } = {}) {
@@ -108,5 +109,12 @@ describe("Toast", () => {
       </Toast.Provider>,
     );
     expect(screen.getByText("Visible")).toBeDefined();
+  });
+
+  describe("accessibility", () => {
+    it("has no axe violations when open", async () => {
+      const { baseElement } = renderToast({ open: true });
+      expect(await axe(baseElement)).toHaveNoViolations();
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import { ErrorSummary } from "./ErrorSummary.js";
 
 describe("ErrorSummary", () => {
@@ -42,5 +43,15 @@ describe("ErrorSummary", () => {
     render(<ErrorSummary errors={{ name: "Required", email: "" }} />);
     const items = screen.getAllByRole("listitem");
     expect(items.length).toBe(1);
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <ErrorSummary
+        errors={{ name: "Name is required", email: "Invalid email" }}
+        fieldIds={{ name: "name-input", email: "email-input" }}
+      />,
+    );
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
