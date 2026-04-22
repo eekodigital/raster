@@ -17,9 +17,9 @@ describe("RadarChart", () => {
     expect(screen.getByRole("img", { name: "Current, Robust: 70" })).toBeDefined();
   });
 
-  it("renders series as a region", () => {
+  it("renders series as a group", () => {
     render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    expect(screen.getByRole("region", { name: "Current" })).toBeDefined();
+    expect(screen.getByRole("group", { name: "Current" })).toBeDefined();
   });
 
   it("renders axis labels", () => {
@@ -58,8 +58,8 @@ describe("RadarChart", () => {
       { name: "Target", data: [100, 100, 100, 100] },
     ];
     render(<RadarChart axes={AXES} series={multi} aria-label="Multi" />);
-    const currentRegion = screen.getByRole("region", { name: "Current" });
-    const targetRegion = screen.getByRole("region", { name: "Target" });
+    const currentRegion = screen.getByRole("group", { name: "Current" });
+    const targetRegion = screen.getByRole("group", { name: "Target" });
     // Each region should have 2 polygons (area fill + line stroke)
     expect(currentRegion.querySelectorAll("polygon").length).toBe(2);
     expect(targetRegion.querySelectorAll("polygon").length).toBe(2);
@@ -93,7 +93,7 @@ describe("RadarChart", () => {
     render(<RadarChart axes={AXES} series={SERIES} aria-label="Single" />);
     // Only one mention of "Current" (in the region, table header, and table body)
     // but no legend element for single series
-    const regions = screen.getAllByRole("region");
+    const regions = screen.getAllByRole("group");
     expect(regions.length).toBe(1);
   });
 

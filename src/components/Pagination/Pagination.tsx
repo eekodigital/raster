@@ -5,6 +5,7 @@ type PaginationProps = {
   totalPages: number;
   onPageChange: (page: number) => void;
   className?: string;
+  "aria-label"?: string;
 };
 
 function getPageNumbers(page: number, totalPages: number): (number | "ellipsis")[] {
@@ -24,13 +25,19 @@ function getPageNumbers(page: number, totalPages: number): (number | "ellipsis")
   return pages;
 }
 
-export function Pagination({ page, totalPages, onPageChange, className }: PaginationProps) {
+export function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+  className,
+  "aria-label": ariaLabel = "Pagination",
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pageNumbers = getPageNumbers(page, totalPages);
 
   return (
-    <nav aria-label="Pagination" className={[styles.nav, className].filter(Boolean).join(" ")}>
+    <nav aria-label={ariaLabel} className={[styles.nav, className].filter(Boolean).join(" ")}>
       <button
         className={styles.button}
         onClick={() => onPageChange(page - 1)}

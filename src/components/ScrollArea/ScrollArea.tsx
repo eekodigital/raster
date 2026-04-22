@@ -43,6 +43,7 @@ type ViewportProps = {
 export function Viewport({ className, style, children }: ViewportProps) {
   return (
     <div
+      tabIndex={0}
       className={cn(styles.viewport, className)}
       style={{ overflow: "scroll", scrollbarWidth: "none", ...style }}
     >

@@ -121,7 +121,7 @@ export function RadarChart({
           const polygon = points.map((p) => `${p.x},${p.y}`).join(" ");
 
           return (
-            <g key={s.name} role="region" aria-label={s.name}>
+            <g key={s.name} role="group" aria-label={s.name}>
               <polygon points={polygon} fill={color} className={styles.seriesArea} />
               <polygon points={polygon} stroke={color} className={styles.seriesLine} />
               {points.map((p, pi) => (

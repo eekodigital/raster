@@ -60,4 +60,16 @@ describe("Pagination", () => {
     const ellipses = container.querySelectorAll("[aria-hidden]");
     expect(ellipses.length).toBeGreaterThan(0);
   });
+
+  it("accepts a custom aria-label to disambiguate multiple paginations on one page", () => {
+    render(
+      <Pagination
+        page={1}
+        totalPages={5}
+        onPageChange={() => {}}
+        aria-label="Search results pagination"
+      />,
+    );
+    expect(screen.getByRole("navigation", { name: "Search results pagination" })).toBeDefined();
+  });
 });

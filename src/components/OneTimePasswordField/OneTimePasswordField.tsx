@@ -10,6 +10,9 @@ type OneTimePasswordFieldProps = {
   disabled?: boolean;
   name?: string;
   passwordMask?: boolean;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  cellAriaLabel?: (index: number, length: number) => string;
 };
 
 export function OneTimePasswordField({
@@ -21,6 +24,9 @@ export function OneTimePasswordField({
   disabled,
   name,
   passwordMask,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  cellAriaLabel = (i, total) => `Character ${i + 1} of ${total}`,
 }: OneTimePasswordFieldProps) {
   const [internalValue, setInternalValue] = useState(defaultValue.padEnd(length, ""));
   const isControlled = controlledValue !== undefined;
@@ -86,7 +92,12 @@ export function OneTimePasswordField({
   );
 
   return (
-    <div className={styles.root}>
+    <div
+      role="group"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      className={styles.root}
+    >
       {Array.from({ length }, (_, i) => (
         <input
           key={i}
@@ -97,6 +108,7 @@ export function OneTimePasswordField({
           inputMode="numeric"
           maxLength={1}
           className={styles.cell}
+          aria-label={cellAriaLabel(i, length)}
           value={value[i] === " " ? "" : (value[i] ?? "")}
           disabled={disabled}
           autoComplete={i === 0 ? "one-time-code" : "off"}

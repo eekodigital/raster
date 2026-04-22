@@ -35,6 +35,12 @@ describe("ScrollArea", () => {
       expect(screen.getByText("Item 5")).toBeDefined();
     });
 
+    it("makes the viewport focusable so keyboard users can scroll", () => {
+      const { container } = renderScrollArea();
+      const viewport = container.querySelector('[tabindex="0"]');
+      expect(viewport).not.toBeNull();
+    });
+
     it("renders vertical scrollbar by default", () => {
       const { container } = renderScrollArea();
       const scrollbar = container.querySelector('[data-orientation="vertical"]');

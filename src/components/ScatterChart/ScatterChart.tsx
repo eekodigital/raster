@@ -185,7 +185,7 @@ export function ScatterChart({
           {series.map((s, si) => {
             const color = s.color ?? DEFAULT_COLORS[si % DEFAULT_COLORS.length];
             return (
-              <g key={s.name} role="region" aria-label={s.name}>
+              <g key={s.name} role="group" aria-label={s.name}>
                 {s.data.map((p, pi) => {
                   const tooltipContent = p.label
                     ? `${s.name}: ${p.label} (${formatValue(p.x)}, ${formatValue(p.y)})`

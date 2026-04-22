@@ -79,12 +79,13 @@ type ChartTooltipProps = {
 };
 
 export function ChartTooltip({ id, visible, x, y, content }: ChartTooltipProps) {
+  const isActive = visible && content.length > 0;
   return (
     <div
       id={id}
-      role="tooltip"
+      {...(isActive ? { role: "tooltip" } : { "aria-hidden": true })}
       className={styles.tooltip}
-      data-visible={visible || undefined}
+      data-visible={isActive || undefined}
       style={{
         left: x,
         top: y,

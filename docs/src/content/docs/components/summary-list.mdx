@@ -17,7 +17,7 @@ import {
 <Example
   code={`import {\n  SummaryList,\n  SummaryListRow,\n  SummaryListKey,\n  SummaryListValue,\n} from '@eekodigital/raster';\n\n<SummaryList>\n  <SummaryListRow>\n    <SummaryListKey>Full name</SummaryListKey>\n    <SummaryListValue>Sarah Johnson</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Date of birth</SummaryListKey>\n    <SummaryListValue>12 March 1985</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Email address</SummaryListKey>\n    <SummaryListValue>sarah.johnson@example.com</SummaryListValue>\n  </SummaryListRow>\n</SummaryList>`}
 >
-  <SummaryListDS client:load>
+  <SummaryListDS>
     <SummaryListRow>
       <SummaryListKey>Full name</SummaryListKey>
       <SummaryListValue>Sarah Johnson</SummaryListValue>
@@ -40,7 +40,7 @@ Add a `SummaryListActions` cell to each row to provide contextual change links.
 <Example
   code={`import {\n  SummaryList,\n  SummaryListRow,\n  SummaryListKey,\n  SummaryListValue,\n  SummaryListActions,\n} from '@eekodigital/raster';\n\n<SummaryList>\n  <SummaryListRow>\n    <SummaryListKey>Full name</SummaryListKey>\n    <SummaryListValue>Sarah Johnson</SummaryListValue>\n    <SummaryListActions>\n      <a href="#">Change<span class="sr-only"> full name</span></a>\n    </SummaryListActions>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Date of birth</SummaryListKey>\n    <SummaryListValue>12 March 1985</SummaryListValue>\n    <SummaryListActions>\n      <a href="#">Change<span class="sr-only"> date of birth</span></a>\n    </SummaryListActions>\n  </SummaryListRow>\n</SummaryList>`}
 >
-  <SummaryListDS client:load>
+  <SummaryListDS>
     <SummaryListRow>
       <SummaryListKey>Full name</SummaryListKey>
       <SummaryListValue>Sarah Johnson</SummaryListValue>
@@ -65,7 +65,7 @@ A lighter style with bold labels, regular-weight values, and no separator lines.
 <Example
   code={`<SummaryList variant="plain">\n  <SummaryListRow>\n    <SummaryListKey>Full name</SummaryListKey>\n    <SummaryListValue>Sarah Johnson</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Date of birth</SummaryListKey>\n    <SummaryListValue>12 March 1985</SummaryListValue>\n  </SummaryListRow>\n  <SummaryListRow>\n    <SummaryListKey>Email address</SummaryListKey>\n    <SummaryListValue>sarah.johnson@example.com</SummaryListValue>\n  </SummaryListRow>\n</SummaryList>`}
 >
-  <SummaryListDS client:load variant="plain">
+  <SummaryListDS variant="plain">
     <SummaryListRow>
       <SummaryListKey>Full name</SummaryListKey>
       <SummaryListValue>Sarah Johnson</SummaryListValue>

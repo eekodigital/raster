@@ -13,7 +13,7 @@ A 10-page set with interactive prev/next and page number buttons.
 <Example
   code={`import { useState } from 'react';\nimport { Pagination } from '@eekodigital/raster';\n\nfunction PaginationDemo() {\n  const [page, setPage] = useState(1);\n  return <Pagination page={page} totalPages={10} onPageChange={setPage} />;\n}`}
 >
-  <PaginationDemo client:load />
+  <PaginationDemo client:load label="Default pagination demo" />
 </Example>
 
 ## Few pages
@@ -21,7 +21,7 @@ A 10-page set with interactive prev/next and page number buttons.
 When there are only a handful of pages all page numbers are shown.
 
 <Example code={`<Pagination page={page} totalPages={3} onPageChange={setPage} />`}>
-  <PaginationDemo client:load totalPages={3} />
+  <PaginationDemo client:load totalPages={3} label="Few-pages pagination demo" />
 </Example>
 
 ## Props
