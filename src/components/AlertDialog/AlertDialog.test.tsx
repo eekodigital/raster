@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import * as AlertDialog from "./AlertDialog.js";
 
 function renderAlertDialog({
@@ -95,6 +96,15 @@ describe("AlertDialog", () => {
       expect(dialog.contains(document.activeElement)).toBe(true);
       await userEvent.tab();
       expect(dialog.contains(document.activeElement)).toBe(true);
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no axe violations when open", async () => {
+      const { baseElement } = renderAlertDialog();
+      fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+      await waitFor(() => screen.getByRole("alertdialog"));
+      expect(await axe(baseElement)).toHaveNoViolations();
     });
   });
 });

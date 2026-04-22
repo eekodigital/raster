@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import { NotificationBanner } from "./NotificationBanner.js";
 
 describe("NotificationBanner", () => {
@@ -35,4 +36,11 @@ describe("NotificationBanner", () => {
       expect(screen.getByText("Message")).toBeDefined();
     },
   );
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <NotificationBanner title="Heads up">Something happened.</NotificationBanner>,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
 });

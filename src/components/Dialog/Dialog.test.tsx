@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import * as Dialog from "./Dialog.js";
 
 function renderDialog() {
@@ -87,6 +88,15 @@ describe("Dialog", () => {
       expect(dialog.contains(document.activeElement)).toBe(true);
       await userEvent.tab();
       expect(dialog.contains(document.activeElement)).toBe(true);
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no axe violations when open", async () => {
+      const { baseElement } = renderDialog();
+      fireEvent.click(screen.getByRole("button", { name: "Open" }));
+      await waitFor(() => screen.getByRole("dialog"));
+      expect(await axe(baseElement)).toHaveNoViolations();
     });
   });
 });

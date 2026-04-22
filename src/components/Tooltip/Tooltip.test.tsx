@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import * as Tooltip from "./Tooltip.js";
 
 function renderTooltip({ defaultOpen = false }: { defaultOpen?: boolean } = {}) {
@@ -142,6 +143,14 @@ describe("Tooltip", () => {
       );
       const tooltip = screen.getByRole("tooltip");
       expect(tooltip.className).toContain("custom-tip");
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no axe violations when open", async () => {
+      const { baseElement } = renderTooltip({ defaultOpen: true });
+      await waitFor(() => screen.getByRole("tooltip"));
+      expect(await axe(baseElement)).toHaveNoViolations();
     });
   });
 });

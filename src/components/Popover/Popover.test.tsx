@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
 import * as Popover from "./Popover.js";
 
 function renderPopover() {
@@ -109,6 +110,15 @@ describe("Popover", () => {
         </Popover.Root>,
       );
       expect(container.querySelector('[data-testid="close-link"]')).toBeTruthy();
+    });
+  });
+
+  describe("accessibility", () => {
+    it("has no axe violations when open", async () => {
+      const { baseElement } = renderPopover();
+      fireEvent.click(screen.getByRole("button", { name: "Open" }));
+      await waitFor(() => screen.getByPlaceholderText("Name"));
+      expect(await axe(baseElement)).toHaveNoViolations();
     });
   });
 });
