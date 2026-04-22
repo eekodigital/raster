@@ -16,6 +16,9 @@ export const root = style({
   )`,
   backgroundSize: "200% 100%",
   animation: `${shimmer} 1.5s ease-in-out infinite`,
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { animation: "none" },
+  },
 });
 
 export const variants = styleVariants({
