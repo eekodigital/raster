@@ -15,10 +15,23 @@ describe("ChartTooltip", () => {
     expect(tooltip.getAttribute("data-visible")).toBeDefined();
   });
 
-  it("does not set data-visible when visible is false", () => {
-    render(<ChartTooltip id="tip-1" visible={false} x={0} y={0} content="Hidden" />);
-    const tooltip = screen.getByRole("tooltip");
-    expect(tooltip.getAttribute("data-visible")).toBeNull();
+  it("drops role=tooltip and sets aria-hidden when not visible", () => {
+    const { container } = render(
+      <ChartTooltip id="tip-1" visible={false} x={0} y={0} content="Hidden" />,
+    );
+    const el = container.querySelector("#tip-1") as HTMLElement;
+    expect(el.getAttribute("role")).toBeNull();
+    expect(el.getAttribute("aria-hidden")).toBe("true");
+    expect(el.getAttribute("data-visible")).toBeNull();
+  });
+
+  it("drops role=tooltip when visible but content is empty", () => {
+    const { container } = render(
+      <ChartTooltip id="tip-1" visible={true} x={0} y={0} content="" />,
+    );
+    const el = container.querySelector("#tip-1") as HTMLElement;
+    expect(el.getAttribute("role")).toBeNull();
+    expect(el.getAttribute("aria-hidden")).toBe("true");
   });
 
   it("positions with left and top styles", () => {

@@ -3,7 +3,7 @@ import { cn } from "../../utils/cn.js";
 import { useControllableState } from "../../utils/use-controllable-state.js";
 import * as styles from "./Switch.css.js";
 
-type RootProps = {
+type RootOwnProps = {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
@@ -15,6 +15,12 @@ type RootProps = {
   children?: React.ReactNode;
 };
 
+type RootProps = RootOwnProps &
+  Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    keyof RootOwnProps | "type" | "role" | "aria-checked" | "onClick"
+  >;
+
 export function Root({
   checked: controlledChecked,
   defaultChecked = false,
@@ -25,6 +31,7 @@ export function Root({
   required,
   className,
   children,
+  ...buttonProps
 }: RootProps) {
   const [checked, setChecked] = useControllableState(
     controlledChecked,
@@ -39,6 +46,7 @@ export function Root({
 
   return (
     <button
+      {...buttonProps}
       type="button"
       role="switch"
       aria-checked={checked}

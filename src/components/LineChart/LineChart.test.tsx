@@ -18,9 +18,9 @@ describe("LineChart", () => {
     expect(screen.getByRole("img", { name: "Assessed, Week 5: 86" })).toBeDefined();
   });
 
-  it("renders series as a region", () => {
+  it("renders series as a group", () => {
     render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    expect(screen.getByRole("region", { name: "Assessed" })).toBeDefined();
+    expect(screen.getByRole("group", { name: "Assessed" })).toBeDefined();
   });
 
   it("renders a hidden data table", () => {
@@ -61,7 +61,7 @@ describe("LineChart", () => {
   it("renders area path elements when area prop is true", () => {
     render(<LineChart series={SERIES} labels={LABELS} area aria-label="Area" />);
     // With area=true, there should be an area path (fill != "none") in addition to the line path
-    const region = screen.getByRole("region", { name: "Assessed" });
+    const region = screen.getByRole("group", { name: "Assessed" });
     const paths = region.querySelectorAll("path");
     // At least 2 paths: one for the area fill, one for the line stroke
     expect(paths.length).toBeGreaterThanOrEqual(2);
@@ -104,7 +104,7 @@ describe("LineChart", () => {
 
   it('renders smooth curve path when curve="smooth"', () => {
     render(<LineChart series={SERIES} labels={LABELS} curve="smooth" aria-label="Smooth" />);
-    const region = screen.getByRole("region", { name: "Assessed" });
+    const region = screen.getByRole("group", { name: "Assessed" });
     const paths = region.querySelectorAll("path");
     expect(paths.length).toBeGreaterThan(0);
     // Smooth curves use C (cubic bezier) commands from catmullRomPath
@@ -121,7 +121,7 @@ describe("LineChart", () => {
       <LineChart series={multi} labels={["Jan", "Feb", "Mar"]} stacked area aria-label="Stacked" />,
     );
     // Each series should have an area path
-    const regions = screen.getAllByRole("region");
+    const regions = screen.getAllByRole("group");
     expect(regions.length).toBe(2);
     for (const region of regions) {
       const paths = region.querySelectorAll("path");
@@ -145,7 +145,7 @@ describe("LineChart", () => {
         aria-label="Smooth stacked"
       />,
     );
-    const regions = screen.getAllByRole("region");
+    const regions = screen.getAllByRole("group");
     expect(regions.length).toBe(2);
   });
 

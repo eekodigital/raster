@@ -61,4 +61,23 @@ describe("Switch", () => {
       expect(screen.getByRole("switch").getAttribute("aria-checked")).toBe("false");
     });
   });
+
+  describe("accessibility", () => {
+    it("forwards aria-label to the underlying button", () => {
+      renderSwitch({ "aria-label": "Enable notifications" });
+      expect(screen.getByRole("switch", { name: "Enable notifications" })).toBeDefined();
+    });
+
+    it("forwards aria-labelledby", () => {
+      render(
+        <>
+          <span id="switch-label">Dark mode</span>
+          <Switch.Root aria-labelledby="switch-label">
+            <Switch.Thumb />
+          </Switch.Root>
+        </>,
+      );
+      expect(screen.getByRole("switch", { name: "Dark mode" })).toBeDefined();
+    });
+  });
 });

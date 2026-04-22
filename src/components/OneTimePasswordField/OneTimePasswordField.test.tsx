@@ -18,4 +18,22 @@ describe("OneTimePasswordField", () => {
     const inputs = screen.getAllByRole("textbox") as HTMLInputElement[];
     expect(inputs.every((el) => el.disabled)).toBe(true);
   });
+
+  it("gives each cell a default aria-label", () => {
+    render(<OneTimePasswordField length={3} />);
+    expect(screen.getByRole("textbox", { name: "Character 1 of 3" })).toBeDefined();
+    expect(screen.getByRole("textbox", { name: "Character 2 of 3" })).toBeDefined();
+    expect(screen.getByRole("textbox", { name: "Character 3 of 3" })).toBeDefined();
+  });
+
+  it("uses a custom cellAriaLabel when provided", () => {
+    render(<OneTimePasswordField length={2} cellAriaLabel={(i) => `Digit ${i + 1}`} />);
+    expect(screen.getByRole("textbox", { name: "Digit 1" })).toBeDefined();
+    expect(screen.getByRole("textbox", { name: "Digit 2" })).toBeDefined();
+  });
+
+  it("exposes the cells as a labelled group", () => {
+    render(<OneTimePasswordField aria-label="Verification code" />);
+    expect(screen.getByRole("group", { name: "Verification code" })).toBeDefined();
+  });
 });

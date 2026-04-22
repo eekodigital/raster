@@ -279,7 +279,7 @@ export function LineChart({
             );
 
             return (
-              <g key={s.name} role="region" aria-label={s.name}>
+              <g key={s.name} role="group" aria-label={s.name}>
                 {areaPath && <path d={areaPath} fill={color} className={styles.area} />}
                 <path
                   d={linePath}
