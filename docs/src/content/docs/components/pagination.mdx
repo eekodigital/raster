@@ -4,7 +4,11 @@ description: Allows users to navigate through a multi-page data set. The current
 ---
 
 import Example from "../../../components/Example.astro";
-import { PaginationDemo } from "../../../components/PaginationDemo.tsx";
+import {
+  PaginationDemo,
+  PaginationItemRangeDemo,
+  PaginationAnchorDemo,
+} from "../../../components/PaginationDemo.tsx";
 
 ## Default
 
@@ -22,6 +26,28 @@ When there are only a handful of pages all page numbers are shown.
 
 <Example code={`<Pagination page={page} totalPages={3} onPageChange={setPage} />`}>
   <PaginationDemo client:load totalPages={3} label="Few-pages pagination demo" />
+</Example>
+
+## With item range
+
+Pass an `itemRange` to render a live-announced `Items X–Y of N` caption under the pager. Handy on admin lists and public feeds where users want to see the full size of the data set.
+
+<Example
+  code={`<Pagination\n  page={page}\n  totalPages={7}\n  onPageChange={setPage}\n  itemRange={{ from: 21, to: 40, total: 134 }}\n/>`}
+>
+  <PaginationItemRangeDemo client:load />
+</Example>
+
+## SSR anchor mode
+
+Pass a `getHref` instead of `onPageChange` to render page controls as real `<a href>` links. This works without JavaScript, is crawlable, and is the right shape for server-rendered routes where the URL (`?page=N`) is the source of truth. Use this on public-facing paginated feeds; use the callback form for client-driven dialogs and admin tools that fetch in place.
+
+In this mode the current page renders as a `<span aria-current="page">` rather than a self-link, and disabled prev/next render as `<span aria-disabled="true">`.
+
+<Example
+  code={`<Pagination\n  page={2}\n  totalPages={7}\n  getHref={(p) => \`?page=\${p}\`}\n  itemRange={{ from: 21, to: 40, total: 134 }}\n/>`}
+>
+  <PaginationAnchorDemo client:load />
 </Example>
 
 ## Props
@@ -64,7 +90,50 @@ When there are only a handful of pages all page numbers are shown.
         <code>(page: number) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Callback fired when the user selects a different page.</td>
+      <td>
+        Click-mode callback. Required when <code>getHref</code> is not provided. Renders controls as{" "}
+        <code>&lt;button&gt;</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>getHref</code>
+      </td>
+      <td>
+        <code>(page: number) =&gt; string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Anchor-mode href generator. Required when <code>onPageChange</code> is not provided. Renders
+        controls as <code>&lt;a href&gt;</code>; current page as{" "}
+        <code>&lt;span aria-current="page"&gt;</code>; disabled prev/next as{" "}
+        <code>&lt;span aria-disabled="true"&gt;</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>itemRange</code>
+      </td>
+      <td>
+        <code>{"{ from: number; to: number; total: number }"}</code>
+      </td>
+      <td>—</td>
+      <td>
+        Optional. When provided, renders a live-announced <code>Items from–to of total</code>{" "}
+        caption below the pager.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>aria-label</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>"Pagination"</code>
+      </td>
+      <td>Disambiguates multiple pagination landmarks on the same page.</td>
     </tr>
   </tbody>
 </table>

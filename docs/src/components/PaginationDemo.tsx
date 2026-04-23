@@ -18,3 +18,45 @@ export function PaginationDemo({
     </div>
   );
 }
+
+export function PaginationItemRangeDemo() {
+  const [page, setPage] = useState(2);
+  const pageSize = 20;
+  const total = 134;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, total);
+
+  return (
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      onPageChange={setPage}
+      itemRange={{ from, to, total }}
+      aria-label="Library pagination"
+    />
+  );
+}
+
+export function PaginationAnchorDemo({
+  page = 2,
+  totalPages = 7,
+}: {
+  page?: number;
+  totalPages?: number;
+}) {
+  const pageSize = 20;
+  const total = (totalPages - 1) * pageSize + 14;
+  const from = (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, total);
+
+  return (
+    <Pagination
+      page={page}
+      totalPages={totalPages}
+      getHref={(p) => `#page-${p}`}
+      itemRange={{ from, to, total }}
+      aria-label="Feed pagination"
+    />
+  );
+}

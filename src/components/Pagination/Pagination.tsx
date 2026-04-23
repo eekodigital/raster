@@ -1,12 +1,30 @@
 import * as styles from "./Pagination.css.js";
 
-type PaginationProps = {
+export type ItemRange = {
+  from: number;
+  to: number;
+  total: number;
+};
+
+type PaginationBaseProps = {
   page: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  itemRange?: ItemRange;
   className?: string;
   "aria-label"?: string;
 };
+
+type ClickPaginationProps = PaginationBaseProps & {
+  onPageChange: (page: number) => void;
+  getHref?: never;
+};
+
+type AnchorPaginationProps = PaginationBaseProps & {
+  getHref: (page: number) => string;
+  onPageChange?: never;
+};
+
+export type PaginationProps = ClickPaginationProps | AnchorPaginationProps;
 
 function getPageNumbers(page: number, totalPages: number): (number | "ellipsis")[] {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -25,56 +43,95 @@ function getPageNumbers(page: number, totalPages: number): (number | "ellipsis")
   return pages;
 }
 
-export function Pagination({
-  page,
-  totalPages,
-  onPageChange,
-  className,
-  "aria-label": ariaLabel = "Pagination",
-}: PaginationProps) {
-  if (totalPages <= 1) return null;
+function cx(...classes: (string | false | undefined | null)[]): string {
+  return classes.filter(Boolean).join(" ");
+}
+
+export function Pagination(props: PaginationProps) {
+  const { page, totalPages, itemRange, className, "aria-label": ariaLabel = "Pagination" } = props;
+
+  if (totalPages <= 1 && !itemRange) return null;
 
   const pageNumbers = getPageNumbers(page, totalPages);
+  const prevDisabled = page <= 1;
+  const nextDisabled = page >= totalPages;
+
+  const renderControl = (
+    targetPage: number,
+    content: string,
+    ariaLabelText: string,
+    disabled: boolean,
+    isCurrent: boolean,
+  ) => {
+    if ("getHref" in props && typeof props.getHref === "function") {
+      if (disabled) {
+        return (
+          <span
+            className={cx(styles.button, styles.buttonDisabled)}
+            aria-disabled="true"
+            aria-label={ariaLabelText}
+          >
+            {content}
+          </span>
+        );
+      }
+      if (isCurrent) {
+        return (
+          <span
+            className={cx(styles.button, styles.buttonCurrent)}
+            aria-current="page"
+            aria-label={ariaLabelText}
+          >
+            {content}
+          </span>
+        );
+      }
+      return (
+        <a href={props.getHref(targetPage)} className={styles.button} aria-label={ariaLabelText}>
+          {content}
+        </a>
+      );
+    }
+
+    const onPageChange = (props as ClickPaginationProps).onPageChange;
+    return (
+      <button
+        className={cx(styles.button, isCurrent ? styles.buttonCurrent : undefined)}
+        onClick={() => onPageChange(targetPage)}
+        disabled={disabled}
+        aria-label={ariaLabelText}
+        aria-current={isCurrent ? "page" : undefined}
+      >
+        {content}
+      </button>
+    );
+  };
 
   return (
-    <nav aria-label={ariaLabel} className={[styles.nav, className].filter(Boolean).join(" ")}>
-      <button
-        className={styles.button}
-        onClick={() => onPageChange(page - 1)}
-        disabled={page <= 1}
-        aria-label="Previous page"
-      >
-        ‹
-      </button>
+    <nav aria-label={ariaLabel} className={cx(styles.root, className)}>
+      {totalPages > 1 && (
+        <div className={styles.nav}>
+          {renderControl(page - 1, "‹", "Previous page", prevDisabled, false)}
 
-      {pageNumbers.map((p, i) =>
-        p === "ellipsis" ? (
-          <span key={`ellipsis-${i}`} className={styles.ellipsis} aria-hidden>
-            …
-          </span>
-        ) : (
-          <button
-            key={p}
-            className={[styles.button, p === page ? styles.buttonCurrent : undefined]
-              .filter(Boolean)
-              .join(" ")}
-            onClick={() => onPageChange(p)}
-            aria-label={`Page ${p}`}
-            aria-current={p === page ? "page" : undefined}
-          >
-            {p}
-          </button>
-        ),
+          {pageNumbers.map((p, i) =>
+            p === "ellipsis" ? (
+              <span key={`ellipsis-${i}`} className={styles.ellipsis} aria-hidden>
+                …
+              </span>
+            ) : (
+              <span key={p}>{renderControl(p, String(p), `Page ${p}`, false, p === page)}</span>
+            ),
+          )}
+
+          {renderControl(page + 1, "›", "Next page", nextDisabled, false)}
+        </div>
       )}
 
-      <button
-        className={styles.button}
-        onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages}
-        aria-label="Next page"
-      >
-        ›
-      </button>
+      {itemRange && (
+        <p className={styles.range} aria-live="polite">
+          Items {itemRange.from}–{itemRange.to} of {itemRange.total}
+        </p>
+      )}
     </nav>
   );
 }

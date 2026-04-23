@@ -1,5 +1,12 @@
 import { style } from "@vanilla-extract/css";
 
+export const root = style({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "var(--spacing-2)",
+});
+
 export const nav = style({
   display: "flex",
   alignItems: "center",
@@ -21,11 +28,12 @@ export const button = style({
   fontSize: "var(--font-size-sm)",
   fontWeight: "var(--font-weight-normal)",
   fontFamily: "inherit",
+  textDecoration: "none",
   cursor: "pointer",
   transition:
     "background-color var(--duration-fast) var(--easing-ease), border-color var(--duration-fast) var(--easing-ease)",
   selectors: {
-    "&:hover:not(:disabled)": {
+    '&:hover:not(:disabled):not([aria-disabled="true"]):not([aria-current="page"])': {
       background: "var(--color-interactive-subtle)",
       borderColor: "var(--color-interactive)",
     },
@@ -40,11 +48,18 @@ export const button = style({
   },
 });
 
+export const buttonDisabled = style({
+  opacity: "var(--opacity-disabled)",
+  cursor: "not-allowed",
+  pointerEvents: "none",
+});
+
 export const buttonCurrent = style({
   background: "var(--color-interactive)",
   color: "var(--color-interactive-text)",
   borderColor: "var(--color-interactive)",
   fontWeight: "var(--font-weight-medium)",
+  cursor: "default",
   selectors: {
     "&:hover": {
       background: "var(--color-interactive-hover)",
@@ -62,4 +77,10 @@ export const ellipsis = style({
   color: "var(--color-text-subtle)",
   fontSize: "var(--font-size-sm)",
   userSelect: "none",
+});
+
+export const range = style({
+  margin: 0,
+  color: "var(--color-text-subtle)",
+  fontSize: "var(--font-size-sm)",
 });
