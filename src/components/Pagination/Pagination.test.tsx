@@ -113,13 +113,7 @@ describe("Pagination (anchor mode via getHref)", () => {
   });
 
   it("passes arbitrary href generators (filter params, trailing slashes, etc.)", () => {
-    render(
-      <Pagination
-        page={1}
-        totalPages={3}
-        getHref={(p) => `/?type=article&page=${p}`}
-      />,
-    );
+    render(<Pagination page={1} totalPages={3} getHref={(p) => `/?type=article&page=${p}`} />);
     expect(screen.getByRole("link", { name: "Page 2" }).getAttribute("href")).toBe(
       "/?type=article&page=2",
     );

@@ -4,7 +4,11 @@ description: Allows users to navigate through a multi-page data set. The current
 ---
 
 import Example from "../../../components/Example.astro";
-import { PaginationDemo, PaginationItemRangeDemo, PaginationAnchorDemo } from "../../../components/PaginationDemo.tsx";
+import {
+  PaginationDemo,
+  PaginationItemRangeDemo,
+  PaginationAnchorDemo,
+} from "../../../components/PaginationDemo.tsx";
 
 ## Default
 
@@ -86,7 +90,10 @@ In this mode the current page renders as a `<span aria-current="page">` rather t
         <code>(page: number) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Click-mode callback. Required when <code>getHref</code> is not provided. Renders controls as <code>&lt;button&gt;</code>.</td>
+      <td>
+        Click-mode callback. Required when <code>getHref</code> is not provided. Renders controls as{" "}
+        <code>&lt;button&gt;</code>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -96,7 +103,12 @@ In this mode the current page renders as a `<span aria-current="page">` rather t
         <code>(page: number) =&gt; string</code>
       </td>
       <td>—</td>
-      <td>Anchor-mode href generator. Required when <code>onPageChange</code> is not provided. Renders controls as <code>&lt;a href&gt;</code>; current page as <code>&lt;span aria-current="page"&gt;</code>; disabled prev/next as <code>&lt;span aria-disabled="true"&gt;</code>.</td>
+      <td>
+        Anchor-mode href generator. Required when <code>onPageChange</code> is not provided. Renders
+        controls as <code>&lt;a href&gt;</code>; current page as{" "}
+        <code>&lt;span aria-current="page"&gt;</code>; disabled prev/next as{" "}
+        <code>&lt;span aria-disabled="true"&gt;</code>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -106,7 +118,10 @@ In this mode the current page renders as a `<span aria-current="page">` rather t
         <code>{"{ from: number; to: number; total: number }"}</code>
       </td>
       <td>—</td>
-      <td>Optional. When provided, renders a live-announced <code>Items from–to of total</code> caption below the pager.</td>
+      <td>
+        Optional. When provided, renders a live-announced <code>Items from–to of total</code>{" "}
+        caption below the pager.
+      </td>
     </tr>
     <tr>
       <td>

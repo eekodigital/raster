@@ -48,13 +48,7 @@ function cx(...classes: (string | false | undefined | null)[]): string {
 }
 
 export function Pagination(props: PaginationProps) {
-  const {
-    page,
-    totalPages,
-    itemRange,
-    className,
-    "aria-label": ariaLabel = "Pagination",
-  } = props;
+  const { page, totalPages, itemRange, className, "aria-label": ariaLabel = "Pagination" } = props;
 
   if (totalPages <= 1 && !itemRange) return null;
 
