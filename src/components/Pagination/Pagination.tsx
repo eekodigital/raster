@@ -111,7 +111,7 @@ export function Pagination(props: PaginationProps) {
     <nav aria-label={ariaLabel} className={cx(styles.root, className)}>
       {totalPages > 1 && (
         <div className={styles.nav}>
-          {renderControl(page - 1, "‹", "Previous page", prevDisabled, false)}
+          {renderControl(page - 1, "←", "Previous page", prevDisabled, false)}
 
           {pageNumbers.map((p, i) =>
             p === "ellipsis" ? (
@@ -123,7 +123,7 @@ export function Pagination(props: PaginationProps) {
             ),
           )}
 
-          {renderControl(page + 1, "›", "Next page", nextDisabled, false)}
+          {renderControl(page + 1, "→", "Next page", nextDisabled, false)}
         </div>
       )}
 
