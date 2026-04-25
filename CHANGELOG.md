@@ -38,7 +38,6 @@
 ### Patch Changes
 
 - 9d52e73: A11y fixes surfaced by the Axe E2E suite, plus the suite is now gated in CI.
-
   - `ChartTooltip` drops `role="tooltip"` and sets `aria-hidden` when not visible
     or when content is empty, avoiding an axe "tooltip must have accessible
     name" violation on every chart page.
@@ -97,7 +96,6 @@
   tick labels rendered as 48px. After this change strokes stay at 2px, points
   at their configured radius, and labels at their CSS-specified font-size
   regardless of container width.
-
   - `LineChart`, `BarChart`, `ScatterChart`: `viewBox` removed; the SVG now
     has explicit `width` / `height` attributes driven by a measured container
     width (720px fallback until measured).
@@ -116,7 +114,6 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
-
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`
