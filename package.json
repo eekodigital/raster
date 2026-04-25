@@ -29,13 +29,14 @@
       "import": "./dist/data-table.mjs",
       "types": "./dist/data-table.d.mts"
     },
-    "./tokens.css": "./src/tokens/tokens.css"
+    "./tokens.css": "./src/tokens/tokens.css",
+    "./primitives.css": "./src/tokens/tokens.css"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build:tokens": "node --import tsx/esm style-dictionary.config.ts && pnpm exec vp check --fix src/tokens && node --import tsx/esm scripts/merge-tokens.ts && pnpm exec vp check --fix tokens/tokens.json",
+    "build:tokens": "node --import tsx/esm style-dictionary.config.ts && pnpm exec vp check --fix src/tokens docs/src/styles && node --import tsx/esm scripts/merge-tokens.ts && pnpm exec vp check --fix tokens/tokens.json",
     "build": "pnpm build:tokens && tsdown",
     "dev": "pnpm build:tokens && concurrently -n lib,docs \"tsdown --watch\" \"pnpm --filter @eekodigital/raster-docs dev\"",
     "dev:lib": "tsdown --watch",
