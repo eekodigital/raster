@@ -8,14 +8,14 @@ export default defineConfig({
     starlight({
       title: "Raster",
       expressiveCode: {
-        themes: ["github-light-default", "github-dark-default", "github-dark-high-contrast"],
+        themes: ["github-light-default", "github-dark-default", "github-light-high-contrast"],
         useStarlightDarkModeSwitch: false,
         themeCssRoot: "html",
         themeCssSelector: (theme) => {
           const map: Record<string, string> = {
             "github-light-default": '[data-theme="light"]',
             "github-dark-default": '[data-theme="dark"]',
-            "github-dark-high-contrast": '[data-theme="high-contrast"]',
+            "github-light-high-contrast": '[data-theme="high-contrast"]',
           };
           return map[theme.name] ?? `[data-theme="${theme.type}"]`;
         },
