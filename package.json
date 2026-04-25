@@ -29,7 +29,8 @@
       "import": "./dist/data-table.mjs",
       "types": "./dist/data-table.d.mts"
     },
-    "./tokens.css": "./src/tokens/tokens.css"
+    "./tokens.css": "./src/tokens/tokens.css",
+    "./primitives.css": "./src/tokens/tokens.css"
   },
   "publishConfig": {
     "access": "public"

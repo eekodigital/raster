@@ -1,17 +1,17 @@
 {
   "color": {
-    "bg": { "$type": "color", "$value": "{color.primitive.gray.2}" },
+    "bg": { "$type": "color", "$value": "{color.primitive.neutral.2}" },
     "surface": { "$type": "color", "$value": "{color.primitive.white}" },
-    "surface-raised": { "$type": "color", "$value": "{color.primitive.gray.3}" },
-    "surface-overlay": { "$type": "color", "$value": "{color.primitive.gray.5}" },
+    "surface-raised": { "$type": "color", "$value": "{color.primitive.neutral.3}" },
+    "surface-overlay": { "$type": "color", "$value": "{color.primitive.neutral.5}" },
 
-    "border": { "$type": "color", "$value": "{color.primitive.gray.6}" },
-    "border-strong": { "$type": "color", "$value": "{color.primitive.gray.8}" },
+    "border": { "$type": "color", "$value": "{color.primitive.neutral.6}" },
+    "border-strong": { "$type": "color", "$value": "{color.primitive.neutral.8}" },
 
-    "text": { "$type": "color", "$value": "{color.primitive.gray.12}" },
-    "text-subtle": { "$type": "color", "$value": "{color.primitive.gray.10}" },
-    "text-placeholder": { "$type": "color", "$value": "{color.primitive.gray.8}" },
-    "text-disabled": { "$type": "color", "$value": "{color.primitive.gray.6}" },
+    "text": { "$type": "color", "$value": "{color.primitive.neutral.12}" },
+    "text-subtle": { "$type": "color", "$value": "{color.primitive.neutral.10}" },
+    "text-placeholder": { "$type": "color", "$value": "{color.primitive.neutral.8}" },
+    "text-disabled": { "$type": "color", "$value": "{color.primitive.neutral.6}" },
     "text-inverse": { "$type": "color", "$value": "{color.primitive.white}" },
 
     "interactive": { "$type": "color", "$value": "{color.primitive.blue.9}" },
@@ -30,9 +30,9 @@
     "danger-bg": { "$type": "color", "$value": "{color.primitive.red.2}" },
     "danger-border": { "$type": "color", "$value": "{color.primitive.red.6}" },
 
-    "inactive": { "$type": "color", "$value": "{color.primitive.gray.9}" },
-    "inactive-bg": { "$type": "color", "$value": "{color.primitive.gray.2}" },
-    "inactive-border": { "$type": "color", "$value": "{color.primitive.gray.6}" },
+    "inactive": { "$type": "color", "$value": "{color.primitive.neutral.9}" },
+    "inactive-bg": { "$type": "color", "$value": "{color.primitive.neutral.2}" },
+    "inactive-border": { "$type": "color", "$value": "{color.primitive.neutral.6}" },
 
     "warning": { "$type": "color", "$value": "{color.primitive.amber.10}" },
     "warning-bg": { "$type": "color", "$value": "{color.primitive.amber.2}" },
