@@ -1,5 +1,15 @@
 # @eekodigital/raster
 
+## 0.4.2
+
+### Patch Changes
+
+- 6cf6ecf: Dark theme surfaces, borders, and text-grays now reference the cool **slate** primitives instead of the warm-leaning **gray** scale. The previous dark mode read as muted brown/khaki rather than a true neutral; switching to slate gives the surfaces the cool slate cast that "dark mode" usually implies.
+
+  Affected tokens (dark theme only): `--color-bg`, `--color-surface`, `--color-surface-raised`, `--color-surface-overlay`, `--color-border`, `--color-border-strong`, `--color-text`, `--color-text-subtle`, `--color-text-placeholder`, `--color-text-disabled`, `--color-text-inverse`, `--color-interactive-text`, `--color-inactive`, `--color-inactive-bg`, `--color-inactive-border`.
+
+  Light theme and high-contrast theme are unchanged. Interactive (blue), success (green), danger (red), and warning (amber) hues are unchanged in dark mode.
+
 ## 0.4.1
 
 ### Patch Changes
@@ -28,6 +38,7 @@
 ### Patch Changes
 
 - 9d52e73: A11y fixes surfaced by the Axe E2E suite, plus the suite is now gated in CI.
+
   - `ChartTooltip` drops `role="tooltip"` and sets `aria-hidden` when not visible
     or when content is empty, avoiding an axe "tooltip must have accessible
     name" violation on every chart page.
@@ -86,6 +97,7 @@
   tick labels rendered as 48px. After this change strokes stay at 2px, points
   at their configured radius, and labels at their CSS-specified font-size
   regardless of container width.
+
   - `LineChart`, `BarChart`, `ScatterChart`: `viewBox` removed; the SVG now
     has explicit `width` / `height` attributes driven by a measured container
     width (720px fallback until measured).
@@ -104,6 +116,7 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
+
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`

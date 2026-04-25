@@ -1,5 +1,12 @@
 # @eekodigital/raster-docs
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [6cf6ecf]
+  - @eekodigital/raster@0.4.2
+
 ## 0.0.9
 
 ### Patch Changes
