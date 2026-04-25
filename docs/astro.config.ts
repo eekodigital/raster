@@ -20,7 +20,16 @@ export default defineConfig({
           return map[theme.name] ?? `[data-theme="${theme.type}"]`;
         },
       },
-      customCss: ["@eekodigital/raster/tokens.css", "./src/styles/custom.css"],
+      customCss: [
+        // Primitives only (themes no longer ship in the package).
+        "@eekodigital/raster/primitives.css",
+        // Docs-owned theme files mapping primitives → semantic tokens.
+        // Built by Style Dictionary into `docs/src/styles/theme-*.css`.
+        "./src/styles/theme-light.css",
+        "./src/styles/theme-dark.css",
+        "./src/styles/theme-high-contrast.css",
+        "./src/styles/custom.css",
+      ],
       components: {
         ThemeProvider: "./src/components/ThemeProvider.astro",
         ThemeSelect: "./src/components/ThemeSelect.astro",
@@ -31,6 +40,7 @@ export default defineConfig({
           items: [
             { label: "Design principles", slug: "foundations/principles" },
             { label: "Colours", slug: "foundations/colours" },
+            { label: "Theming", slug: "foundations/theming" },
             { label: "Typography", slug: "foundations/typography" },
           ],
         },

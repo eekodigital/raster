@@ -1,7 +1,9 @@
+/* Raster ships primitives and components only — themes (mapping primitives
+   to semantic tokens) are a brand decision and live with each consumer.
+   See the `Theming` docs page for guidance on building a theme that maps
+   semantic tokens (e.g. `--color-surface`, `--color-text`) onto these
+   primitives. */
 @import "./primitives.css";
-@import "./theme-light.css";
-@import "./theme-dark.css";
-@import "./theme-high-contrast.css";
 
 /* Composite tokens — derived from generated tokens, not expressible in DTCG */
 :root {

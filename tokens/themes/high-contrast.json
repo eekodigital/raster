@@ -3,15 +3,15 @@
     "bg": { "$type": "color", "$value": "{color.primitive.white}" },
     "surface": { "$type": "color", "$value": "{color.primitive.white}" },
     "surface-raised": { "$type": "color", "$value": "{color.primitive.white}" },
-    "surface-overlay": { "$type": "color", "$value": "{color.primitive.gray.2}" },
+    "surface-overlay": { "$type": "color", "$value": "{color.primitive.neutral.2}" },
 
-    "border": { "$type": "color", "$value": "{color.primitive.gray.12}" },
+    "border": { "$type": "color", "$value": "{color.primitive.neutral.12}" },
     "border-strong": { "$type": "color", "$value": "{color.primitive.black}" },
 
     "text": { "$type": "color", "$value": "{color.primitive.black}" },
-    "text-subtle": { "$type": "color", "$value": "{color.primitive.gray.11}" },
-    "text-placeholder": { "$type": "color", "$value": "{color.primitive.gray.9}" },
-    "text-disabled": { "$type": "color", "$value": "{color.primitive.gray.7}" },
+    "text-subtle": { "$type": "color", "$value": "{color.primitive.neutral.11}" },
+    "text-placeholder": { "$type": "color", "$value": "{color.primitive.neutral.9}" },
+    "text-disabled": { "$type": "color", "$value": "{color.primitive.neutral.7}" },
     "text-inverse": { "$type": "color", "$value": "{color.primitive.white}" },
 
     "interactive": { "$type": "color", "$value": "{color.primitive.blue.12}" },
@@ -30,9 +30,9 @@
     "danger-bg": { "$type": "color", "$value": "{color.primitive.red.2}" },
     "danger-border": { "$type": "color", "$value": "{color.primitive.red.12}" },
 
-    "inactive": { "$type": "color", "$value": "{color.primitive.gray.9}" },
-    "inactive-bg": { "$type": "color", "$value": "{color.primitive.gray.2}" },
-    "inactive-border": { "$type": "color", "$value": "{color.primitive.gray.9}" },
+    "inactive": { "$type": "color", "$value": "{color.primitive.neutral.9}" },
+    "inactive-bg": { "$type": "color", "$value": "{color.primitive.neutral.2}" },
+    "inactive-border": { "$type": "color", "$value": "{color.primitive.neutral.9}" },
 
     "warning": { "$type": "color", "$value": "{color.primitive.amber.12}" },
     "warning-bg": { "$type": "color", "$value": "{color.primitive.amber.2}" },

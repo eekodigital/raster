@@ -36,7 +36,10 @@ const baseConfig: Config = {
 const sd = new StyleDictionary(baseConfig);
 await sd.buildAllPlatforms();
 
-// Build each theme as a separate [data-theme] selector
+// Build each theme into the docs site, NOT into the published package.
+// Themes are no longer part of the raster bundle (consumers should ship
+// their own); they live alongside the docs site so the docs preview a
+// reasonable theme without coupling consumers to those choices.
 for (const theme of themes) {
   const themeConfig: Config = {
     usesDtcg: true,
@@ -47,7 +50,7 @@ for (const theme of themes) {
         transformGroup: "css",
         files: [
           {
-            destination: `src/tokens/theme-${theme}.css`,
+            destination: `docs/src/styles/theme-${theme}.css`,
             format: "css/variables",
             filter: (token) => token.filePath.includes(`themes/${theme}`),
             options: {
