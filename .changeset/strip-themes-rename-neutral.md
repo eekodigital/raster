@@ -18,6 +18,7 @@ Migration:
 2. **If you reference `--color-primitive-gray-*`** anywhere in your CSS: rename to `--color-primitive-neutral-*`. Values are subtly different (now exact R = G = B); contrast ratios are equivalent.
 
 Other changes in this release:
+
 - Raster docs sidebar: new "Theming" entry under Foundations.
 - Colours docs page: `Gray (neutral)` palette entry renamed to `Neutral`.
 - WCAG verified: light + dark themes hit AA on body text; high-contrast hits AAA. (Verification was on the docs site theme files, which now live in `docs/`.)
