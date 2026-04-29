@@ -33,12 +33,10 @@
   The `gray.*` scale had a slight warm tilt at every step (e.g. `gray.11` = `#494748`, R=73 G=71 B=72). The renamed `neutral.*` scale preserves the same lightness curve but zeroes out the chroma so every step is pure achromatic grey. "Neutral" is also the right name for a scale that spans white and black — and it sidesteps the `gray` (US) / `grey` (UK) spelling fork.
 
   Migration:
-
   1. **If you imported `@eekodigital/raster/tokens.css`** and depended on the bundled theme: copy raster's prior theme files into your app (or write your own using the new `/foundations/theming` template), then keep importing `tokens.css` (or the new `primitives.css` alias) for the primitives only.
   2. **If you reference `--color-primitive-gray-*`** anywhere in your CSS: rename to `--color-primitive-neutral-*`. Values are subtly different (now exact R = G = B); contrast ratios are equivalent.
 
   Other changes in this release:
-
   - Raster docs sidebar: new "Theming" entry under Foundations.
   - Colours docs page: `Gray (neutral)` palette entry renamed to `Neutral`.
   - WCAG verified: light + dark themes hit AA on body text; high-contrast hits AAA. (Verification was on the docs site theme files, which now live in `docs/`.)
@@ -83,7 +81,6 @@
 ### Patch Changes
 
 - 9d52e73: A11y fixes surfaced by the Axe E2E suite, plus the suite is now gated in CI.
-
   - `ChartTooltip` drops `role="tooltip"` and sets `aria-hidden` when not visible
     or when content is empty, avoiding an axe "tooltip must have accessible
     name" violation on every chart page.
@@ -142,7 +139,6 @@
   tick labels rendered as 48px. After this change strokes stay at 2px, points
   at their configured radius, and labels at their CSS-specified font-size
   regardless of container width.
-
   - `LineChart`, `BarChart`, `ScatterChart`: `viewBox` removed; the SVG now
     has explicit `width` / `height` attributes driven by a measured container
     width (720px fallback until measured).
@@ -161,7 +157,6 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
-
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`
