@@ -31,6 +31,7 @@ export function SegmentedButtons({
   className,
 }: SegmentedButtonsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
+  const hasSelection = options.some((opt) => opt.value === value);
 
   function handleKeyDown(e: React.KeyboardEvent) {
     const buttons = Array.from(
@@ -66,8 +67,11 @@ export function SegmentedButtons({
       className={cn(styles.group, className)}
       aria-label={ariaLabel}
     >
-      {options.map((opt) => {
+      {options.map((opt, idx) => {
         const checked = value === opt.value;
+        // Roving tabindex: the checked option is the tab stop. When nothing is
+        // checked, the first option takes it so the group stays keyboard-reachable.
+        const tabbable = checked || (!hasSelection && idx === 0);
         const itemStyle: CSSProperties = {};
         if (opt.color) (itemStyle as Record<string, string>)["--segment-color"] = opt.color;
         if (opt.bg) (itemStyle as Record<string, string>)["--segment-bg"] = opt.bg;
@@ -81,7 +85,7 @@ export function SegmentedButtons({
             data-state={checked ? "checked" : "unchecked"}
             className={styles.item}
             style={Object.keys(itemStyle).length > 0 ? itemStyle : undefined}
-            tabIndex={value === opt.value ? 0 : -1}
+            tabIndex={tabbable ? 0 : -1}
             disabled={disabled}
             onClick={() => {
               if (!disabled) onValueChange(opt.value);
