@@ -121,6 +121,26 @@ describe("SegmentedButtons", () => {
     });
   });
 
+  describe("roving tabindex", () => {
+    it("makes the selected option the only tabbable item", () => {
+      render(
+        <SegmentedButtons options={OPTIONS} value="b" onValueChange={() => {}} aria-label="Test" />,
+      );
+      expect(screen.getByRole("radio", { name: "Beta" }).tabIndex).toBe(0);
+      expect(screen.getByRole("radio", { name: "Alpha" }).tabIndex).toBe(-1);
+      expect(screen.getByRole("radio", { name: "Gamma" }).tabIndex).toBe(-1);
+    });
+
+    it("makes the first option tabbable when no option is selected", () => {
+      render(
+        <SegmentedButtons options={OPTIONS} value="" onValueChange={() => {}} aria-label="Test" />,
+      );
+      expect(screen.getByRole("radio", { name: "Alpha" }).tabIndex).toBe(0);
+      expect(screen.getByRole("radio", { name: "Beta" }).tabIndex).toBe(-1);
+      expect(screen.getByRole("radio", { name: "Gamma" }).tabIndex).toBe(-1);
+    });
+  });
+
   it("renders a hidden input when name is provided", () => {
     const { container } = render(
       <SegmentedButtons
