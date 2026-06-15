@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  esbuild@<0.28.1: '>=0.28.1'
+  yaml@<2.8.3: '>=2.8.3'
+
 importers:
 
   .:
@@ -1985,7 +1989,7 @@ packages:
       '@arethetypeswrong/core': ^0.18.1
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.7.1
-      esbuild: ^0.27.0 || ^0.28.0
+      esbuild: '>=0.28.1'
       jiti: '>=1.21.0'
       less: ^4.0.0
       publint: ^0.3.8
@@ -1998,7 +2002,7 @@ packages:
       typescript: ^5.0.0 || ^6.0.0 || ^7.0.0
       unplugin-unused: '>=0.5.0'
       unrun: '*'
-      yaml: ^2.4.2
+      yaml: '>=2.8.3'
     peerDependenciesMeta:
       '@arethetypeswrong/core':
         optional: true
@@ -4400,7 +4404,7 @@ packages:
     peerDependencies:
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.7.1
-      esbuild: ^0.27.0 || ^0.28.0
+      esbuild: '>=0.28.1'
       jiti: '>=1.21.0'
       less: ^4.0.0
       sass: ^1.70.0
@@ -4409,7 +4413,7 @@ packages:
       sugarss: ^5.0.0
       terser: ^5.16.0
       tsx: ^4.8.1
-      yaml: ^2.4.2
+      yaml: '>=2.8.3'
     peerDependenciesMeta:
       '@types/node':
         optional: true
