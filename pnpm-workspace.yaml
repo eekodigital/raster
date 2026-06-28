@@ -1,3 +1,15 @@
 packages:
   - "."
   - "docs"
+
+# pnpm 11 defaults strictDepBuilds to true: dependency build scripts must be
+# explicitly approved or install fails. esbuild and sharp are trusted native
+# deps that need their install scripts to set up prebuilt platform binaries.
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+# pnpm 11 enables minimumReleaseAge (24h) by default. This repo's weekly
+# dependency ritual intentionally tracks the very latest releases, so the age
+# gate is disabled here to keep that workflow (and CI) working as before.
+minimumReleaseAge: 0
