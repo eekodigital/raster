@@ -52,27 +52,27 @@
     "@tanstack/react-table": "^8.21.3",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.2.16",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-specification": "^1.0.5",
-    "@vanilla-extract/css": "^1.20.1",
+    "@vanilla-extract/css": "^1.21.0",
     "@vanilla-extract/rollup-plugin": "^1.5.3",
-    "@vanilla-extract/vite-plugin": "^5.2.2",
-    "@vitejs/plugin-react": "^6.0.2",
-    "@vitest/coverage-v8": "^4.1.8",
-    "axe-core": "^4.12.0",
+    "@vanilla-extract/vite-plugin": "^5.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "axe-core": "^4.12.1",
     "concurrently": "^10.0.3",
-    "happy-dom": "^20.10.1",
+    "happy-dom": "^20.10.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "style-dictionary": "^5.4.3",
+    "style-dictionary": "^5.5.0",
     "topojson-client": "^3.1.0",
-    "tsdown": "^0.22.2",
+    "tsdown": "^0.22.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "vite-plus": "^0.1.24",
-    "vitest": "^4.1.8",
+    "vite-plus": "^0.2.1",
+    "vitest": "^4.1.9",
     "vitest-axe": "^0.1.0"
   },
   "peerDependencies": {
@@ -87,5 +87,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.34.4"
 }
