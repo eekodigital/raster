@@ -53,6 +53,7 @@ export default new Map([
 ["src/content/docs/components/typography.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Fcomponents%2Ftypography.mdx&astroContentModuleFlag=true")],
 ["src/content/docs/foundations/colours.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Ffoundations%2Fcolours.mdx&astroContentModuleFlag=true")],
 ["src/content/docs/foundations/principles.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Ffoundations%2Fprinciples.mdx&astroContentModuleFlag=true")],
+["src/content/docs/foundations/theming.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Ffoundations%2Ftheming.mdx&astroContentModuleFlag=true")],
 ["src/content/docs/foundations/typography.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Ffoundations%2Ftypography.mdx&astroContentModuleFlag=true")],
 ["src/content/docs/index.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fdocs%2Findex.mdx&astroContentModuleFlag=true")]]);
 		
