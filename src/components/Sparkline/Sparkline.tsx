@@ -2,10 +2,12 @@ import { useRef, useImperativeHandle } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { cn } from "../../utils/cn.js";
 import { seriesColor } from "../../utils/palette.js";
 
-type SparklineProps = {
+export type SparklineProps = {
   data: number[];
   width?: number;
   height?: number;

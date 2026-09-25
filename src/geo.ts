@@ -2,4 +2,9 @@
 // `topojson-client`.
 export type { ChartExportHandle } from "./utils/use-chart-export.js";
 export { GeoChart } from "./components/GeoChart/GeoChart.js";
-export type { GeoMarker, GeoRegionDatum, GeoTopology } from "./components/GeoChart/GeoChart.js";
+export type {
+  GeoChartProps,
+  GeoMarker,
+  GeoRegionDatum,
+  GeoTopology,
+} from "./components/GeoChart/GeoChart.js";

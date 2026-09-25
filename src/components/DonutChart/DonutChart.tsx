@@ -3,6 +3,8 @@ import { pieAngles, strokeArcPath, sum } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { useRovingFocus } from "../../utils/use-roving-focus.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import { ChartDataTable } from "../shared/ChartDataTable.js";
@@ -19,7 +21,7 @@ export type DonutDatum = {
   color: string;
 };
 
-type DonutChartProps = {
+export type DonutChartProps = {
   data: DonutDatum[];
   size?: number;
   thickness?: number;

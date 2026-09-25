@@ -1,10 +1,12 @@
 import { useRef, useImperativeHandle } from "react";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { cn } from "../../utils/cn.js";
 import { seriesColor } from "../../utils/palette.js";
 
-type GaugeProps = {
+export type GaugeProps = {
   value: number;
   max: number;
   label?: string;

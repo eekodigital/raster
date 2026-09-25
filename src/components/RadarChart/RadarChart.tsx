@@ -3,6 +3,8 @@ import { cn } from "../../utils/cn.js";
 import { seriesColor } from "../../utils/palette.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { ChartDataTable } from "../shared/ChartDataTable.js";
@@ -14,7 +16,7 @@ export type RadarSeries = {
   color?: string;
 };
 
-type RadarChartProps = {
+export type RadarChartProps = {
   axes: string[];
   series: RadarSeries[];
   max?: number;

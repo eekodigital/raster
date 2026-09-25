@@ -1,7 +1,7 @@
 import { cn } from "../../utils/cn.js";
 import { seriesColor } from "../../utils/palette.js";
 
-type LinearGaugeProps = {
+export type LinearGaugeProps = {
   value: number;
   max: number;
   label?: string;

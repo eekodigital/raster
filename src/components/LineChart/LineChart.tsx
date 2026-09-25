@@ -4,6 +4,8 @@ import { cn } from "../../utils/cn.js";
 import { seriesColor } from "../../utils/palette.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
@@ -18,7 +20,7 @@ export type LineSeries = {
 
 type GridOption = "horizontal" | "vertical" | "both" | "none";
 
-type LineChartProps = {
+export type LineChartProps = {
   series: LineSeries[];
   labels: string[];
   area?: boolean;

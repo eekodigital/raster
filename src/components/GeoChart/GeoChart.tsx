@@ -5,6 +5,8 @@ import { cn } from "../../utils/cn.js";
 import { seriesColor } from "../../utils/palette.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import { ChartDataTable } from "../shared/ChartDataTable.js";
 
@@ -36,7 +38,7 @@ export type GeoMarker = {
 
 type ProjectionFn = (lon: number, lat: number) => [number, number];
 
-type GeoChartProps = {
+export type GeoChartProps = {
   topology: GeoTopology;
   objectName?: string;
   data?: GeoRegionDatum[];
