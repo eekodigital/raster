@@ -47,11 +47,12 @@ Returns:
 
 ## `ChartTooltip`
 
-| Prop      | Type      | Description                                                                              |
-| --------- | --------- | ---------------------------------------------------------------------------------------- |
-| `id`      | `string`  | Element id (use `tooltipId`).                                                            |
-| `visible` | `boolean` | Whether it's shown. When hidden or empty it drops `role="tooltip"` and is `aria-hidden`. |
-| `x`, `y`  | `number`  | Position in px relative to the container; the tooltip centres above this point.          |
-| `content` | `string`  | Text to show.                                                                            |
+| Prop         | Type      | Description                                                                                                                          |
+| ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`         | `string`  | Element id (use `tooltipId`).                                                                                                        |
+| `visible`    | `boolean` | Whether it's shown. When hidden or empty it drops `role="tooltip"` and is `aria-hidden`.                                             |
+| `x`, `y`     | `number`  | Position in px relative to the container; the tooltip centres above this point, shifting sideways to stay inside its parent element. |
+| `content`    | `string`  | Text to show.                                                                                                                        |
+| `decorative` | `boolean` | Always `aria-hidden`, for when the marks' accessible names already carry the text (raster's own charts do this).                     |
 
 It's styled by the `.raster-tooltip` rule in `styles.css` and themed with `--raster-tooltip-bg` and `--raster-tooltip-text`.

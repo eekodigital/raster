@@ -49,6 +49,22 @@ Pass `onSelect` (and optionally `selectedIndex`) to make points toggle buttons. 
   <LineChartSelectDemo client:load />
 </Example>
 
+## Axis labels
+
+Keep `categories` complete: they name each point and label the table rows. To thin or shorten the x-axis, use `xTickFilter` and `formatXTick`, which only affect the ticks:
+
+```tsx
+<LineChart
+  series={[{ name: "Visitors", data: visits }]}
+  categories={days} // "2026-09-01" … "2026-09-30"
+  xTickFilter={(i) => i % 7 === 0}
+  formatXTick={(day) => day.slice(5)} // "09-01"
+  title="Visitors in September"
+/>
+```
+
+Only the first and last categories anchor to the plot edges; every other tick centres on its point.
+
 ## Accessibility
 
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
@@ -68,7 +84,7 @@ Pass `onSelect` (and optionally `selectedIndex`) to make points toggle buttons. 
 | ↑ / ↓             | Previous / next series               |
 | Tab               | Leave the chart (one tab stop)       |
 | Enter / Space     | Toggle selection (interactive marks) |
-| Escape            | Clear selection                      |
+| Escape            | Hide the tooltip and clear selection |
 
 See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
@@ -105,7 +121,10 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>—</td>
       <td>
-        Required. X-axis categories, one per point. <code>""</code> hides that tick label.
+        Required. X-axis categories, one per point. They name each point and label the table rows,
+        so keep them complete and thin the axis with <code>xTickFilter</code> or{" "}
+        <code>formatXTick</code>. (A <code>""</code> category still hides its tick, but also leaves
+        that point without an x value in its name.)
       </td>
     </tr>
     <tr>
@@ -201,7 +220,35 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>30</code>
       </td>
-      <td>Minimum px between x labels before they thin out.</td>
+      <td>
+        Minimum px between x labels before they thin out. Thinning keeps the first and last
+        categories.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>xTickFilter</code>
+      </td>
+      <td>
+        <code>(index: number, category: string) =&gt; boolean</code>
+      </td>
+      <td>—</td>
+      <td>
+        Which x ticks to label. Replaces the automatic thinning. Points and the table keep every
+        category.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatXTick</code>
+      </td>
+      <td>
+        <code>(category: string, index: number) =&gt; string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Text for an x tick, e.g. a short date. Return <code>""</code> to hide it.
+      </td>
     </tr>
     <tr>
       <td>

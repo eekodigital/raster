@@ -63,7 +63,7 @@ Raster 3.0 is a charts library. Everything else from raster 2 has been removed. 
 
 9. **Marks are only buttons when interactive.** Points, bars and segments become `role="button"` with `aria-pressed` only when you pass `onSelect`, `selectedIndex` or a click handler; otherwise clicking does nothing. ScatterChart, RadarChart and GeoChart gain `selectedIndex`/`onSelect`.
 
-10. **Sizes follow the container.** `aspectRatio` is an alternative to `height`. DonutChart, Gauge, RadarChart and Sparkline fill their container's width when you omit `size`/`width`. GeoChart loses `width` and fills its container (16:9 by default, or `height`/`aspectRatio`). Gauge and LinearGauge gain `min`.
+10. **Sizes follow the container.** `aspectRatio` is an alternative to `height`. DonutChart, Gauge, RadarChart and Sparkline fill their container's width when you omit `size`/`width`; in v2 DonutChart defaulted to `size={160}`, Gauge to `size={120}` and Sparkline to `width={80}`, so pass those to keep the old size. GeoChart loses `width` and fills its container (16:9 by default, or `height`/`aspectRatio`). Gauge and LinearGauge gain `min`.
 
 11. **Multi-series points use marker shapes** (circle, square, triangle, diamond, …) as well as colour.
 

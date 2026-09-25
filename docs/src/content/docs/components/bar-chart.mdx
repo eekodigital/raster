@@ -1,6 +1,6 @@
 ---
 title: BarChart
-description: Vertical bar chart for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Fully keyboard navigable with a hidden data table for screen readers.
+description: Vertical or horizontal bar chart, single, stacked or grouped, for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Keyboard navigable, with a data table disclosure.
 ---
 
 import Example from "../../../components/Example.astro";
@@ -12,7 +12,7 @@ import {
 
 ## Basic
 
-Pass data as an array of `{ label, value }` objects. Colours default to the interactive palette or can be set per bar.
+Pass data as an array of `{ label, value }` objects. Colours default to the raster series palette (`--raster-series-*`) or can be set per bar with `colors`.
 
 <Example
   code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--demo-good)', 'var(--demo-bad)', 'var(--demo-neutral)', 'var(--demo-warn)']}\n  title="Conformance results by status"\n/>`}
@@ -45,18 +45,18 @@ Pass `series` and `values` with `stacked` (or `grouped`). With `onSelect`, bars 
 - Each bar is labelled `{x}: {y}, 2 of 4` (stacked/grouped: `{series}, {x}: {y}, 2 of 4`, inside a `role="group"` per series). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
 - Stacked and grouped bars select a whole category.
 - A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
-- Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
-- Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
+- Escape (inside the chart only) hides the tooltip and clears the selection, announcing the cleared selection in a polite live region; it doesn't close a surrounding dialog.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode bars use system colours; in stacked and grouped charts, series after the first are outlined with their legend line's dash pattern.
 
-| Key                                 | Action                               |
-| ----------------------------------- | ------------------------------------ |
-| ← / → (↑ / ↓ when horizontal)       | Previous / next mark                 |
-| Home / End                          | First / last mark                    |
-| PageUp / PageDown                   | Back / forward 10 marks              |
-| ↑ / ↓ (stacked: ↑ climbs the stack) | Previous / next series               |
-| Tab                                 | Leave the chart (one tab stop)       |
-| Enter / Space                       | Toggle selection (interactive marks) |
-| Escape                              | Clear selection                      |
+| Key                                                        | Action                               |
+| ---------------------------------------------------------- | ------------------------------------ |
+| ← / → (↑ / ↓ when horizontal)                              | Previous / next mark                 |
+| Home / End                                                 | First / last mark                    |
+| PageUp / PageDown                                          | Back / forward 10 marks              |
+| ↑ / ↓ (stacked: ↑ climbs the stack; ← / → when horizontal) | Previous / next series               |
+| Tab                                                        | Leave the chart (one tab stop)       |
+| Enter / Space                                              | Toggle selection (interactive marks) |
+| Escape                                                     | Hide the tooltip and clear selection |
 
 See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 

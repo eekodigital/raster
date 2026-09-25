@@ -65,7 +65,7 @@ Custom function: `(lon, lat) => [x, y]` where x/y are 0-1 normalised.
 Pass a `filter` array of feature IDs to show only specific regions:
 
 ```tsx
-<GeoChart topology={world} filter={["GBR", "IRL"]} data={ukData} />
+<GeoChart topology={world} filter={["826", "372"]} data={ukData} title="UK and Ireland" />
 ```
 
 ## Accessibility
@@ -85,7 +85,7 @@ Pass a `filter` array of feature IDs to show only specific regions:
 | ↑ / ↓             | Switch between regions and markers   |
 | Tab               | Leave the map                        |
 | Enter / Space     | Toggle selection (interactive marks) |
-| Escape            | Clear selection                      |
+| Escape            | Hide the tooltip and clear selection |
 
 See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 

@@ -28,14 +28,14 @@ Every chart follows the same pattern, so once you know one you know them all. Ac
 
 Each chart is one Tab stop. The last mark you visited stays the Tab stop when you come back.
 
-| Key               | Action                                                                                  |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| ← / →             | Previous / next mark in the series (↑ / ↓ for horizontal bars)                          |
-| ↑ / ↓             | Previous / next series (stacked bars: ↑ climbs the stack)                               |
-| Home / End        | First / last mark in the series                                                         |
-| PageUp / PageDown | Back / forward 10 marks                                                                 |
-| Enter / Space     | Toggle selection of the focused mark (interactive charts)                               |
-| Escape            | Clear the selection. Handled inside the chart only, so a surrounding dialog stays open. |
+| Key               | Action                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| ← / →             | Previous / next mark in the series (↑ / ↓ for horizontal bars)                                               |
+| ↑ / ↓             | Previous / next series (stacked bars: ↑ climbs the stack)                                                    |
+| Home / End        | First / last mark in the series                                                                              |
+| PageUp / PageDown | Back / forward 10 marks                                                                                      |
+| Enter / Space     | Toggle selection of the focused mark (interactive charts)                                                    |
+| Escape            | Hide the tooltip and clear the selection. Handled inside the chart only, so a surrounding dialog stays open. |
 
 DonutChart moves round the ring with any arrow key. RadarChart wraps round its axes. GeoChart moves across regions with ← / →, and ↑ / ↓ switch between regions and markers.
 
@@ -58,7 +58,7 @@ Changes you make on the focused mark are announced by the mark itself (its `aria
 ## Colour, motion and forced colours
 
 - **Not colour alone.** Line, scatter and radar series use a different marker shape each (circle, square, triangle, diamond, inverted triangle, cross), and the legend repeats it.
-- **Forced colours** (Windows High Contrast): marks switch to system colours; series are told apart by dash pattern and marker shape; focus and selection use `Highlight`.
+- **Forced colours** (Windows High Contrast): marks switch to system colours; series are told apart by dash pattern and marker shape (stacked and grouped bars: series after the first are outlined with their legend dash pattern); focus and selection use `Highlight`.
 - **Reduced motion:** every draw-in and transition stops under `prefers-reduced-motion: reduce`. DonutChart's draw-in is a CSS class, so it stops too.
 
 ## Labels
@@ -87,19 +87,20 @@ const de: Partial<ChartLabels> = {
 <LineChart {...props} labels={de} />;
 ```
 
-| Key                                      | Default                                                                                                                   |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `locale`                                 | `"en"`                                                                                                                    |
-| `chart`                                  | `"chart"` (the SVG's `aria-roledescription`)                                                                              |
-| `showTable`                              | `"Show data table"`                                                                                                       |
-| `hideTable`                              | `"Hide data table"`                                                                                                       |
-| `tableCaption`                           | `(title) => "Data for {title}"`                                                                                           |
-| `selectionCleared`                       | `"Selection cleared"`                                                                                                     |
-| `noData`                                 | `"No data"` (GeoChart regions without a value)                                                                            |
-| `regions`, `markers`, `region`, `marker` | GeoChart group names and table types                                                                                      |
-| `series`                                 | `(name, count, n) => "{name}, {count} points"`                                                                            |
-| `mark`                                   | `({ series, x, y, index, count }, n) => "{series}, {x}: {y}, {index + 1} of {count}"`                                     |
-| `summary`                                | `({ type, series, points, x, y, first, last }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."` |
+| Key                                                                                                                                                                | Default                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `locale`                                                                                                                                                           | `"en"`                                                                                                                                                                                                                           |
+| `chart`                                                                                                                                                            | `"chart"` (the SVG's `aria-roledescription`)                                                                                                                                                                                     |
+| `showTable`                                                                                                                                                        | `"Show data table"`                                                                                                                                                                                                              |
+| `hideTable`                                                                                                                                                        | `"Hide data table"`                                                                                                                                                                                                              |
+| `tableCaption`                                                                                                                                                     | `(title) => "Data for {title}"`                                                                                                                                                                                                  |
+| `selectionCleared`                                                                                                                                                 | `"Selection cleared"`                                                                                                                                                                                                            |
+| `noData`                                                                                                                                                           | `"No data"` (GeoChart regions without a value)                                                                                                                                                                                   |
+| `regions`, `markers`, `region`, `marker`                                                                                                                           | GeoChart group names and table types                                                                                                                                                                                             |
+| `categoryColumn`, `valueColumn`, `percentageColumn`, `periodColumn`, `axisColumn`, `nameColumn`, `typeColumn`, `seriesColumn`, `labelColumn`, `xColumn`, `yColumn` | Data table headers: `"Category"`, `"Value"`, `"Percentage"`, `"Period"`, `"Axis"`, `"Name"`, `"Type"`, `"Series"`, `"Label"`, `"X"`, `"Y"`. Series columns use the series names; ScatterChart uses `xLabel`/`yLabel` when given. |
+| `series`                                                                                                                                                           | `(name, count, n) => "{name}, {count} points"`                                                                                                                                                                                   |
+| `mark`                                                                                                                                                             | `({ series, x, y, index, count }, n) => "{series}, {x}: {y}, {index + 1} of {count}"`                                                                                                                                            |
+| `summary`                                                                                                                                                          | `({ type, series, points, x, y, first, last }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."`                                                                                                        |
 
 `DEFAULT_LABELS` is exported if you want to wrap a default.
 
