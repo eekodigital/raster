@@ -14,7 +14,7 @@ The 2.x source and docs remain at the `v2.0.1` git tag, and `2.0.1` stays on npm
 
 ### Added
 
-- `@eekodigital/raster/styles.css`: the single stylesheet. The package is now `sideEffects: false`; no JS entry imports CSS.
+- `@eekodigital/raster/styles.css`: the single stylesheet. No JS entry imports CSS, so `sideEffects` now lists only CSS (`["*.css"]`): bundlers can drop unused charts but keep the stylesheet import.
 - `@eekodigital/raster/theme`: `rasterVars`, the typed theming contract.
 - Per-chart entry points: `/line-chart`, `/bar-chart`, `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip`.
 - `ChartTooltip` and `useChartTooltip` are exported.

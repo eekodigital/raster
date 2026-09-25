@@ -7,7 +7,7 @@
  * imports (react, topojson-client) are peers and aren't counted.
  *
  * Also fails if any built JS imports CSS: styles ship only as
- * `dist/styles.css`, so `sideEffects: false` stays true.
+ * `dist/styles.css`, so `sideEffects` can stay limited to CSS (`["*.css"]`).
  *
  * Run after `pnpm build`: `node scripts/check-size.ts`.
  */

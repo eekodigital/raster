@@ -23,7 +23,7 @@ Raster ships one stylesheet. Import it once at your app root, before your own st
 import "@eekodigital/raster/styles.css";
 ```
 
-No chart imports CSS itself, so the package is marked `sideEffects: false` and bundlers can drop any chart you don't use. If the stylesheet is missing, charts still render: marks get their colours from attributes, and the hidden data table keeps an inline visually-hidden style. Animations, focus rings and the default grid and axis styling do need it.
+No chart imports CSS itself, so the package's `sideEffects` lists only the stylesheet: bundlers can drop any chart you don't use, but keep the stylesheet import. If the stylesheet is missing, charts still render: marks get their colours from attributes, and the hidden data table keeps an inline visually-hidden style. Animations, focus rings and the default grid and axis styling do need it.
 
 ## Entry points
 
