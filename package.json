@@ -48,31 +48,31 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
+    "@changesets/cli": "^2.31.1",
     "@tanstack/react-table": "^8.21.3",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-specification": "^1.0.5",
-    "@vanilla-extract/css": "^1.20.1",
-    "@vanilla-extract/rollup-plugin": "^1.5.3",
-    "@vanilla-extract/vite-plugin": "^5.2.2",
-    "@vitejs/plugin-react": "^6.0.2",
-    "@vitest/coverage-v8": "^4.1.9",
-    "axe-core": "^4.12.1",
-    "concurrently": "^10.0.3",
-    "happy-dom": "^20.10.3",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "style-dictionary": "^5.4.4",
+    "@vanilla-extract/css": "^1.21.2",
+    "@vanilla-extract/rollup-plugin": "^1.5.4",
+    "@vanilla-extract/vite-plugin": "^5.2.6",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "4.1.11",
+    "axe-core": "^4.13.0",
+    "concurrently": "^10.0.5",
+    "happy-dom": "^20.14.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "style-dictionary": "^5.5.5",
     "topojson-client": "^3.1.0",
-    "tsdown": "^0.22.2",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3",
-    "vite-plus": "^0.1.24",
-    "vitest": "^4.1.9",
+    "tsdown": "^0.23.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite-plus": "^0.3.3",
+    "vitest": "4.1.11",
     "vitest-axe": "^0.1.0"
   },
   "peerDependencies": {
@@ -87,11 +87,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.33.0",
-  "pnpm": {
-    "overrides": {
-      "esbuild@<0.28.1": ">=0.28.1",
-      "yaml@<2.8.3": ">=2.8.3"
-    }
-  }
+  "packageManager": "pnpm@11.22.0"
 }
