@@ -133,4 +133,21 @@ describe("/theme contract", () => {
     expect(block).toContain("Highlight");
     expect(block).toMatch(/stroke-dasharray/);
   });
+
+  it("gives each forced-colours bar series its legend line's dash pattern", () => {
+    const block = css.slice(css.indexOf("@media (forced-colors: active)"));
+    const legend = (n: number) =>
+      new RegExp(
+        `\\.raster-legend__swatch\\[data-series="${n}"\\] line \\{\\s*stroke-dasharray: ([^;!]+)`,
+      ).exec(block)?.[1];
+    for (let n = 2; n <= 8; n++) {
+      const bar = new RegExp(
+        `\\.raster-bar__bar\\[data-series="${n}"\\] \\{\\s*stroke-dasharray: ([^;]+);`,
+      ).exec(block)?.[1];
+      expect(bar, `bar series ${n}`).toBeDefined();
+      expect(bar?.trim(), `bar series ${n}`).toBe(legend(n)?.trim());
+    }
+    // Bars are no longer told apart only by CanvasText/GrayText alternation.
+    expect(block).not.toMatch(/\.raster-bar__bar\[data-series="\d"\],?\s*[^{]*\{\s*fill: GrayText/);
+  });
 });

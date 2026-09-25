@@ -104,7 +104,8 @@ In Windows High Contrast and other forced-colours modes, browsers keep the fill 
 
 - text, axes and grid use `CanvasText`;
 - focus and selection use `Highlight`;
-- series marks use `CanvasText`, with fills alternating with `GrayText`, and each series' lines and legend swatch get their own dash pattern;
+- series marks use `CanvasText`, with point and segment fills alternating with `GrayText`, and each series' lines and legend swatch get their own dash pattern;
+- in multi-series bar charts, series 1 stays solid and later series become outlined bars carrying their legend line's dash pattern;
 - legend swatches are inline SVG, so they follow the same rules as the marks.
 
 The hidden data table carries every value in all modes.
