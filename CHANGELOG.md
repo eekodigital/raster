@@ -1,5 +1,113 @@
 # @eekodigital/raster
 
+## 3.0.0
+
+### Major Changes
+
+- 44b5022: **Accessible, responsive charts.** Every chart now shares one accessible structure, keyboard model and sizing model. See the Accessibility guide and "Migrating from v2" for details.
+
+  ### Changed (breaking)
+
+  - Charts are `role="figure"`s named by a visible **`title`** (replaces `aria-label`; `hideTitle` keeps it for screen readers only) and described by a generated summary. The SVG is `role="group"` with `aria-roledescription="chart"`; series are groups; marks are labelled "{series}, {x}: {y}, 3 of 12".
+  - LineChart's x-axis `labels` prop is renamed **`categories`**. `labels` is now the object of generated strings (English defaults, `locale` for `Intl` number formatting).
+  - Values are formatted with `Intl.NumberFormat` by default.
+  - Marks are `role="button"` with `aria-pressed` only when a chart is interactive (`onSelect`, `selectedIndex` or a click handler); otherwise they're static images and clicks do nothing.
+  - The data table is a visible **Show data table** disclosure by default (`dataTable="visually-hidden"` restores the old behaviour), with a caption, scoped headers and formatted values.
+  - Gauge and LinearGauge: `label` is required and names the meter (`aria-labelledby`); `aria-label` is removed; `aria-valuetext` comes from `format`.
+  - Sparkline takes `title` and exposes a text summary instead of `role="img"`.
+  - GeoChart loses `width` and fills its container (16:9 of its width, was a fixed 800×450 viewBox).
+  - **Default sizes changed:** DonutChart (was `size` 160), Gauge (was `size` 120) and Sparkline (was `width` 80) now fill their container when `size`/`width` is omitted. Pass the old value to keep a fixed size.
+  - Multi-series line, scatter and radar points use a different marker shape per series.
+
+  ### Added
+
+  - `aspectRatio` as an alternative to `height`; the plot is sized in CSS, so SSR doesn't shift.
+  - Keyboard: one tab stop per chart, arrows, Home/End, PageUp/PageDown, Enter/Space; stacked and grouped bars and GeoChart regions and markers are navigable. Escape clears the selection inside the chart only, announced in a polite live region.
+  - `min` on Gauge and LinearGauge; `selectedIndex`/`onSelect` on ScatterChart, RadarChart and GeoChart; `value` on GeoChart markers.
+  - `formatValue` on DonutChart, RadarChart and Sparkline.
+  - LineChart `xTickFilter` and `formatXTick`: thin or shorten x-axis ticks without touching `categories`, which keep naming the points and table rows. Automatic thinning always labels the last category, and only the first and last categories anchor to the plot edges.
+  - Horizontal stacked and grouped BarCharts (`direction="horizontal"` with `series`/`values`); ← / → move between series.
+  - Data table headers are translatable through `labels` (`categoryColumn`, `valueColumn`, …).
+  - `ChartTooltip` `decorative` prop, and it now shifts sideways to stay inside its container.
+  - `DEFAULT_LABELS` and the types `ChartLabels`, `ChartType`, `MarkLabelParts`, `SummaryParts`, `DataTableMode`, `LinePointIndex`, `ScatterPointIndex`, `RadarPointIndex` and `GeoSelection`.
+
+  ### Fixed
+
+  - DonutChart's draw-in animation now respects `prefers-reduced-motion`.
+  - GeoChart keyboard navigation (focus never moved before) and unreachable markers.
+  - Escape no longer listens on `document`, so it doesn't close a surrounding dialog.
+  - Tooltips no longer duplicate each mark's name via `aria-describedby`, and Escape dismisses them (WCAG 1.4.13).
+  - Selecting a point now visibly dims the others, and line areas keep their 15% opacity after the fade-in.
+  - Focused points get a surface-coloured halo inside the focus ring, so focus stays visible when `--raster-focus` matches the series colour.
+  - `dist/styles.css` is minified.
+
+- 8ad4143: **Raster 3 is a charts library.** The UI components, design tokens and DataTable have been removed; charts are unchanged in their props but are now themed through a small `--raster-*` contract and styled by one stylesheet.
+
+  The 2.x source and docs remain at the `v2.0.1` git tag, and `2.0.1` stays on npm.
+
+  ### Removed
+
+  - Every non-chart component: Accordion, AlertDialog, Avatar, Badge, Box, Breadcrumbs, Button, Card, Checkbox, Collapsible, DateInput, Details, Dialog, DropdownMenu, ErrorSummary, Fieldset, FileUpload, Flex, Grid, NotificationBanner, OneTimePasswordField, Pagination, PasswordToggleField, Popover, Portal, Progress, Radio, ScrollArea, SegmentedButtons, Select, Separator, Skeleton, SkipLink, Slider, Spinner, SummaryList, Switch, Table, Tabs, Tag, Textarea, TextInput, Toast, Tooltip, Typography.
+  - `DataTable` and the `@eekodigital/raster/data-table` entry.
+  - `@eekodigital/raster/tokens.css` and `@eekodigital/raster/primitives.css`.
+
+  ### Added
+
+  - `@eekodigital/raster/styles.css`: the single stylesheet. No JS entry imports CSS, so `sideEffects` now lists only CSS (`["*.css"]`): bundlers can drop unused charts but keep the stylesheet import.
+  - `@eekodigital/raster/theme`: `rasterVars`, the typed theming contract.
+  - Per-chart entry points: `/line-chart`, `/bar-chart`, `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip`.
+  - `ChartTooltip` and `useChartTooltip` are exported.
+  - Props types for every chart (`LineChartProps`, `BarChartProps`, `GaugeProps`, …, `GeoChartProps` from `/geo`), and `ChartExportHandle` from every per-chart entry.
+  - Forced-colours styles: system colours, with per-series dash patterns.
+
+  ### Migration guide
+
+  1. **Load the stylesheet once** at your app root and drop the tokens import:
+
+     ```diff
+     - import "@eekodigital/raster/tokens.css";
+     + import "@eekodigital/raster/styles.css";
+     ```
+
+     Chart CSS is no longer injected on import, so remove any bare `import "@eekodigital/raster"` side-effect imports. Class names are now stable (`raster-*`), so remove `[class*="LineChart_…"]`-style overrides.
+
+  2. **Map your theme onto the chart contract.** Charts no longer read `--color-*`, `--font-*` or `--spacing-*`:
+
+     | v2 token                                                                                                   | v3 property                                                                              |
+     | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+     | `--color-text`                                                                                             | `--raster-text` (and `--raster-tooltip-bg`)                                              |
+     | `--color-text-subtle`                                                                                      | `--raster-text-subtle`                                                                   |
+     | `--color-text-inverse`                                                                                     | `--raster-tooltip-text`                                                                  |
+     | `--color-border`                                                                                           | `--raster-grid`, `--raster-axis`                                                         |
+     | `--color-focus-ring`                                                                                       | `--raster-focus`                                                                         |
+     | `--color-surface`                                                                                          | `--raster-surface`                                                                       |
+     | default series (`--color-interactive`, `--color-success`, …)                                               | `--raster-series-1` … `--raster-series-8`                                                |
+     | GeoChart scale and markers (`--color-surface-raised`, `--color-interactive-subtle`, `--color-interactive`) | a ramp from `--raster-surface` to `--raster-series-1`; pass `colorScale` to set your own |
+
+     ```css
+     :root {
+       --raster-text: var(--color-text);
+       --raster-grid: var(--color-border);
+       --raster-focus: var(--color-focus-ring);
+       --raster-series-1: var(--color-interactive);
+     }
+     ```
+
+     With vanilla-extract: `createGlobalTheme(":root", rasterVars, { … })` or `assignVars(rasterVars, { … })`, with `rasterVars` from `@eekodigital/raster/theme`. Fonts are inherited from the page. Unset properties fall back to `currentColor`-based values.
+
+  3. **Default series colours changed** to an eight-colour palette derived from Okabe–Ito, with separate light and dark values chosen by `light-dark()` (set `color-scheme` on your dark theme). Pass `color` props or set `--raster-series-*` to keep your own colours.
+
+  4. **GeoChart moved** to its own entry, and `topojson-client` is now a declared optional peer dependency:
+
+     ```diff
+     - import { GeoChart } from "@eekodigital/raster";
+     + import { GeoChart } from "@eekodigital/raster/geo";
+     ```
+
+     `topology` is typed structurally (`GeoTopology`), so `@types/topojson-specification` is no longer needed.
+
+  5. **UI components:** move them into your app, on [Base UI](https://base-ui.com) or plain HTML. **DataTable:** copy it from the `v2.0.1` tag and add `@tanstack/react-table` as a direct dependency. **Tokens:** copy the primitive values you use from `src/tokens/primitives.css` at `v2.0.1`.
+
 ## 2.0.1
 
 ### Patch Changes
@@ -39,10 +147,12 @@
   The `gray.*` scale had a slight warm tilt at every step (e.g. `gray.11` = `#494748`, R=73 G=71 B=72). The renamed `neutral.*` scale preserves the same lightness curve but zeroes out the chroma so every step is pure achromatic grey. "Neutral" is also the right name for a scale that spans white and black — and it sidesteps the `gray` (US) / `grey` (UK) spelling fork.
 
   Migration:
+
   1. **If you imported `@eekodigital/raster/tokens.css`** and depended on the bundled theme: copy raster's prior theme files into your app (or write your own using the new `/foundations/theming` template), then keep importing `tokens.css` (or the new `primitives.css` alias) for the primitives only.
   2. **If you reference `--color-primitive-gray-*`** anywhere in your CSS: rename to `--color-primitive-neutral-*`. Values are subtly different (now exact R = G = B); contrast ratios are equivalent.
 
   Other changes in this release:
+
   - Raster docs sidebar: new "Theming" entry under Foundations.
   - Colours docs page: `Gray (neutral)` palette entry renamed to `Neutral`.
   - WCAG verified: light + dark themes hit AA on body text; high-contrast hits AAA. (Verification was on the docs site theme files, which now live in `docs/`.)
@@ -87,6 +197,7 @@
 ### Patch Changes
 
 - 9d52e73: A11y fixes surfaced by the Axe E2E suite, plus the suite is now gated in CI.
+
   - `ChartTooltip` drops `role="tooltip"` and sets `aria-hidden` when not visible
     or when content is empty, avoiding an axe "tooltip must have accessible
     name" violation on every chart page.
@@ -145,6 +256,7 @@
   tick labels rendered as 48px. After this change strokes stay at 2px, points
   at their configured radius, and labels at their CSS-specified font-size
   regardless of container width.
+
   - `LineChart`, `BarChart`, `ScatterChart`: `viewBox` removed; the SVG now
     has explicit `width` / `height` attributes driven by a measured container
     width (720px fallback until measured).
@@ -163,6 +275,7 @@
   **Breaking:** render-prop form is removed from `Dialog.Trigger`, `Dialog.Close`, `AlertDialog.Trigger`, `Tooltip.Trigger`, and `DropdownMenu.Trigger`. Use `asChild` instead.
 
   **New:** `asChild` prop added to:
+
   - `Popover.Trigger`, `Popover.Close` (fixes nested-button bug #20)
   - `DropdownMenu.Trigger`
   - `Dialog.Trigger`, `Dialog.Close`
