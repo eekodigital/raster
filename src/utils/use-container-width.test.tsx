@@ -2,7 +2,7 @@ import { act, render } from "@testing-library/react";
 import { useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { useContainerWidth } from "./use-container-width.js";
+import { plotSize, useContainerWidth } from "./use-container-width.js";
 
 type ResizeCallback = (entries: Array<{ contentRect: DOMRect; target: Element }>) => void;
 
@@ -89,5 +89,26 @@ describe("useContainerWidth", () => {
     } finally {
       observer.restore();
     }
+  });
+});
+
+describe("plotSize", () => {
+  it("uses the fixed height, sized in CSS", () => {
+    expect(plotSize(600, { height: 150 }, 200)).toEqual({
+      width: 600,
+      height: 150,
+      style: { height: 150 },
+    });
+    expect(plotSize(600, {}, 200)).toEqual({ width: 600, height: 200, style: { height: 200 } });
+  });
+
+  it("derives the height from aspectRatio, sized in CSS", () => {
+    expect(plotSize(600, { aspectRatio: 3 }, 200)).toEqual({
+      width: 600,
+      height: 200,
+      style: { aspectRatio: "3" },
+    });
+    // aspectRatio wins over height.
+    expect(plotSize(500, { aspectRatio: 2, height: 99 }, 200).height).toBe(250);
   });
 });

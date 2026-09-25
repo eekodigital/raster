@@ -34,3 +34,31 @@ export function useContainerWidth(
 
   return width;
 }
+
+export type PlotSizeOptions = {
+  /** Fixed plot height in px. */
+  height?: number;
+  /** Width ÷ height. Takes precedence over `height`. */
+  aspectRatio?: number;
+};
+
+/**
+ * Drawing size for a plot `width` px wide, plus the CSS that sizes the plot
+ * box. The box is sized by CSS (not the measured width), so server and client
+ * render the same layout and nothing shifts once the width is measured.
+ */
+export function plotSize(
+  width: number,
+  { height, aspectRatio }: PlotSizeOptions,
+  defaultHeight: number,
+): { width: number; height: number; style: React.CSSProperties } {
+  if (aspectRatio) {
+    return {
+      width,
+      height: Math.round(width / aspectRatio),
+      style: { aspectRatio: String(aspectRatio) },
+    };
+  }
+  const h = height ?? defaultHeight;
+  return { width, height: h, style: { height: h } };
+}

@@ -82,7 +82,7 @@ describe("/theme contract", () => {
   });
 
   it("charts read no custom properties outside the contract", () => {
-    const internal = new Set(["--line-length", "--gauge-pct"]);
+    const internal = new Set(["--line-length", "--gauge-pct", "--donut-duration", "--donut-delay"]);
     for (const { path, text } of sources) {
       for (const name of varReads(text)) {
         if (internal.has(name)) continue;

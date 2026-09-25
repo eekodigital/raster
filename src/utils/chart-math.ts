@@ -221,3 +221,40 @@ export function catmullRomPath(points: { x: number; y: number }[], tension = 0.5
 
   return parts.join(" ");
 }
+
+/**
+ * Unit outlines (x, y pairs, radius 1) for the polygon marker shapes: square,
+ * triangle, diamond, inverted triangle, cross. Index 0, the circle, is an arc.
+ */
+const SHAPES = [
+  [],
+  [-0.9, -0.9, 0.9, -0.9, 0.9, 0.9, -0.9, 0.9],
+  [0, -1.25, 1.25, 0.94, -1.25, 0.94],
+  [0, -1.25, 1.25, 0, 0, 1.25, -1.25, 0],
+  [0, 1.25, -1.25, -0.94, 1.25, -0.94],
+  [
+    -0.4, -1.1, 0.4, -1.1, 0.4, -0.4, 1.1, -0.4, 1.1, 0.4, 0.4, 0.4, 0.4, 1.1, -0.4, 1.1, -0.4, 0.4,
+    -1.1, 0.4, -1.1, -0.4, -0.4, -0.4,
+  ],
+];
+
+/** Number of distinct series marker shapes before they repeat. */
+export const MARKER_SHAPES = SHAPES.length;
+
+const r2 = (v: number) => Math.round(v * 100) / 100;
+
+/**
+ * SVG path for series `index`'s marker, centred on (x, y) with nominal radius
+ * `r`: circle, square, triangle, diamond, inverted triangle, cross. Shapes
+ * carry series identity without colour (forced colours, colour blindness).
+ */
+export function markerPath(index: number, x: number, y: number, r: number): string {
+  const shape = SHAPES[index % MARKER_SHAPES];
+  if (!shape.length)
+    return `M${r2(x - r)} ${r2(y)}a${r} ${r} 0 1 0 ${r2(2 * r)} 0a${r} ${r} 0 1 0-${r2(2 * r)} 0Z`;
+  let d = "";
+  for (let i = 0; i < shape.length; i += 2) {
+    d += `${i ? "L" : "M"}${r2(x + shape[i] * r)} ${r2(y + shape[i + 1] * r)}`;
+  }
+  return `${d}Z`;
+}

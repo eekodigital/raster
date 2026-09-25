@@ -75,14 +75,19 @@ export type ChartTooltipProps = {
   x: number;
   y: number;
   content: string;
+  /**
+   * Visual only: always `aria-hidden`. Charts use this because each mark's
+   * accessible name already carries the same text.
+   */
+  decorative?: boolean;
 };
 
-export function ChartTooltip({ id, visible, x, y, content }: ChartTooltipProps) {
+export function ChartTooltip({ id, visible, x, y, content, decorative }: ChartTooltipProps) {
   const isActive = visible && content.length > 0;
   return (
     <div
       id={id}
-      {...(isActive ? { role: "tooltip" } : { "aria-hidden": true })}
+      {...(isActive && !decorative ? { role: "tooltip" } : { "aria-hidden": true })}
       className="raster-tooltip"
       data-visible={isActive || undefined}
       style={{

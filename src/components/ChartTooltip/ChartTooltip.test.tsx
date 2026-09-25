@@ -38,4 +38,14 @@ describe("ChartTooltip", () => {
     expect(tooltip.style.left).toBe("120px");
     expect(tooltip.style.top).toBe("80px");
   });
+
+  it("stays aria-hidden when decorative", () => {
+    const { container } = render(
+      <ChartTooltip id="tip-3" visible x={0} y={0} content="Shown" decorative />,
+    );
+    const el = container.querySelector("#tip-3") as HTMLElement;
+    expect(el.getAttribute("role")).toBeNull();
+    expect(el.getAttribute("aria-hidden")).toBe("true");
+    expect(el.hasAttribute("data-visible")).toBe(true);
+  });
 });

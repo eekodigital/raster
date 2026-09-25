@@ -4,6 +4,8 @@ import {
   bandScale,
   clamp,
   labelSkip,
+  MARKER_SHAPES,
+  markerPath,
   shouldRotateLabels,
   strokeArcPath,
   extent,
@@ -187,5 +189,21 @@ describe("shouldRotateLabels", () => {
 
   it("returns false for single label", () => {
     expect(shouldRotateLabels(1, 100)).toBe(false);
+  });
+});
+
+describe("markerPath", () => {
+  it("draws a distinct closed shape per series, cycling", () => {
+    const shapes = Array.from({ length: MARKER_SHAPES }, (_, i) => markerPath(i, 10, 10, 3));
+    expect(new Set(shapes).size).toBe(MARKER_SHAPES);
+    for (const d of shapes) expect(d).toMatch(/^M.*Z$/);
+    expect(markerPath(MARKER_SHAPES, 10, 10, 3)).toBe(shapes[0]);
+  });
+
+  it("centres the shape on the point", () => {
+    // Square: corners at ±0.9r.
+    expect(markerPath(1, 10, 20, 5)).toBe("M5.5 15.5L14.5 15.5L14.5 24.5L5.5 24.5Z");
+    // Circle: two arcs through (x-r, y) and (x+r, y).
+    expect(markerPath(0, 10, 20, 5)).toBe("M5 20a5 5 0 1 0 10 0a5 5 0 1 0-10 0Z");
   });
 });
