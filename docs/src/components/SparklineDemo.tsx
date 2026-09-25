@@ -15,26 +15,29 @@ export function SparklineDemo() {
       <span>
         Trend:{" "}
         <Sparkline
+          width={80}
           data={[10, 25, 18, 40, 35, 60, 72, 86]}
           color="var(--demo-good)"
-          aria-label="Upward trend"
+          title="Upward trend"
         />
       </span>
       <span>
         Flat:{" "}
         <Sparkline
+          width={80}
           data={[50, 48, 52, 49, 51, 50, 48, 52]}
           color="var(--demo-neutral)"
-          aria-label="Flat trend"
+          title="Flat trend"
         />
       </span>
       <span>
         With fill:{" "}
         <Sparkline
+          width={80}
           data={[5, 15, 10, 30, 25, 45]}
           fill
           color="var(--demo-accent)"
-          aria-label="Growth with area"
+          title="Growth with area"
         />
       </span>
     </div>

@@ -1,0 +1,115 @@
+---
+title: Accessibility
+description: How raster charts are structured for assistive technology, how to navigate them by keyboard, and how to reword or translate the strings they generate.
+---
+
+Every chart follows the same pattern, so once you know one you know them all. Accessibility is table stakes for a chart library rather than something that sets raster apart: AG Charts and MUI X also ship keyboard and screen-reader support.
+
+## Structure
+
+- `div role="figure"`, named by the visible title and described by a generated summary
+  - the title, e.g. "Results trend"
+  - a visually hidden summary: "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."
+  - `svg role="group" aria-roledescription="chart"`
+    - `g role="group"` per series: "Pass, 6 points"
+      - `path role="img"` per mark: "Pass, Feb: 12, 2 of 6" (`role="button"` with `aria-pressed` when the chart is interactive)
+  - the legend, in HTML, with swatches matching each series' line and marker
+  - `button aria-expanded`: "Show data table"
+  - the table, hidden until shown: caption "Data for Results trend", `th scope="col"` and `th scope="row"`
+  - `div role="status"`: a polite live region for changes away from focus
+
+- **No `graphics-*` roles.** Support for the Graphics ARIA module is patchy, so charts use `figure`, `group`, `img` and `button`, which every screen reader understands.
+- **Marks are static images unless the chart is interactive.** Pass `onSelect`, `selectedIndex` or a click handler (`onPointClick`, `onBarClick`, …) and marks become `role="button"` with `aria-pressed`.
+- **The tooltip is visual only.** Each mark's name already carries the same text, so the tooltip is `aria-hidden` rather than announced twice.
+- **Sparkline** is word-sized, so it has no marks or table: the drawing is hidden and a visually hidden sentence ("Weekly views: Sparkline, 8 points. Values from 10 to 86. First 10, last 86.") takes its place.
+- **Gauge and LinearGauge** are `role="meter"`, named by their visible `label`, with `aria-valuetext` from `format`.
+
+## Keyboard
+
+Each chart is one Tab stop. The last mark you visited stays the Tab stop when you come back.
+
+| Key               | Action                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| ← / →             | Previous / next mark in the series (↑ / ↓ for horizontal bars)                                               |
+| ↑ / ↓             | Previous / next series (stacked bars: ↑ climbs the stack)                                                    |
+| Home / End        | First / last mark in the series                                                                              |
+| PageUp / PageDown | Back / forward 10 marks                                                                                      |
+| Enter / Space     | Toggle selection of the focused mark (interactive charts)                                                    |
+| Escape            | Hide the tooltip and clear the selection. Handled inside the chart only, so a surrounding dialog stays open. |
+
+DonutChart moves round the ring with any arrow key. RadarChart wraps round its axes. GeoChart moves across regions with ← / →, and ↑ / ↓ switch between regions and markers.
+
+## Data table
+
+By default each chart shows a **Show data table** button (`aria-expanded`, `aria-controls`). It reveals a real, visible table: captioned `Data for {title}`, with `th scope` headers and every value run through `formatValue`. It's the most reliable way for anyone to read exact values, and it works with every screen reader.
+
+If the page already shows the same data, keep the table for assistive technology only:
+
+```tsx
+<BarChart {...props} dataTable="visually-hidden" />
+```
+
+GeoChart's table lists every region, including those with no data, and every marker.
+
+## Announcements
+
+Changes you make on the focused mark are announced by the mark itself (its `aria-pressed` state). The polite live region is used only for changes away from focus, such as "Selection cleared" when Escape clears a selection.
+
+## Colour, motion and forced colours
+
+- **Not colour alone.** Line, scatter and radar series use a different marker shape each (circle, square, triangle, diamond, inverted triangle, cross), and the legend repeats it.
+- **Forced colours** (Windows High Contrast): marks switch to system colours; series are told apart by dash pattern and marker shape (stacked and grouped bars: series after the first are outlined with their legend dash pattern); focus and selection use `Highlight`.
+- **Reduced motion:** every draw-in and transition stops under `prefers-reduced-motion: reduce`. DonutChart's draw-in is a CSS class, so it stops too.
+
+## Labels
+
+Every string a chart generates comes from one `labels` prop. Anything you leave out keeps its English default. Numbers go through `Intl.NumberFormat(labels.locale)`: the default `formatValue` uses it, and so do the counts in mark and series names.
+
+```tsx
+import type { ChartLabels } from "@eekodigital/raster";
+
+const de: Partial<ChartLabels> = {
+  locale: "de",
+  chart: "Diagramm",
+  showTable: "Datentabelle anzeigen",
+  hideTable: "Datentabelle ausblenden",
+  tableCaption: (title) => `Daten für ${title}`,
+  selectionCleared: "Auswahl aufgehoben",
+  series: (name, count, n) => `${name}, ${n(count)} Punkte`,
+  mark: ({ series, x, y, index, count }, n) => {
+    const value = y ? `${x}: ${y}` : x;
+    const pos = `${n(index + 1)} von ${n(count)}`;
+    return [series, value, pos].filter(Boolean).join(", ");
+  },
+  summary: (s, n) => `Diagramm, ${n(s.points)} Punkte.`,
+};
+
+<LineChart {...props} labels={de} />;
+```
+
+| Key                                                                                                                                                                | Default                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `locale`                                                                                                                                                           | `"en"`                                                                                                                                                                                                                           |
+| `chart`                                                                                                                                                            | `"chart"` (the SVG's `aria-roledescription`)                                                                                                                                                                                     |
+| `showTable`                                                                                                                                                        | `"Show data table"`                                                                                                                                                                                                              |
+| `hideTable`                                                                                                                                                        | `"Hide data table"`                                                                                                                                                                                                              |
+| `tableCaption`                                                                                                                                                     | `(title) => "Data for {title}"`                                                                                                                                                                                                  |
+| `selectionCleared`                                                                                                                                                 | `"Selection cleared"`                                                                                                                                                                                                            |
+| `noData`                                                                                                                                                           | `"No data"` (GeoChart regions without a value)                                                                                                                                                                                   |
+| `regions`, `markers`, `region`, `marker`                                                                                                                           | GeoChart group names and table types                                                                                                                                                                                             |
+| `categoryColumn`, `valueColumn`, `percentageColumn`, `periodColumn`, `axisColumn`, `nameColumn`, `typeColumn`, `seriesColumn`, `labelColumn`, `xColumn`, `yColumn` | Data table headers: `"Category"`, `"Value"`, `"Percentage"`, `"Period"`, `"Axis"`, `"Name"`, `"Type"`, `"Series"`, `"Label"`, `"X"`, `"Y"`. Series columns use the series names; ScatterChart uses `xLabel`/`yLabel` when given. |
+| `series`                                                                                                                                                           | `(name, count, n) => "{name}, {count} points"`                                                                                                                                                                                   |
+| `mark`                                                                                                                                                             | `({ series, x, y, index, count }, n) => "{series}, {x}: {y}, {index + 1} of {count}"`                                                                                                                                            |
+| `summary`                                                                                                                                                          | `({ type, series, points, x, y, first, last }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."`                                                                                                        |
+
+`DEFAULT_LABELS` is exported if you want to wrap a default.
+
+## Testing with a screen reader
+
+Raster's tests cover roles, names, keyboard and axe for every chart and mode, but they can't tell you how it sounds. Before a release, check LineChart and BarChart with VoiceOver (Safari, macOS) on the [LineChart](/components/line-chart/) and [BarChart](/components/bar-chart/) pages:
+
+1. Turn on VoiceOver (⌘F5). Tab to the first chart. Expect the figure title and summary, then the first mark: "Assessed, Week 1: 10, 1 of 6, image".
+2. Press → a few times. Each step announces the next point with its position. Press End, then Home.
+3. On a multi-series chart press ↓. Expect the same period in the next series ("Fail, Jan: 0, 1 of 6").
+4. On the Selection example, press Space. Expect "selected" or "pressed". Press Escape: expect "Selection cleared", and the button is no longer pressed.
+5. Tab to **Show data table**. Expect "Show data table, collapsed, button". Press Space: expect "expanded". Use VO+⌘T (next table) and table navigation (VO+arrows) to read the caption and cells.

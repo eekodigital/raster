@@ -10,14 +10,14 @@ Docs: [raster.eeko.digital](https://raster.eeko.digital)
 
 ## Design goals
 
-| Goal                                          | Where it stands                                                                                                                                                                                                              |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Light.** No feature bloat.                  | Zero runtime dependencies. Each chart is its own entry point, under 4.5 KB min+gzip including shared helpers. GeoChart and its `topojson-client` peer are at `@eekodigital/raster/geo`. CI enforces a size budget per entry. |
-| **Themable enough for our apps.**             | Charts read a documented `--raster-*` contract, with fallbacks for every property. Per-series and per-datum `color` props override it.                                                                                       |
-| **SVG, for accessibility and interactivity.** | SVG marks, a visually hidden data table, arrow-key navigation, tooltips on hover and focus. More complete labelling and keyboard coverage are in progress.                                                                   |
-| **Not based on d3.**                          | Scales, ticks, curves and arcs come from raster's own `chart-math`.                                                                                                                                                          |
-| **TypeScript native.**                        | Types ship with the package.                                                                                                                                                                                                 |
-| **Responsive.**                               | Cartesian charts track their container width and thin or rotate labels. Heights, and Donut, Gauge and Sparkline sizes, are still fixed.                                                                                      |
+| Goal                                          | Where it stands                                                                                                                                                                                                                                                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Light.** No feature bloat.                  | Zero runtime dependencies. Each chart is its own entry point, about 5–6 KB min+gzip including the shared accessibility layer (Sparkline about 2.3 KB). GeoChart and its `topojson-client` peer are at `@eekodigital/raster/geo`. CI enforces a size budget per entry. |
+| **Themable enough for our apps.**             | Charts read a documented `--raster-*` contract, with fallbacks for every property. Per-series and per-datum `color` props override it.                                                                                                                                |
+| **SVG, for accessibility and interactivity.** | Each chart is a labelled figure with a generated summary, a "Show data table" disclosure, and SVG marks with accessible names, reached with one Tab stop and arrow keys. Tooltips show on hover and focus.                                                            |
+| **Not based on d3.**                          | Scales, ticks, curves and arcs come from raster's own `chart-math`.                                                                                                                                                                                                   |
+| **TypeScript native.**                        | Types ship with the package.                                                                                                                                                                                                                                          |
+| **Responsive.**                               | Every chart fills its container unless given a fixed size. Cartesian charts take a `height` or an `aspectRatio`, sized in CSS so server-rendered and hydrated layouts match, and thin or rotate labels to fit.                                                        |
 
 No other library we found is light, SVG and d3-free at once; see the [comparison](https://raster.eeko.digital/guides/comparison/).
 
@@ -39,8 +39,8 @@ import { LineChart } from "@eekodigital/raster";
 
 <LineChart
   series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
-  labels={["Mon", "Tue", "Wed", "Thu"]}
-  aria-label="Visitors this week"
+  categories={["Mon", "Tue", "Wed", "Thu"]}
+  title="Visitors this week"
 />;
 ```
 

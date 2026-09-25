@@ -11,10 +11,18 @@ import { GaugeBasicDemo } from "../../../components/GaugeDemo.tsx";
 Different sizes, colours, and format functions.
 
 <Example
-  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<Gauge value={3.5} max={4} label="Score" format={(v) => v.toFixed(1)} color="var(--demo-good)" aria-label="Score: 3.5/4" />\n<Gauge value={45} max={100} label="Complete" format={(v) => \`\${v}%\`} size={80} thickness={8} aria-label="45% complete" />`}
+  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} label="Assessed" />\n<Gauge value={3.5} max={4} label="Score" format={(v) => v.toFixed(1)} color="var(--demo-good)" />\n<Gauge value={45} max={100} label="Complete" format={(v) => \`\${v}%\`} size={80} thickness={8} />`}
 >
   <GaugeBasicDemo client:load />
 </Example>
+
+## Accessibility
+
+- `role="meter"` with `aria-valuemin`, `aria-valuemax`, `aria-valuenow` and `aria-valuetext` from `format`.
+- Named by the visible `label` through `aria-labelledby`, so what you see is what is announced.
+- The fill transition stops under `prefers-reduced-motion`.
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -36,7 +44,19 @@ Different sizes, colours, and format functions.
         <code>number</code>
       </td>
       <td>—</td>
-      <td>Current value</td>
+      <td>Required.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>min</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>0</code>
+      </td>
+      <td>Start of the range.</td>
     </tr>
     <tr>
       <td>
@@ -46,7 +66,7 @@ Different sizes, colours, and format functions.
         <code>number</code>
       </td>
       <td>—</td>
-      <td>Maximum value</td>
+      <td>Required. End of the range.</td>
     </tr>
     <tr>
       <td>
@@ -56,19 +76,21 @@ Different sizes, colours, and format functions.
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Label below the value</td>
+      <td>Required. Visible label and accessible name.</td>
     </tr>
     <tr>
       <td>
-        <code>color</code>
+        <code>format</code>
       </td>
       <td>
-        <code>string</code>
+        <code>(value: number) =&gt; string</code>
       </td>
       <td>
-        <code>--raster-series-1</code>
+        <code>Intl.NumberFormat("en")</code>
       </td>
-      <td>Fill colour</td>
+      <td>
+        Formats the displayed value and <code>aria-valuetext</code>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -77,10 +99,8 @@ Different sizes, colours, and format functions.
       <td>
         <code>number</code>
       </td>
-      <td>
-        <code>120</code>
-      </td>
-      <td>Diameter in pixels</td>
+      <td>—</td>
+      <td>Fixed diameter in px. Omit to fill the container's width (square).</td>
     </tr>
     <tr>
       <td>
@@ -92,29 +112,51 @@ Different sizes, colours, and format functions.
       <td>
         <code>10</code>
       </td>
-      <td>Ring thickness</td>
+      <td>Ring thickness in px.</td>
     </tr>
     <tr>
       <td>
-        <code>format</code>
+        <code>color</code>
       </td>
       <td>
-        <code>(v: number) =&gt; string</code>
+        <code>string</code>
       </td>
       <td>
-        <code>String</code>
+        <code>series 1</code>
       </td>
-      <td>Format the displayed value</td>
+      <td>Fill colour.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>trackColor</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>grid colour</code>
+      </td>
+      <td>Track colour.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>SVG/PNG export.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required.</td>
+      <td></td>
     </tr>
   </tbody>
 </table>

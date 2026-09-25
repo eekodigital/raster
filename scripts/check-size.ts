@@ -16,21 +16,32 @@ import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
 
-/** Budgets in gzipped bytes. Raise deliberately, in the PR that needs it. */
+/**
+ * Budgets in gzipped bytes. Raise deliberately, in the PR that needs it.
+ *
+ * Framed charts carry the shared accessibility layer (figure + summary, data
+ * table disclosure, `labels`, state-based roving focus, selection + live
+ * region): about 1.3–2.5 KB per entry, set in the raster-3 a11y PR.
+ *
+ * The review pass (tooltip clamping, Escape dismissal, translatable table
+ * headers, tick filtering, horizontal multi-series bars) added 50–350 B per
+ * JS entry; minifying styles.css saved ~900 B, so every chart's JS + CSS
+ * total went down.
+ */
 const BUDGETS: Record<string, number> = {
-  ".": 10_000,
-  "./bar-chart": 5_000,
+  ".": 11_300,
+  "./bar-chart": 6_600,
   "./chart-tooltip": 800,
-  "./donut-chart": 3_750,
+  "./donut-chart": 5_450,
   "./gauge": 2_000,
-  "./geo": 4_000,
-  "./line-chart": 5_000,
+  "./geo": 6_000,
+  "./line-chart": 6_700,
   "./linear-gauge": 800,
-  "./radar-chart": 3_200,
-  "./scatter-chart": 4_300,
-  "./sparkline": 2_000,
+  "./radar-chart": 5_600,
+  "./scatter-chart": 6_150,
+  "./sparkline": 2_500,
   "./theme": 300,
-  "./styles.css": 3_300,
+  "./styles.css": 2_550,
 };
 
 const root = resolve(import.meta.dirname, "..");

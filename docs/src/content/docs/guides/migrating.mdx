@@ -41,7 +41,33 @@ Raster 3.0 is a charts library. Everything else from raster 2 has been removed. 
 
 4. **Default series colours changed.** The default palette is now eight Okabe–Ito-derived colours (see [Theming charts](/guides/theming/)) instead of your `--color-interactive`/`--color-success`/… tokens. Pass `color` props or set `--raster-series-*` to keep your old colours.
 
-Chart props are otherwise unchanged. `ChartTooltip` and `useChartTooltip` are now exported, and every chart has its own entry point (`@eekodigital/raster/line-chart`, …).
+5. **Charts are titled figures.** Replace `aria-label` with `title`, which is now shown above the chart. If your page already has a heading for it, pass `hideTitle` to keep the title for screen readers only:
+
+   ```diff
+   - <LineChart aria-label="Visitors this week" … />
+   + <LineChart title="Visitors this week" hideTitle … />
+   ```
+
+   Sparkline also takes `title` (it isn't displayed; it leads the text summary). Gauge and LinearGauge drop `aria-label`: `label` is now required and names the meter.
+
+6. **LineChart's x-axis `labels` is now `categories`.** `labels` is now the object of generated strings (see [Accessibility](/guides/accessibility/#labels)):
+
+   ```diff
+   - <LineChart labels={["Mon", "Tue"]} … />
+   + <LineChart categories={["Mon", "Tue"]} … />
+   ```
+
+7. **Numbers are formatted with `Intl.NumberFormat`** by default (`1200` shows as `1,200`). Pass `formatValue` to keep your own formatting, or `labels={{ locale: "de" }}` to change the locale.
+
+8. **The data table is visible on request.** Each chart shows a **Show data table** button that reveals a real table. To keep the old always-present, visually hidden table (for example when the page already shows the data), pass `dataTable="visually-hidden"`.
+
+9. **Marks are only buttons when interactive.** Points, bars and segments become `role="button"` with `aria-pressed` only when you pass `onSelect`, `selectedIndex` or a click handler; otherwise clicking does nothing. ScatterChart, RadarChart and GeoChart gain `selectedIndex`/`onSelect`.
+
+10. **Sizes follow the container.** `aspectRatio` is an alternative to `height`. DonutChart, Gauge, RadarChart and Sparkline fill their container's width when you omit `size`/`width`; in v2 DonutChart defaulted to `size={160}`, Gauge to `size={120}` and Sparkline to `width={80}`, so pass those to keep the old size. GeoChart loses `width` and fills its container (16:9 by default, or `height`/`aspectRatio`). Gauge and LinearGauge gain `min`.
+
+11. **Multi-series points use marker shapes** (circle, square, triangle, diamond, …) as well as colour.
+
+`ChartTooltip` and `useChartTooltip` are now exported, and every chart has its own entry point (`@eekodigital/raster/line-chart`, …).
 
 ## If you use UI components
 

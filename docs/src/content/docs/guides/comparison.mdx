@@ -29,8 +29,8 @@ Sizes are min+gzip from `npm view` and bundlephobia, checked in September 2026. 
 
 ## Where raster stands
 
-Raster's charts are 0.6–4.3 KB min+gzip each, render SVG, use no d3 and have no runtime dependencies. That's the gap it fills.
+Raster's charts are about 2.4–6.5 KB min+gzip each, including the shared accessibility layer, render SVG, use no d3 and have no runtime dependencies. That's the gap it fills.
 
 It also does less. There's no zooming, brushing, animation API, or large chart catalogue. If you need those, one of the libraries above is the better choice.
 
-**Accessibility is table stakes, not raster's differentiator.** AG Charts Community and MUI X Charts both ship keyboard navigation and screen-reader support out of the box. Raster aims to match them (SVG marks, a hidden data table, arrow-key navigation, tooltips on focus), not to claim it's uniquely accessible.
+**Accessibility is table stakes, not raster's differentiator.** AG Charts Community and MUI X Charts both ship keyboard navigation and screen-reader support out of the box. Raster aims to match them (SVG marks with accessible names, a "Show data table" disclosure, arrow-key navigation, tooltips on focus), not to claim it's uniquely accessible.

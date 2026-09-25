@@ -24,9 +24,9 @@ export function VisitorsChart() {
     <>
       <LineChart
         series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
-        labels={["Mon", "Tue", "Wed", "Thu"]}
+        categories={["Mon", "Tue", "Wed", "Thu"]}
         exportRef={exportRef}
-        aria-label="Visitors this week"
+        title="Visitors this week"
       />
       <button type="button" onClick={() => exportRef.current?.exportSVG("visitors.svg")}>
         Download SVG

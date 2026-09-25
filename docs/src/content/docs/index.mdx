@@ -22,14 +22,14 @@ Up to version 2 it was a design system. Version 3 keeps only the charts; see [Mi
 
 These goals decide what goes into raster and what stays out. Where a chart doesn't meet one yet, the gap is listed.
 
-| Goal                                          | Where it stands                                                                                                                                                                                                                                                                                                       |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Light.** No feature bloat.                  | Zero runtime dependencies. Each chart is its own entry point, under 4.5 KB min+gzip including shared helpers (Sparkline about 1.6 KB, LineChart about 4.3 KB). GeoChart and its `topojson-client` peer live at `@eekodigital/raster/geo`, so the main entry never pulls them in. CI enforces a size budget per entry. |
-| **Themable enough for our apps.**             | Charts read a documented set of `--raster-*` custom properties, and every one has a fallback, so an unthemed chart is still legible. Per-series and per-datum `color` props override the theme. See [Theming charts](/guides/theming/).                                                                               |
-| **SVG, for accessibility and interactivity.** | SVG marks, a visually hidden data table, arrow-key navigation between marks, and tooltips on hover and focus. Richer labelling, a visible table toggle and full keyboard coverage for every mode are in progress.                                                                                                     |
-| **Not based on d3.**                          | Scales, ticks, curves and arcs come from raster's own `chart-math` (about 220 lines).                                                                                                                                                                                                                                 |
-| **TypeScript native.**                        | Written in TypeScript; types ship with the package.                                                                                                                                                                                                                                                                   |
-| **Responsive.**                               | Cartesian charts track their container width and draw at display pixels, thinning or rotating labels to fit. Height is still fixed, and Donut, Gauge and Sparkline have fixed sizes; container-sized versions are in progress.                                                                                        |
+| Goal                                          | Where it stands                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Light.** No feature bloat.                  | Zero runtime dependencies. Each chart is its own entry point, about 5–6 KB min+gzip including the shared accessibility layer (Sparkline about 2.3 KB, LineChart about 6.1 KB). GeoChart and its `topojson-client` peer live at `@eekodigital/raster/geo`, so the main entry never pulls them in. CI enforces a size budget per entry. |
+| **Themable enough for our apps.**             | Charts read a documented set of `--raster-*` custom properties, and every one has a fallback, so an unthemed chart is still legible. Per-series and per-datum `color` props override the theme. See [Theming charts](/guides/theming/).                                                                                               |
+| **SVG, for accessibility and interactivity.** | Each chart is a labelled figure with a generated summary, a visible data-table toggle, and SVG marks named like "Pass, Feb: 12, 2 of 6" that you reach with one Tab stop and arrow keys. See [Accessibility](/guides/accessibility/).                                                                                                 |
+| **Not based on d3.**                          | Scales, ticks, curves and arcs come from raster's own `chart-math` (about 260 lines).                                                                                                                                                                                                                                                 |
+| **TypeScript native.**                        | Written in TypeScript; types ship with the package.                                                                                                                                                                                                                                                                                   |
+| **Responsive.**                               | Every chart fills its container unless given a fixed size, and draws at display pixels. Cartesian charts take a `height` or an `aspectRatio`, sized in CSS so server-rendered and hydrated layouts match, and thin or rotate labels to fit.                                                                                           |
 
 If these goals don't match yours, [Compared with alternatives](/guides/comparison/) lists what else is out there.
 
@@ -48,7 +48,7 @@ import { LineChart } from "@eekodigital/raster";
 
 <LineChart
   series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
-  labels={["Mon", "Tue", "Wed", "Thu"]}
-  aria-label="Visitors this week"
+  categories={["Mon", "Tue", "Wed", "Thu"]}
+  title="Visitors this week"
 />;
 ```

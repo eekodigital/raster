@@ -82,7 +82,7 @@ describe("/theme contract", () => {
   });
 
   it("charts read no custom properties outside the contract", () => {
-    const internal = new Set(["--line-length", "--gauge-pct"]);
+    const internal = new Set(["--line-length", "--gauge-pct", "--donut-duration", "--donut-delay"]);
     for (const { path, text } of sources) {
       for (const name of varReads(text)) {
         if (internal.has(name)) continue;
@@ -136,18 +136,35 @@ describe("/theme contract", () => {
 
   it("gives each forced-colours bar series its legend line's dash pattern", () => {
     const block = css.slice(css.indexOf("@media (forced-colors: active)"));
-    const legend = (n: number) =>
-      new RegExp(
-        `\\.raster-legend__swatch\\[data-series="${n}"\\] line \\{\\s*stroke-dasharray: ([^;!]+)`,
-      ).exec(block)?.[1];
+    const rules = [...block.matchAll(/([^{}]+)\{([^}]*)\}/g)].map(([, sel, body]) => ({
+      sel,
+      body,
+    }));
     for (let n = 2; n <= 8; n++) {
-      const bar = new RegExp(
-        `\\.raster-bar__bar\\[data-series="${n}"\\] \\{\\s*stroke-dasharray: ([^;]+);`,
-      ).exec(block)?.[1];
-      expect(bar, `bar series ${n}`).toBeDefined();
-      expect(bar?.trim(), `bar series ${n}`).toBe(legend(n)?.trim());
+      const rule = rules.find((r) => r.sel.includes(`[data-series="${n}"] > .raster-bar__bar`));
+      expect(rule?.body, `bar series ${n}`).toMatch(/stroke-dasharray/);
+      expect(rule?.sel, `bar series ${n}`).toContain(
+        `.raster-legend__swatch[data-series="${n}"] line`,
+      );
     }
     // Bars are no longer told apart only by CanvasText/GrayText alternation.
-    expect(block).not.toMatch(/\.raster-bar__bar\[data-series="\d"\],?\s*[^{]*\{\s*fill: GrayText/);
+    expect(block).not.toMatch(/raster-bar__bar[^{}]*\{\s*fill: GrayText/);
+  });
+
+  it("fades marks in without pinning their opacity, so dimming and area opacity apply", () => {
+    const keyframes = /@keyframes raster-fade-in \{([^]*?)\n\}/.exec(css)?.[1] ?? "";
+    expect(keyframes).toContain("from");
+    expect(keyframes).not.toMatch(/\bto\b/);
+    const uses = [...css.matchAll(/animation: raster-fade-in ([^;]+);/g)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    for (const use of uses) expect(use).not.toMatch(/\b(both|forwards)\b/);
+  });
+
+  it("gives focused points a surface halo inside a focus-coloured ring", () => {
+    const rule = /\.raster-radar__point:focus-visible \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(rule).toMatch(/stroke: var\(--raster-surface,/);
+    expect(rule).toMatch(/outline: 2px solid var\(--raster-focus, currentColor\)/);
+    const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
+    expect(forced).toMatch(/\.raster-line__point:focus-visible,[^{]*\{\s*outline-color: Highlight/);
   });
 });

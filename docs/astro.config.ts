@@ -36,6 +36,7 @@ export default defineConfig({
           label: "Guides",
           items: [
             { label: "Getting started", slug: "guides/getting-started" },
+            { label: "Accessibility", slug: "guides/accessibility" },
             { label: "Theming charts", slug: "guides/theming" },
             { label: "Exporting charts", slug: "guides/exporting" },
             { label: "Compared with alternatives", slug: "guides/comparison" },

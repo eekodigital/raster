@@ -22,3 +22,19 @@ describe("package.json", () => {
     expect(pkg.peerDependenciesMeta["topojson-client"]).toEqual({ optional: true });
   });
 });
+
+describe("styles.css build", () => {
+  it("minifies without changing the rules", async () => {
+    const { minifyCss } = await import("./utils/minify-css.js");
+    const src = readFileSync(join(import.meta.dirname, "styles.css"), "utf8");
+    const min = minifyCss(src);
+    expect(min).not.toMatch(/\/\*|\n/);
+    const count = (css: string, ch: string) => css.split(ch).length - 1;
+    const noComments = src.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(count(min, "{")).toBe(count(noComments, "{"));
+    expect(count(min, "}")).toBe(count(noComments, "}"));
+    expect(min).toContain("@media (forced-colors: active){");
+    expect(min).toContain('[data-series]:not([data-series="1"])>.raster-bar__bar{');
+    expect(min.length).toBeLessThan(src.length * 0.8);
+  });
+});
