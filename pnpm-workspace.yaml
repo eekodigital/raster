@@ -1,3 +1,16 @@
 packages:
   - "."
   - "docs"
+
+# pnpm 11 defaults strictDepBuilds to true: dependency build scripts must be
+# explicitly approved or install fails. esbuild and sharp are trusted native
+# deps that need their install scripts to set up prebuilt platform binaries.
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+# Security floor for dev-only transitive deps of the docs toolchain
+# (esbuild GHSA-g7r4-m6w7-qqqr; yaml <2.8.3). Carried over from #68.
+overrides:
+  "esbuild@<0.28.1": ">=0.28.1"
+  "yaml@<2.8.3": ">=2.8.3"
