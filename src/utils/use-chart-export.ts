@@ -21,7 +21,7 @@ const SVG_STYLE_PROPS = [
 
 /**
  * Walks all elements in an SVG clone and inlines computed styles as attributes.
- * This resolves CSS custom properties (var(--color-*)) so the SVG renders
+ * This resolves CSS custom properties (var(--raster-*)) so the SVG renders
  * correctly when opened outside the browser.
  */
 function inlineComputedStyles(svgClone: SVGElement, sourceRoot: SVGElement) {

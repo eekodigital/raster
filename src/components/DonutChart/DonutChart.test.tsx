@@ -98,6 +98,28 @@ describe("DonutChart", () => {
   it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
     render(<DonutChart data={DATA} aria-label="Test donut" />);
     const table = screen.getByRole("table", { name: "Test donut" });
-    expect(table.className).toMatch(/srOnly/);
+    expect(table.classList.contains("raster-sr-only")).toBe(true);
+    expect(table.style.display).toBe("block");
+  });
+
+  it("arrow keys wrap around the ring", () => {
+    render(<DonutChart data={DATA} aria-label="Wrap" />);
+    const segs = screen.getAllByRole("img").filter((el) => el.tagName === "path");
+    segs[0].focus();
+    fireEvent.keyDown(segs[0], { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(segs[segs.length - 1]);
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(segs[0]);
+  });
+
+  it("selection toggles on click and clears on Escape", () => {
+    const onSelect = vi.fn();
+    render(<DonutChart data={DATA} onSelect={onSelect} aria-label="Sel" />);
+    const seg = screen.getAllByRole("img").filter((el) => el.tagName === "path")[1];
+    fireEvent.click(seg);
+    expect(onSelect).toHaveBeenLastCalledWith(1);
+    expect(seg.hasAttribute("data-selected")).toBe(true);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 });

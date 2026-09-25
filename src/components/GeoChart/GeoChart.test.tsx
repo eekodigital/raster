@@ -170,6 +170,7 @@ describe("GeoChart", () => {
       />,
     );
     const table = screen.getByRole("table", { name: "Map" });
-    expect(table.className).toMatch(/srOnly/);
+    expect(table.classList.contains("raster-sr-only")).toBe(true);
+    expect(table.style.display).toBe("block");
   });
 });

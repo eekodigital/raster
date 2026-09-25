@@ -1,10 +1,16 @@
 import { useState, useRef, useCallback, useImperativeHandle, useEffect } from "react";
 import { catmullRomPath, extent, linearScale, ticks, labelSkip } from "../../utils/chart-math.js";
+import { cn } from "../../utils/cn.js";
+import { seriesColor } from "../../utils/palette.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
+import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import * as styles from "./LineChart.css.js";
+import { ChartDataTable } from "../shared/ChartDataTable.js";
+import { ChartLegend } from "../shared/ChartLegend.js";
 
 export type LineSeries = {
   name: string;
@@ -14,7 +20,7 @@ export type LineSeries = {
 
 type GridOption = "horizontal" | "vertical" | "both" | "none";
 
-type LineChartProps = {
+export type LineChartProps = {
   series: LineSeries[];
   labels: string[];
   area?: boolean;
@@ -38,14 +44,6 @@ type LineChartProps = {
   "aria-label": string;
   className?: string;
 };
-
-const DEFAULT_COLORS = [
-  "var(--color-interactive)",
-  "var(--color-success)",
-  "var(--color-danger)",
-  "var(--color-warning)",
-  "var(--color-inactive)",
-];
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
 
@@ -71,8 +69,6 @@ export function LineChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const exportHandle = useChartExport(containerRef);
   useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const focusedRef = useRef({ series: 0, point: 0 });
-  const pointsRef = useRef<Map<string, SVGCircleElement>>(new Map());
   const { tooltipId, tooltipProps, hide, handlers } = useChartTooltip();
 
   type PointIndex = { series: number; point: number };
@@ -134,30 +130,21 @@ export function LineChart({
   const firstVisibleLabelIndex = visibleLabelIndices[0];
   const lastVisibleLabelIndex = visibleLabelIndices[visibleLabelIndices.length - 1];
 
-  const handleKeyDown = useCallback(
-    (seriesIdx: number, pointIdx: number, e: React.KeyboardEvent) => {
-      let si = seriesIdx;
-      let pi = pointIdx;
-
-      if (e.key === "ArrowRight") pi = Math.min(pi + 1, labels.length - 1);
-      else if (e.key === "ArrowLeft") pi = Math.max(pi - 1, 0);
-      else if (e.key === "ArrowDown") si = Math.min(si + 1, series.length - 1);
-      else if (e.key === "ArrowUp") si = Math.max(si - 1, 0);
-      else return;
-
-      e.preventDefault();
-      focusedRef.current = { series: si, point: pi };
-      pointsRef.current.get(`${si}-${pi}`)?.focus();
-    },
-    [labels.length, series.length],
-  );
-
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
+  const roving = useRovingFocus({
+    counts: series.map(() => labels.length),
+    itemKeys: HORIZONTAL_KEYS,
+    rowKeys: VERTICAL_KEYS,
+  });
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
+    <div
+      ref={containerRef}
+      className={cn("raster-chart", className)}
+      data-chart-container
+      style={{ position: "relative" }}
+    >
       <svg
-        className={styles.svg}
+        className="raster-chart__svg"
         width={chartWidth}
         height={height}
         role="img"
@@ -168,9 +155,9 @@ export function LineChart({
           {yTicks.map((tick) => (
             <g key={tick} transform={`translate(0, ${yScale(tick)})`}>
               {showHGrid && (
-                <line x1={0} x2={plotWidth} className={styles.axisLine} strokeDasharray="2,4" />
+                <line x1={0} x2={plotWidth} className="raster-chart__grid" strokeDasharray="2,4" />
               )}
-              <text x={-8} dy="0.35em" textAnchor="end" className={styles.tickLabel}>
+              <text x={-8} dy="0.35em" textAnchor="end" className="raster-chart__tick">
                 {formatValue(tick)}
               </text>
             </g>
@@ -185,7 +172,7 @@ export function LineChart({
                   x2={xScale(i)}
                   y1={0}
                   y2={plotHeight}
-                  className={styles.axisLine}
+                  className="raster-chart__grid"
                   strokeDasharray="2,4"
                 />
               )}
@@ -200,7 +187,7 @@ export function LineChart({
                         ? "end"
                         : "middle"
                   }
-                  className={styles.tickLabel}
+                  className="raster-chart__tick"
                 >
                   {label}
                 </text>
@@ -209,7 +196,13 @@ export function LineChart({
           ))}
 
           {/* Axis baselines */}
-          <line x1={0} x2={plotWidth} y1={plotHeight} y2={plotHeight} className={styles.axisLine} />
+          <line
+            x1={0}
+            x2={plotWidth}
+            y1={plotHeight}
+            y2={plotHeight}
+            className="raster-chart__axis"
+          />
 
           {/* Axis labels */}
           {xLabel && (
@@ -217,7 +210,7 @@ export function LineChart({
               x={plotWidth / 2}
               y={plotHeight + 36}
               textAnchor="middle"
-              className={styles.tickLabel}
+              className="raster-chart__tick"
             >
               {xLabel}
             </text>
@@ -228,7 +221,7 @@ export function LineChart({
               y={-38}
               textAnchor="middle"
               transform="rotate(-90)"
-              className={styles.tickLabel}
+              className="raster-chart__tick"
             >
               {yLabel}
             </text>
@@ -237,7 +230,7 @@ export function LineChart({
           {/* Series (render in reverse for stacked so first series is on top) */}
           {(stacked ? [...series].toReversed() : series).map((s, rawIdx) => {
             const si = stacked ? series.length - 1 - rawIdx : rawIdx;
-            const color = s.color ?? DEFAULT_COLORS[si % DEFAULT_COLORS.length];
+            const color = s.color ?? seriesColor(si);
             const displayData = stackedData[si];
             const points = displayData.map((v, i) => ({ x: xScale(i), y: yScale(v) }));
 
@@ -279,13 +272,13 @@ export function LineChart({
             );
 
             return (
-              <g key={s.name} role="group" aria-label={s.name}>
-                {areaPath && <path d={areaPath} fill={color} className={styles.area} />}
+              <g key={s.name} role="group" aria-label={s.name} data-series={(si % 8) + 1}>
+                {areaPath && <path d={areaPath} fill={color} className="raster-line__area" />}
                 <path
                   d={linePath}
                   stroke={color}
                   fill="none"
-                  className={styles.line}
+                  className="raster-line__line"
                   style={
                     {
                       "--line-length": `${lineLength}`,
@@ -302,14 +295,12 @@ export function LineChart({
                   return (
                     <circle
                       key={pi}
-                      ref={(el) => {
-                        if (el) pointsRef.current.set(`${si}-${pi}`, el);
-                      }}
+                      ref={roving.ref(si, pi)}
                       cx={p.x}
                       cy={p.y}
                       r={isSelected ? 5 : 3}
                       fill={color}
-                      className={styles.point}
+                      className="raster-line__point"
                       tabIndex={si === 0 && pi === 0 ? 0 : -1}
                       role="img"
                       aria-label={tooltipContent}
@@ -320,11 +311,8 @@ export function LineChart({
                         setSelected(isSelected ? null : { series: si, point: pi });
                         onPointClick?.(si, pi, originalValue);
                       }}
-                      onKeyDown={(e) => handleKeyDown(si, pi, e)}
-                      onFocus={(e) => {
-                        focusedRef.current = { series: si, point: pi };
-                        tip.onFocus(e);
-                      }}
+                      onKeyDown={roving.onKeyDown(si, pi)}
+                      onFocus={tip.onFocus}
                       onBlur={() => {
                         if (!isSelected) hide();
                       }}
@@ -351,40 +339,20 @@ export function LineChart({
 
       {/* Legend */}
       {series.length > 1 && (
-        <div className={styles.legend}>
-          {series.map((s, i) => (
-            <span key={s.name} className={styles.legendItem}>
-              <span
-                className={styles.legendSwatch}
-                style={{ background: s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length] }}
-              />
-              {s.name}
-            </span>
-          ))}
-        </div>
+        <ChartLegend
+          items={series.map((s, i) => ({ label: s.name, color: s.color ?? seriesColor(i) }))}
+        />
       )}
 
       {/* Hidden data table */}
-      <table className={styles.srOnly} aria-label={ariaLabel}>
-        <thead>
-          <tr>
-            <th>Period</th>
-            {series.map((s) => (
-              <th key={s.name}>{s.name}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {labels.map((label, i) => (
-            <tr key={label}>
-              <td>{label}</td>
-              {series.map((s) => (
-                <td key={s.name}>{formatValue(s.data[i])}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ChartDataTable
+        aria-label={ariaLabel}
+        headers={["Period", ...series.map((s) => s.name)]}
+        rows={labels.map((label, i) => ({
+          key: label,
+          cells: [label, ...series.map((s) => formatValue(s.data[i]))],
+        }))}
+      />
     </div>
   );
 }

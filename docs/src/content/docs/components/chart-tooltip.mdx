@@ -1,0 +1,57 @@
+---
+title: ChartTooltip
+description: The tooltip raster's charts use, exported so custom SVG visualisations can share its behaviour and styling.
+---
+
+`ChartTooltip` and `useChartTooltip` are the pieces every raster chart uses for its hover and focus tooltip. They're exported so a custom SVG chart can look and behave the same.
+
+```tsx
+import { ChartTooltip, useChartTooltip } from "@eekodigital/raster";
+
+export function Dots({ values }: { values: number[] }) {
+  const { tooltipId, tooltipProps, handlers } = useChartTooltip();
+  return (
+    // The tooltip positions itself against the nearest [data-chart-container].
+    <div data-chart-container style={{ position: "relative" }}>
+      <svg width={values.length * 24} height={24} role="group" aria-label="Values">
+        {values.map((v, i) => {
+          const label = `Item ${i + 1}: ${v}`;
+          return (
+            <circle
+              key={i}
+              cx={12 + i * 24}
+              cy={12}
+              r={6}
+              tabIndex={i === 0 ? 0 : -1}
+              role="img"
+              aria-label={label}
+              {...handlers(label)}
+            />
+          );
+        })}
+      </svg>
+      <ChartTooltip id={tooltipId} {...tooltipProps} />
+    </div>
+  );
+}
+```
+
+## `useChartTooltip()`
+
+Returns:
+
+- `tooltipId`: a stable id for the tooltip element.
+- `tooltipProps`: `{ visible, x, y, content }` to spread onto `ChartTooltip`.
+- `handlers(content)`: `onMouseEnter`, `onMouseLeave`, `onFocus`, `onBlur` and `aria-describedby` for a mark.
+- `show(content, rect, containerRect)` and `hide()`, for positioning it yourself.
+
+## `ChartTooltip`
+
+| Prop      | Type      | Description                                                                              |
+| --------- | --------- | ---------------------------------------------------------------------------------------- |
+| `id`      | `string`  | Element id (use `tooltipId`).                                                            |
+| `visible` | `boolean` | Whether it's shown. When hidden or empty it drops `role="tooltip"` and is `aria-hidden`. |
+| `x`, `y`  | `number`  | Position in px relative to the container; the tooltip centres above this point.          |
+| `content` | `string`  | Text to show.                                                                            |
+
+It's styled by the `.raster-tooltip` rule in `styles.css` and themed with `--raster-tooltip-bg` and `--raster-tooltip-text`.

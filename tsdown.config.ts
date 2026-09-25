@@ -1,30 +1,37 @@
-import { readdirSync } from "node:fs";
-import { vanillaExtractPlugin } from "@vanilla-extract/rollup-plugin";
+import { copyFileSync } from "node:fs";
 import { defineConfig } from "tsdown";
 
-// Discover every component dir under src/components and emit one bundle per
-// component (e.g. dist/components/Pagination/Pagination.mjs). Each per-
-// component bundle side-effect-loads only its own .vanilla.css, so a
-// consumer who imports `Pagination` no longer pulls in the chart, gauge,
-// breadcrumb, etc. CSS that they don't use.
-//
-// `shared/` is the in-repo helpers dir, not a component (no Component.tsx).
-const componentDirs = readdirSync("./src/components", { withFileTypes: true })
-  .filter((d) => d.isDirectory() && d.name !== "shared")
-  .map((d) => d.name);
-
-const componentEntries = Object.fromEntries(
-  componentDirs.map((name) => [`components/${name}/${name}`, `src/components/${name}/${name}.tsx`]),
-);
+/**
+ * Public entry points. Each becomes `dist/<name>.mjs` and is listed in
+ * package.json `exports`; shared code is split into chunks, so importing one
+ * chart pulls in only that chart and its helpers.
+ *
+ * No entry imports CSS: styles ship as a single `dist/styles.css`
+ * (`@eekodigital/raster/styles.css`), copied from `src/styles.css`.
+ */
+export const entries = {
+  index: "src/index.ts",
+  theme: "src/theme.ts",
+  geo: "src/geo.ts",
+  "bar-chart": "src/components/BarChart/BarChart.tsx",
+  "chart-tooltip": "src/components/ChartTooltip/ChartTooltip.tsx",
+  "donut-chart": "src/components/DonutChart/DonutChart.tsx",
+  gauge: "src/components/Gauge/Gauge.tsx",
+  "line-chart": "src/components/LineChart/LineChart.tsx",
+  "linear-gauge": "src/components/LinearGauge/LinearGauge.tsx",
+  "radar-chart": "src/components/RadarChart/RadarChart.tsx",
+  "scatter-chart": "src/components/ScatterChart/ScatterChart.tsx",
+  sparkline: "src/components/Sparkline/Sparkline.tsx",
+} as const;
 
 export default defineConfig({
-  entry: {
-    index: "src/index.ts",
-    "data-table": "src/data-table.ts",
-    ...componentEntries,
-  },
+  entry: entries,
   format: ["esm"],
   dts: true,
   clean: true,
-  plugins: [vanillaExtractPlugin()],
+  hooks: {
+    "build:done": () => {
+      copyFileSync("src/styles.css", "dist/styles.css");
+    },
+  },
 });

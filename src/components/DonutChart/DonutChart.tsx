@@ -1,9 +1,19 @@
 import { useState, useRef, useCallback, useImperativeHandle, useEffect } from "react";
 import { pieAngles, strokeArcPath, sum } from "../../utils/chart-math.js";
+import { cn } from "../../utils/cn.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
+import { useRovingFocus } from "../../utils/use-roving-focus.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import * as styles from "./DonutChart.css.js";
+import { ChartDataTable } from "../shared/ChartDataTable.js";
+import { ChartLegend } from "../shared/ChartLegend.js";
+
+const DONUT_KEYS = {
+  next: ["ArrowRight", "ArrowDown"],
+  prev: ["ArrowLeft", "ArrowUp"],
+} as const;
 
 export type DonutDatum = {
   label: string;
@@ -11,7 +21,7 @@ export type DonutDatum = {
   color: string;
 };
 
-type DonutChartProps = {
+export type DonutChartProps = {
   data: DonutDatum[];
   size?: number;
   thickness?: number;
@@ -41,8 +51,6 @@ export function DonutChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const exportHandle = useChartExport(containerRef);
   useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const focusedRef = useRef(0);
-  const segmentsRef = useRef<(SVGPathElement | null)[]>([]);
   const { tooltipId, tooltipProps, hide, handlers } = useChartTooltip();
 
   const [internalSelected, setInternalSelected] = useState<number | null>(null);
@@ -72,34 +80,17 @@ export function DonutChart({
   const total = sum(data.map((d) => d.value));
   const angles = pieAngles(data.map((d) => d.value));
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      let next = focusedRef.current;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        next = (next + 1) % data.length;
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        next = (next - 1 + data.length) % data.length;
-      } else {
-        return;
-      }
-      e.preventDefault();
-      focusedRef.current = next;
-      segmentsRef.current[next]?.focus();
-    },
-    [data.length],
-  );
-
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
+  const roving = useRovingFocus({ counts: [data.length], itemKeys: DONUT_KEYS, wrap: true });
 
   return (
     <div
       ref={containerRef}
-      className={cls}
+      className={cn("raster-donut", className)}
       style={{ width: size, height: size }}
       data-chart-container
     >
       <svg
-        className={styles.svg}
+        className="raster-donut__svg"
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
@@ -127,10 +118,9 @@ export function DonutChart({
           return (
             <path
               key={d.label}
-              ref={(el) => {
-                segmentsRef.current[i] = el;
-              }}
-              className={styles.segment}
+              ref={roving.ref(0, i)}
+              className="raster-donut__segment"
+              data-series={(i % 8) + 1}
               d={path}
               fill="none"
               stroke={d.color}
@@ -147,11 +137,8 @@ export function DonutChart({
                 setSelected(isSelected ? null : i);
                 onSegmentClick?.(d, i);
               }}
-              onKeyDown={handleKeyDown}
-              onFocus={(e) => {
-                focusedRef.current = i;
-                tip.onFocus(e);
-              }}
+              onKeyDown={roving.onKeyDown(0, i)}
+              onFocus={tip.onFocus}
               onBlur={() => {
                 if (!isSelected) hide();
               }}
@@ -162,7 +149,7 @@ export function DonutChart({
               style={{
                 strokeDasharray: 1,
                 strokeDashoffset: 1,
-                animation: `draw ${duration}ms linear ${delayMs}ms forwards`,
+                animation: `raster-donut-draw ${duration}ms linear ${delayMs}ms forwards`,
                 cursor: "pointer",
               }}
             />
@@ -171,7 +158,7 @@ export function DonutChart({
 
         {children && (
           <foreignObject x={0} y={0} width={size} height={size}>
-            <div className={styles.centre} style={{ width: size, height: size }}>
+            <div className="raster-donut__centre" style={{ width: size, height: size }}>
               {children}
             </div>
           </foreignObject>
@@ -187,38 +174,18 @@ export function DonutChart({
       />
 
       {/* Hidden data table for screen readers */}
-      <table className={styles.srOnly} aria-label={ariaLabel}>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Value</th>
-            <th>Percentage</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((d) => {
-            const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
-            return (
-              <tr key={d.label}>
-                <td>{d.label}</td>
-                <td>{d.value}</td>
-                <td>{pct}%</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <ChartDataTable
+        aria-label={ariaLabel}
+        headers={["Category", "Value", "Percentage"]}
+        rows={data.map((d) => {
+          const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
+          return { key: d.label, cells: [d.label, d.value, `${pct}%`] };
+        })}
+      />
 
       {/* Legend */}
       {showLegend && (
-        <div className={styles.legend}>
-          {data.map((d) => (
-            <span key={d.label} className={styles.legendItem}>
-              <span className={styles.legendSwatch} style={{ background: d.color }} />
-              {d.label}
-            </span>
-          ))}
-        </div>
+        <ChartLegend swatch="dot" items={data.map((d) => ({ label: d.label, color: d.color }))} />
       )}
     </div>
   );

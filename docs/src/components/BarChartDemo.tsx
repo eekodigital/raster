@@ -9,12 +9,7 @@ export function BarChartBasicDemo() {
         { label: "N/A", value: 12 },
         { label: "To do", value: 24 },
       ]}
-      colors={[
-        "var(--color-success)",
-        "var(--color-danger)",
-        "var(--color-inactive)",
-        "var(--color-warning)",
-      ]}
+      colors={["var(--demo-good)", "var(--demo-bad)", "var(--demo-neutral)", "var(--demo-warn)"]}
       aria-label="Conformance results by status"
     />
   );

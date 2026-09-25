@@ -1,6 +1,7 @@
-import * as styles from "./LinearGauge.css.js";
+import { cn } from "../../utils/cn.js";
+import { seriesColor } from "../../utils/palette.js";
 
-type LinearGaugeProps = {
+export type LinearGaugeProps = {
   value: number;
   max: number;
   label?: string;
@@ -16,7 +17,7 @@ export function LinearGauge({
   value,
   max,
   label,
-  color = "var(--color-interactive)",
+  color = seriesColor(0),
   height = 8,
   format = (v) => String(v),
   formatLabel,
@@ -24,11 +25,9 @@ export function LinearGauge({
   className,
 }: LinearGaugeProps) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
-
   return (
     <div
-      className={cls}
+      className={cn("raster-linear-gauge", className)}
       role="meter"
       aria-label={ariaLabel}
       aria-valuenow={value}
@@ -36,16 +35,16 @@ export function LinearGauge({
       aria-valuemax={max}
     >
       {label && (
-        <div className={styles.header}>
-          <span className={styles.label}>{label}</span>
-          <span className={styles.value}>
+        <div className="raster-linear-gauge__header">
+          <span className="raster-linear-gauge__label">{label}</span>
+          <span className="raster-linear-gauge__value">
             {formatLabel ? formatLabel(value, max) : `${format(value)} / ${format(max)}`}
           </span>
         </div>
       )}
-      <div className={styles.track} style={{ height }}>
+      <div className="raster-linear-gauge__track" style={{ height }}>
         <div
-          className={styles.fill}
+          className="raster-linear-gauge__fill"
           style={
             {
               width: `${pct}%`,

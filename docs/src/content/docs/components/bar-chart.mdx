@@ -11,7 +11,7 @@ import { BarChartBasicDemo, BarChartCustomDemo } from "../../../components/BarCh
 Pass data as an array of `{ label, value }` objects. Colours default to the interactive palette or can be set per bar.
 
 <Example
-  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--color-success)', 'var(--color-danger)', 'var(--color-inactive)', 'var(--color-warning)']}\n  aria-label="Conformance results by status"\n/>`}
+  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--demo-good)', 'var(--demo-bad)', 'var(--demo-neutral)', 'var(--demo-warn)']}\n  aria-label="Conformance results by status"\n/>`}
 >
   <BarChartBasicDemo client:load />
 </Example>

@@ -1,11 +1,26 @@
 import { feature } from "topojson-client";
-import type { Topology } from "topojson-specification";
 import { useRef, useCallback, useMemo, useImperativeHandle } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
+import { cn } from "../../utils/cn.js";
+import { seriesColor } from "../../utils/palette.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+
+export type { ChartExportHandle };
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import * as styles from "./GeoChart.css.js";
+import { ChartDataTable } from "../shared/ChartDataTable.js";
+
+/**
+ * A TopoJSON topology (e.g. `world-atlas/countries-110m.json`). Typed
+ * structurally so consumers don't need `@types/topojson-specification`.
+ */
+export type GeoTopology = {
+  type: string;
+  objects: Record<string, unknown>;
+  arcs: unknown[];
+  transform?: unknown;
+  bbox?: unknown;
+};
 
 export type GeoRegionDatum = {
   id: string;
@@ -23,8 +38,8 @@ export type GeoMarker = {
 
 type ProjectionFn = (lon: number, lat: number) => [number, number];
 
-type GeoChartProps = {
-  topology: Topology;
+export type GeoChartProps = {
+  topology: GeoTopology;
   objectName?: string;
   data?: GeoRegionDatum[];
   colorScale?: string[];
@@ -109,10 +124,11 @@ function geoPath(coordinates: number[][][], project: ProjectionFn, s: ScaleParam
     .join(" ");
 }
 
+const SURFACE = "var(--raster-surface, light-dark(#ffffff, #121212))";
 const DEFAULT_COLOR_SCALE = [
-  "var(--color-surface-raised)",
-  "var(--color-interactive-subtle)",
-  "var(--color-interactive)",
+  `color-mix(in srgb, ${seriesColor(0)} 15%, ${SURFACE})`,
+  `color-mix(in srgb, ${seriesColor(0)} 55%, ${SURFACE})`,
+  seriesColor(0),
 ];
 
 export function GeoChart({
@@ -148,7 +164,7 @@ export function GeoChart({
   const objName = objectName ?? Object.keys(topology.objects)[0];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const geojson = useMemo(
-    () => feature(topology, topology.objects[objName] as any) as any,
+    () => feature(topology as any, topology.objects[objName] as any) as any,
     [topology, objName],
   );
 
@@ -191,12 +207,15 @@ export function GeoChart({
     [features.length],
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
-
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
+    <div
+      ref={containerRef}
+      className={cn("raster-chart", className)}
+      data-chart-container
+      style={{ position: "relative" }}
+    >
       <svg
-        className={styles.svg}
+        className="raster-chart__svg raster-geo__svg"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={ariaLabel}
@@ -222,7 +241,7 @@ export function GeoChart({
               key={id}
               d={pathD}
               fill={getColor(id)}
-              className={styles.region}
+              className="raster-geo__region"
               tabIndex={i === 0 ? 0 : -1}
               role="img"
               aria-label={tooltipContent}
@@ -248,8 +267,8 @@ export function GeoChart({
               cx={x * scale.scaleX + scale.offsetX}
               cy={y * scale.scaleY + scale.offsetY}
               r={m.size ?? 4}
-              fill={m.color ?? "var(--color-interactive)"}
-              className={styles.marker}
+              fill={m.color ?? seriesColor(0)}
+              className="raster-geo__marker"
               tabIndex={-1}
               role="img"
               aria-label={m.label}
@@ -275,11 +294,11 @@ export function GeoChart({
 
       {/* Colour scale legend */}
       {data.length > 0 && (
-        <div className={styles.legend}>
+        <div className="raster-legend raster-geo__legend">
           {legendLabel && <span>{legendLabel}</span>}
           <span>{formatValue ? formatValue(minVal) : minVal}</span>
           <div
-            className={styles.gradientBar}
+            className="raster-geo__gradient"
             style={{ background: `linear-gradient(to right, ${colorScale.join(", ")})` }}
           />
           <span>{formatValue ? formatValue(maxVal) : maxVal}</span>
@@ -287,22 +306,11 @@ export function GeoChart({
       )}
 
       {/* Hidden data table */}
-      <table className={styles.srOnly} aria-label={ariaLabel}>
-        <thead>
-          <tr>
-            <th>Region</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((d) => (
-            <tr key={d.id}>
-              <td>{d.label ?? d.id}</td>
-              <td>{d.value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ChartDataTable
+        aria-label={ariaLabel}
+        headers={["Region", "Value"]}
+        rows={data.map((d) => ({ key: d.id, cells: [d.label ?? d.id, d.value] }))}
+      />
     </div>
   );
 }

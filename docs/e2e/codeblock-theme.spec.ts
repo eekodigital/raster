@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
  * variant uses a light-bg theme so it doesn't invert against the white HC page.
  */
 test("codeblocks follow [data-theme] without inverting against page bg", async ({ page }) => {
-  await page.goto("/foundations/theming/");
+  await page.goto("/guides/theming/");
 
   async function snapshot(theme: "light" | "dark" | "high-contrast") {
     await page.evaluate((t) => {

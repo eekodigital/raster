@@ -9,7 +9,7 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
 ## Examples
 
 <Example
-  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<LinearGauge value={45} max={100} label="Complete" color="var(--color-warning)" formatLabel={(v) => \`\${v}%\`} aria-label="45% complete" />\n<LinearGauge value={86} max={86} label="Criteria" color="var(--color-success)" aria-label="All criteria assessed" />`}
+  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<LinearGauge value={45} max={100} label="Complete" color="var(--demo-warn)" formatLabel={(v) => \`\${v}%\`} aria-label="45% complete" />\n<LinearGauge value={86} max={86} label="Criteria" color="var(--demo-good)" aria-label="All criteria assessed" />`}
 >
   <LinearGaugeDemo client:load />
 </Example>
@@ -64,7 +64,7 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
         <code>string</code>
       </td>
       <td>
-        <code>--color-interactive</code>
+        <code>--raster-series-1</code>
       </td>
       <td>Fill colour</td>
     </tr>
