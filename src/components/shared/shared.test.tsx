@@ -51,6 +51,24 @@ describe("ChartDataTable", () => {
     expect(screen.queryByRole("table")).toBeNull();
   });
 
+  it("end-aligns data column headers to match their cells", () => {
+    const { rerender } = render(
+      <ChartDataTable {...TABLE} labels={DEFAULT_LABELS} mode="visually-hidden" />,
+    );
+    const cls = () => screen.getAllByRole("columnheader").map((th) => th.className);
+    // The row-header column stays start-aligned; data columns (end-aligned cells) match.
+    expect(cls()).toEqual(["", "raster-chart__col-end"]);
+    rerender(
+      <ChartDataTable
+        {...TABLE}
+        rowHeaders={false}
+        labels={DEFAULT_LABELS}
+        mode="visually-hidden"
+      />,
+    );
+    expect(cls()).toEqual(["raster-chart__col-end", "raster-chart__col-end"]);
+  });
+
   it("can render rows without row headers", () => {
     render(
       <ChartDataTable

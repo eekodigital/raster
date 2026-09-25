@@ -69,7 +69,12 @@ export function ChartDataTable({
       <thead>
         <tr>
           {headers.map((h, i) => (
-            <th key={i} scope="col">
+            // Data columns are end-aligned (numbers); their headers follow.
+            <th
+              key={i}
+              scope="col"
+              className={i === 0 && rowHeaders ? undefined : "raster-chart__col-end"}
+            >
               {h}
             </th>
           ))}
