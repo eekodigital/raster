@@ -154,6 +154,42 @@ describe("BarChart multi-series", () => {
     expect(focusedName()).toBe("South, Q2: 1,500, 2 of 2");
   });
 
+  for (const mode of ["stacked", "grouped"] as const) {
+    it(`horizontal ${mode}: bars lie along x, Up/Down move categories, Left/Right move series`, () => {
+      const { container } = render(
+        <BarChart
+          data={QUARTERS}
+          series={SERIES}
+          values={VALUES}
+          direction="horizontal"
+          {...{ [mode]: true }}
+          title="H"
+        />,
+      );
+      const rects = [...container.querySelectorAll<SVGRectElement>("rect.raster-bar__bar")];
+      expect(rects.every((r) => r.classList.contains("raster-bar__bar--horizontal"))).toBe(true);
+      const at = (name: RegExp) => screen.getByRole("img", { name });
+      const n1 = at(/^North, Q1/);
+      const s1 = at(/^South, Q1/);
+      // Same category: stacked bars share a row and sit end to end; grouped bars share x = 0.
+      if (mode === "stacked") {
+        expect(s1.getAttribute("y")).toBe(n1.getAttribute("y"));
+        expect(Number(s1.getAttribute("x"))).toBeCloseTo(
+          Number(n1.getAttribute("x")) + Number(n1.getAttribute("width")),
+        );
+      } else {
+        expect(s1.getAttribute("x")).toBe("0");
+        expect(Number(s1.getAttribute("y"))).toBeGreaterThan(Number(n1.getAttribute("y")));
+      }
+      press(n1, "ArrowDown");
+      expect(focusedName()).toBe("North, Q2: 30, 2 of 2");
+      press(at(/^North, Q2/), "ArrowRight");
+      expect(focusedName()).toBe("South, Q2: 1,500, 2 of 2");
+      press(at(/^South, Q2/), "ArrowLeft");
+      expect(focusedName()).toBe("North, Q2: 30, 2 of 2");
+    });
+  }
+
   it("selecting a bar selects its category and reports the series", () => {
     const onBarClick = vi.fn();
     const onSelect = vi.fn();

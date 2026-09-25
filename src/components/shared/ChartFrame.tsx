@@ -3,6 +3,8 @@ import type React from "react";
 import { cn } from "../../utils/cn.js";
 import type { ChartLabels } from "../../utils/labels.js";
 import type { Selection } from "../../utils/use-selection.js";
+import { ChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import type { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import { ChartDataTable, SR_ONLY_STYLE } from "./ChartDataTable.js";
 import type { ChartTableData, DataTableMode } from "./ChartDataTable.js";
 
@@ -29,8 +31,8 @@ export type ChartFrameProps = Omit<ChartFrameOptions, "labels"> & {
   width: number;
   height: number;
   svgClassName?: string;
-  /** HTML laid over the SVG (tooltip). */
-  overlay?: React.ReactNode;
+  /** The chart's tooltip, drawn over the SVG. Decorative: marks already carry the text. */
+  tooltip?: ReturnType<typeof useChartTooltip>;
   legend?: React.ReactNode;
   table: ChartTableData;
   // oxlint-disable-next-line no-explicit-any
@@ -43,8 +45,9 @@ export type ChartFrameProps = Omit<ChartFrameOptions, "labels"> & {
  *
  * `div[role=figure]` (named by the visible title, described by a generated
  * summary) › `svg[role=group][aria-roledescription=chart]` › legend › data
- * table disclosure › live region. Escape inside the figure clears the
- * selection and stops there, so a surrounding dialog stays open.
+ * table disclosure › live region. Escape inside the figure dismisses the
+ * tooltip and clears the selection, and stops there when it did either, so a
+ * surrounding dialog stays open.
  */
 export function ChartFrame({
   title,
@@ -58,7 +61,7 @@ export function ChartFrame({
   width,
   height,
   svgClassName,
-  overlay,
+  tooltip,
   legend,
   table,
   selection,
@@ -75,7 +78,11 @@ export function ChartFrame({
       aria-describedby={summaryId}
       className={cn("raster-chart", className)}
       onKeyDown={(e) => {
-        if (e.key === "Escape" && selection?.clear()) e.stopPropagation();
+        if (e.key !== "Escape") return;
+        const hadTip = !!tooltip?.tooltipProps.visible;
+        if (hadTip) tooltip.hide();
+        const cleared = !!selection?.clear();
+        if (hadTip || cleared) e.stopPropagation();
       }}
     >
       <div
@@ -100,7 +107,7 @@ export function ChartFrame({
         >
           {children}
         </svg>
-        {overlay}
+        {tooltip && <ChartTooltip id={tooltip.tooltipId} {...tooltip.tooltipProps} decorative />}
       </div>
       {legend}
       <ChartDataTable {...table} labels={labels} mode={dataTable} describedBy={titleId} />

@@ -1,4 +1,4 @@
-import { useState, useCallback, useId } from "react";
+import { useState, useCallback, useId, useLayoutEffect, useRef } from "react";
 
 type TooltipState = {
   visible: boolean;
@@ -84,8 +84,21 @@ export type ChartTooltipProps = {
 
 export function ChartTooltip({ id, visible, x, y, content, decorative }: ChartTooltipProps) {
   const isActive = visible && content.length > 0;
+  const ref = useRef<HTMLDivElement>(null);
+  // Horizontal nudge that keeps the tooltip inside its container at the edges.
+  const [shift, setShift] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const box = el?.parentElement;
+    if (!el || !box || !isActive) return;
+    const w = el.offsetWidth;
+    const left = x - w / 2;
+    const max = box.clientWidth - w;
+    setShift(max < 0 ? -left : Math.min(Math.max(left, 0), max) - left);
+  }, [x, content, isActive]);
   return (
     <div
+      ref={ref}
       id={id}
       {...(isActive && !decorative ? { role: "tooltip" } : { "aria-hidden": true })}
       className="raster-tooltip"
@@ -93,7 +106,7 @@ export function ChartTooltip({ id, visible, x, y, content, decorative }: ChartTo
       style={{
         left: x,
         top: y,
-        transform: "translate(-50%, -100%)",
+        transform: `translate(calc(-50% + ${shift}px), -100%)`,
       }}
     >
       {content}

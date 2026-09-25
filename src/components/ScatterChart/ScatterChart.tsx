@@ -11,7 +11,7 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { markProps, tooltipOverlay, useChart } from "../shared/use-chart.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 export type ScatterPoint = {
   x: number;
@@ -131,7 +131,7 @@ export function ScatterChart({
       width={size.width}
       height={size.height}
       selection={selection}
-      overlay={tooltipOverlay(tooltip)}
+      tooltip={tooltip}
       legend={
         series.length > 1 && (
           <ChartLegend

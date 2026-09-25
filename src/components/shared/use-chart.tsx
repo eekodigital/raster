@@ -5,7 +5,7 @@ import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 import type { useRovingFocus } from "../../utils/use-roving-focus.js";
-import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
+import { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 
 type Tooltip = ReturnType<typeof useChartTooltip>;
 
@@ -22,11 +22,6 @@ export function useChart(
   const n = numberFormatter(labels.locale);
   const tooltip = useChartTooltip();
   return { plotRef, labels, n, format: formatValue ?? n, tooltip };
-}
-
-/** The chart's tooltip. Decorative: marks already carry the text. */
-export function tooltipOverlay({ tooltipId, tooltipProps }: Tooltip) {
-  return <ChartTooltip id={tooltipId} {...tooltipProps} decorative />;
 }
 
 type MarkOptions = {

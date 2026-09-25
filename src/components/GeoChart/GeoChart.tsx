@@ -12,7 +12,7 @@ import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-
 import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
-import { markProps, tooltipOverlay, useChart } from "../shared/use-chart.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 /**
  * A TopoJSON topology (e.g. `world-atlas/countries-110m.json`). Typed
@@ -276,7 +276,7 @@ export function GeoChart({
       height={size.height}
       svgClassName="raster-geo__svg"
       selection={selection}
-      overlay={tooltipOverlay(tooltip)}
+      tooltip={tooltip}
       legend={
         data.length > 0 && (
           <div className="raster-legend raster-geo__legend">

@@ -75,6 +75,29 @@ describe("RadarChart keyboard", () => {
     press(p, "Escape");
     expect(p.getAttribute("aria-pressed")).toBe("false");
   });
+
+  it("keeps keyboard focus on drawn points when a series is shorter than the axes", () => {
+    const axes = ["A", "B", "C", "D", "E"];
+    render(
+      <RadarChart
+        axes={axes}
+        series={[
+          { name: "Short", data: [1, 2, 3] },
+          { name: "Long", data: [1, 2, 3, 4, 5, 6] },
+        ]}
+        title="Partial"
+      />,
+    );
+    screen.getByRole("group", { name: "Short, 3 points" });
+    // Extra values past the last axis are ignored.
+    screen.getByRole("group", { name: "Long, 5 points" });
+    press(screen.getByRole("img", { name: "Short, A: 1, 1 of 3" }), "End");
+    expect(focusedName()).toBe("Short, C: 3, 3 of 3");
+    press(screen.getByRole("img", { name: /^Short, C/ }), "ArrowRight");
+    expect(focusedName()).toBe("Short, A: 1, 1 of 3");
+    expect(tabStops()).toHaveLength(1);
+    expect(tableText(openTable())[4]).toEqual(["D", "", "4"]);
+  });
 });
 
 describe("RadarChart axe", () => {

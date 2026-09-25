@@ -10,7 +10,7 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { markProps, tooltipOverlay, useChart } from "../shared/use-chart.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 export type DonutDatum = {
   label: string;
@@ -106,7 +106,7 @@ export function DonutChart({
       width={size}
       height={size}
       selection={selection}
-      overlay={tooltipOverlay(tooltip)}
+      tooltip={tooltip}
       legend={
         showLegend && (
           <ChartLegend swatch="dot" items={data.map((d) => ({ label: d.label, color: d.color }))} />

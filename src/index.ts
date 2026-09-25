@@ -17,9 +17,17 @@ export type { GaugeProps } from "./components/Gauge/Gauge.js";
 export { LinearGauge } from "./components/LinearGauge/LinearGauge.js";
 export type { LinearGaugeProps } from "./components/LinearGauge/LinearGauge.js";
 export { LineChart } from "./components/LineChart/LineChart.js";
-export type { LineChartProps, LinePointIndex, LineSeries } from "./components/LineChart/LineChart.js";
+export type {
+  LineChartProps,
+  LinePointIndex,
+  LineSeries,
+} from "./components/LineChart/LineChart.js";
 export { RadarChart } from "./components/RadarChart/RadarChart.js";
-export type { RadarChartProps, RadarPointIndex, RadarSeries } from "./components/RadarChart/RadarChart.js";
+export type {
+  RadarChartProps,
+  RadarPointIndex,
+  RadarSeries,
+} from "./components/RadarChart/RadarChart.js";
 export { ScatterChart } from "./components/ScatterChart/ScatterChart.js";
 export type {
   ScatterChartProps,

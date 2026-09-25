@@ -10,7 +10,7 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { markProps, tooltipOverlay, useChart } from "../shared/use-chart.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 export type RadarSeries = {
   name: string;
@@ -64,18 +64,20 @@ export function RadarChart({
   const c = size / 2;
   const radius = Math.max(size / 2 - 40, 0); // margin for labels
   const count = axes.length;
-  const values = series.flatMap((s) => s.data);
+  // One value per axis: extra values have no axis to sit on; missing ones aren't drawn.
+  const data = series.map((s) => s.data.slice(0, count));
+  const values = data.flat();
   const maxVal = maxProp ?? Math.max(...values, 1);
 
   const activate = interactive
     ? (si: number, pi: number) => {
         selection.toggle({ series: si, point: pi });
-        onPointClick?.(si, pi, series[si].data[pi]);
+        onPointClick?.(si, pi, data[si][pi]);
       }
     : undefined;
 
   const roving = useRovingFocus({
-    counts: series.map(() => count),
+    counts: data.map((d) => d.length),
     itemKeys: HORIZONTAL_KEYS,
     rowKeys: VERTICAL_KEYS,
     wrap: true,
@@ -106,7 +108,7 @@ export function RadarChart({
       width={size}
       height={size}
       selection={selection}
-      overlay={tooltipOverlay(tooltip)}
+      tooltip={tooltip}
       legend={
         series.length > 1 && (
           <ChartLegend
@@ -120,7 +122,7 @@ export function RadarChart({
         headers: ["Axis", ...series.map((s) => s.name)],
         rows: axes.map((axis, i) => ({
           key: i,
-          cells: [axis, ...series.map((s) => format(s.data[i]))],
+          cells: [axis, ...data.map((d) => (d[i] === undefined ? "" : format(d[i])))],
         })),
       }}
     >
@@ -154,7 +156,7 @@ export function RadarChart({
 
       {series.map((s, si) => {
         const color = s.color ?? seriesColor(si);
-        const points = s.data.map((v, i) =>
+        const points = data[si].map((v, i) =>
           polarToCartesian(c, c, (v / maxVal) * radius, i, count),
         );
         const polygon = points.map((p) => `${p.x},${p.y}`).join(" ");
@@ -163,7 +165,7 @@ export function RadarChart({
           <g
             key={s.name}
             role="group"
-            aria-label={labels.series(s.name, s.data.length, n)}
+            aria-label={labels.series(s.name, data[si].length, n)}
             data-series={(si % 8) + 1}
           >
             <polygon points={polygon} fill={color} className="raster-radar__area" />
@@ -181,9 +183,9 @@ export function RadarChart({
                       {
                         series: s.name,
                         x: axes[pi],
-                        y: format(s.data[pi]),
+                        y: format(data[si][pi]),
                         index: pi,
-                        count,
+                        count: data[si].length,
                       },
                       n,
                     ),

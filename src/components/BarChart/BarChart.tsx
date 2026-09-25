@@ -19,7 +19,7 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { markProps, tooltipOverlay, useChart } from "../shared/use-chart.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 export type BarDatum = {
   label: string;
@@ -35,7 +35,7 @@ export type BarChartProps = ChartFrameOptions &
     direction?: "vertical" | "horizontal";
     stacked?: boolean;
     grouped?: boolean;
-    /** Series names for stacked/grouped bars (vertical only). */
+    /** Series names for stacked/grouped bars. */
     series?: string[];
     /** `values[category][series]` for stacked/grouped bars. */
     values?: number[][];
@@ -54,7 +54,7 @@ export type BarChartProps = ChartFrameOptions &
 
 const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
 const MARGIN_H = { top: 8, right: 8, bottom: 28, left: 80 };
-/** Stacked: Up climbs the stack (next series), Down descends. */
+/** Vertical stacks: Up climbs the stack (next series), Down descends. */
 const STACK_KEYS = { next: ["ArrowUp"], prev: ["ArrowDown"] };
 
 export function BarChart({
@@ -120,7 +120,15 @@ export function BarChart({
   const roving = useRovingFocus({
     counts: multi ? multi.series.map(() => data.length) : [data.length],
     itemKeys: isHorizontal ? VERTICAL_KEYS : HORIZONTAL_KEYS,
-    rowKeys: multi ? (stacked ? STACK_KEYS : VERTICAL_KEYS) : undefined,
+    // Series keys are the other axis from category keys: Left/Right between
+    // series of horizontal bars; Up/Down (Up climbing a stack) for vertical.
+    rowKeys: multi
+      ? isHorizontal
+        ? HORIZONTAL_KEYS
+        : stacked
+          ? STACK_KEYS
+          : VERTICAL_KEYS
+      : undefined,
     onActivate: activate,
   });
 
@@ -216,26 +224,28 @@ export function BarChart({
       >
         {data.map((_, i) => {
           const v = cell(i, si);
-          let geometry: object;
-          if (stacked) {
-            let below = 0;
-            for (let s = 0; s < si; s++) below += cell(i, s);
-            geometry = {
-              x: categoryScale.offset(i),
-              y: valueScale(below + v),
-              width: categoryScale.bandwidth,
-              height: valueScale(below) - valueScale(below + v),
-            };
-          } else {
-            geometry = {
-              x: categoryScale.offset(i) + si * subBarWidth,
-              y: valueScale(v),
-              width: Math.max(subBarWidth - 1, 0),
-              height: plotHeight - valueScale(v),
-            };
-          }
+          let below = 0;
+          if (stacked) for (let s = 0; s < si; s++) below += cell(i, s);
+          const band = stacked ? categoryScale.bandwidth : Math.max(subBarWidth - 1, 0);
+          const bandStart = categoryScale.offset(i) + (stacked ? 0 : si * subBarWidth);
+          const from = stacked ? below : 0;
+          const geometry = isHorizontal
+            ? {
+                x: valueScale(from),
+                y: bandStart,
+                width: valueScale(from + v) - valueScale(from),
+                height: band,
+              }
+            : {
+                x: bandStart,
+                y: valueScale(from + v),
+                width: band,
+                height: valueScale(from) - valueScale(from + v),
+              };
           return bar(i, si, i, v, geometry, {
-            className: "raster-bar__bar",
+            className: isHorizontal
+              ? "raster-bar__bar raster-bar__bar--horizontal"
+              : "raster-bar__bar",
             style: { animationDelay: `${(i * names.length + si) * 40}ms` },
             fill: colors[si % colors.length],
             rx: stacked && si < names.length - 1 ? 0 : 2,
@@ -258,7 +268,7 @@ export function BarChart({
       width={size.width}
       height={size.height}
       selection={selection}
-      overlay={tooltipOverlay(tooltip)}
+      tooltip={tooltip}
       legend={
         multi && (
           <ChartLegend
