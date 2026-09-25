@@ -147,10 +147,10 @@ export function ScatterChart({
         // no cell is guaranteed to identify its row.
         rowHeaders: false,
         headers: [
-          ...(series.length > 1 ? ["Series"] : []),
-          ...(hasPointLabels ? ["Label"] : []),
-          xLabel ?? "X",
-          yLabel ?? "Y",
+          ...(series.length > 1 ? [labels.seriesColumn] : []),
+          ...(hasPointLabels ? [labels.labelColumn] : []),
+          xLabel ?? labels.xColumn,
+          yLabel ?? labels.yColumn,
         ],
         rows: series.flatMap((s, si) =>
           s.data.map((p, i) => ({

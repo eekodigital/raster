@@ -292,7 +292,7 @@ export function GeoChart({
       }
       table={{
         caption: labels.tableCaption(frame.title),
-        headers: ["Name", "Type", "Value"],
+        headers: [labels.nameColumn, labels.typeColumn, labels.valueColumn],
         rows: [
           ...regions.map((r) => ({
             key: `r-${r.id}`,

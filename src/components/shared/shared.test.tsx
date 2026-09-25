@@ -268,3 +268,51 @@ describe("useSelection", () => {
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 });
+
+describe("table column labels", () => {
+  const de = {
+    categoryColumn: "Kategorie",
+    valueColumn: "Wert",
+    percentageColumn: "Anteil",
+    periodColumn: "Zeitraum",
+    axisColumn: "Achse",
+    xColumn: "x-Wert",
+    yColumn: "y-Wert",
+  };
+  const headers = () => screen.getAllByRole("columnheader").map((th) => th.textContent);
+
+  it("translates every generated header", async () => {
+    const { BarChart } = await import("../BarChart/BarChart.js");
+    const { DonutChart } = await import("../DonutChart/DonutChart.js");
+    const { LineChart } = await import("../LineChart/LineChart.js");
+    const { RadarChart } = await import("../RadarChart/RadarChart.js");
+    const { ScatterChart } = await import("../ScatterChart/ScatterChart.js");
+    const common = { labels: de, dataTable: "visually-hidden" as const };
+    const cases: [React.ReactElement, (string | null)[]][] = [
+      [<BarChart data={[{ label: "A", value: 1 }]} title="B" {...common} />, ["Kategorie", "Wert"]],
+      [
+        <DonutChart data={[{ label: "A", value: 1, color: "red" }]} title="D" {...common} />,
+        ["Kategorie", "Wert", "Anteil"],
+      ],
+      [
+        <LineChart series={[{ name: "S", data: [1] }]} categories={["A"]} title="L" {...common} />,
+        ["Zeitraum", "S"],
+      ],
+      [
+        <RadarChart
+          axes={["A", "B", "C"]}
+          series={[{ name: "S", data: [1, 2, 3] }]}
+          title="R"
+          {...common}
+        />,
+        ["Achse", "S"],
+      ],
+      [<ScatterChart data={[{ x: 1, y: 2 }]} title="Sc" {...common} />, ["x-Wert", "y-Wert"]],
+    ];
+    for (const [el, expected] of cases) {
+      const { unmount } = render(el);
+      expect(headers()).toEqual(expected);
+      unmount();
+    }
+  });
+});

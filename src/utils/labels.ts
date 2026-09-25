@@ -51,6 +51,19 @@ export type ChartLabels = {
   markers: string;
   region: string;
   marker: string;
+  /** Data table column headers. Series columns use the series names. */
+  categoryColumn: string;
+  valueColumn: string;
+  percentageColumn: string;
+  periodColumn: string;
+  axisColumn: string;
+  nameColumn: string;
+  typeColumn: string;
+  seriesColumn: string;
+  labelColumn: string;
+  /** Scatter x/y columns when `xLabel`/`yLabel` aren't given. */
+  xColumn: string;
+  yColumn: string;
   series: (name: string, count: number, n: NumberFormat) => string;
   mark: (parts: MarkLabelParts, n: NumberFormat) => string;
   summary: (parts: SummaryParts, n: NumberFormat) => string;
@@ -81,6 +94,17 @@ export const DEFAULT_LABELS: ChartLabels = {
   markers: "Markers",
   region: "Region",
   marker: "Marker",
+  categoryColumn: "Category",
+  valueColumn: "Value",
+  percentageColumn: "Percentage",
+  periodColumn: "Period",
+  axisColumn: "Axis",
+  nameColumn: "Name",
+  typeColumn: "Type",
+  seriesColumn: "Series",
+  labelColumn: "Label",
+  xColumn: "X",
+  yColumn: "Y",
   series: (name, count, n) => `${name}, ${points(count, n)}`,
   mark: ({ series, x, y, index, count }, n) =>
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,

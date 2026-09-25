@@ -193,7 +193,7 @@ export function LineChart({
       }
       table={{
         caption: labels.tableCaption(frame.title),
-        headers: ["Period", ...series.map((s) => s.name)],
+        headers: [labels.periodColumn, ...series.map((s) => s.name)],
         rows: categories.map((label, i) => ({
           key: i,
           cells: [label, ...series.map((s) => (s.data[i] === undefined ? "" : format(s.data[i])))],

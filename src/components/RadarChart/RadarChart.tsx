@@ -119,7 +119,7 @@ export function RadarChart({
       }
       table={{
         caption: labels.tableCaption(frame.title),
-        headers: ["Axis", ...series.map((s) => s.name)],
+        headers: [labels.axisColumn, ...series.map((s) => s.name)],
         rows: axes.map((axis, i) => ({
           key: i,
           cells: [axis, ...data.map((d) => (d[i] === undefined ? "" : format(d[i])))],

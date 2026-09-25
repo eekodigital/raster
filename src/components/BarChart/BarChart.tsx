@@ -278,7 +278,7 @@ export function BarChart({
       }
       table={{
         caption: labels.tableCaption(frame.title),
-        headers: ["Category", ...(multi ? multi.series : ["Value"])],
+        headers: [labels.categoryColumn, ...(multi ? multi.series : [labels.valueColumn])],
         rows: data.map((d, i) => ({
           key: i,
           cells: [

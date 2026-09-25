@@ -114,7 +114,7 @@ export function DonutChart({
       }
       table={{
         caption: labels.tableCaption(frame.title),
-        headers: ["Category", "Value", "Percentage"],
+        headers: [labels.categoryColumn, labels.valueColumn, labels.percentageColumn],
         rows: data.map((d, i) => ({ key: i, cells: [d.label, format(d.value), pct(d.value)] })),
       }}
     >
