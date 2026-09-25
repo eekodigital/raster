@@ -1,5 +1,6 @@
-import { copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { defineConfig } from "tsdown";
+import { minifyCss } from "./src/utils/minify-css.ts";
 
 /**
  * Public entry points. Each becomes `dist/<name>.mjs` and is listed in
@@ -7,8 +8,9 @@ import { defineConfig } from "tsdown";
  * chart pulls in only that chart and its helpers.
  *
  * No entry imports CSS: styles ship as a single `dist/styles.css`
- * (`@eekodigital/raster/styles.css`), copied from `src/styles.css`.
+ * (`@eekodigital/raster/styles.css`), minified from `src/styles.css`.
  */
+
 export const entries = {
   index: "src/index.ts",
   theme: "src/theme.ts",
@@ -31,7 +33,7 @@ export default defineConfig({
   clean: true,
   hooks: {
     "build:done": () => {
-      copyFileSync("src/styles.css", "dist/styles.css");
+      writeFileSync("dist/styles.css", minifyCss(readFileSync("src/styles.css", "utf8")));
     },
   },
 });

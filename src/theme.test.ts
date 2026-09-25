@@ -136,16 +136,16 @@ describe("/theme contract", () => {
 
   it("gives each forced-colours bar series its legend line's dash pattern", () => {
     const block = css.slice(css.indexOf("@media (forced-colors: active)"));
-    const legend = (n: number) =>
-      new RegExp(
-        `\\.raster-legend__swatch\\[data-series="${n}"\\] line \\{\\s*stroke-dasharray: ([^;!]+)`,
-      ).exec(block)?.[1];
+    const rules = [...block.matchAll(/([^{}]+)\{([^}]*)\}/g)].map(([, sel, body]) => ({
+      sel,
+      body,
+    }));
     for (let n = 2; n <= 8; n++) {
-      const bar = new RegExp(
-        `\\[data-series="${n}"\\] > \\.raster-bar__bar \\{\\s*stroke-dasharray: ([^;]+);`,
-      ).exec(block)?.[1];
-      expect(bar, `bar series ${n}`).toBeDefined();
-      expect(bar?.trim(), `bar series ${n}`).toBe(legend(n)?.trim());
+      const rule = rules.find((r) => r.sel.includes(`[data-series="${n}"] > .raster-bar__bar`));
+      expect(rule?.body, `bar series ${n}`).toMatch(/stroke-dasharray/);
+      expect(rule?.sel, `bar series ${n}`).toContain(
+        `.raster-legend__swatch[data-series="${n}"] line`,
+      );
     }
     // Bars are no longer told apart only by CanvasText/GrayText alternation.
     expect(block).not.toMatch(/raster-bar__bar[^{}]*\{\s*fill: GrayText/);

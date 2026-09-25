@@ -228,11 +228,7 @@
   outline: none;
 }
 
-/*
- * Focus: a surface-coloured halo separates the mark from a focus-coloured
- * ring, so the indicator stays visible even when --raster-focus matches the
- * series colour.
- */
+/* Surface halo inside the focus ring: visible even if focus = series colour. */
 .raster-line__point:focus-visible,
 .raster-scatter__point:focus-visible,
 .raster-radar__point:focus-visible {
@@ -648,43 +644,11 @@
     fill: GrayText;
   }
 
-  /*
-   * Bars: series 1 stays solid; later series become outlined bars carrying the
-   * same dash pattern as their legend line, so stacked and grouped series stay
-   * distinguishable and match the legend.
-   */
+  /* Bars 2–8: outlined, dashed like their legend line. */
   [data-series]:not([data-series="1"]) > .raster-bar__bar {
     fill: Canvas;
     stroke: CanvasText;
     stroke-width: 2px;
-  }
-
-  [data-series="2"] > .raster-bar__bar {
-    stroke-dasharray: 6 3;
-  }
-
-  [data-series="3"] > .raster-bar__bar {
-    stroke-dasharray: 2 2;
-  }
-
-  [data-series="4"] > .raster-bar__bar {
-    stroke-dasharray: 8 3 2 3;
-  }
-
-  [data-series="5"] > .raster-bar__bar {
-    stroke-dasharray: 4 4;
-  }
-
-  [data-series="6"] > .raster-bar__bar {
-    stroke-dasharray: 1 3;
-  }
-
-  [data-series="7"] > .raster-bar__bar {
-    stroke-dasharray: 10 4;
-  }
-
-  [data-series="8"] > .raster-bar__bar {
-    stroke-dasharray: 6 2 2 2;
   }
 
   .raster-donut__segment[data-series="2"],
@@ -723,42 +687,49 @@
 
   [data-series="2"] > .raster-line__line,
   [data-series="2"] > .raster-radar__line,
+  [data-series="2"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="2"] line {
     stroke-dasharray: 6 3 !important;
   }
 
   [data-series="3"] > .raster-line__line,
   [data-series="3"] > .raster-radar__line,
+  [data-series="3"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="3"] line {
     stroke-dasharray: 2 2 !important;
   }
 
   [data-series="4"] > .raster-line__line,
   [data-series="4"] > .raster-radar__line,
+  [data-series="4"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="4"] line {
     stroke-dasharray: 8 3 2 3 !important;
   }
 
   [data-series="5"] > .raster-line__line,
   [data-series="5"] > .raster-radar__line,
+  [data-series="5"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="5"] line {
     stroke-dasharray: 4 4 !important;
   }
 
   [data-series="6"] > .raster-line__line,
   [data-series="6"] > .raster-radar__line,
+  [data-series="6"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="6"] line {
     stroke-dasharray: 1 3 !important;
   }
 
   [data-series="7"] > .raster-line__line,
   [data-series="7"] > .raster-radar__line,
+  [data-series="7"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="7"] line {
     stroke-dasharray: 10 4 !important;
   }
 
   [data-series="8"] > .raster-line__line,
   [data-series="8"] > .raster-radar__line,
+  [data-series="8"] > .raster-bar__bar,
   .raster-legend__swatch[data-series="8"] line {
     stroke-dasharray: 6 2 2 2 !important;
   }
