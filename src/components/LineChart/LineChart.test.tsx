@@ -235,6 +235,34 @@ describe("LineChart keyboard", () => {
     fireEvent.mouseLeave(m);
     expect(container.querySelector(".raster-tooltip")?.hasAttribute("data-visible")).toBe(true);
   });
+
+  it("dismisses the tooltip with Escape, including a pinned one, without leaving the chart", () => {
+    const outer = vi.fn();
+    const { container } = render(
+      <div onKeyDown={outer}>
+        <LineChart series={SERIES} categories={CATEGORIES} title="P" onSelect={() => {}} />
+      </div>,
+    );
+    const tip = () => container.querySelector(".raster-tooltip")!.hasAttribute("data-visible");
+    const m = screen.getByRole("button", { name: /Week 2/ });
+    // Hover/focus tooltip (WCAG 1.4.13: dismissible without moving focus).
+    fireEvent.mouseEnter(m);
+    expect(tip()).toBe(true);
+    press(m, "Escape");
+    expect(tip()).toBe(false);
+    expect(outer).not.toHaveBeenCalled();
+    // Pinned by a selection: Escape clears both.
+    fireEvent.focus(m);
+    fireEvent.click(m);
+    fireEvent.blur(m);
+    expect(tip()).toBe(true);
+    press(m, "Escape");
+    expect(tip()).toBe(false);
+    expect(m.getAttribute("aria-pressed")).toBe("false");
+    // Nothing left to dismiss: Escape passes through.
+    press(m, "Escape");
+    expect(outer).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("LineChart sizing", () => {
@@ -323,6 +351,88 @@ describe("LineChart drawing", () => {
     expect(texts).toContain("D0");
     expect(texts).toContain("D5");
     expect(texts.some((t) => /^D[1-46-9]$/.test(t ?? ""))).toBe(false);
+  });
+
+  describe("x-axis ticks", () => {
+    const DAYS = Array.from({ length: 30 }, (_, i) => `2026-09-${String(i + 1).padStart(2, "0")}`);
+    const DATA = [{ name: "Visitors", data: DAYS.map((_, i) => i * 10) }];
+    const ticksOf = (root: Element) =>
+      [...root.querySelectorAll("text.raster-chart__tick")]
+        .filter((t) => t.getAttribute("y") !== null && !t.hasAttribute("dy"))
+        .map((t) => [t.textContent, t.getAttribute("text-anchor")]);
+
+    it("thins ticks with xTickFilter but keeps full categories in point names and the table", () => {
+      const { container } = render(
+        <LineChart
+          series={DATA}
+          categories={DAYS}
+          title="Visits"
+          xTickFilter={(i) => i % 7 === 0}
+        />,
+      );
+      expect(ticksOf(container).map(([t]) => t)).toEqual([
+        "2026-09-01",
+        "2026-09-08",
+        "2026-09-15",
+        "2026-09-22",
+        "2026-09-29",
+      ]);
+      // A point whose tick is hidden still has its x value.
+      screen.getByRole("img", { name: "Visitors, 2026-09-02: 10, 2 of 30" });
+      const rows = tableText(openTable());
+      expect(rows[2]).toEqual(["2026-09-02", "10"]);
+    });
+
+    it("formats tick text with formatXTick, and hides ticks it returns '' for", () => {
+      const { container } = render(
+        <LineChart
+          series={DATA}
+          categories={DAYS}
+          title="Visits"
+          xTickFilter={() => true}
+          formatXTick={(c, i) => (i % 10 === 0 ? c.slice(8) : "")}
+        />,
+      );
+      expect(ticksOf(container).map(([t]) => t)).toEqual(["01", "11", "21"]);
+      screen.getByRole("img", { name: "Visitors, 2026-09-11: 100, 11 of 30" });
+    });
+
+    it("anchors only the true first and last categories to the plot edges", () => {
+      const { container } = render(
+        <LineChart
+          series={DATA}
+          categories={DAYS}
+          title="Visits"
+          xTickFilter={(i) => i % 7 === 0}
+        />,
+      );
+      // 2026-09-29 is the last *visible* tick but not the last category: it centres.
+      expect(ticksOf(container)).toEqual([
+        ["2026-09-01", "start"],
+        ["2026-09-08", "middle"],
+        ["2026-09-15", "middle"],
+        ["2026-09-22", "middle"],
+        ["2026-09-29", "middle"],
+      ]);
+    });
+
+    it("always labels the last category when thinning automatically", () => {
+      const { container } = render(
+        <LineChart series={DATA} categories={DAYS} title="Visits" xLabelMinSpacing={100} />,
+      );
+      const ticks = ticksOf(container);
+      expect(ticks[0]).toEqual(["2026-09-01", "start"]);
+      expect(ticks.at(-1)).toEqual(["2026-09-30", "end"]);
+      expect(ticks.slice(1, -1).every(([, a]) => a === "middle")).toBe(true);
+      expect(ticks.length).toBeLessThan(10);
+    });
+
+    it("centres a lone category", () => {
+      const { container } = render(
+        <LineChart series={[{ name: "One", data: [3] }]} categories={["Only"]} title="One" />,
+      );
+      expect(ticksOf(container)).toEqual([["Only", "middle"]]);
+    });
   });
 
   it("handles a single point and no data", () => {

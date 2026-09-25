@@ -18,7 +18,7 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { markProps, tooltipOverlay, useChart } from "../shared/use-chart.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 export type LineSeries = {
   name: string;
@@ -33,8 +33,20 @@ export type LinePointIndex = { series: number; point: number };
 export type LineChartProps = ChartFrameOptions &
   PlotSizeOptions & {
     series: LineSeries[];
-    /** X-axis categories, one per data point. Pass `""` to hide a tick label. */
+    /**
+     * X-axis categories, one per data point. They name each point and label the
+     * data table, so keep them complete: use `xTickFilter`/`formatXTick` to
+     * thin or shorten the axis labels. (A `""` category still hides its tick,
+     * but also leaves that point without an x value in its name.)
+     */
     categories: string[];
+    /**
+     * Which x-axis ticks to label, by category index. Replaces the automatic
+     * thinning (`xLabelMinSpacing`). Points and the table keep every category.
+     */
+    xTickFilter?: (index: number, category: string) => boolean;
+    /** Text for an x-axis tick. Return `""` to hide it. Default: the category. */
+    formatXTick?: (category: string, index: number) => string;
     area?: boolean;
     stacked?: boolean;
     curve?: "linear" | "smooth";
@@ -69,6 +81,8 @@ export function LineChart({
   grid = "horizontal",
   formatValue,
   xLabelMinSpacing = 30,
+  xTickFilter,
+  formatXTick,
   onPointClick,
   selectedIndex,
   onSelect,
@@ -106,19 +120,29 @@ export function LineChart({
     categories.length <= 1 ? plotWidth / 2 : (i / (categories.length - 1)) * plotWidth;
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const yTicks = ticks(yMin, yMax, 4);
-  // If the consumer has pre-decimated their labels (passing "" for positions
-  // they want to hide), defer to them. Otherwise auto-skip by width.
+  // Which ticks get a label. A filter wins; otherwise defer to consumers who
+  // pre-decimated with "" categories; otherwise thin by width, always keeping
+  // the last category (and dropping the one before it if that would crowd it).
+  const last = categories.length - 1;
   const hasManualXLabels = categories.some((l) => l === "");
-  const xLabelSkip = hasManualXLabels
-    ? 1
-    : labelSkip(categories.length, plotWidth, xLabelMinSpacing);
-  // Edge labels anchor to their x position rather than centering on it, so a
-  // wide first or last label doesn't extend past the plot area.
-  const visibleLabelIndices = categories
-    .map((label, i) => (label !== "" && i % xLabelSkip === 0 ? i : -1))
-    .filter((i) => i !== -1);
-  const firstVisibleLabelIndex = visibleLabelIndices[0];
-  const lastVisibleLabelIndex = visibleLabelIndices[visibleLabelIndices.length - 1];
+  let tickIndices = categories.map((_, i) => i);
+  if (xTickFilter) {
+    tickIndices = tickIndices.filter((i) => xTickFilter(i, categories[i]));
+  } else if (!hasManualXLabels) {
+    const skip = labelSkip(categories.length, plotWidth, xLabelMinSpacing);
+    tickIndices = tickIndices.filter((i) => i % skip === 0);
+    if (last > 0 && tickIndices.at(-1) !== last) {
+      if (last - tickIndices.at(-1)! < skip && tickIndices.length > 1) tickIndices.pop();
+      tickIndices.push(last);
+    }
+  }
+  const xTicks = tickIndices
+    .map((i) => ({ i, text: formatXTick ? formatXTick(categories[i], i) : categories[i] }))
+    .filter((t) => t.text !== "");
+  // Only the true first and last categories sit at the plot edges, so only
+  // they anchor inwards; every other label centres on its point.
+  const tickAnchor = (i: number) =>
+    last < 1 ? "middle" : i === 0 ? "start" : i === last ? "end" : "middle";
 
   const activate = interactive
     ? (si: number, pi: number) => {
@@ -158,7 +182,7 @@ export function LineChart({
       width={size.width}
       height={size.height}
       selection={selection}
-      overlay={tooltipOverlay(tooltip)}
+      tooltip={tooltip}
       legend={
         series.length > 1 && (
           <ChartLegend
@@ -186,34 +210,27 @@ export function LineChart({
           </g>
         ))}
 
-        {categories.map((label, i) => (
-          <g key={`${i}-${label}`}>
-            {showVGrid && (
-              <line
-                x1={xScale(i)}
-                x2={xScale(i)}
-                y1={0}
-                y2={plotHeight}
-                className="raster-chart__grid"
-              />
-            )}
-            {label !== "" && i % xLabelSkip === 0 && (
-              <text
-                x={xScale(i)}
-                y={plotHeight + 20}
-                textAnchor={
-                  i === firstVisibleLabelIndex
-                    ? "start"
-                    : i === lastVisibleLabelIndex
-                      ? "end"
-                      : "middle"
-                }
-                className="raster-chart__tick"
-              >
-                {label}
-              </text>
-            )}
-          </g>
+        {showVGrid &&
+          categories.map((_, i) => (
+            <line
+              key={i}
+              x1={xScale(i)}
+              x2={xScale(i)}
+              y1={0}
+              y2={plotHeight}
+              className="raster-chart__grid"
+            />
+          ))}
+        {xTicks.map(({ i, text }) => (
+          <text
+            key={i}
+            x={xScale(i)}
+            y={plotHeight + 20}
+            textAnchor={tickAnchor(i)}
+            className="raster-chart__tick"
+          >
+            {text}
+          </text>
         ))}
 
         <line
