@@ -55,6 +55,20 @@ describe("useContainerWidth", () => {
     }
   });
 
+  it("reads the width before first paint, without waiting for the observer", () => {
+    const observer = installResizeObserverMock();
+    const spy = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(360);
+    try {
+      const probe = vi.fn();
+      render(<Harness fallback={720} probe={probe} />);
+      // First render uses the fallback (matches SSR); the layout effect corrects it pre-paint.
+      expect(probe.mock.calls.map(([w]) => w)).toEqual([720, 360]);
+    } finally {
+      spy.mockRestore();
+      observer.restore();
+    }
+  });
+
   it("updates when ResizeObserver fires", () => {
     const observer = installResizeObserverMock();
     try {

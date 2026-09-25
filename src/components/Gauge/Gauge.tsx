@@ -1,5 +1,5 @@
 import { useId, useImperativeHandle, useRef } from "react";
-import { clamp } from "../../utils/chart-math.js";
+import { fraction } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
@@ -25,11 +25,6 @@ export type GaugeProps = {
   exportRef?: React.Ref<ChartExportHandle>;
   className?: string;
 };
-
-/** Where `value` sits between `min` and `max`, clamped to 0–1. */
-export function fraction(value: number, min: number, max: number): number {
-  return max > min ? clamp((value - min) / (max - min), 0, 1) : 0;
-}
 
 export function Gauge({
   value,

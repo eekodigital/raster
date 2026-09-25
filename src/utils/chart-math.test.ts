@@ -3,6 +3,7 @@ import {
   arcPath,
   bandScale,
   clamp,
+  fraction,
   labelSkip,
   MARKER_SHAPES,
   markerPath,
@@ -14,6 +15,15 @@ import {
   sum,
   ticks,
 } from "./chart-math.js";
+
+describe("fraction", () => {
+  it("maps the range to 0–1 and clamps", () => {
+    expect(fraction(25, 0, 100)).toBe(0.25);
+    expect(fraction(-5, 0, 10)).toBe(0);
+    expect(fraction(50, 10, 20)).toBe(1);
+  });
+  it("is 0 for an empty range", () => expect(fraction(5, 10, 10)).toBe(0));
+});
 
 describe("clamp", () => {
   it("clamps below min", () => expect(clamp(-5, 0, 10)).toBe(0));

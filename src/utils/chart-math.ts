@@ -8,6 +8,11 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 /** Get [min, max] of an array. */
+/** Where `value` sits between `min` and `max`, clamped to 0–1 (0 for an empty range). */
+export function fraction(value: number, min: number, max: number): number {
+  return max > min ? clamp((value - min) / (max - min), 0, 1) : 0;
+}
+
 export function extent(values: number[]): [number, number] {
   let min = Infinity;
   let max = -Infinity;

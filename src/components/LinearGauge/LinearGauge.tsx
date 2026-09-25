@@ -2,7 +2,7 @@ import { useId } from "react";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { fraction } from "../Gauge/Gauge.js";
+import { fraction } from "../../utils/chart-math.js";
 
 export type LinearGaugeProps = {
   value: number;

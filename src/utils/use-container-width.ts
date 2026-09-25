@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import type React from "react";
 
 /**
  * Tracks the current `clientWidth` of the referenced element via `ResizeObserver`.
  *
- * Returns `fallback` during SSR and the first client render (before the observer
- * fires). Zero-width measurements are ignored so a briefly hidden or unmounted
+ * Returns `fallback` during SSR; on the client the width is read before first
+ * paint, so a hydrated chart never paints at the fallback size. Zero-width measurements are ignored so a briefly hidden or unmounted
  * element doesn't collapse layouts that depend on the returned number.
  *
  * Chart components use this to render in display pixels rather than scaling a
@@ -18,9 +18,11 @@ export function useContainerWidth(
 ): number {
   const [width, setWidth] = useState(fallback);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
+    if (!el) return;
+    if (el.clientWidth > 0) setWidth(el.clientWidth);
+    if (typeof ResizeObserver === "undefined") return;
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
