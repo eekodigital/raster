@@ -1,254 +1,265 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
+import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { BarChart } from "./BarChart.js";
 
 const DATA = [
-  { label: "Pass", value: 12 },
-  { label: "Fail", value: 3 },
-  { label: "N/A", value: 5 },
+  { label: "Pass", value: 42 },
+  { label: "Fail", value: 8 },
+  { label: "N/A", value: 12 },
+];
+const QUARTERS = [
+  { label: "Q1", value: 0 },
+  { label: "Q2", value: 0 },
+];
+const SERIES = ["North", "South"];
+const VALUES = [
+  [10, 20],
+  [30, 1500],
 ];
 
-describe("BarChart", () => {
-  describe("vertical (default)", () => {
-    it("renders a bar for each data point", () => {
-      render(<BarChart data={DATA} aria-label="Results" />);
-      expect(screen.getByRole("img", { name: "Pass: 12" })).toBeDefined();
-      expect(screen.getByRole("img", { name: "Fail: 3" })).toBeDefined();
-      expect(screen.getByRole("img", { name: "N/A: 5" })).toBeDefined();
-    });
-
-    it("renders a hidden data table", () => {
-      render(<BarChart data={DATA} aria-label="Results" />);
-      const table = screen.getByRole("table", { name: "Results" });
-      expect(table.textContent).toContain("Pass");
-      expect(table.textContent).toContain("12");
-    });
+describe("BarChart structure", () => {
+  it("is a figure with a title, summary and chart group", () => {
+    const { container } = render(<BarChart data={DATA} title="Results" />);
+    const figure = screen.getByRole("figure", { name: "Results" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Bar chart, 3 points. Pass to N/A. Values from 8 to 42.",
+    );
+    expect(container.querySelector("svg")?.getAttribute("aria-roledescription")).toBe("chart");
   });
 
-  describe("horizontal", () => {
-    it("renders horizontal bars", () => {
-      render(<BarChart data={DATA} direction="horizontal" aria-label="Horizontal" />);
-      expect(screen.getByRole("img", { name: "Pass: 12" })).toBeDefined();
-    });
-
-    it("renders category labels", () => {
-      render(<BarChart data={DATA} direction="horizontal" aria-label="Horizontal" />);
-      expect(screen.getByRole("table", { name: "Horizontal" }).textContent).toContain("Pass");
-    });
+  it("labels static bars as images: {x}: {y}, n of m", () => {
+    render(<BarChart data={DATA} title="Results" />);
+    expect(screen.getAllByRole("img").map((el) => el.getAttribute("aria-label"))).toEqual([
+      "Pass: 42, 1 of 3",
+      "Fail: 8, 2 of 3",
+      "N/A: 12, 3 of 3",
+    ]);
   });
 
-  describe("stacked", () => {
-    it("renders stacked bars with series", () => {
+  it("makes bars toggle buttons when selectable, dimming the rest", () => {
+    const onSelect = vi.fn();
+    const onBarClick = vi.fn();
+    render(<BarChart data={DATA} title="R" onSelect={onSelect} onBarClick={onBarClick} />);
+    const fail = screen.getByRole("button", { name: "Fail: 8, 2 of 3" });
+    fireEvent.click(fail);
+    expect(fail.getAttribute("aria-pressed")).toBe("true");
+    expect(onSelect).toHaveBeenCalledWith(1);
+    expect(onBarClick).toHaveBeenCalledWith(DATA[1], 1, undefined);
+    expect(screen.getByRole("button", { name: /^Pass/ }).hasAttribute("data-dimmed")).toBe(true);
+    fireEvent.click(fail);
+    expect(onSelect).toHaveBeenLastCalledWith(null);
+  });
+
+  it("follows a controlled selectedIndex", () => {
+    render(<BarChart data={DATA} title="R" selectedIndex={2} />);
+    expect(screen.getByRole("button", { name: /^N\/A/ }).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("renders horizontal bars with category labels", () => {
+    const { container } = render(<BarChart data={DATA} direction="horizontal" title="H" />);
+    expect(container.querySelectorAll(".raster-bar__bar--horizontal")).toHaveLength(3);
+    expect(container.querySelector("svg")?.textContent).toContain("Fail");
+    // Horizontal bars grow with the data by default.
+    expect(container.querySelector<HTMLElement>(".raster-chart__plot")?.style.height).toBe("120px");
+  });
+
+  it("rotates crowded category labels", () => {
+    const many = Array.from({ length: 40 }, (_, i) => ({ label: `Category ${i}`, value: i }));
+    const { container } = render(<BarChart data={many} title="Many" />);
+    expect(container.querySelector("text[transform^='rotate']")).toBeTruthy();
+  });
+
+  it("handles empty, zero and single-bar data", () => {
+    render(<BarChart data={[]} title="Empty" />);
+    render(<BarChart data={[{ label: "Zero", value: 0 }]} title="Zero" />);
+    screen.getByRole("img", { name: "Zero: 0, 1 of 1" });
+    expect(screen.getAllByRole("figure")).toHaveLength(2);
+  });
+
+  it("renders axis titles and grid variants", () => {
+    const { container, rerender } = render(
+      <BarChart data={DATA} title="G" xLabel="Status" yLabel="Count" grid="both" />,
+    );
+    expect(screen.getByText("Status")).toBeTruthy();
+    expect(screen.getByText("Count")).toBeTruthy();
+    expect(container.querySelectorAll(".raster-chart__grid").length).toBeGreaterThan(0);
+    rerender(<BarChart data={DATA} title="G" direction="horizontal" grid="vertical" />);
+    expect(container.querySelectorAll(".raster-chart__grid").length).toBeGreaterThan(0);
+    rerender(<BarChart data={DATA} title="G" grid="none" />);
+    expect(container.querySelectorAll(".raster-chart__grid")).toHaveLength(0);
+  });
+
+  it("shows a decorative tooltip on hover and focus", () => {
+    const { container } = render(<BarChart data={DATA} title="T" />);
+    const bar = screen.getByRole("img", { name: /^Pass/ });
+    fireEvent.mouseEnter(bar);
+    const tip = container.querySelector(".raster-tooltip")!;
+    expect(tip.textContent).toBe("Pass: 42, 1 of 3");
+    expect(tip.getAttribute("aria-hidden")).toBe("true");
+    fireEvent.mouseLeave(bar);
+    fireEvent.focus(bar);
+    expect(tip.hasAttribute("data-visible")).toBe(true);
+    fireEvent.blur(bar);
+    expect(tip.hasAttribute("data-visible")).toBe(false);
+    expect(bar.hasAttribute("aria-describedby")).toBe(false);
+  });
+
+  it("supports aspectRatio", () => {
+    const { container } = render(<BarChart data={DATA} title="A" aspectRatio={3} />);
+    expect(container.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 720 240");
+  });
+});
+
+describe("BarChart multi-series", () => {
+  for (const mode of ["stacked", "grouped"] as const) {
+    it(`${mode}: series are groups of labelled bars`, () => {
       render(
         <BarChart
-          data={[
-            { label: "Report 1", value: 0 },
-            { label: "Report 2", value: 0 },
-          ]}
-          series={["Pass", "Fail"]}
-          values={[
-            [30, 5],
-            [42, 8],
-          ]}
-          stacked
-          aria-label="Stacked"
+          data={QUARTERS}
+          series={SERIES}
+          values={VALUES}
+          {...{ [mode]: true }}
+          title="Sales"
         />,
       );
-      expect(screen.getByRole("img", { name: "Report 1 — Pass: 30" })).toBeDefined();
-      expect(screen.getByRole("img", { name: "Report 1 — Fail: 5" })).toBeDefined();
+      const north = screen.getByRole("group", { name: "North, 2 points" });
+      expect(
+        [...north.querySelectorAll("[role=img]")].map((el) => el.getAttribute("aria-label")),
+      ).toEqual(["North, Q1: 10, 1 of 2", "North, Q2: 30, 2 of 2"]);
+      screen.getByRole("img", { name: "South, Q2: 1,500, 2 of 2" });
+      expect(screen.getByRole("figure").textContent).toContain("Q1");
     });
+  }
 
-    it("renders multi-value data table", () => {
-      render(
-        <BarChart
-          data={[{ label: "Report 1", value: 0 }]}
-          series={["Pass", "Fail"]}
-          values={[[30, 5]]}
-          stacked
-          aria-label="Stacked"
-        />,
-      );
-      const table = screen.getByRole("table", { name: "Stacked" });
-      expect(table.textContent).toContain("Pass");
-      expect(table.textContent).toContain("30");
-    });
+  it("stacked: arrows move along categories and up/down the stack", () => {
+    render(<BarChart data={QUARTERS} series={SERIES} values={VALUES} stacked title="S" />);
+    expect(tabStops()).toEqual(["North, Q1: 10, 1 of 2"]);
+    press(screen.getByRole("img", { name: /^North, Q1/ }), "ArrowRight");
+    expect(focusedName()).toBe("North, Q2: 30, 2 of 2");
+    press(screen.getByRole("img", { name: /^North, Q2/ }), "ArrowUp");
+    expect(focusedName()).toBe("South, Q2: 1,500, 2 of 2");
+    press(screen.getByRole("img", { name: /^South, Q2/ }), "ArrowDown");
+    expect(focusedName()).toBe("North, Q2: 30, 2 of 2");
+    press(screen.getByRole("img", { name: /^North, Q2/ }), "Home");
+    expect(focusedName()).toBe("North, Q1: 10, 1 of 2");
   });
 
-  describe("keyboard interaction", () => {
-    it("ArrowRight moves focus to next bar", async () => {
-      render(<BarChart data={DATA} aria-label="Results" />);
-      screen.getByRole("img", { name: "Pass: 12" }).focus();
-      await userEvent.keyboard("{ArrowRight}");
-      expect(document.activeElement).toBe(screen.getByRole("img", { name: "Fail: 3" }));
-    });
-
-    it("ArrowLeft moves focus to previous bar", async () => {
-      render(<BarChart data={DATA} aria-label="Results" />);
-      screen.getByRole("img", { name: "Fail: 3" }).focus();
-      await userEvent.keyboard("{ArrowLeft}");
-      expect(document.activeElement).toBe(screen.getByRole("img", { name: "Pass: 12" }));
-    });
+  it("grouped: arrows move along categories and between series", () => {
+    render(<BarChart data={QUARTERS} series={SERIES} values={VALUES} grouped title="G" />);
+    press(screen.getByRole("img", { name: /^North, Q1/ }), "ArrowDown");
+    expect(focusedName()).toBe("South, Q1: 20, 1 of 2");
+    press(screen.getByRole("img", { name: /^South, Q1/ }), "End");
+    expect(focusedName()).toBe("South, Q2: 1,500, 2 of 2");
   });
 
-  describe("edge cases", () => {
-    it("handles empty data", () => {
-      render(<BarChart data={[]} aria-label="Empty" />);
-      expect(screen.getByRole("img", { name: "Empty" })).toBeDefined();
-    });
-
-    it("handles zero values", () => {
-      render(<BarChart data={[{ label: "Zero", value: 0 }]} aria-label="Zero" />);
-      expect(screen.getByRole("img", { name: "Zero: 0" })).toBeDefined();
-    });
-
-    it("handles single data point", () => {
-      render(<BarChart data={[{ label: "Only", value: 42 }]} aria-label="Single" />);
-      expect(screen.getByRole("img", { name: "Only: 42" })).toBeDefined();
-    });
+  it("selecting a bar selects its category and reports the series", () => {
+    const onBarClick = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <BarChart
+        data={QUARTERS}
+        series={SERIES}
+        values={VALUES}
+        grouped
+        title="G"
+        onBarClick={onBarClick}
+        onSelect={onSelect}
+      />,
+    );
+    const southQ2 = screen.getByRole("button", { name: /^South, Q2/ });
+    press(southQ2, "Enter");
+    expect(onBarClick).toHaveBeenCalledWith(QUARTERS[1], 1, 1);
+    expect(onSelect).toHaveBeenCalledWith(1);
+    expect(southQ2.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: /^North, Q2/ }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
   });
 
-  describe("grouped", () => {
-    it("renders grouped bars with multiple bars per category", () => {
-      render(
-        <BarChart
-          data={[
-            { label: "Q1", value: 0 },
-            { label: "Q2", value: 0 },
-          ]}
-          series={["Revenue", "Costs"]}
-          values={[
-            [100, 60],
-            [120, 70],
-          ]}
-          grouped
-          aria-label="Grouped"
-        />,
-      );
-      expect(screen.getByRole("img", { name: "Q1 — Revenue: 100" })).toBeDefined();
-      expect(screen.getByRole("img", { name: "Q1 — Costs: 60" })).toBeDefined();
-      expect(screen.getByRole("img", { name: "Q2 — Revenue: 120" })).toBeDefined();
-      expect(screen.getByRole("img", { name: "Q2 — Costs: 70" })).toBeDefined();
-    });
+  it("renders a legend and a table of formatted values", () => {
+    const { container } = render(
+      <BarChart
+        data={QUARTERS}
+        series={SERIES}
+        values={VALUES}
+        stacked
+        title="Sales"
+        formatValue={(v) => `£${v}`}
+      />,
+    );
+    expect(container.querySelectorAll(".raster-legend__swatch")).toHaveLength(2);
+    const table = openTable();
+    expect(screen.getByRole("table", { name: "Data for Sales" })).toBe(table);
+    expect(tableText(table)).toEqual([
+      ["Category", "North", "South"],
+      ["Q1", "£10", "£20"],
+      ["Q2", "£30", "£1500"],
+    ]);
+  });
+});
+
+describe("BarChart keyboard", () => {
+  it("vertical bars move with Left/Right, Home/End and PageUp/PageDown", () => {
+    render(<BarChart data={DATA} title="K" />);
+    const bar = (n: RegExp) => screen.getByRole("img", { name: n });
+    press(bar(/^Pass/), "ArrowRight");
+    expect(focusedName()).toBe("Fail: 8, 2 of 3");
+    press(bar(/^Fail/), "ArrowLeft");
+    expect(focusedName()).toBe("Pass: 42, 1 of 3");
+    press(bar(/^Pass/), "End");
+    expect(focusedName()).toBe("N/A: 12, 3 of 3");
+    press(bar(/^N\/A/), "PageUp");
+    expect(focusedName()).toBe("Pass: 42, 1 of 3");
+    press(bar(/^Pass/), "PageDown");
+    expect(focusedName()).toBe("N/A: 12, 3 of 3");
   });
 
-  describe("onBarClick", () => {
-    it("fires onClick handler with correct data for grouped bars", () => {
-      const onClick = vi.fn();
-      render(
-        <BarChart
-          data={[
-            { label: "Q1", value: 0 },
-            { label: "Q2", value: 0 },
-          ]}
-          series={["Revenue", "Costs"]}
-          values={[
-            [100, 60],
-            [120, 70],
-          ]}
-          grouped
-          onBarClick={onClick}
-          aria-label="Clickable"
-        />,
-      );
-      fireEvent.click(screen.getByRole("img", { name: "Q1 — Costs: 60" }));
-      expect(onClick).toHaveBeenCalledWith({ label: "Q1", value: 0 }, 0, 1);
-    });
+  it("horizontal bars move with Up/Down and ignore Left/Right", () => {
+    render(<BarChart data={DATA} direction="horizontal" title="K" />);
+    const pass = screen.getByRole("img", { name: /^Pass/ });
+    expect(press(pass, "ArrowRight")).toBe(true);
+    press(pass, "ArrowDown");
+    expect(focusedName()).toBe("Fail: 8, 2 of 3");
   });
 
-  describe("responsive sizing", () => {
-    it("renders with a fixed-px width and no viewBox", () => {
-      render(<BarChart data={DATA} aria-label="Results" />);
-      const svg = screen.getByRole("img", { name: "Results" });
-      expect(svg.getAttribute("width")).toBe("720");
-      expect(svg.getAttribute("viewBox")).toBeNull();
-    });
+  it("Escape clears the selection inside the chart only", () => {
+    const outer = vi.fn();
+    render(
+      <div onKeyDown={outer}>
+        <BarChart data={DATA} direction="horizontal" title="K" onSelect={() => {}} />
+      </div>,
+    );
+    const pass = screen.getByRole("button", { name: /^Pass/ });
+    press(pass, " ");
+    expect(pass.getAttribute("aria-pressed")).toBe("true");
+    outer.mockClear();
+    press(pass, "Escape");
+    expect(pass.getAttribute("aria-pressed")).toBe("false");
+    expect(outer).not.toHaveBeenCalled();
+    expect(screen.getByRole("status").textContent).toBe("Selection cleared");
+  });
+});
+
+describe("BarChart axe", () => {
+  it("has no violations: simple, static, table open", async () => {
+    const { container } = render(<BarChart data={DATA} title="R" />);
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
-    render(<BarChart data={DATA} aria-label="Results" />);
-    const table = screen.getByRole("table", { name: "Results" });
-    expect(table.classList.contains("raster-sr-only")).toBe(true);
-    expect(table.style.display).toBe("block");
-  });
-
-  describe("keyboard, selection and tooltip", () => {
-    it("horizontal bars move with ArrowDown/ArrowUp and ignore ArrowRight", () => {
-      render(<BarChart data={DATA} direction="horizontal" aria-label="H" />);
-      const first = screen.getByRole("img", { name: "Pass: 12" });
-      first.focus();
-      fireEvent.keyDown(first, { key: "ArrowRight" });
-      expect(document.activeElement).toBe(first);
-      fireEvent.keyDown(first, { key: "ArrowDown" });
-      expect(document.activeElement).toBe(screen.getByRole("img", { name: "Fail: 3" }));
-      fireEvent.keyDown(document.activeElement!, { key: "ArrowUp" });
-      expect(document.activeElement).toBe(first);
-    });
-
-    it("clicking a bar selects it, dims the rest, and Escape clears", () => {
-      const onSelect = vi.fn();
-      const onBarClick = vi.fn();
-      render(<BarChart data={DATA} onSelect={onSelect} onBarClick={onBarClick} aria-label="S" />);
-      const bar = screen.getByRole("img", { name: "Fail: 3" });
-      fireEvent.click(bar);
-      expect(onSelect).toHaveBeenLastCalledWith(1);
-      expect(onBarClick).toHaveBeenCalledWith(DATA[1], 1);
-      expect(bar.hasAttribute("data-selected")).toBe(true);
-      expect(screen.getByRole("img", { name: "Pass: 12" }).hasAttribute("data-dimmed")).toBe(true);
-      fireEvent.keyDown(document, { key: "Escape" });
-      expect(onSelect).toHaveBeenLastCalledWith(null);
-      expect(bar.hasAttribute("data-selected")).toBe(false);
-    });
-
-    it("horizontal bars select on click too", () => {
-      render(<BarChart data={DATA} direction="horizontal" aria-label="H" />);
-      const bar = screen.getByRole("img", { name: "Pass: 12" });
-      fireEvent.click(bar);
-      expect(bar.hasAttribute("data-selected")).toBe(true);
-      fireEvent.click(bar);
-      expect(bar.hasAttribute("data-selected")).toBe(false);
-    });
-
-    it("shows the tooltip on hover and focus", () => {
-      const { container } = render(
-        <BarChart
-          data={DATA}
-          series={["A", "B"]}
-          values={[
-            [1, 2],
-            [3, 4],
-            [5, 6],
-          ]}
-          stacked
-          aria-label="Stacked"
-        />,
-      );
-      const seg = screen.getByRole("img", { name: "Pass — B: 2" });
-      fireEvent.mouseEnter(seg);
-      expect(screen.getByRole("tooltip").textContent).toBe("Pass — B: 2");
-      fireEvent.mouseLeave(seg);
-      expect(screen.queryByRole("tooltip")).toBeNull();
-      fireEvent.focus(seg);
-      expect(screen.getByRole("tooltip")).toBeDefined();
-      fireEvent.blur(seg);
-      expect(container.querySelector("[data-series='2']")).not.toBeNull();
-    });
-
-    it("renders the multi-series legend with a swatch per series", () => {
-      const { container } = render(
-        <BarChart
-          data={DATA}
-          series={["A", "B"]}
-          values={[
-            [1, 2],
-            [3, 4],
-            [5, 6],
-          ]}
-          grouped
-          aria-label="Grouped"
-        />,
-      );
-      expect(container.querySelectorAll(".raster-legend__swatch")).toHaveLength(2);
-    });
+  it("has no violations: stacked, interactive", async () => {
+    const { container } = render(
+      <BarChart
+        data={QUARTERS}
+        series={SERIES}
+        values={VALUES}
+        stacked
+        title="S"
+        onBarClick={() => {}}
+      />,
+    );
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
