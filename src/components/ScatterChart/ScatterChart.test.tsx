@@ -1,77 +1,131 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
+import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { ScatterChart } from "./ScatterChart.js";
 
-const DATA = [
-  { x: 10, y: 5, label: "Page A" },
-  { x: 30, y: 15, label: "Page B" },
-  { x: 50, y: 8, label: "Page C" },
+const POINTS = [
+  { x: 30, y: 5 },
+  { x: 10, y: 1 },
+  { x: 20, y: 1500, label: "Peak" },
+];
+const SERIES = [
+  {
+    name: "A",
+    data: [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ],
+  },
+  { name: "B", data: [{ x: 2, y: 3 }] },
 ];
 
-describe("ScatterChart", () => {
-  it("renders points with aria-labels", () => {
-    render(<ScatterChart data={DATA} aria-label="Scatter" />);
-    expect(screen.getByRole("img", { name: /Page A/ })).toBeDefined();
-    expect(screen.getByRole("img", { name: /Page B/ })).toBeDefined();
+describe("ScatterChart structure", () => {
+  it("is a figure with a title, summary and chart group", () => {
+    const { container } = render(<ScatterChart data={POINTS} title="Load" />);
+    const figure = screen.getByRole("figure", { name: "Load" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Scatter chart, 3 points. 10 to 30. Values from 1 to 1,500.",
+    );
+    expect(container.querySelector("svg")?.getAttribute("aria-roledescription")).toBe("chart");
   });
 
-  it("renders axis labels", () => {
-    render(<ScatterChart data={DATA} xLabel="Complexity" yLabel="Issues" aria-label="Scatter" />);
-    expect(screen.getAllByText("Complexity").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Issues").length).toBeGreaterThanOrEqual(1);
+  it("labels single-series points {x}: {y}, n of m, ordered by x", () => {
+    render(<ScatterChart data={POINTS} title="Load" />);
+    expect(screen.getAllByRole("img").map((el) => el.getAttribute("aria-label"))).toEqual([
+      "10: 1, 1 of 3",
+      "Peak (20): 1,500, 2 of 3",
+      "30: 5, 3 of 3",
+    ]);
   });
 
-  it("renders a hidden data table", () => {
-    render(<ScatterChart data={DATA} aria-label="Scatter" />);
-    const table = screen.getByRole("table", { name: "Scatter" });
-    expect(table.textContent).toContain("Page A");
-    expect(table.textContent).toContain("10");
+  it("groups named series and draws a marker shape per series", () => {
+    const { container } = render(<ScatterChart series={SERIES} title="S" />);
+    const a = screen.getByRole("group", { name: "A, 2 points" });
+    screen.getByRole("group", { name: "B, 1 point" });
+    screen.getByRole("img", { name: "B, 2: 3, 1 of 1" });
+    const shapeA = a.querySelector("path")?.getAttribute("d");
+    const shapeB = screen.getByRole("img", { name: /^B/ }).getAttribute("d");
+    expect(shapeA).toMatch(/a/);
+    expect(shapeB).toMatch(/^M[^a]+Z$/);
+    expect(container.querySelectorAll(".raster-legend__marker")).toHaveLength(2);
   });
 
-  it("renders legend for multi-series", () => {
-    const series = [
-      { name: "Group A", data: [{ x: 1, y: 2 }] },
-      { name: "Group B", data: [{ x: 3, y: 4 }] },
-    ];
-    render(<ScatterChart series={series} aria-label="Multi" />);
-    expect(screen.getAllByText("Group A").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Group B").length).toBeGreaterThanOrEqual(1);
+  it("makes points toggle buttons when clickable", () => {
+    const onPointClick = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <ScatterChart data={POINTS} title="L" onPointClick={onPointClick} onSelect={onSelect} />,
+    );
+    const peak = screen.getByRole("button", { name: /^Peak/ });
+    fireEvent.click(peak);
+    expect(onPointClick).toHaveBeenCalledWith(POINTS[2], 0, 2);
+    expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 2 });
+    expect(peak.getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("calls onPointClick when a point is clicked", () => {
-    const onClick = vi.fn();
-    render(<ScatterChart data={DATA} onPointClick={onClick} aria-label="Clickable" />);
-    fireEvent.click(screen.getByRole("img", { name: /Page A/ }));
-    expect(onClick).toHaveBeenCalledWith(DATA[0], 0, 0);
+  it("has a formatted data table with series and label columns", () => {
+    render(
+      <ScatterChart
+        series={[{ name: "A", data: [{ x: 1, y: 2, label: "one" }] }, SERIES[1]]}
+        title="S"
+        xLabel="Time"
+        yLabel="Load"
+        formatValue={(v) => `${v}u`}
+      />,
+    );
+    const table = openTable();
+    expect(tableText(table)).toEqual([
+      ["Series", "Label", "Time", "Load"],
+      ["A", "one", "1u", "2u"],
+      ["B", "", "2u", "3u"],
+    ]);
   });
 
-  it("formats tick values with formatValue", () => {
-    render(<ScatterChart data={DATA} formatValue={(v) => `${v}%`} aria-label="Formatted" />);
-    const table = screen.getByRole("table", { name: "Formatted" });
-    expect(table.textContent).toContain("10%");
+  it("supports grid variants and aspectRatio", () => {
+    const { container, rerender } = render(
+      <ScatterChart data={POINTS} title="G" grid="none" aspectRatio={2} />,
+    );
+    expect(container.querySelectorAll(".raster-chart__grid")).toHaveLength(0);
+    expect(container.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 720 360");
+    rerender(<ScatterChart data={POINTS} title="G" grid="horizontal" />);
+    expect(container.querySelectorAll(".raster-chart__grid").length).toBeGreaterThan(0);
   });
 
-  describe("keyboard interaction", () => {
-    it("ArrowRight moves focus to next point", () => {
-      render(<ScatterChart data={DATA} aria-label="Nav" />);
-      const first = screen.getByRole("img", { name: /Page A/ });
-      first.focus();
-      fireEvent.keyDown(first, { key: "ArrowRight" });
-      expect(document.activeElement).toBe(screen.getByRole("img", { name: /Page B/ }));
-    });
+  it("renders with no data", () => {
+    render(<ScatterChart title="Empty" />);
+    screen.getByRole("figure", { name: "Empty" });
   });
+});
 
-  it("renders with a fixed-px width and no viewBox", () => {
-    render(<ScatterChart data={DATA} aria-label="Scatter" />);
-    const svg = screen.getByRole("img", { name: "Scatter" });
-    expect(svg.getAttribute("width")).toBe("720");
-    expect(svg.getAttribute("viewBox")).toBeNull();
+describe("ScatterChart keyboard", () => {
+  it("moves by x within a series and between series", () => {
+    render(<ScatterChart series={SERIES} title="S" onSelect={() => {}} />);
+    expect(tabStops()).toEqual(["A, 1: 2, 1 of 2"]);
+    press(screen.getByRole("button", { name: /^A, 1/ }), "ArrowRight");
+    expect(focusedName()).toBe("A, 3: 4, 2 of 2");
+    press(screen.getByRole("button", { name: /^A, 3/ }), "ArrowDown");
+    expect(focusedName()).toBe("B, 2: 3, 1 of 1");
+    press(screen.getByRole("button", { name: /^B/ }), "ArrowUp");
+    press(screen.getByRole("button", { name: /^A, 1/ }), "End");
+    expect(focusedName()).toBe("A, 3: 4, 2 of 2");
+    const a3 = screen.getByRole("button", { name: /^A, 3/ });
+    press(a3, "Enter");
+    expect(a3.getAttribute("aria-pressed")).toBe("true");
+    press(a3, "Escape");
+    expect(a3.getAttribute("aria-pressed")).toBe("false");
   });
+});
 
-  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
-    render(<ScatterChart data={DATA} aria-label="Scatter" />);
-    const table = screen.getByRole("table", { name: "Scatter" });
-    expect(table.classList.contains("raster-sr-only")).toBe(true);
-    expect(table.style.display).toBe("block");
+describe("ScatterChart axe", () => {
+  it("has no violations, static and interactive", async () => {
+    const { container, unmount } = render(<ScatterChart series={SERIES} title="S" />);
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
+    unmount();
+    const { container: c2 } = render(
+      <ScatterChart data={POINTS} title="S" onPointClick={() => {}} />,
+    );
+    expect(await axe(c2)).toHaveNoViolations();
   });
 });

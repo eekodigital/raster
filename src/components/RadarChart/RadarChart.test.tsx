@@ -1,119 +1,86 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
+import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { RadarChart } from "./RadarChart.js";
 
-const AXES = ["Perceivable", "Operable", "Understandable", "Robust"];
-const SERIES = [{ name: "Current", data: [80, 65, 90, 70] }];
+const AXES = ["Speed", "Power", "Range"];
+const SERIES = [
+  { name: "Alpha", data: [3, 4, 5] },
+  { name: "Beta", data: [5, 2, 1] },
+];
 
-describe("RadarChart", () => {
-  it('renders an SVG with role="img"', () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    expect(screen.getByRole("img", { name: "POUR scores" })).toBeDefined();
+describe("RadarChart structure", () => {
+  it("is a figure with a title, summary, chart group and series groups", () => {
+    const { container } = render(<RadarChart axes={AXES} series={SERIES} title="Specs" />);
+    const figure = screen.getByRole("figure", { name: "Specs" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Radar chart, 2 series, 6 points. Speed to Range. Values from 1 to 5.",
+    );
+    expect(container.querySelector("svg")?.getAttribute("role")).toBe("group");
+    screen.getByRole("group", { name: "Alpha, 3 points" });
   });
 
-  it("renders data points with aria-labels", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    expect(screen.getByRole("img", { name: "Current, Perceivable: 80" })).toBeDefined();
-    expect(screen.getByRole("img", { name: "Current, Robust: 70" })).toBeDefined();
+  it("labels points {series}, {axis}: {value}, n of m with marker shapes", () => {
+    render(<RadarChart axes={AXES} series={SERIES} title="Specs" />);
+    const a = screen.getByRole("img", { name: "Alpha, Power: 4, 2 of 3" });
+    const b = screen.getByRole("img", { name: "Beta, Power: 2, 2 of 3" });
+    expect(a.getAttribute("d")).not.toBe(b.getAttribute("d"));
   });
 
-  it("renders series as a group", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    expect(screen.getByRole("group", { name: "Current" })).toBeDefined();
+  it("makes points toggle buttons when clickable", () => {
+    const onPointClick = vi.fn();
+    render(<RadarChart axes={AXES} series={SERIES} title="Specs" onPointClick={onPointClick} />);
+    const p = screen.getByRole("button", { name: /^Beta, Range/ });
+    fireEvent.click(p);
+    expect(onPointClick).toHaveBeenCalledWith(1, 2, 1);
+    expect(p.getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("renders axis labels", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    expect(screen.getAllByText("Perceivable").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Robust").length).toBeGreaterThanOrEqual(1);
+  it("has a formatted data table", () => {
+    render(<RadarChart axes={AXES} series={SERIES} title="Specs" formatValue={(v) => `${v}/5`} />);
+    expect(tableText(openTable())).toEqual([
+      ["Axis", "Alpha", "Beta"],
+      ["Speed", "3/5", "5/5"],
+      ["Power", "4/5", "2/5"],
+      ["Range", "5/5", "1/5"],
+    ]);
   });
 
-  it("renders legend for multi-series", () => {
-    const multi = [
-      { name: "Current", data: [80, 65, 90, 70] },
-      { name: "Target", data: [100, 100, 100, 100] },
-    ];
-    render(<RadarChart axes={AXES} series={multi} aria-label="Comparison" />);
-    expect(screen.getAllByText("Current").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Target").length).toBeGreaterThanOrEqual(1);
+  it("uses a fixed size when given, otherwise a square that fills the container", () => {
+    const { container, rerender } = render(
+      <RadarChart axes={AXES} series={SERIES} title="S" size={240} max={10} levels={2} />,
+    );
+    const plot = container.querySelector<HTMLElement>(".raster-chart__plot")!;
+    expect(plot.style.width).toBe("240px");
+    expect(container.querySelectorAll(".raster-radar__grid")).toHaveLength(2);
+    rerender(<RadarChart axes={AXES} series={SERIES} title="S" />);
+    expect(plot.style.aspectRatio).toMatch(/^1/);
   });
+});
 
-  it("renders a hidden data table", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    const table = screen.getByRole("table", { name: "POUR scores" });
-    expect(table).toBeDefined();
-    expect(table.textContent).toContain("Perceivable");
-    expect(table.textContent).toContain("80");
+describe("RadarChart keyboard", () => {
+  it("wraps round the axes and moves between series", () => {
+    render(<RadarChart axes={AXES} series={SERIES} title="S" onSelect={() => {}} />);
+    expect(tabStops()).toEqual(["Alpha, Speed: 3, 1 of 3"]);
+    press(screen.getByRole("button", { name: /^Alpha, Speed/ }), "ArrowLeft");
+    expect(focusedName()).toBe("Alpha, Range: 5, 3 of 3");
+    press(screen.getByRole("button", { name: /^Alpha, Range/ }), "ArrowDown");
+    expect(focusedName()).toBe("Beta, Range: 1, 3 of 3");
+    press(screen.getByRole("button", { name: /^Beta, Range/ }), "Home");
+    expect(focusedName()).toBe("Beta, Speed: 5, 1 of 3");
+    const p = screen.getByRole("button", { name: /^Beta, Speed/ });
+    press(p, " ");
+    expect(p.getAttribute("aria-pressed")).toBe("true");
+    press(p, "Escape");
+    expect(p.getAttribute("aria-pressed")).toBe("false");
   });
+});
 
-  it("first data point is focusable", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    const first = screen.getByRole("img", { name: "Current, Perceivable: 80" });
-    expect(first.getAttribute("tabindex")).toBe("0");
-  });
-
-  it("renders multiple polygons for multi-series", () => {
-    const multi = [
-      { name: "Current", data: [80, 65, 90, 70] },
-      { name: "Target", data: [100, 100, 100, 100] },
-    ];
-    render(<RadarChart axes={AXES} series={multi} aria-label="Multi" />);
-    const currentRegion = screen.getByRole("group", { name: "Current" });
-    const targetRegion = screen.getByRole("group", { name: "Target" });
-    // Each region should have 2 polygons (area fill + line stroke)
-    expect(currentRegion.querySelectorAll("polygon").length).toBe(2);
-    expect(targetRegion.querySelectorAll("polygon").length).toBe(2);
-  });
-
-  it("renders legend with series names for multi-series", () => {
-    const multi = [
-      { name: "Current", data: [80, 65, 90, 70] },
-      { name: "Target", data: [100, 100, 100, 100] },
-    ];
-    render(<RadarChart axes={AXES} series={multi} aria-label="Multi" />);
-    // Legend text should include series names
-    expect(screen.getAllByText("Current").length).toBeGreaterThanOrEqual(2); // region + legend
-    expect(screen.getAllByText("Target").length).toBeGreaterThanOrEqual(2);
-  });
-
-  it("hidden data table contains correct values for multi-series", () => {
-    const multi = [
-      { name: "Current", data: [80, 65, 90, 70] },
-      { name: "Target", data: [100, 100, 100, 100] },
-    ];
-    render(<RadarChart axes={AXES} series={multi} aria-label="Multi" />);
-    const table = screen.getByRole("table", { name: "Multi" });
-    expect(table.textContent).toContain("Current");
-    expect(table.textContent).toContain("Target");
-    expect(table.textContent).toContain("80");
-    expect(table.textContent).toContain("100");
-  });
-
-  it("does not render legend for single series", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="Single" />);
-    // Only one mention of "Current" (in the region, table header, and table body)
-    // but no legend element for single series
-    const regions = screen.getAllByRole("group");
-    expect(regions.length).toBe(1);
-  });
-
-  it("falls back to the measurement default when size is omitted and no viewBox is set", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    const svg = screen.getByRole("img", { name: "POUR scores" });
-    expect(svg.getAttribute("width")).toBe("300");
-    expect(svg.getAttribute("viewBox")).toBeNull();
-  });
-
-  it("respects an explicit size prop", () => {
-    render(<RadarChart axes={AXES} series={SERIES} size={420} aria-label="POUR scores" />);
-    const svg = screen.getByRole("img", { name: "POUR scores" });
-    expect(svg.getAttribute("width")).toBe("420");
-  });
-
-  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
-    render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
-    const table = screen.getByRole("table", { name: "POUR scores" });
-    expect(table.classList.contains("raster-sr-only")).toBe(true);
-    expect(table.style.display).toBe("block");
+describe("RadarChart axe", () => {
+  it("has no violations", async () => {
+    const { container } = render(<RadarChart axes={AXES} series={SERIES} title="S" />);
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
