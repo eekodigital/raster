@@ -168,6 +168,87 @@ describe("BarChart", () => {
   it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
     render(<BarChart data={DATA} aria-label="Results" />);
     const table = screen.getByRole("table", { name: "Results" });
-    expect(table.className).toMatch(/srOnly/);
+    expect(table.classList.contains("raster-sr-only")).toBe(true);
+    expect(table.style.display).toBe("block");
+  });
+
+  describe("keyboard, selection and tooltip", () => {
+    it("horizontal bars move with ArrowDown/ArrowUp and ignore ArrowRight", () => {
+      render(<BarChart data={DATA} direction="horizontal" aria-label="H" />);
+      const first = screen.getByRole("img", { name: "Pass: 12" });
+      first.focus();
+      fireEvent.keyDown(first, { key: "ArrowRight" });
+      expect(document.activeElement).toBe(first);
+      fireEvent.keyDown(first, { key: "ArrowDown" });
+      expect(document.activeElement).toBe(screen.getByRole("img", { name: "Fail: 3" }));
+      fireEvent.keyDown(document.activeElement!, { key: "ArrowUp" });
+      expect(document.activeElement).toBe(first);
+    });
+
+    it("clicking a bar selects it, dims the rest, and Escape clears", () => {
+      const onSelect = vi.fn();
+      const onBarClick = vi.fn();
+      render(<BarChart data={DATA} onSelect={onSelect} onBarClick={onBarClick} aria-label="S" />);
+      const bar = screen.getByRole("img", { name: "Fail: 3" });
+      fireEvent.click(bar);
+      expect(onSelect).toHaveBeenLastCalledWith(1);
+      expect(onBarClick).toHaveBeenCalledWith(DATA[1], 1);
+      expect(bar.hasAttribute("data-selected")).toBe(true);
+      expect(screen.getByRole("img", { name: "Pass: 12" }).hasAttribute("data-dimmed")).toBe(true);
+      fireEvent.keyDown(document, { key: "Escape" });
+      expect(onSelect).toHaveBeenLastCalledWith(null);
+      expect(bar.hasAttribute("data-selected")).toBe(false);
+    });
+
+    it("horizontal bars select on click too", () => {
+      render(<BarChart data={DATA} direction="horizontal" aria-label="H" />);
+      const bar = screen.getByRole("img", { name: "Pass: 12" });
+      fireEvent.click(bar);
+      expect(bar.hasAttribute("data-selected")).toBe(true);
+      fireEvent.click(bar);
+      expect(bar.hasAttribute("data-selected")).toBe(false);
+    });
+
+    it("shows the tooltip on hover and focus", () => {
+      const { container } = render(
+        <BarChart
+          data={DATA}
+          series={["A", "B"]}
+          values={[
+            [1, 2],
+            [3, 4],
+            [5, 6],
+          ]}
+          stacked
+          aria-label="Stacked"
+        />,
+      );
+      const seg = screen.getByRole("img", { name: "Pass — B: 2" });
+      fireEvent.mouseEnter(seg);
+      expect(screen.getByRole("tooltip").textContent).toBe("Pass — B: 2");
+      fireEvent.mouseLeave(seg);
+      expect(screen.queryByRole("tooltip")).toBeNull();
+      fireEvent.focus(seg);
+      expect(screen.getByRole("tooltip")).toBeDefined();
+      fireEvent.blur(seg);
+      expect(container.querySelector("[data-series='2']")).not.toBeNull();
+    });
+
+    it("renders the multi-series legend with a swatch per series", () => {
+      const { container } = render(
+        <BarChart
+          data={DATA}
+          series={["A", "B"]}
+          values={[
+            [1, 2],
+            [3, 4],
+            [5, 6],
+          ]}
+          grouped
+          aria-label="Grouped"
+        />,
+      );
+      expect(container.querySelectorAll(".raster-legend__swatch")).toHaveLength(2);
+    });
   });
 });

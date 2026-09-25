@@ -1,7 +1,8 @@
 import { useRef, useImperativeHandle } from "react";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
-import * as styles from "./Gauge.css.js";
+import { cn } from "../../utils/cn.js";
+import { seriesColor } from "../../utils/palette.js";
 
 type GaugeProps = {
   value: number;
@@ -21,8 +22,8 @@ export function Gauge({
   value,
   max,
   label,
-  color = "var(--color-interactive)",
-  trackColor = "var(--color-border)",
+  color = seriesColor(0),
+  trackColor = "var(--raster-grid, currentColor)",
   size = 120,
   thickness = 10,
   format = (v) => String(v),
@@ -40,12 +41,10 @@ export function Gauge({
   const cx = size / 2;
   const cy = size / 2;
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
-
   return (
     <div
       ref={containerRef}
-      className={cls}
+      className={cn("raster-gauge", className)}
       style={{ width: size, height: size }}
       role="meter"
       aria-label={ariaLabel}
@@ -53,10 +52,10 @@ export function Gauge({
       aria-valuemin={0}
       aria-valuemax={max}
     >
-      <svg className={styles.svg} width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <svg className="raster-gauge__svg" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Track */}
         <circle
-          className={styles.track}
+          className="raster-gauge__track"
           cx={cx}
           cy={cy}
           r={radius}
@@ -66,7 +65,7 @@ export function Gauge({
         />
         {/* Fill */}
         <circle
-          className={styles.fill}
+          className="raster-gauge__fill"
           cx={cx}
           cy={cy}
           r={radius}
@@ -79,9 +78,9 @@ export function Gauge({
           transform={`rotate(-90 ${cx} ${cy})`}
         />
         <foreignObject x={0} y={0} width={size} height={size}>
-          <div className={styles.centre} style={{ width: size, height: size }}>
-            <span className={styles.value}>{format(value)}</span>
-            {label && <span className={styles.label}>{label}</span>}
+          <div className="raster-gauge__centre" style={{ width: size, height: size }}>
+            <span className="raster-gauge__value">{format(value)}</span>
+            {label && <span className="raster-gauge__label">{label}</span>}
           </div>
         </foreignObject>
       </svg>

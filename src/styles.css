@@ -1,0 +1,692 @@
+/*
+ * @eekodigital/raster — chart styles.
+ *
+ * Import once at the app root: `import "@eekodigital/raster/styles.css";`
+ *
+ * Charts read only the `--raster-*` contract (see `@eekodigital/raster/theme`).
+ * Every read carries its fallback inline, so nothing is declared at `:root`
+ * and the variables resolve wherever they are set (theme classes, wrappers).
+ * Fonts inherit from the page; spacing is internal.
+ */
+
+/* ── Shared chart frame ─────────────────────────────────────────────────── */
+
+.raster-chart {
+  width: 100%;
+}
+
+.raster-chart__svg {
+  display: block;
+  overflow: visible;
+}
+
+.raster-chart__axis {
+  stroke: var(--raster-axis, currentColor);
+  stroke-width: 1;
+}
+
+.raster-chart__grid {
+  stroke: var(--raster-grid, color-mix(in srgb, currentColor 25%, transparent));
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.raster-chart__tick {
+  font-size: 0.75rem;
+  fill: var(--raster-text-subtle, var(--raster-text, currentColor));
+}
+
+.raster-chart__axis-title {
+  font-weight: 500;
+}
+
+.raster-sr-only {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Legend ─────────────────────────────────────────────────────────────── */
+
+.raster-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--raster-text-subtle, var(--raster-text, currentColor));
+}
+
+.raster-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.raster-legend__swatch {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.raster-legend__swatch line {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* ── Tooltip ────────────────────────────────────────────────────────────── */
+
+.raster-tooltip {
+  position: absolute;
+  pointer-events: none;
+  padding: 0.25rem 0.5rem;
+  background: var(--raster-tooltip-bg, light-dark(#1f1f1f, #f5f5f5));
+  color: var(--raster-tooltip-text, light-dark(#ffffff, #121212));
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.raster-tooltip[data-visible] {
+  opacity: 1;
+}
+
+/* ── LineChart ──────────────────────────────────────────────────────────── */
+
+@keyframes raster-line-draw {
+  from {
+    stroke-dashoffset: var(--line-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes raster-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.raster-line__line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  animation: raster-line-draw 0.8s ease both;
+}
+
+.raster-line__area {
+  opacity: 0.15;
+  animation: raster-fade-in 0.6s ease 0.4s both;
+}
+
+.raster-line__point {
+  cursor: pointer;
+  transition:
+    r 0.15s ease,
+    opacity 0.15s ease;
+  animation: raster-fade-in 0.3s ease 0.6s both;
+}
+
+.raster-line__point:hover {
+  r: 5;
+}
+
+.raster-line__point:focus {
+  outline: none;
+}
+
+.raster-line__point:focus-visible {
+  r: 6;
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 2;
+}
+
+.raster-line__point[data-selected] {
+  r: 5;
+  stroke: var(--raster-selected, currentColor);
+  stroke-width: 2;
+}
+
+.raster-line__point[data-dimmed] {
+  opacity: 0.3;
+}
+
+/* ── BarChart ───────────────────────────────────────────────────────────── */
+
+@keyframes raster-bar-grow-up {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes raster-bar-grow-right {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.raster-bar__bar {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: raster-bar-grow-up 0.4s ease both;
+}
+
+.raster-bar__bar--horizontal {
+  transform-origin: left;
+  animation-name: raster-bar-grow-right;
+}
+
+.raster-bar__bar:hover {
+  opacity: 0.8;
+}
+
+.raster-bar__bar:focus {
+  outline: none;
+}
+
+.raster-bar__bar:focus-visible {
+  outline: 2px solid var(--raster-focus, currentColor);
+  outline-offset: 1px;
+}
+
+.raster-bar__bar[data-selected] {
+  stroke: var(--raster-selected, currentColor);
+  stroke-width: 2px;
+}
+
+.raster-bar__bar[data-dimmed] {
+  opacity: 0.3;
+}
+
+/* ── DonutChart ─────────────────────────────────────────────────────────── */
+
+@keyframes raster-donut-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.raster-donut {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.raster-donut__svg {
+  display: block;
+}
+
+.raster-donut__segment {
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    stroke-width 0.15s ease;
+}
+
+.raster-donut__segment:hover {
+  opacity: 0.8;
+}
+
+.raster-donut__segment:focus {
+  outline: none;
+}
+
+.raster-donut__segment:focus-visible {
+  outline: 2px solid var(--raster-focus, currentColor);
+  outline-offset: 2px;
+}
+
+.raster-donut__segment[data-dimmed] {
+  opacity: 0.3;
+}
+
+.raster-donut__centre {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--raster-text, currentColor);
+}
+
+/* ── ScatterChart ───────────────────────────────────────────────────────── */
+
+.raster-scatter__point {
+  animation: raster-fade-in 0.3s ease both;
+  transition: r 0.15s ease;
+  cursor: default;
+}
+
+.raster-scatter__point:hover {
+  r: 6;
+}
+
+.raster-scatter__point:focus {
+  outline: none;
+}
+
+.raster-scatter__point:focus-visible {
+  r: 7;
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 2;
+}
+
+.raster-scatter__point[data-clickable] {
+  cursor: pointer;
+}
+
+/* ── RadarChart ─────────────────────────────────────────────────────────── */
+
+.raster-radar__grid {
+  fill: none;
+  stroke: var(--raster-grid, color-mix(in srgb, currentColor 25%, transparent));
+  stroke-width: 1;
+}
+
+.raster-radar__label {
+  text-anchor: middle;
+}
+
+.raster-radar__area {
+  opacity: 0.15;
+}
+
+.raster-radar__line {
+  fill: none;
+  stroke-width: 2;
+}
+
+.raster-radar__point {
+  transition: r 0.15s ease;
+}
+
+.raster-radar__point:focus {
+  outline: none;
+}
+
+.raster-radar__point:focus-visible {
+  r: 6;
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 2;
+}
+
+/* ── Sparkline ──────────────────────────────────────────────────────────── */
+
+.raster-sparkline {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.raster-sparkline__line {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.raster-sparkline__area {
+  opacity: 0.1;
+}
+
+/* ── Gauge ──────────────────────────────────────────────────────────────── */
+
+.raster-gauge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.raster-gauge__svg {
+  display: block;
+}
+
+.raster-gauge__track {
+  opacity: 0.15;
+}
+
+.raster-gauge__fill {
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.raster-gauge__centre {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.raster-gauge__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--raster-text, currentColor);
+  line-height: 1;
+}
+
+.raster-gauge__label {
+  font-size: 0.75rem;
+  color: var(--raster-text-subtle, var(--raster-text, currentColor));
+}
+
+/* ── LinearGauge ────────────────────────────────────────────────────────── */
+
+@keyframes raster-linear-gauge-grow {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--gauge-pct);
+  }
+}
+
+.raster-linear-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.raster-linear-gauge__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.875rem;
+}
+
+.raster-linear-gauge__label {
+  color: var(--raster-text-subtle, var(--raster-text, currentColor));
+  font-weight: 500;
+}
+
+.raster-linear-gauge__value {
+  color: var(--raster-text, currentColor);
+  font-weight: 700;
+}
+
+.raster-linear-gauge__track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--raster-grid, color-mix(in srgb, currentColor 25%, transparent));
+  overflow: hidden;
+}
+
+.raster-linear-gauge__fill {
+  height: 100%;
+  border-radius: 4px;
+  animation: raster-linear-gauge-grow 0.6s ease both;
+}
+
+/* ── GeoChart ───────────────────────────────────────────────────────────── */
+
+.raster-geo__svg {
+  width: 100%;
+}
+
+.raster-geo__region {
+  stroke: var(--raster-surface, light-dark(#ffffff, #121212));
+  stroke-width: 0.5;
+  transition: fill-opacity 0.15s ease;
+  cursor: default;
+}
+
+.raster-geo__marker {
+  stroke: var(--raster-surface, light-dark(#ffffff, #121212));
+  stroke-width: 1;
+  transition: fill-opacity 0.15s ease;
+  cursor: default;
+}
+
+.raster-geo__region:hover,
+.raster-geo__marker:hover {
+  fill-opacity: 0.8;
+}
+
+.raster-geo__region:focus,
+.raster-geo__marker:focus {
+  outline: none;
+}
+
+.raster-geo__region:focus-visible {
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 1.5;
+}
+
+.raster-geo__marker:focus-visible {
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 2;
+}
+
+.raster-geo__region[data-clickable],
+.raster-geo__marker[data-clickable] {
+  cursor: pointer;
+}
+
+.raster-geo__legend {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.raster-geo__gradient {
+  height: 8px;
+  width: 120px;
+  border-radius: 4px;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .raster-tooltip,
+  .raster-line__line,
+  .raster-line__area,
+  .raster-line__point,
+  .raster-bar__bar,
+  .raster-donut__segment,
+  .raster-scatter__point,
+  .raster-radar__point,
+  .raster-gauge__fill,
+  .raster-linear-gauge__fill,
+  .raster-geo__region,
+  .raster-geo__marker {
+    transition: none;
+    animation: none;
+  }
+}
+
+/*
+ * ── Forced colours ────────────────────────────────────────────────────────
+ * SVG keeps authored fill and stroke in forced-colours mode, so the palette
+ * would survive into a high-contrast theme. Map everything to system colours
+ * instead: text, axes and grid to CanvasText; focus and selection to
+ * Highlight; series to CanvasText (fills alternate with GrayText), told apart
+ * by per-series dash patterns.
+ */
+@media (forced-colors: active) {
+  .raster-chart__tick,
+  .raster-legend,
+  .raster-donut__centre,
+  .raster-gauge__value,
+  .raster-gauge__label,
+  .raster-linear-gauge__label,
+  .raster-linear-gauge__value {
+    fill: CanvasText;
+    color: CanvasText;
+  }
+
+  .raster-chart__axis,
+  .raster-chart__grid,
+  .raster-radar__grid {
+    stroke: CanvasText;
+  }
+
+  .raster-tooltip {
+    background: CanvasText;
+    color: Canvas;
+    forced-color-adjust: none;
+  }
+
+  /* Series marks */
+  .raster-line__line,
+  .raster-radar__line,
+  .raster-sparkline__line,
+  .raster-gauge__fill,
+  .raster-legend__swatch line {
+    stroke: CanvasText;
+  }
+
+  .raster-line__point,
+  .raster-scatter__point,
+  .raster-radar__point,
+  .raster-bar__bar,
+  .raster-legend__swatch circle,
+  .raster-geo__marker {
+    fill: CanvasText;
+  }
+
+  .raster-donut__segment {
+    stroke: CanvasText;
+  }
+
+  .raster-bar__bar[data-series="2"],
+  .raster-bar__bar[data-series="4"],
+  .raster-bar__bar[data-series="6"],
+  .raster-bar__bar[data-series="8"],
+  [data-series="2"] > .raster-scatter__point,
+  [data-series="4"] > .raster-scatter__point,
+  [data-series="6"] > .raster-scatter__point,
+  [data-series="8"] > .raster-scatter__point,
+  .raster-legend__swatch[data-series="2"] circle,
+  .raster-legend__swatch[data-series="4"] circle,
+  .raster-legend__swatch[data-series="6"] circle,
+  .raster-legend__swatch[data-series="8"] circle {
+    fill: GrayText;
+  }
+
+  .raster-donut__segment[data-series="2"],
+  .raster-donut__segment[data-series="4"],
+  .raster-donut__segment[data-series="6"],
+  .raster-donut__segment[data-series="8"] {
+    stroke: GrayText;
+  }
+
+  .raster-line__area,
+  .raster-radar__area,
+  .raster-sparkline__area {
+    fill: CanvasText;
+  }
+
+  .raster-gauge__track,
+  .raster-linear-gauge__track {
+    stroke: CanvasText;
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+
+  .raster-linear-gauge__fill {
+    background: CanvasText !important;
+  }
+
+  .raster-geo__region {
+    stroke: CanvasText;
+  }
+
+  /* Dash patterns per series (lines lose their draw-in animation here). */
+  .raster-line__line,
+  .raster-radar__line {
+    animation: none;
+  }
+
+  [data-series="2"] > .raster-line__line,
+  [data-series="2"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="2"] line {
+    stroke-dasharray: 6 3 !important;
+  }
+
+  [data-series="3"] > .raster-line__line,
+  [data-series="3"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="3"] line {
+    stroke-dasharray: 2 2 !important;
+  }
+
+  [data-series="4"] > .raster-line__line,
+  [data-series="4"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="4"] line {
+    stroke-dasharray: 8 3 2 3 !important;
+  }
+
+  [data-series="5"] > .raster-line__line,
+  [data-series="5"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="5"] line {
+    stroke-dasharray: 4 4 !important;
+  }
+
+  [data-series="6"] > .raster-line__line,
+  [data-series="6"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="6"] line {
+    stroke-dasharray: 1 3 !important;
+  }
+
+  [data-series="7"] > .raster-line__line,
+  [data-series="7"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="7"] line {
+    stroke-dasharray: 10 4 !important;
+  }
+
+  [data-series="8"] > .raster-line__line,
+  [data-series="8"] > .raster-radar__line,
+  .raster-legend__swatch[data-series="8"] line {
+    stroke-dasharray: 6 2 2 2 !important;
+  }
+
+  [data-series="1"] > .raster-line__line {
+    stroke-dasharray: none !important;
+  }
+
+  /* Focus and selection */
+  .raster-line__point:focus-visible,
+  .raster-scatter__point:focus-visible,
+  .raster-radar__point:focus-visible,
+  .raster-geo__region:focus-visible,
+  .raster-geo__marker:focus-visible,
+  .raster-line__point[data-selected],
+  .raster-bar__bar[data-selected] {
+    stroke: Highlight;
+  }
+
+  .raster-bar__bar:focus-visible,
+  .raster-donut__segment:focus-visible {
+    outline-color: Highlight;
+  }
+}

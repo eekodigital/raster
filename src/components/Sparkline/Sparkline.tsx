@@ -2,7 +2,8 @@ import { useRef, useImperativeHandle } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
-import * as styles from "./Sparkline.css.js";
+import { cn } from "../../utils/cn.js";
+import { seriesColor } from "../../utils/palette.js";
 
 type SparklineProps = {
   data: number[];
@@ -19,7 +20,7 @@ export function Sparkline({
   data,
   width = 80,
   height = 24,
-  color = "var(--color-interactive)",
+  color = seriesColor(0),
   fill = false,
   exportRef,
   "aria-label": ariaLabel,
@@ -48,20 +49,18 @@ export function Sparkline({
     ? `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`
     : undefined;
 
-  const cls = [styles.svg, className].filter(Boolean).join(" ");
-
   return (
     <div ref={containerRef} style={{ display: "inline-block" }} data-chart-container>
       <svg
-        className={cls}
+        className={cn("raster-sparkline", className)}
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={ariaLabel}
       >
-        {areaPath && <path d={areaPath} fill={color} className={styles.area} />}
-        <polyline points={polyline} stroke={color} className={styles.line} />
+        {areaPath && <path d={areaPath} fill={color} className="raster-sparkline__area" />}
+        <polyline points={polyline} stroke={color} className="raster-sparkline__line" />
       </svg>
     </div>
   );

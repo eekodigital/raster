@@ -7,11 +7,15 @@ import {
   shouldRotateLabels,
   labelSkip,
 } from "../../utils/chart-math.js";
+import { cn } from "../../utils/cn.js";
+import { DEFAULT_SERIES_COLORS } from "../../utils/palette.js";
 import { useChartExport } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 import { useContainerWidth } from "../../utils/use-container-width.js";
+import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import * as styles from "./BarChart.css.js";
+import { ChartDataTable } from "../shared/ChartDataTable.js";
+import { ChartLegend } from "../shared/ChartLegend.js";
 
 export type BarDatum = {
   label: string;
@@ -41,20 +45,12 @@ type BarChartProps = {
   className?: string;
 };
 
-const DEFAULT_COLORS = [
-  "var(--color-interactive)",
-  "var(--color-success)",
-  "var(--color-danger)",
-  "var(--color-warning)",
-  "var(--color-inactive)",
-];
-
 const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
 const MARGIN_H = { top: 8, right: 8, bottom: 28, left: 80 };
 
 export function BarChart({
   data,
-  colors = DEFAULT_COLORS,
+  colors = DEFAULT_SERIES_COLORS as string[],
   direction = "vertical",
   stacked = false,
   grouped = false,
@@ -75,8 +71,6 @@ export function BarChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const exportHandle = useChartExport(containerRef);
   useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const focusedRef = useRef(0);
-  const barsRef = useRef<(SVGRectElement | null)[]>([]);
   const { tooltipId, tooltipProps, hide, handlers } = useChartTooltip();
 
   // Selection state (controlled or uncontrolled)
@@ -131,22 +125,10 @@ export function BarChart({
     ? labelSkip(data.length, plotHeight, 20)
     : labelSkip(data.length, plotWidth, rotateLabels ? 18 : 30);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      let next = focusedRef.current;
-      const fwd = isHorizontal ? "ArrowDown" : "ArrowRight";
-      const bwd = isHorizontal ? "ArrowUp" : "ArrowLeft";
-      if (e.key === fwd) next = Math.min(next + 1, data.length - 1);
-      else if (e.key === bwd) next = Math.max(next - 1, 0);
-      else return;
-      e.preventDefault();
-      focusedRef.current = next;
-      barsRef.current[next]?.focus();
-    },
-    [data.length, isHorizontal],
-  );
-
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
+  const roving = useRovingFocus({
+    counts: [data.length],
+    itemKeys: isHorizontal ? VERTICAL_KEYS : HORIZONTAL_KEYS,
+  });
 
   // Simple single-value bars
   function renderSimpleBars() {
@@ -161,10 +143,8 @@ export function BarChart({
         return (
           <g key={d.label}>
             <rect
-              ref={(el) => {
-                barsRef.current[i] = el;
-              }}
-              className={styles.barHorizontal}
+              ref={roving.ref(0, i)}
+              className="raster-bar__bar raster-bar__bar--horizontal"
               style={{ animationDelay: `${i * 60}ms` }}
               x={0}
               y={categoryScale.offset(i)}
@@ -182,11 +162,8 @@ export function BarChart({
                 setSelected(isSelected ? null : i);
                 onBarClick?.(d, i);
               }}
-              onKeyDown={handleKeyDown}
-              onFocus={(e) => {
-                focusedRef.current = i;
-                tip.onFocus(e);
-              }}
+              onKeyDown={roving.onKeyDown(0, i)}
+              onFocus={tip.onFocus}
               onBlur={() => {
                 if (!isSelected) hide();
               }}
@@ -201,7 +178,7 @@ export function BarChart({
                 y={categoryScale.offset(i) + categoryScale.bandwidth / 2}
                 dy="0.35em"
                 textAnchor="end"
-                className={styles.tickLabel}
+                className="raster-chart__tick"
               >
                 {d.label}
               </text>
@@ -215,10 +192,8 @@ export function BarChart({
       return (
         <g key={d.label}>
           <rect
-            ref={(el) => {
-              barsRef.current[i] = el;
-            }}
-            className={styles.bar}
+            ref={roving.ref(0, i)}
+            className="raster-bar__bar"
             style={{ animationDelay: `${i * 60}ms` }}
             x={categoryScale.offset(i)}
             y={valueScale(d.value)}
@@ -236,11 +211,8 @@ export function BarChart({
               setSelected(isSelected ? null : i);
               onBarClick?.(d, i);
             }}
-            onKeyDown={handleKeyDown}
-            onFocus={(e) => {
-              focusedRef.current = i;
-              tip.onFocus(e);
-            }}
+            onKeyDown={roving.onKeyDown(0, i)}
+            onFocus={tip.onFocus}
             onBlur={() => {
               if (!isSelected) hide();
             }}
@@ -254,7 +226,7 @@ export function BarChart({
               x={labelX}
               y={plotHeight + 16}
               textAnchor={rotateLabels ? "end" : "middle"}
-              className={styles.tickLabel}
+              className="raster-chart__tick"
               transform={rotateLabels ? `rotate(-45, ${labelX}, ${plotHeight + 16})` : undefined}
             >
               {d.label}
@@ -281,7 +253,8 @@ export function BarChart({
             return (
               <rect
                 key={si}
-                className={styles.bar}
+                className="raster-bar__bar"
+                data-series={(si % 8) + 1}
                 x={categoryScale.offset(i)}
                 y={valueScale(cumulative)}
                 width={categoryScale.bandwidth}
@@ -304,7 +277,7 @@ export function BarChart({
               x={categoryScale.offset(i) + categoryScale.bandwidth / 2}
               y={plotHeight + 16}
               textAnchor={rotateLabels ? "end" : "middle"}
-              className={styles.tickLabel}
+              className="raster-chart__tick"
               transform={
                 rotateLabels
                   ? `rotate(-45, ${categoryScale.offset(i) + categoryScale.bandwidth / 2}, ${plotHeight + 16})`
@@ -335,7 +308,8 @@ export function BarChart({
             return (
               <rect
                 key={si}
-                className={styles.bar}
+                className="raster-bar__bar"
+                data-series={(si % 8) + 1}
                 style={{ animationDelay: `${(i * seriesCount + si) * 40}ms` }}
                 x={categoryScale.offset(i) + si * subBarWidth}
                 y={valueScale(v)}
@@ -361,7 +335,7 @@ export function BarChart({
               x={categoryScale.offset(i) + categoryScale.bandwidth / 2}
               y={plotHeight + 16}
               textAnchor={rotateLabels ? "end" : "middle"}
-              className={styles.tickLabel}
+              className="raster-chart__tick"
               transform={
                 rotateLabels
                   ? `rotate(-45, ${categoryScale.offset(i) + categoryScale.bandwidth / 2}, ${plotHeight + 16})`
@@ -380,9 +354,14 @@ export function BarChart({
   const showVGrid = grid === "vertical" || grid === "both";
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
+    <div
+      ref={containerRef}
+      className={cn("raster-chart", className)}
+      data-chart-container
+      style={{ position: "relative" }}
+    >
       <svg
-        className={styles.svg}
+        className="raster-chart__svg"
         width={chartWidth}
         height={height}
         role="img"
@@ -401,11 +380,16 @@ export function BarChart({
                       x2={x}
                       y1={0}
                       y2={plotHeight}
-                      className={styles.axisLine}
+                      className="raster-chart__grid"
                       strokeDasharray="2,4"
                     />
                   )}
-                  <text x={x} y={plotHeight + 16} textAnchor="middle" className={styles.tickLabel}>
+                  <text
+                    x={x}
+                    y={plotHeight + 16}
+                    textAnchor="middle"
+                    className="raster-chart__tick"
+                  >
                     {formatValue(tick)}
                   </text>
                 </g>
@@ -415,9 +399,14 @@ export function BarChart({
             return (
               <g key={tick} transform={`translate(0, ${y})`}>
                 {showHGrid && (
-                  <line x1={0} x2={plotWidth} className={styles.axisLine} strokeDasharray="2,4" />
+                  <line
+                    x1={0}
+                    x2={plotWidth}
+                    className="raster-chart__grid"
+                    strokeDasharray="2,4"
+                  />
                 )}
-                <text x={-6} dy="0.35em" textAnchor="end" className={styles.tickLabel}>
+                <text x={-6} dy="0.35em" textAnchor="end" className="raster-chart__tick">
                   {formatValue(tick)}
                 </text>
               </g>
@@ -426,14 +415,14 @@ export function BarChart({
 
           {/* Baseline */}
           {isHorizontal ? (
-            <line x1={0} x2={0} y1={0} y2={plotHeight} className={styles.axisLine} />
+            <line x1={0} x2={0} y1={0} y2={plotHeight} className="raster-chart__axis" />
           ) : (
             <line
               x1={0}
               x2={plotWidth}
               y1={plotHeight}
               y2={plotHeight}
-              className={styles.axisLine}
+              className="raster-chart__axis"
             />
           )}
 
@@ -443,7 +432,7 @@ export function BarChart({
               x={plotWidth / 2}
               y={plotHeight + 28}
               textAnchor="middle"
-              className={styles.tickLabel}
+              className="raster-chart__tick"
             >
               {xLabel}
             </text>
@@ -454,7 +443,7 @@ export function BarChart({
               y={-30}
               textAnchor="middle"
               transform="rotate(-90)"
-              className={styles.tickLabel}
+              className="raster-chart__tick"
             >
               {yLabel}
             </text>
@@ -479,39 +468,19 @@ export function BarChart({
 
       {/* Legend for multi-series */}
       {isMulti && series && (
-        <div className={styles.legend}>
-          {series.map((s, i) => (
-            <span key={s} className={styles.legendItem}>
-              <span
-                className={styles.legendSwatch}
-                style={{ background: colors[i % colors.length] }}
-              />
-              {s}
-            </span>
-          ))}
-        </div>
+        <ChartLegend
+          items={series.map((s, i) => ({ label: s, color: colors[i % colors.length] }))}
+        />
       )}
 
-      <table className={styles.srOnly} aria-label={ariaLabel}>
-        <thead>
-          <tr>
-            <th>Category</th>
-            {isMulti && series ? series.map((s) => <th key={s}>{s}</th>) : <th>Value</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((d, i) => (
-            <tr key={d.label}>
-              <td>{d.label}</td>
-              {isMulti && values ? (
-                values[i]?.map((v, si) => <td key={si}>{v}</td>)
-              ) : (
-                <td>{d.value}</td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ChartDataTable
+        aria-label={ariaLabel}
+        headers={["Category", ...(isMulti && series ? series : ["Value"])]}
+        rows={data.map((d, i) => ({
+          key: d.label,
+          cells: [d.label, ...(isMulti && values ? (values[i] ?? []) : [d.value])],
+        }))}
+      />
     </div>
   );
 }

@@ -113,6 +113,7 @@ describe("RadarChart", () => {
   it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
     render(<RadarChart axes={AXES} series={SERIES} aria-label="POUR scores" />);
     const table = screen.getByRole("table", { name: "POUR scores" });
-    expect(table.className).toMatch(/srOnly/);
+    expect(table.classList.contains("raster-sr-only")).toBe(true);
+    expect(table.style.display).toBe("block");
   });
 });

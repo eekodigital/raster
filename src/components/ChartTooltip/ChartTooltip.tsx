@@ -1,5 +1,4 @@
 import { useState, useCallback, useId } from "react";
-import * as styles from "./ChartTooltip.css.js";
 
 type TooltipState = {
   visible: boolean;
@@ -70,7 +69,7 @@ export function useChartTooltip() {
   };
 }
 
-type ChartTooltipProps = {
+export type ChartTooltipProps = {
   id: string;
   visible: boolean;
   x: number;
@@ -84,7 +83,7 @@ export function ChartTooltip({ id, visible, x, y, content }: ChartTooltipProps) 
     <div
       id={id}
       {...(isActive ? { role: "tooltip" } : { "aria-hidden": true })}
-      className={styles.tooltip}
+      className="raster-tooltip"
       data-visible={isActive || undefined}
       style={{
         left: x,
