@@ -18,6 +18,7 @@ The 2.x source and docs remain at the `v2.0.1` git tag, and `2.0.1` stays on npm
 - `@eekodigital/raster/theme`: `rasterVars`, the typed theming contract.
 - Per-chart entry points: `/line-chart`, `/bar-chart`, `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip`.
 - `ChartTooltip` and `useChartTooltip` are exported.
+- Props types for every chart (`LineChartProps`, `BarChartProps`, `GaugeProps`, …, `GeoChartProps` from `/geo`), and `ChartExportHandle` from every per-chart entry.
 - Forced-colours styles: system colours, with per-series dash patterns.
 
 ### Migration guide
@@ -33,15 +34,16 @@ The 2.x source and docs remain at the `v2.0.1` git tag, and `2.0.1` stays on npm
 
 2. **Map your theme onto the chart contract.** Charts no longer read `--color-*`, `--font-*` or `--spacing-*`:
 
-   | v2 token                                                     | v3 property                                 |
-   | ------------------------------------------------------------ | ------------------------------------------- |
-   | `--color-text`                                               | `--raster-text` (and `--raster-tooltip-bg`) |
-   | `--color-text-subtle`                                        | `--raster-text-subtle`                      |
-   | `--color-text-inverse`                                       | `--raster-tooltip-text`                     |
-   | `--color-border`                                             | `--raster-grid`, `--raster-axis`            |
-   | `--color-focus-ring`                                         | `--raster-focus`                            |
-   | `--color-surface`                                            | `--raster-surface`                          |
-   | default series (`--color-interactive`, `--color-success`, …) | `--raster-series-1` … `--raster-series-8`   |
+   | v2 token                                                                                                   | v3 property                                                                              |
+   | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+   | `--color-text`                                                                                             | `--raster-text` (and `--raster-tooltip-bg`)                                              |
+   | `--color-text-subtle`                                                                                      | `--raster-text-subtle`                                                                   |
+   | `--color-text-inverse`                                                                                     | `--raster-tooltip-text`                                                                  |
+   | `--color-border`                                                                                           | `--raster-grid`, `--raster-axis`                                                         |
+   | `--color-focus-ring`                                                                                       | `--raster-focus`                                                                         |
+   | `--color-surface`                                                                                          | `--raster-surface`                                                                       |
+   | default series (`--color-interactive`, `--color-success`, …)                                               | `--raster-series-1` … `--raster-series-8`                                                |
+   | GeoChart scale and markers (`--color-surface-raised`, `--color-interactive-subtle`, `--color-interactive`) | a ramp from `--raster-surface` to `--raster-series-1`; pass `colorScale` to set your own |
 
    ```css
    :root {
