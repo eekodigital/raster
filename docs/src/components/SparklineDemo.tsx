@@ -5,36 +5,39 @@ export function SparklineDemo() {
     <div
       style={{
         display: "flex",
-        gap: "var(--spacing-6)",
+        gap: "1.5rem",
         alignItems: "center",
-        fontFamily: "var(--font-family-sans)",
-        fontSize: "var(--font-size-sm)",
-        color: "var(--color-text)",
+        fontFamily: "inherit",
+        fontSize: "0.875rem",
+        color: "inherit",
       }}
     >
       <span>
         Trend:{" "}
         <Sparkline
+          width={80}
           data={[10, 25, 18, 40, 35, 60, 72, 86]}
-          color="var(--color-success)"
-          aria-label="Upward trend"
+          color="var(--demo-good)"
+          title="Upward trend"
         />
       </span>
       <span>
         Flat:{" "}
         <Sparkline
+          width={80}
           data={[50, 48, 52, 49, 51, 50, 48, 52]}
-          color="var(--color-inactive)"
-          aria-label="Flat trend"
+          color="var(--demo-neutral)"
+          title="Flat trend"
         />
       </span>
       <span>
         With fill:{" "}
         <Sparkline
+          width={80}
           data={[5, 15, 10, 30, 25, 45]}
           fill
-          color="var(--color-interactive)"
-          aria-label="Growth with area"
+          color="var(--demo-accent)"
+          title="Growth with area"
         />
       </span>
     </div>

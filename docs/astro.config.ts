@@ -21,13 +21,10 @@ export default defineConfig({
         },
       },
       customCss: [
-        // Primitives only (themes no longer ship in the package).
-        "@eekodigital/raster/primitives.css",
-        // Docs-owned theme files mapping primitives → semantic tokens.
-        // Built by Style Dictionary into `docs/src/styles/theme-*.css`.
-        "./src/styles/theme-light.css",
-        "./src/styles/theme-dark.css",
-        "./src/styles/theme-high-contrast.css",
+        // The one stylesheet raster ships.
+        "@eekodigital/raster/styles.css",
+        // Docs-owned mapping of Starlight tokens onto the --raster-* contract.
+        "./src/styles/chart-theme.css",
         "./src/styles/custom.css",
       ],
       components: {
@@ -36,21 +33,14 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: "Foundations",
+          label: "Guides",
           items: [
-            { label: "Design principles", slug: "foundations/principles" },
-            { label: "Colours", slug: "foundations/colours" },
-            { label: "Theming", slug: "foundations/theming" },
-            { label: "Typography", slug: "foundations/typography" },
-          ],
-        },
-        {
-          label: "Layout",
-          items: [
-            { label: "Box", slug: "components/box" },
-            { label: "Flex", slug: "components/flex" },
-            { label: "Grid", slug: "components/grid" },
-            { label: "ScrollArea", slug: "components/scroll-area" },
+            { label: "Getting started", slug: "guides/getting-started" },
+            { label: "Accessibility", slug: "guides/accessibility" },
+            { label: "Theming charts", slug: "guides/theming" },
+            { label: "Exporting charts", slug: "guides/exporting" },
+            { label: "Compared with alternatives", slug: "guides/comparison" },
+            { label: "Migrating from v2", slug: "guides/migrating" },
           ],
         },
         {
@@ -65,72 +55,7 @@ export default defineConfig({
             { label: "RadarChart", slug: "components/radar-chart" },
             { label: "ScatterChart", slug: "components/scatter-chart" },
             { label: "Sparkline", slug: "components/sparkline" },
-          ],
-        },
-        {
-          label: "Actions",
-          items: [{ label: "Button", slug: "components/buttons" }],
-        },
-        {
-          label: "Forms",
-          items: [
-            { label: "TextInput", slug: "components/text-input" },
-            { label: "Textarea", slug: "components/textarea" },
-            { label: "Select", slug: "components/select" },
-            { label: "Checkbox", slug: "components/checkboxes" },
-            { label: "Radio", slug: "components/radios" },
-            { label: "Switch", slug: "components/switch" },
-            { label: "Slider", slug: "components/slider" },
-            { label: "DateInput", slug: "components/date-input" },
-            { label: "FileUpload", slug: "components/file-upload" },
-            { label: "OneTimePasswordField", slug: "components/otp-field" },
-            { label: "PasswordToggleField", slug: "components/password-toggle-field" },
-            { label: "Fieldset", slug: "components/fieldset" },
-          ],
-        },
-        {
-          label: "Overlays",
-          items: [
-            { label: "AlertDialog", slug: "components/alert-dialog" },
-            { label: "Dialog", slug: "components/dialog" },
-            { label: "DropdownMenu", slug: "components/dropdown-menu" },
-            { label: "Popover", slug: "components/popover" },
-            { label: "Tooltip", slug: "components/tooltip" },
-          ],
-        },
-        {
-          label: "Navigation",
-          items: [
-            { label: "Breadcrumbs", slug: "components/breadcrumbs" },
-            { label: "Pagination", slug: "components/pagination" },
-            { label: "SkipLink", slug: "components/skip-link" },
-            { label: "Tabs", slug: "components/tabs" },
-          ],
-        },
-        {
-          label: "Feedback",
-          items: [
-            { label: "Badge", slug: "components/badge" },
-            { label: "NotificationBanner", slug: "components/notification-banner" },
-            { label: "Progress", slug: "components/progress" },
-            { label: "Spinner", slug: "components/spinner" },
-            { label: "Tag", slug: "components/tags" },
-            { label: "Toast", slug: "components/toast" },
-          ],
-        },
-        {
-          label: "Display",
-          items: [
-            { label: "Accordion", slug: "components/accordion" },
-            { label: "Avatar", slug: "components/avatar" },
-            { label: "Collapsible", slug: "components/collapsible" },
-            { label: "Details", slug: "components/details" },
-            { label: "Separator", slug: "components/separator" },
-            { label: "Skeleton", slug: "components/skeleton" },
-            { label: "SummaryList", slug: "components/summary-list" },
-            { label: "Table", slug: "components/tables" },
-            { label: "DataTable", slug: "components/data-table" },
-            { label: "Heading & Text", slug: "components/typography" },
+            { label: "ChartTooltip", slug: "components/chart-tooltip" },
           ],
         },
       ],

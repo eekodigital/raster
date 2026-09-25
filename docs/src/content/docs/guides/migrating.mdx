@@ -1,0 +1,82 @@
+---
+title: Migrating from v2
+description: Raster 3 keeps only the charts. UI components, design tokens and DataTable are gone. Here's what to change.
+---
+
+Raster 3.0 is a charts library. Everything else from raster 2 has been removed. The 2.x source and docs stay available at the [`v2.0.1` tag](https://github.com/eekodigital/raster/tree/v2.0.1), and `2.0.1` stays on npm.
+
+## If you only use charts
+
+1. **Load the stylesheet once** at your app root, and remove any `tokens.css` or `primitives.css` import:
+
+   ```diff
+   - import "@eekodigital/raster/tokens.css";
+   + import "@eekodigital/raster/styles.css";
+   ```
+
+   Chart CSS is no longer injected when you import a chart. Remove bare `import "@eekodigital/raster"` side-effect imports and `[class*="LineChart_…"]`-style overrides; class names are now stable (`raster-*`).
+
+2. **Map your theme onto the chart contract.** Charts no longer read `--color-*`, `--font-*` or `--spacing-*`. Set `--raster-*` instead (see [Theming charts](/guides/theming/)):
+
+   | v2 token                                                     | v3 property                                 |
+   | ------------------------------------------------------------ | ------------------------------------------- |
+   | `--color-text`                                               | `--raster-text` (and `--raster-tooltip-bg`) |
+   | `--color-text-subtle`                                        | `--raster-text-subtle`                      |
+   | `--color-text-inverse`                                       | `--raster-tooltip-text`                     |
+   | `--color-border`                                             | `--raster-grid` / `--raster-axis`           |
+   | `--color-focus-ring`                                         | `--raster-focus`                            |
+   | `--color-surface`                                            | `--raster-surface`                          |
+   | `--color-interactive`, `--color-success`, … (default series) | `--raster-series-1` … `--raster-series-8`   |
+
+   Fonts are inherited from the page. If you set nothing, charts use `currentColor`-based fallbacks and a new default palette.
+
+3. **Import GeoChart from its own entry**, and install `topojson-client` if you haven't:
+
+   ```diff
+   - import { GeoChart } from "@eekodigital/raster";
+   + import { GeoChart } from "@eekodigital/raster/geo";
+   ```
+
+   The `topology` prop now takes a structural `GeoTopology` type, so you no longer need `@types/topojson-specification`.
+
+4. **Default series colours changed.** The default palette is now eight Okabe–Ito-derived colours (see [Theming charts](/guides/theming/)) instead of your `--color-interactive`/`--color-success`/… tokens. Pass `color` props or set `--raster-series-*` to keep your old colours.
+
+5. **Charts are titled figures.** Replace `aria-label` with `title`, which is now shown above the chart. If your page already has a heading for it, pass `hideTitle` to keep the title for screen readers only:
+
+   ```diff
+   - <LineChart aria-label="Visitors this week" … />
+   + <LineChart title="Visitors this week" hideTitle … />
+   ```
+
+   Sparkline also takes `title` (it isn't displayed; it leads the text summary). Gauge and LinearGauge drop `aria-label`: `label` is now required and names the meter.
+
+6. **LineChart's x-axis `labels` is now `categories`.** `labels` is now the object of generated strings (see [Accessibility](/guides/accessibility/#labels)):
+
+   ```diff
+   - <LineChart labels={["Mon", "Tue"]} … />
+   + <LineChart categories={["Mon", "Tue"]} … />
+   ```
+
+7. **Numbers are formatted with `Intl.NumberFormat`** by default (`1200` shows as `1,200`). Pass `formatValue` to keep your own formatting, or `labels={{ locale: "de" }}` to change the locale.
+
+8. **The data table is visible on request.** Each chart shows a **Show data table** button that reveals a real table. To keep the old always-present, visually hidden table (for example when the page already shows the data), pass `dataTable="visually-hidden"`.
+
+9. **Marks are only buttons when interactive.** Points, bars and segments become `role="button"` with `aria-pressed` only when you pass `onSelect`, `selectedIndex` or a click handler; otherwise clicking does nothing. ScatterChart, RadarChart and GeoChart gain `selectedIndex`/`onSelect`.
+
+10. **Sizes follow the container.** `aspectRatio` is an alternative to `height`. DonutChart, Gauge, RadarChart and Sparkline fill their container's width when you omit `size`/`width`; in v2 DonutChart defaulted to `size={160}`, Gauge to `size={120}` and Sparkline to `width={80}`, so pass those to keep the old size. GeoChart loses `width` and fills its container (16:9 by default, or `height`/`aspectRatio`). Gauge and LinearGauge gain `min`.
+
+11. **Multi-series points use marker shapes** (circle, square, triangle, diamond, …) as well as colour.
+
+`ChartTooltip` and `useChartTooltip` are now exported, and every chart has its own entry point (`@eekodigital/raster/line-chart`, …).
+
+## If you use UI components
+
+Button, Dialog, AlertDialog, DropdownMenu, Popover, Tooltip, Tabs, Select, form fields, Pagination and the other UI components are gone. Move them into your app, on [Base UI](https://base-ui.com) or plain semantic HTML. Base UI supplies the accessible behaviour (focus management, positioning, dismissal, form participation); your app supplies the styling.
+
+## If you use DataTable
+
+`@eekodigital/raster/data-table` is gone. Copy the component from the `v2.0.1` tag into your app and add `@tanstack/react-table` as a direct dependency.
+
+## If you use the design tokens
+
+`tokens.css` and `primitives.css` are gone. Copy the values you use from `src/tokens/primitives.css` at the `v2.0.1` tag into your app's own token file.

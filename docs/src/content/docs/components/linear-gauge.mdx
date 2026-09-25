@@ -9,10 +9,18 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
 ## Examples
 
 <Example
-  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<LinearGauge value={45} max={100} label="Complete" color="var(--color-warning)" formatLabel={(v) => \`\${v}%\`} aria-label="45% complete" />\n<LinearGauge value={86} max={86} label="Criteria" color="var(--color-success)" aria-label="All criteria assessed" />`}
+  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} label="Assessed" />\n<LinearGauge value={45} max={100} label="Complete" color="var(--demo-warn)" formatLabel={(v) => \`\${v}%\`} />\n<LinearGauge value={86} max={86} label="Criteria" color="var(--demo-good)" />`}
 >
   <LinearGaugeDemo client:load />
 </Example>
+
+## Accessibility
+
+- `role="meter"` with `aria-valuemin`, `aria-valuemax`, `aria-valuenow` and `aria-valuetext` from `format`.
+- Named by the visible `label` through `aria-labelledby`.
+- Fills its container's width; the grow animation stops under `prefers-reduced-motion`.
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -34,7 +42,19 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
         <code>number</code>
       </td>
       <td>—</td>
-      <td>Current value</td>
+      <td>Required.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>min</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>0</code>
+      </td>
+      <td>Start of the range.</td>
     </tr>
     <tr>
       <td>
@@ -44,7 +64,7 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
         <code>number</code>
       </td>
       <td>—</td>
-      <td>Maximum value</td>
+      <td>Required. End of the range.</td>
     </tr>
     <tr>
       <td>
@@ -54,19 +74,33 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Label above the bar</td>
+      <td>Required. Visible label and accessible name.</td>
     </tr>
     <tr>
       <td>
-        <code>color</code>
+        <code>format</code>
       </td>
       <td>
-        <code>string</code>
+        <code>(value: number) =&gt; string</code>
       </td>
       <td>
-        <code>--color-interactive</code>
+        <code>Intl.NumberFormat("en")</code>
       </td>
-      <td>Fill colour</td>
+      <td>
+        Formats the value and <code>aria-valuetext</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatLabel</code>
+      </td>
+      <td>
+        <code>(value, max) =&gt; string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Visible value text (default <code>&#123;value&#125; / &#123;max&#125;</code>).
+      </td>
     </tr>
     <tr>
       <td>
@@ -78,29 +112,29 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
       <td>
         <code>8</code>
       </td>
-      <td>Bar height in pixels</td>
+      <td>Track height in px.</td>
     </tr>
     <tr>
       <td>
-        <code>format</code>
+        <code>color</code>
       </td>
       <td>
-        <code>(v: number) =&gt; string</code>
+        <code>string</code>
       </td>
       <td>
-        <code>String</code>
+        <code>series 1</code>
       </td>
-      <td>Format the displayed value</td>
+      <td>Fill colour.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>className</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required.</td>
+      <td></td>
     </tr>
   </tbody>
 </table>

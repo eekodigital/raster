@@ -1,11 +1,30 @@
 import { feature } from "topojson-client";
-import type { Topology } from "topojson-specification";
-import { useRef, useCallback, useMemo, useImperativeHandle } from "react";
+import { useMemo } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
+import type { NumberFormat } from "../../utils/labels.js";
+import { seriesColor } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
-import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import * as styles from "./GeoChart.css.js";
+
+export type { ChartExportHandle };
+import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
+import type { PlotSizeOptions } from "../../utils/use-container-width.js";
+import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
+import { useSelection } from "../../utils/use-selection.js";
+import { ChartFrame } from "../shared/ChartFrame.js";
+import type { ChartFrameOptions } from "../shared/ChartFrame.js";
+import { markProps, useChart } from "../shared/use-chart.js";
+
+/**
+ * A TopoJSON topology (e.g. `world-atlas/countries-110m.json`). Typed
+ * structurally so consumers don't need `@types/topojson-specification`.
+ */
+export type GeoTopology = {
+  type: string;
+  objects: Record<string, unknown>;
+  arcs: unknown[];
+  transform?: unknown;
+  bbox?: unknown;
+};
 
 export type GeoRegionDatum = {
   id: string;
@@ -18,29 +37,36 @@ export type GeoMarker = {
   lon: number;
   size?: number;
   label: string;
+  /** Optional quantity, shown in the mark label and the data table. */
+  value?: number;
   color?: string;
 };
 
+/** A selected region (by feature id) or marker (by index). */
+export type GeoSelection = { region: string } | { marker: number };
+
 type ProjectionFn = (lon: number, lat: number) => [number, number];
 
-type GeoChartProps = {
-  topology: Topology;
-  objectName?: string;
-  data?: GeoRegionDatum[];
-  colorScale?: string[];
-  markers?: GeoMarker[];
-  projection?: "mercator" | "equirectangular" | ProjectionFn;
-  filter?: string[];
-  onRegionClick?: (datum: GeoRegionDatum | undefined, featureId: string) => void;
-  onMarkerClick?: (marker: GeoMarker, index: number) => void;
-  legendLabel?: string;
-  formatValue?: (value: number) => string;
-  width?: number;
-  height?: number;
-  exportRef?: React.Ref<ChartExportHandle>;
-  "aria-label": string;
-  className?: string;
-};
+export type GeoChartProps = ChartFrameOptions &
+  PlotSizeOptions & {
+    topology: GeoTopology;
+    objectName?: string;
+    data?: GeoRegionDatum[];
+    colorScale?: string[];
+    markers?: GeoMarker[];
+    projection?: "mercator" | "equirectangular" | ProjectionFn;
+    filter?: string[];
+    /** Passing this (or `onSelect`/`selectedIndex`) makes regions toggle buttons. */
+    onRegionClick?: (datum: GeoRegionDatum | undefined, featureId: string) => void;
+    /** Passing this (or `onSelect`/`selectedIndex`) makes markers toggle buttons. */
+    onMarkerClick?: (marker: GeoMarker, index: number) => void;
+    selectedIndex?: GeoSelection | null;
+    onSelect?: (selection: GeoSelection | null) => void;
+    legendLabel?: string;
+    /** Formats values in marks, the legend and the table. Default: `Intl.NumberFormat(labels.locale)`. */
+    formatValue?: NumberFormat;
+    exportRef?: React.Ref<ChartExportHandle>;
+  };
 
 // Built-in projections
 function mercator(lon: number, lat: number): [number, number] {
@@ -109,10 +135,11 @@ function geoPath(coordinates: number[][][], project: ProjectionFn, s: ScaleParam
     .join(" ");
 }
 
+const SURFACE = "var(--raster-surface, light-dark(#ffffff, #121212))";
 const DEFAULT_COLOR_SCALE = [
-  "var(--color-surface-raised)",
-  "var(--color-interactive-subtle)",
-  "var(--color-interactive)",
+  `color-mix(in srgb, ${seriesColor(0)} 15%, ${SURFACE})`,
+  `color-mix(in srgb, ${seriesColor(0)} 55%, ${SURFACE})`,
+  seriesColor(0),
 ];
 
 export function GeoChart({
@@ -125,184 +152,211 @@ export function GeoChart({
   filter,
   onRegionClick,
   onMarkerClick,
+  selectedIndex,
+  onSelect,
   legendLabel,
   formatValue,
-  width = 800,
-  height = 450,
+  height,
+  aspectRatio,
   exportRef,
-  "aria-label": ariaLabel,
-  className,
+  labels: labelOverrides,
+  ...frame
 }: GeoChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const exportHandle = useChartExport(containerRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const focusedRef = useRef(0);
-  const { tooltipId, tooltipProps, hide, handlers } = useChartTooltip();
-  const project = getProjection(projection);
-  const scale = useMemo(
-    () => getScaleParams(projection, width, height),
-    [projection, width, height],
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const selection = useSelection<GeoSelection>(selectedIndex, onSelect, labels);
+  const selectable = !!onSelect || selectedIndex !== undefined;
+
+  const size = plotSize(
+    useContainerWidth(plotRef, 720),
+    { height, aspectRatio: aspectRatio ?? (height ? undefined : 16 / 9) },
+    405,
   );
+  const project = getProjection(projection);
+  const scale = getScaleParams(projection, size.width, size.height);
 
   // Extract GeoJSON features from topology
   const objName = objectName ?? Object.keys(topology.objects)[0];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line no-explicit-any
   const geojson = useMemo(
-    () => feature(topology, topology.objects[objName] as any) as any,
+    () => feature(topology as any, topology.objects[objName] as any) as any,
     [topology, objName],
   );
 
-  const features = useMemo(() => {
+  const features: any[] = useMemo(() => {
     const all: any[] = geojson.features ?? [];
     if (!filter) return all;
     const filterSet = new Set(filter);
     return all.filter((f: any) => filterSet.has(String(f.id ?? f.properties?.name ?? "")));
   }, [geojson, filter]);
 
-  // Build data lookup
-  const dataMap = useMemo(() => {
-    const map = new Map<string, GeoRegionDatum>();
-    for (const d of data) map.set(d.id, d);
-    return map;
-  }, [data]);
+  const dataMap = new Map(data.map((d) => [d.id, d]));
+  const regions = features.map((f, i) => {
+    const id = String(f.id ?? f.properties?.name ?? i);
+    const datum = dataMap.get(id);
+    return { f, id, datum, name: String(datum?.label ?? f.properties?.name ?? id) };
+  });
 
-  // Colour scale
   const values = data.map((d) => d.value);
   const [minVal, maxVal] = values.length ? extent(values) : [0, 1];
   const colorIdx = linearScale([minVal, maxVal], [0, colorScale.length - 1]);
+  const colorOf = (datum: GeoRegionDatum | undefined) =>
+    datum
+      ? colorScale[Math.min(Math.round(colorIdx(datum.value)), colorScale.length - 1)]
+      : colorScale[0];
 
-  function getColor(id: string): string {
-    const datum = dataMap.get(id);
-    if (!datum) return colorScale[0];
-    const idx = Math.round(colorIdx(datum.value));
-    return colorScale[Math.min(idx, colorScale.length - 1)];
-  }
+  const activateRegion =
+    onRegionClick || selectable
+      ? (i: number) => {
+          selection.toggle({ region: regions[i].id });
+          onRegionClick?.(regions[i].datum, regions[i].id);
+        }
+      : undefined;
+  const activateMarker =
+    onMarkerClick || selectable
+      ? (i: number) => {
+          selection.toggle({ marker: i });
+          onMarkerClick?.(markers[i], i);
+        }
+      : undefined;
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      let next = focusedRef.current;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown")
-        next = Math.min(next + 1, features.length - 1);
-      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = Math.max(next - 1, 0);
-      else return;
-      e.preventDefault();
-      focusedRef.current = next;
+  // Row 0: regions (Left/Right), row 1: markers (Up/Down switches rows).
+  const roving = useRovingFocus({
+    counts: [regions.length, markers.length],
+    itemKeys: HORIZONTAL_KEYS,
+    rowKeys: VERTICAL_KEYS,
+    onActivate:
+      activateRegion || activateMarker
+        ? (row, i) => (row === 0 ? activateRegion : activateMarker)?.(i)
+        : undefined,
+  });
+
+  const summary = labels.summary(
+    {
+      type: "map",
+      series: 1,
+      points: regions.length,
+      y: values.length ? [format(minVal), format(maxVal)] : undefined,
     },
-    [features.length],
+    n,
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
+  const mark = (
+    row: number,
+    i: number,
+    label: string,
+    value: string | undefined,
+    count: number,
+    sel: GeoSelection,
+    onActivate?: (i: number) => void,
+  ) => {
+    const selected = selection.isSelected(sel);
+    return markProps({
+      label: labels.mark(
+        { series: row ? labels.markers : undefined, x: label, y: value, index: i, count },
+        n,
+      ),
+      row,
+      item: i,
+      roving,
+      tooltip,
+      onActivate: onActivate && (() => onActivate(i)),
+      selected,
+      dimmed: selection.selected !== null && !selected,
+    });
+  };
 
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
-      <svg
-        className={styles.svg}
-        viewBox={`0 0 ${width} ${height}`}
-        role="img"
-        aria-label={ariaLabel}
-      >
-        {/* Regions */}
-        {features.map((f, i) => {
-          const id = String(f.id ?? f.properties?.name ?? i);
-          const datum = dataMap.get(id);
-          const label = datum?.label ?? f.properties?.name ?? id;
-          const tooltipContent = datum ? `${label}: ${datum.value}` : String(label);
-          const tip = handlers(tooltipContent);
-
-          // Handle both Polygon and MultiPolygon
+    <ChartFrame
+      {...frame}
+      labels={labels}
+      summary={summary}
+      plotRef={plotRef}
+      plotStyle={size.style}
+      width={size.width}
+      height={size.height}
+      svgClassName="raster-geo__svg"
+      selection={selection}
+      tooltip={tooltip}
+      legend={
+        data.length > 0 && (
+          <div className="raster-legend raster-geo__legend">
+            {legendLabel && <span>{legendLabel}</span>}
+            <span>{format(minVal)}</span>
+            <div
+              className="raster-geo__gradient"
+              style={{ background: `linear-gradient(to right, ${colorScale.join(", ")})` }}
+            />
+            <span>{format(maxVal)}</span>
+          </div>
+        )
+      }
+      table={{
+        caption: labels.tableCaption(frame.title),
+        headers: [labels.nameColumn, labels.typeColumn, labels.valueColumn],
+        rows: [
+          ...regions.map((r) => ({
+            key: `r-${r.id}`,
+            cells: [r.name, labels.region, r.datum ? format(r.datum.value) : labels.noData],
+          })),
+          ...markers.map((m, i) => ({
+            key: `m-${i}`,
+            cells: [m.label, labels.marker, m.value === undefined ? "" : format(m.value)],
+          })),
+        ],
+      }}
+    >
+      <g role="group" aria-label={labels.series(labels.regions, regions.length, n)}>
+        {regions.map(({ f, id, datum, name }, i) => {
           const coords: number[][][][] =
             f.geometry.type === "MultiPolygon"
               ? (f.geometry.coordinates as number[][][][])
               : [f.geometry.coordinates as number[][][]];
-
-          const pathD = coords.map((poly) => geoPath(poly, project, scale)).join(" ");
-
           return (
             <path
               key={id}
-              d={pathD}
-              fill={getColor(id)}
-              className={styles.region}
-              tabIndex={i === 0 ? 0 : -1}
-              role="img"
-              aria-label={tooltipContent}
-              aria-describedby={tip["aria-describedby"]}
-              data-clickable={onRegionClick ? "" : undefined}
-              onClick={onRegionClick ? () => onRegionClick(datum, id) : undefined}
-              onKeyDown={handleKeyDown}
-              onFocus={tip.onFocus}
-              onBlur={hide}
-              onMouseEnter={tip.onMouseEnter}
-              onMouseLeave={tip.onMouseLeave}
+              d={coords.map((poly) => geoPath(poly, project, scale)).join(" ")}
+              fill={colorOf(datum)}
+              className="raster-geo__region"
+              {...mark(
+                0,
+                i,
+                name,
+                datum ? format(datum.value) : labels.noData,
+                regions.length,
+                { region: id },
+                activateRegion,
+              )}
             />
           );
         })}
+      </g>
 
-        {/* Markers (bubble map) */}
-        {markers.map((m, i) => {
-          const [x, y] = project(m.lon, m.lat);
-          const tip = handlers(m.label);
-          return (
-            <circle
-              key={i}
-              cx={x * scale.scaleX + scale.offsetX}
-              cy={y * scale.scaleY + scale.offsetY}
-              r={m.size ?? 4}
-              fill={m.color ?? "var(--color-interactive)"}
-              className={styles.marker}
-              tabIndex={-1}
-              role="img"
-              aria-label={m.label}
-              aria-describedby={tip["aria-describedby"]}
-              data-clickable={onMarkerClick ? "" : undefined}
-              onClick={onMarkerClick ? () => onMarkerClick(m, i) : undefined}
-              onFocus={tip.onFocus}
-              onBlur={hide}
-              onMouseEnter={tip.onMouseEnter}
-              onMouseLeave={tip.onMouseLeave}
-            />
-          );
-        })}
-      </svg>
-
-      <ChartTooltip
-        id={tooltipId}
-        visible={tooltipProps.visible}
-        x={tooltipProps.x}
-        y={tooltipProps.y}
-        content={tooltipProps.content}
-      />
-
-      {/* Colour scale legend */}
-      {data.length > 0 && (
-        <div className={styles.legend}>
-          {legendLabel && <span>{legendLabel}</span>}
-          <span>{formatValue ? formatValue(minVal) : minVal}</span>
-          <div
-            className={styles.gradientBar}
-            style={{ background: `linear-gradient(to right, ${colorScale.join(", ")})` }}
-          />
-          <span>{formatValue ? formatValue(maxVal) : maxVal}</span>
-        </div>
+      {markers.length > 0 && (
+        <g role="group" aria-label={labels.series(labels.markers, markers.length, n)}>
+          {markers.map((m, i) => {
+            const [x, y] = project(m.lon, m.lat);
+            return (
+              <circle
+                key={i}
+                cx={x * scale.scaleX + scale.offsetX}
+                cy={y * scale.scaleY + scale.offsetY}
+                r={m.size ?? 4}
+                fill={m.color ?? seriesColor(0)}
+                className="raster-geo__marker"
+                {...mark(
+                  1,
+                  i,
+                  m.label,
+                  m.value === undefined ? undefined : format(m.value),
+                  markers.length,
+                  { marker: i },
+                  activateMarker,
+                )}
+              />
+            );
+          })}
+        </g>
       )}
-
-      {/* Hidden data table */}
-      <table className={styles.srOnly} aria-label={ariaLabel}>
-        <thead>
-          <tr>
-            <th>Region</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((d) => (
-            <tr key={d.id}>
-              <td>{d.label ?? d.id}</td>
-              <td>{d.value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    </ChartFrame>
   );
 }

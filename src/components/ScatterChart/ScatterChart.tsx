@@ -1,10 +1,17 @@
-import { useRef, useCallback, useImperativeHandle } from "react";
-import { extent, linearScale, ticks, labelSkip } from "../../utils/chart-math.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
+import { extent, linearScale, markerPath, ticks, labelSkip } from "../../utils/chart-math.js";
+import type { NumberFormat } from "../../utils/labels.js";
+import { seriesColor } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
-import { useContainerWidth } from "../../utils/use-container-width.js";
-import { ChartTooltip, useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import * as styles from "./ScatterChart.css.js";
+
+export type { ChartExportHandle };
+import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
+import type { PlotSizeOptions } from "../../utils/use-container-width.js";
+import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
+import { useSelection } from "../../utils/use-selection.js";
+import { ChartFrame } from "../shared/ChartFrame.js";
+import type { ChartFrameOptions } from "../shared/ChartFrame.js";
+import { ChartLegend } from "../shared/ChartLegend.js";
+import { markProps, useChart } from "../shared/use-chart.js";
 
 export type ScatterPoint = {
   x: number;
@@ -20,29 +27,26 @@ export type ScatterSeries = {
 
 type GridOption = "horizontal" | "vertical" | "both" | "none";
 
-type ScatterChartProps = {
-  /** Single series — pass an array of points. */
-  data?: ScatterPoint[];
-  /** Multi-series — pass named series. */
-  series?: ScatterSeries[];
-  xLabel?: string;
-  yLabel?: string;
-  grid?: GridOption;
-  formatValue?: (value: number) => string;
-  onPointClick?: (point: ScatterPoint, seriesIndex: number, pointIndex: number) => void;
-  height?: number;
-  exportRef?: React.Ref<ChartExportHandle>;
-  "aria-label": string;
-  className?: string;
-};
+export type ScatterPointIndex = { series: number; point: number };
 
-const DEFAULT_COLORS = [
-  "var(--color-interactive)",
-  "var(--color-success)",
-  "var(--color-danger)",
-  "var(--color-warning)",
-  "var(--color-inactive)",
-];
+export type ScatterChartProps = ChartFrameOptions &
+  PlotSizeOptions & {
+    /** Single series — pass an array of points. */
+    data?: ScatterPoint[];
+    /** Multi-series — pass named series. */
+    series?: ScatterSeries[];
+    xLabel?: string;
+    yLabel?: string;
+    grid?: GridOption;
+    /** Formats x and y values. Default: `Intl.NumberFormat(labels.locale)`. */
+    formatValue?: NumberFormat;
+    /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
+    onPointClick?: (point: ScatterPoint, seriesIndex: number, pointIndex: number) => void;
+    /** `point` is the index in the series' `data`. */
+    selectedIndex?: ScatterPointIndex | null;
+    onSelect?: (index: ScatterPointIndex | null) => void;
+    exportRef?: React.Ref<ChartExportHandle>;
+  };
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
 
@@ -52,32 +56,35 @@ export function ScatterChart({
   xLabel,
   yLabel,
   grid = "both",
-  formatValue = String,
+  formatValue,
   onPointClick,
-  height = 240,
+  selectedIndex,
+  onSelect,
+  height,
+  aspectRatio,
   exportRef,
-  "aria-label": ariaLabel,
-  className,
+  labels: labelOverrides,
+  ...frame
 }: ScatterChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const exportHandle = useChartExport(containerRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const focusedRef = useRef({ series: 0, point: 0 });
-  const pointsRef = useRef<Map<string, SVGCircleElement>>(new Map());
-  const { tooltipId, tooltipProps, hide, handlers } = useChartTooltip();
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const selection = useSelection<ScatterPointIndex>(selectedIndex, onSelect, labels);
+  const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
 
-  // Normalise single data to a series
   const series: ScatterSeries[] = seriesProp ?? (data ? [{ name: "Data", data }] : []);
+  const named = !!seriesProp;
   const allPoints = series.flatMap((s) => s.data);
+  const hasPointLabels = allPoints.some((p) => p.label);
+  // Keyboard order follows x, so Left/Right match the drawing.
+  const order = series.map((s) =>
+    s.data.map((_, i) => i).sort((a, b) => s.data[a].x - s.data[b].x),
+  );
 
-  const chartWidth = useContainerWidth(containerRef, 720);
-  const plotWidth = chartWidth - MARGIN.left - MARGIN.right;
-  const plotHeight = height - MARGIN.top - MARGIN.bottom;
+  const size = plotSize(useContainerWidth(plotRef, 720), { height, aspectRatio }, 240);
+  const plotWidth = size.width - MARGIN.left - MARGIN.right;
+  const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
 
-  const xValues = allPoints.map((p) => p.x);
-  const yValues = allPoints.map((p) => p.y);
-  const [xMin, xMax] = xValues.length ? extent(xValues) : [0, 1];
-  const [yMin, yMax] = yValues.length ? extent(yValues) : [0, 1];
+  const [xMin, xMax] = allPoints.length ? extent(allPoints.map((p) => p.x)) : [0, 1];
+  const [yMin, yMax] = allPoints.length ? extent(allPoints.map((p) => p.y)) : [0, 1];
 
   const xScale = linearScale([xMin, xMax], [0, plotWidth]);
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
@@ -88,190 +95,192 @@ export function ScatterChart({
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";
 
-  const handleKeyDown = useCallback(
-    (si: number, pi: number, e: React.KeyboardEvent) => {
-      let nextSi = si;
-      let nextPi = pi;
-      const len = series[si]?.data.length ?? 0;
+  const activate = interactive
+    ? (si: number, item: number) => {
+        const pi = order[si][item];
+        selection.toggle({ series: si, point: pi });
+        onPointClick?.(series[si].data[pi], si, pi);
+      }
+    : undefined;
 
-      if (e.key === "ArrowRight") nextPi = Math.min(pi + 1, len - 1);
-      else if (e.key === "ArrowLeft") nextPi = Math.max(pi - 1, 0);
-      else if (e.key === "ArrowDown") nextSi = Math.min(si + 1, series.length - 1);
-      else if (e.key === "ArrowUp") nextSi = Math.max(si - 1, 0);
-      else return;
+  const roving = useRovingFocus({
+    counts: series.map((s) => s.data.length),
+    itemKeys: HORIZONTAL_KEYS,
+    rowKeys: VERTICAL_KEYS,
+    onActivate: activate,
+  });
 
-      e.preventDefault();
-      focusedRef.current = { series: nextSi, point: nextPi };
-      pointsRef.current.get(`${nextSi}-${nextPi}`)?.focus();
+  const summary = labels.summary(
+    {
+      type: "scatter",
+      series: series.length,
+      points: allPoints.length,
+      x: allPoints.length ? [format(xMin), format(xMax)] : undefined,
+      y: allPoints.length ? [format(yMin), format(yMax)] : undefined,
     },
-    [series],
+    n,
   );
 
-  const cls = [styles.wrapper, className].filter(Boolean).join(" ");
-
   return (
-    <div ref={containerRef} className={cls} data-chart-container style={{ position: "relative" }}>
-      <svg
-        className={styles.svg}
-        width={chartWidth}
-        height={height}
-        role="img"
-        aria-label={ariaLabel}
-      >
-        <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
-          {/* Grid + Y ticks */}
-          {yTicks.map((tick) => (
-            <g key={`y-${tick}`} transform={`translate(0, ${yScale(tick)})`}>
-              {showHGrid && <line x1={0} x2={plotWidth} className={styles.gridLine} />}
-              <text x={-8} dy="0.35em" textAnchor="end" className={styles.tickLabel}>
-                {formatValue(tick)}
-              </text>
-            </g>
-          ))}
-
-          {/* X ticks + vertical grid */}
-          {xTicks.map((tick, i) => (
-            <g key={`x-${tick}`}>
-              {showVGrid && (
-                <line
-                  x1={xScale(tick)}
-                  x2={xScale(tick)}
-                  y1={0}
-                  y2={plotHeight}
-                  className={styles.gridLine}
-                />
-              )}
-              {i % xTickSkip === 0 && (
-                <text
-                  x={xScale(tick)}
-                  y={plotHeight + 16}
-                  textAnchor="middle"
-                  className={styles.tickLabel}
-                >
-                  {formatValue(tick)}
-                </text>
-              )}
-            </g>
-          ))}
-
-          {/* Axes */}
-          <line x1={0} x2={plotWidth} y1={plotHeight} y2={plotHeight} className={styles.axisLine} />
-          <line x1={0} x2={0} y1={0} y2={plotHeight} className={styles.axisLine} />
-
-          {/* Axis labels */}
-          {xLabel && (
-            <text
-              x={plotWidth / 2}
-              y={plotHeight + 32}
-              textAnchor="middle"
-              className={styles.axisTitle}
-            >
-              {xLabel}
+    <ChartFrame
+      {...frame}
+      labels={labels}
+      summary={summary}
+      plotRef={plotRef}
+      plotStyle={size.style}
+      width={size.width}
+      height={size.height}
+      selection={selection}
+      tooltip={tooltip}
+      legend={
+        series.length > 1 && (
+          <ChartLegend
+            swatch="dot"
+            marker
+            items={series.map((s, i) => ({ label: s.name, color: s.color ?? seriesColor(i) }))}
+          />
+        )
+      }
+      table={{
+        caption: labels.tableCaption(frame.title),
+        // A point may have no label and a multi-series row no unique key, so
+        // no cell is guaranteed to identify its row.
+        rowHeaders: false,
+        headers: [
+          ...(series.length > 1 ? [labels.seriesColumn] : []),
+          ...(hasPointLabels ? [labels.labelColumn] : []),
+          xLabel ?? labels.xColumn,
+          yLabel ?? labels.yColumn,
+        ],
+        rows: series.flatMap((s, si) =>
+          s.data.map((p, i) => ({
+            key: `${si}-${i}`,
+            cells: [
+              ...(series.length > 1 ? [s.name] : []),
+              ...(hasPointLabels ? [p.label ?? ""] : []),
+              format(p.x),
+              format(p.y),
+            ],
+          })),
+        ),
+      }}
+    >
+      <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
+        {yTicks.map((tick) => (
+          <g key={`y-${tick}`} transform={`translate(0, ${yScale(tick)})`}>
+            {showHGrid && <line x1={0} x2={plotWidth} className="raster-chart__grid" />}
+            <text x={-8} dy="0.35em" textAnchor="end" className="raster-chart__tick">
+              {format(tick)}
             </text>
-          )}
-          {yLabel && (
-            <text
-              x={-plotHeight / 2}
-              y={-38}
-              textAnchor="middle"
-              transform="rotate(-90)"
-              className={styles.axisTitle}
-            >
-              {yLabel}
-            </text>
-          )}
+          </g>
+        ))}
 
-          {/* Points */}
-          {series.map((s, si) => {
-            const color = s.color ?? DEFAULT_COLORS[si % DEFAULT_COLORS.length];
-            return (
-              <g key={s.name} role="group" aria-label={s.name}>
-                {s.data.map((p, pi) => {
-                  const tooltipContent = p.label
-                    ? `${s.name}: ${p.label} (${formatValue(p.x)}, ${formatValue(p.y)})`
-                    : `${s.name}: (${formatValue(p.x)}, ${formatValue(p.y)})`;
-                  const tip = handlers(tooltipContent);
-                  return (
-                    <circle
-                      key={pi}
-                      ref={(el) => {
-                        if (el) pointsRef.current.set(`${si}-${pi}`, el);
-                      }}
-                      cx={xScale(p.x)}
-                      cy={yScale(p.y)}
-                      r={4}
-                      fill={color}
-                      className={styles.point}
-                      style={{ animationDelay: `${(si * s.data.length + pi) * 20}ms` }}
-                      tabIndex={si === 0 && pi === 0 ? 0 : -1}
-                      role="img"
-                      aria-label={tooltipContent}
-                      aria-describedby={tip["aria-describedby"]}
-                      data-clickable={onPointClick ? "" : undefined}
-                      onClick={onPointClick ? () => onPointClick(p, si, pi) : undefined}
-                      onKeyDown={(e) => handleKeyDown(si, pi, e)}
-                      onFocus={(e) => {
-                        focusedRef.current = { series: si, point: pi };
-                        tip.onFocus(e);
-                      }}
-                      onBlur={hide}
-                      onMouseEnter={tip.onMouseEnter}
-                      onMouseLeave={tip.onMouseLeave}
-                    />
-                  );
-                })}
-              </g>
-            );
-          })}
-        </g>
-      </svg>
-
-      <ChartTooltip
-        id={tooltipId}
-        visible={tooltipProps.visible}
-        x={tooltipProps.x}
-        y={tooltipProps.y}
-        content={tooltipProps.content}
-      />
-
-      {/* Legend for multi-series */}
-      {series.length > 1 && (
-        <div className={styles.legend}>
-          {series.map((s, i) => (
-            <span key={s.name} className={styles.legendItem}>
-              <span
-                className={styles.legendDot}
-                style={{ background: s.color ?? DEFAULT_COLORS[i % DEFAULT_COLORS.length] }}
+        {xTicks.map((tick, i) => (
+          <g key={`x-${tick}`}>
+            {showVGrid && (
+              <line
+                x1={xScale(tick)}
+                x2={xScale(tick)}
+                y1={0}
+                y2={plotHeight}
+                className="raster-chart__grid"
               />
-              {s.name}
-            </span>
-          ))}
-        </div>
-      )}
+            )}
+            {i % xTickSkip === 0 && (
+              <text
+                x={xScale(tick)}
+                y={plotHeight + 16}
+                textAnchor="middle"
+                className="raster-chart__tick"
+              >
+                {format(tick)}
+              </text>
+            )}
+          </g>
+        ))}
 
-      {/* Hidden data table */}
-      <table className={styles.srOnly} aria-label={ariaLabel}>
-        <thead>
-          <tr>
-            {series.length > 1 && <th>Series</th>}
-            {allPoints.some((p) => p.label) && <th>Label</th>}
-            <th>{xLabel ?? "X"}</th>
-            <th>{yLabel ?? "Y"}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {series.flatMap((s) =>
-            s.data.map((p, i) => (
-              <tr key={`${s.name}-${i}`}>
-                {series.length > 1 && <td>{s.name}</td>}
-                {allPoints.some((pt) => pt.label) && <td>{p.label ?? ""}</td>}
-                <td>{formatValue(p.x)}</td>
-                <td>{formatValue(p.y)}</td>
-              </tr>
-            )),
-          )}
-        </tbody>
-      </table>
-    </div>
+        <line
+          x1={0}
+          x2={plotWidth}
+          y1={plotHeight}
+          y2={plotHeight}
+          className="raster-chart__axis"
+        />
+        <line x1={0} x2={0} y1={0} y2={plotHeight} className="raster-chart__axis" />
+
+        {xLabel && (
+          <text
+            x={plotWidth / 2}
+            y={plotHeight + 32}
+            textAnchor="middle"
+            className="raster-chart__tick raster-chart__axis-title"
+          >
+            {xLabel}
+          </text>
+        )}
+        {yLabel && (
+          <text
+            x={-plotHeight / 2}
+            y={-38}
+            textAnchor="middle"
+            transform="rotate(-90)"
+            className="raster-chart__tick raster-chart__axis-title"
+          >
+            {yLabel}
+          </text>
+        )}
+
+        {series.map((s, si) => {
+          const color = s.color ?? seriesColor(si);
+          const points = order[si].map((pi, item) => {
+            const p = s.data[pi];
+            const x = format(p.x);
+            const selected = selection.isSelected({ series: si, point: pi });
+            return (
+              <path
+                key={pi}
+                d={markerPath(si, xScale(p.x), yScale(p.y), 4)}
+                fill={color}
+                className="raster-scatter__point"
+                style={{ animationDelay: `${Math.min(pi, 50) * 20}ms` }}
+                {...markProps({
+                  label: labels.mark(
+                    {
+                      series: named ? s.name : undefined,
+                      x: p.label ? `${p.label} (${x})` : x,
+                      y: format(p.y),
+                      index: item,
+                      count: s.data.length,
+                    },
+                    n,
+                  ),
+                  row: si,
+                  item,
+                  roving,
+                  tooltip,
+                  onActivate: activate,
+                  selected,
+                  dimmed: selection.selected !== null && !selected,
+                })}
+              />
+            );
+          });
+          return named ? (
+            <g
+              key={si}
+              role="group"
+              aria-label={labels.series(s.name, s.data.length, n)}
+              data-series={(si % 8) + 1}
+            >
+              {points}
+            </g>
+          ) : (
+            <g key={si} data-series={1}>
+              {points}
+            </g>
+          );
+        })}
+      </g>
+    </ChartFrame>
   );
 }

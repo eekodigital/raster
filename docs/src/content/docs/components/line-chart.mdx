@@ -8,12 +8,13 @@ import {
   LineChartBasicDemo,
   LineChartMultiDemo,
   LineChartAreaDemo,
+  LineChartSelectDemo,
 } from "../../../components/LineChartDemo.tsx";
 
 ## Basic
 
 <Example
-  code={`import { LineChart } from '@eekodigital/raster';\n\n<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  labels={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  aria-label="Assessment progress over time"\n/>`}
+  code={`import { LineChart } from '@eekodigital/raster';\n\n<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  categories={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  title="Assessment progress over time"\n/>`}
 >
   <LineChartBasicDemo client:load />
 </Example>
@@ -23,7 +24,7 @@ import {
 Pass multiple series to compare trends. A legend renders automatically.
 
 <Example
-  code={`<LineChart\n  series={[\n    { name: 'Pass', data: [0, 5, 12, 20, 30, 42], color: 'var(--color-success)' },\n    { name: 'Fail', data: [0, 1, 3, 5, 6, 8], color: 'var(--color-danger)' },\n    { name: 'N/A', data: [0, 2, 4, 7, 10, 12], color: 'var(--color-inactive)' },\n  ]}\n  labels={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']}\n  aria-label="Results trend by status"\n/>`}
+  code={`<LineChart\n  series={[\n    { name: 'Pass', data: [0, 5, 12, 20, 30, 42], color: 'var(--demo-good)' },\n    { name: 'Fail', data: [0, 1, 3, 5, 6, 8], color: 'var(--demo-bad)' },\n    { name: 'N/A', data: [0, 2, 4, 7, 10, 12], color: 'var(--demo-neutral)' },\n  ]}\n  categories={['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']}\n  title="Results trend by status"\n/>`}
 >
   <LineChartMultiDemo client:load />
 </Example>
@@ -33,19 +34,59 @@ Pass multiple series to compare trends. A legend renders automatically.
 Set `area` to fill below the line.
 
 <Example
-  code={`<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  labels={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  area\n  aria-label="Assessment progress (area)"\n/>`}
+  code={`<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  categories={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  area\n  title="Assessment progress (area)"\n/>`}
 >
   <LineChartAreaDemo client:load />
 </Example>
 
+## Selection
+
+Pass `onSelect` (and optionally `selectedIndex`) to make points toggle buttons. Enter or Space toggles the focused point; Escape clears the selection.
+
+<Example
+  code={`const [selected, setSelected] = useState<LinePointIndex | null>(null);\n\n<LineChart\n  series={series}\n  categories={months}\n  title="Results trend (select a point)"\n  aspectRatio={3}\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
+>
+  <LineChartSelectDemo client:load />
+</Example>
+
+## Axis labels
+
+Keep `categories` complete: they name each point and label the table rows. To thin or shorten the x-axis, use `xTickFilter` and `formatXTick`, which only affect the ticks:
+
+```tsx
+<LineChart
+  series={[{ name: "Visitors", data: visits }]}
+  categories={days} // "2026-09-01" … "2026-09-30"
+  xTickFilter={(i) => i % 7 === 0}
+  formatXTick={(day) => day.slice(5)} // "09-01"
+  title="Visitors in September"
+/>
+```
+
+Only the first and last categories anchor to the plot edges; every other tick centres on its point.
+
 ## Accessibility
 
-- SVG has `role="img"` with `aria-label`
-- Each series is a `role="region"` with the series name
-- Data points are focusable with series name, label, and value announced
-- Left/Right arrows navigate within a series; Up/Down switch between series
-- A hidden `<table>` provides the full data for screen readers
-- Legend rendered as HTML (not SVG) for proper semantics
+- A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
+- The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
+- Each series is a `role="group"` named `{series}, {n} points`.
+- Each point is labelled `{series}, {x}: {y}, 3 of 12`. With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
+- Points use a different marker shape per series (circle, square, triangle…) as well as colour.
+- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
+
+| Key               | Action                               |
+| ----------------- | ------------------------------------ |
+| ← / →             | Previous / next mark                 |
+| Home / End        | First / last mark                    |
+| PageUp / PageDown | Back / forward 10 marks              |
+| ↑ / ↓             | Previous / next series               |
+| Tab               | Leave the chart (one tab stop)       |
+| Enter / Space     | Toggle selection (interactive marks) |
+| Escape            | Hide the tooltip and clear selection |
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -67,17 +108,24 @@ Set `area` to fill below the line.
         <code>LineSeries[]</code>
       </td>
       <td>—</td>
-      <td>Array of {`{ name, data: number[], color? }`}</td>
+      <td>
+        Required. <code>&#123; name, data: number[], color? &#125;</code>.
+      </td>
     </tr>
     <tr>
       <td>
-        <code>labels</code>
+        <code>categories</code>
       </td>
       <td>
         <code>string[]</code>
       </td>
       <td>—</td>
-      <td>X-axis labels (one per data point)</td>
+      <td>
+        Required. X-axis categories, one per point. They name each point and label the table rows,
+        so keep them complete and thin the axis with <code>xTickFilter</code> or{" "}
+        <code>formatXTick</code>. (A <code>""</code> category still hides its tick, but also leaves
+        that point without an x value in its name.)
+      </td>
     </tr>
     <tr>
       <td>
@@ -89,7 +137,118 @@ Set `area` to fill below the line.
       <td>
         <code>false</code>
       </td>
-      <td>Fill below the line</td>
+      <td>Fill below the line.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>stacked</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Stack series.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>curve</code>
+      </td>
+      <td>
+        <code>"linear" | "smooth"</code>
+      </td>
+      <td>
+        <code>"linear"</code>
+      </td>
+      <td>Line interpolation.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>xLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>X-axis title.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>yLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Y-axis title.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>grid</code>
+      </td>
+      <td>
+        <code>"horizontal" | "vertical" | "both" | "none"</code>
+      </td>
+      <td>
+        <code>"horizontal"</code>
+      </td>
+      <td>Grid lines.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>Intl.NumberFormat</code>
+      </td>
+      <td>
+        Formats values in ticks, marks and the table. Defaults to{" "}
+        <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>xLabelMinSpacing</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>30</code>
+      </td>
+      <td>
+        Minimum px between x labels before they thin out. Thinning keeps the first and last
+        categories.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>xTickFilter</code>
+      </td>
+      <td>
+        <code>(index: number, category: string) =&gt; boolean</code>
+      </td>
+      <td>—</td>
+      <td>
+        Which x ticks to label. Replaces the automatic thinning. Points and the table keep every
+        category.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatXTick</code>
+      </td>
+      <td>
+        <code>(category: string, index: number) =&gt; string</code>
+      </td>
+      <td>—</td>
+      <td>
+        Text for an x tick, e.g. a short date. Return <code>""</code> to hide it.
+      </td>
     </tr>
     <tr>
       <td>
@@ -101,17 +260,109 @@ Set `area` to fill below the line.
       <td>
         <code>200</code>
       </td>
-      <td>Chart height in pixels</td>
+      <td>Plot height in px.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>aspectRatio</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>
+        Width ÷ height, instead of <code>height</code>. The plot box is sized in CSS either way, so
+        server-rendered and hydrated layouts match.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>onPointClick</code>
+      </td>
+      <td>
+        <code>(series, point, value) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes points buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>selectedIndex</code>
+      </td>
+      <td>
+        <code>&#123; series, point &#125; | null</code>
+      </td>
+      <td>—</td>
+      <td>Controlled selection.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSelect</code>
+      </td>
+      <td>
+        <code>(index | null) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes points buttons; called on toggle and Escape.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required. Describes the chart.</td>
+      <td>Required. Visible title: names the figure and captions the data table.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hideTitle</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Hide the title visually. It still names the chart for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>
+        Generated strings and the number locale. See{" "}
+        <a href="/guides/accessibility/#labels">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dataTable</code>
+      </td>
+      <td>
+        <code>"disclosure" | "visually-hidden"</code>
+      </td>
+      <td>
+        <code>"disclosure"</code>
+      </td>
+      <td>How the data table is offered.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>
+        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -121,7 +372,7 @@ Set `area` to fill below the line.
         <code>string</code>
       </td>
       <td>—</td>
-      <td></td>
+      <td>Class on the figure.</td>
     </tr>
   </tbody>
 </table>

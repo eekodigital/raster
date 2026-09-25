@@ -1,0 +1,46 @@
+/*
+ * Docs site → raster chart contract.
+ *
+ * This is the pattern an app follows: map your own tokens (here, Starlight's
+ * --sl-color-*) onto --raster-* once, where the theme switches. Series colours
+ * are left unset so the docs show raster's validated default palette.
+ */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="high-contrast"] {
+  color-scheme: light;
+}
+
+:root {
+  --raster-text: var(--sl-color-white);
+  --raster-text-subtle: var(--sl-color-gray-2);
+  --raster-surface: var(--sl-color-gray-7);
+  --raster-grid: var(--sl-color-gray-5);
+  --raster-axis: var(--sl-color-gray-3);
+  --raster-focus: var(--sl-color-accent);
+  --raster-selected: var(--sl-color-white);
+  --raster-tooltip-bg: var(--sl-color-white);
+  --raster-tooltip-text: var(--sl-color-black);
+
+  /* Demo-only status colours used by the examples (not part of raster). */
+  --demo-good: light-dark(#00791e, #93d495);
+  --demo-bad: light-dark(#b71824, #ffa59e);
+  --demo-warn: light-dark(#865900, #ebb76c);
+  --demo-neutral: light-dark(#696969, #d4d4d4);
+  --demo-accent: light-dark(#0070b3, #87c8ff);
+  --demo-muted: light-dark(#c1c1c1, #696969);
+}
+
+:root[data-theme="high-contrast"] {
+  --raster-text-subtle: var(--sl-color-white);
+  --raster-grid: var(--sl-color-gray-4);
+  --raster-axis: var(--sl-color-white);
+}

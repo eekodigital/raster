@@ -1,103 +1,137 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
+import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { DonutChart } from "./DonutChart.js";
 
 const DATA = [
-  { label: "Pass", value: 12, color: "var(--color-success)" },
-  { label: "Fail", value: 3, color: "var(--color-danger)" },
-  { label: "N/A", value: 5, color: "var(--color-inactive)" },
+  { label: "Pass", value: 60, color: "green" },
+  { label: "Fail", value: 30, color: "red" },
+  { label: "N/A", value: 10, color: "grey" },
 ];
 
-describe("DonutChart", () => {
-  it('renders an SVG with role="img"', () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    const svg = screen.getByRole("img", { name: "Test donut" });
-    expect(svg.tagName.toLowerCase()).toBe("svg");
+describe("DonutChart structure", () => {
+  it("is a figure with a title, summary and chart group", () => {
+    const { container } = render(<DonutChart data={DATA} title="Results" />);
+    const figure = screen.getByRole("figure", { name: "Results" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Donut chart, 3 points. Values from 10 to 60.",
+    );
+    expect(container.querySelector("svg")?.getAttribute("role")).toBe("group");
   });
 
-  it("renders a segment for each data point", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    expect(screen.getByRole("img", { name: /Pass: 12/ })).toBeDefined();
-    expect(screen.getByRole("img", { name: /Fail: 3/ })).toBeDefined();
-    expect(screen.getByRole("img", { name: /N\/A: 5/ })).toBeDefined();
+  it("labels static segments with value, percentage and position", () => {
+    render(<DonutChart data={DATA} title="R" />);
+    expect(screen.getAllByRole("img").map((el) => el.getAttribute("aria-label"))).toEqual([
+      "Pass: 60 (60%), 1 of 3",
+      "Fail: 30 (30%), 2 of 3",
+      "N/A: 10 (10%), 3 of 3",
+    ]);
   });
 
-  it("includes percentage in segment labels", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    // 12/20 = 60%
-    expect(screen.getByRole("img", { name: /60%/ })).toBeDefined();
+  it("skips zero-value segments in the drawing and the count, but keeps them in the table", () => {
+    const data = [...DATA, { label: "Empty", value: 0, color: "blue" }];
+    render(<DonutChart data={data} title="R" />);
+    expect(screen.getAllByRole("img")).toHaveLength(3);
+    screen.getByRole("img", { name: "N/A: 10 (10%), 3 of 3" });
+    expect(tableText(openTable()).at(-1)).toEqual(["Empty", "0", "0%"]);
   });
 
-  it("renders centre content", () => {
-    render(
-      <DonutChart data={DATA} aria-label="Test donut">
-        <span>20 total</span>
+  it("renders centre content and a legend", () => {
+    const { container } = render(
+      <DonutChart data={DATA} title="R" showLegend>
+        <strong>100</strong>
       </DonutChart>,
     );
-    expect(screen.getByText("20 total")).toBeDefined();
+    expect(container.querySelector(".raster-donut__centre")?.textContent).toBe("100");
+    expect(container.querySelectorAll(".raster-legend__swatch")).toHaveLength(3);
   });
 
-  it("renders a hidden data table", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    const table = screen.getByRole("table", { name: "Test donut" });
-    expect(table).toBeDefined();
+  it("puts the draw-in animation in CSS, driven by custom properties", () => {
+    render(<DonutChart data={DATA} title="R" />);
+    const seg = screen.getByRole("img", { name: /^Fail/ }) as unknown as SVGElement;
+    expect(seg.style.animation).toBe("");
+    expect(seg.style.getPropertyValue("--donut-delay")).toMatch(/ms$/);
+    expect(seg.style.getPropertyValue("--donut-duration")).toMatch(/ms$/);
   });
 
-  it("first segment is focusable", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    const first = screen.getByRole("img", { name: /Pass: 12/ });
-    expect(first.getAttribute("tabindex")).toBe("0");
+  it("has a data table with formatted values and percentages", () => {
+    render(<DonutChart data={DATA} title="Results" formatValue={(v) => `${v} items`} />);
+    const table = openTable();
+    expect(screen.getByRole("table", { name: "Data for Results" })).toBe(table);
+    expect(tableText(table)).toEqual([
+      ["Category", "Value", "Percentage"],
+      ["Pass", "60 items", "60%"],
+      ["Fail", "30 items", "30%"],
+      ["N/A", "10 items", "10%"],
+    ]);
+  });
+});
+
+describe("DonutChart sizing", () => {
+  it("has a fixed size when given one", () => {
+    const { container } = render(<DonutChart data={DATA} title="R" size={200} />);
+    const plot = container.querySelector<HTMLElement>(".raster-chart__plot")!;
+    expect(plot.style.width).toBe("200px");
+    expect(plot.style.height).toBe("200px");
+    expect(container.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 200 200");
   });
 
-  it("skips zero-value segments", () => {
-    const dataWithZero = [
-      { label: "A", value: 10, color: "red" },
-      { label: "B", value: 0, color: "blue" },
-    ];
-    render(<DonutChart data={dataWithZero} aria-label="Test" />);
-    expect(screen.queryByRole("img", { name: /B: 0/ })).toBeNull();
+  it("otherwise fills its container as a square", () => {
+    const { container } = render(<DonutChart data={DATA} title="R" />);
+    const plot = container.querySelector<HTMLElement>(".raster-chart__plot")!;
+    expect(plot.style.aspectRatio).toMatch(/^1/);
+    expect(plot.style.width).toBe("");
+  });
+});
+
+describe("DonutChart keyboard and selection", () => {
+  it("moves round the ring with any arrow, wrapping, and Home/End", () => {
+    render(<DonutChart data={DATA} title="R" />);
+    expect(tabStops()).toEqual(["Pass: 60 (60%), 1 of 3"]);
+    const seg = (n: RegExp) => screen.getByRole("img", { name: n });
+    press(seg(/^Pass/), "ArrowRight");
+    expect(focusedName()).toMatch(/^Fail/);
+    press(seg(/^Fail/), "ArrowDown");
+    expect(focusedName()).toMatch(/^N\/A/);
+    press(seg(/^N\/A/), "ArrowRight");
+    expect(focusedName()).toMatch(/^Pass/);
+    press(seg(/^Pass/), "ArrowUp");
+    expect(focusedName()).toMatch(/^N\/A/);
+    press(seg(/^N\/A/), "Home");
+    expect(focusedName()).toMatch(/^Pass/);
+    press(seg(/^Pass/), "End");
+    expect(focusedName()).toMatch(/^N\/A/);
   });
 
-  it("renders legend when showLegend is true", () => {
-    render(<DonutChart data={DATA} showLegend aria-label="Test donut" />);
-    // Each label appears in both the hidden data table and the legend
-    expect(screen.getAllByText("Pass").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText("Fail").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText("N/A").length).toBeGreaterThanOrEqual(2);
+  it("toggles with click, Enter and Space; Escape clears within the chart", () => {
+    const onSegmentClick = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <DonutChart data={DATA} title="R" onSegmentClick={onSegmentClick} onSelect={onSelect} />,
+    );
+    const fail = screen.getByRole("button", { name: /^Fail/ });
+    fireEvent.click(fail);
+    expect(onSegmentClick).toHaveBeenCalledWith(DATA[1], 1);
+    expect(onSelect).toHaveBeenCalledWith(1);
+    expect(fail.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: /^Pass/ }).hasAttribute("data-dimmed")).toBe(true);
+    press(fail, "Enter");
+    expect(fail.getAttribute("aria-pressed")).toBe("false");
+    press(fail, " ");
+    press(fail, "Escape");
+    expect(fail.getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByRole("status").textContent).toBe("Selection cleared");
   });
+});
 
-  it("hidden data table contains all data values", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    const table = screen.getByRole("table", { name: "Test donut" });
-    expect(table.textContent).toContain("12");
-    expect(table.textContent).toContain("3");
-    expect(table.textContent).toContain("5");
-    expect(table.textContent).toContain("60%");
-    expect(table.textContent).toContain("15%");
-    expect(table.textContent).toContain("25%");
-  });
-
-  it("ArrowRight navigates to the next segment", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    const first = screen.getByRole("img", { name: /Pass: 12/ });
-    first.focus();
-    fireEvent.keyDown(first, { key: "ArrowRight" });
-    // The second segment should now have focus
-    const second = screen.getByRole("img", { name: /Fail: 3/ });
-    expect(document.activeElement).toBe(second);
-  });
-
-  it("segment click fires onSegmentClick with correct datum", () => {
-    const onClick = vi.fn();
-    render(<DonutChart data={DATA} aria-label="Test donut" onSegmentClick={onClick} />);
-    const segment = screen.getByRole("img", { name: /Fail: 3/ });
-    fireEvent.click(segment);
-    expect(onClick).toHaveBeenCalledWith(DATA[1], 1);
-  });
-
-  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
-    render(<DonutChart data={DATA} aria-label="Test donut" />);
-    const table = screen.getByRole("table", { name: "Test donut" });
-    expect(table.className).toMatch(/srOnly/);
+describe("DonutChart axe", () => {
+  it("has no violations, static and interactive", async () => {
+    const { container, unmount } = render(<DonutChart data={DATA} title="R" showLegend />);
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
+    unmount();
+    const { container: c2 } = render(<DonutChart data={DATA} title="R" onSelect={() => {}} />);
+    expect(await axe(c2)).toHaveNoViolations();
   });
 });

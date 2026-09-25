@@ -4,3 +4,6 @@ dist
 .DS_Store
 coverage
 docs/.astro
+docs/test-results
+docs/playwright-report
+.turbo

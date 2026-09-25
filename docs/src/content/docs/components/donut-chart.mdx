@@ -11,7 +11,7 @@ import { DonutChartBasicDemo, DonutChartSmallDemo } from "../../../components/Do
 Each datum has a `label`, `value`, and `color`. Children render in the centre.
 
 <Example
-  code={`import { DonutChart } from '@eekodigital/raster';\n\n<DonutChart\n  data={[\n    { label: 'Pass', value: 42, color: 'var(--color-success)' },\n    { label: 'Fail', value: 8, color: 'var(--color-danger)' },\n    { label: 'N/A', value: 12, color: 'var(--color-inactive)' },\n    { label: 'To do', value: 24, color: 'var(--color-warning)' },\n  ]}\n  aria-label="Conformance summary"\n>\n  <strong>86</strong>\n  <span>criteria</span>\n</DonutChart>`}
+  code={`import { DonutChart } from '@eekodigital/raster';\n\n<DonutChart\n  data={[\n    { label: 'Pass', value: 42, color: 'var(--demo-good)' },\n    { label: 'Fail', value: 8, color: 'var(--demo-bad)' },\n    { label: 'N/A', value: 12, color: 'var(--demo-neutral)' },\n    { label: 'To do', value: 24, color: 'var(--demo-warn)' },\n  ]}\n  title="Conformance summary"\n>\n  <strong>86</strong>\n  <span>criteria</span>\n</DonutChart>`}
 >
   <DonutChartBasicDemo client:load />
 </Example>
@@ -21,18 +21,30 @@ Each datum has a `label`, `value`, and `color`. Children render in the centre.
 Use smaller `size` and `thickness` for inline progress indicators.
 
 <Example
-  code={`<DonutChart\n  data={[\n    { label: 'Complete', value: 75, color: 'var(--color-success)' },\n    { label: 'Remaining', value: 25, color: 'var(--color-border)' },\n  ]}\n  size={80}\n  thickness={10}\n  aria-label="75% complete"\n>\n  <strong>75%</strong>\n</DonutChart>`}
+  code={`<DonutChart\n  data={[\n    { label: 'Complete', value: 75, color: 'var(--demo-good)' },\n    { label: 'Remaining', value: 25, color: 'var(--demo-muted)' },\n  ]}\n  size={80}\n  thickness={10}\n  title="75% complete"\n>\n  <strong>75%</strong>\n</DonutChart>`}
 >
   <DonutChartSmallDemo client:load />
 </Example>
 
 ## Accessibility
 
-- SVG has `role="img"` with `aria-label`
-- Each segment is focusable with label, value, and percentage announced
-- Arrow keys navigate between segments (wraps around)
-- A hidden `<table>` provides the data with percentages for screen readers
-- Zero-value segments are skipped (not rendered or focusable)
+- A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
+- The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
+- Each segment is labelled `{label}: {value} ({percent}), 2 of 4`. Zero-value segments are skipped. With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
+- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
+- The draw-in animation is a CSS class, so `prefers-reduced-motion` switches it off.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
+
+| Key           | Action                               |
+| ------------- | ------------------------------------ |
+| ← → ↑ ↓       | Previous / next segment (wraps)      |
+| Home / End    | First / last segment                 |
+| Tab           | Leave the chart                      |
+| Enter / Space | Toggle selection (interactive marks) |
+| Escape        | Hide the tooltip and clear selection |
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -55,7 +67,7 @@ Use smaller `size` and `thickness` for inline progress indicators.
       </td>
       <td>—</td>
       <td>
-        Array of <code>{`{ label, value, color }`}</code>
+        Required. <code>&#123; label, value, color &#125;</code>.
       </td>
     </tr>
     <tr>
@@ -65,10 +77,8 @@ Use smaller `size` and `thickness` for inline progress indicators.
       <td>
         <code>number</code>
       </td>
-      <td>
-        <code>160</code>
-      </td>
-      <td>Diameter in pixels</td>
+      <td>—</td>
+      <td>Fixed diameter in px. Omit to fill the container's width (square).</td>
     </tr>
     <tr>
       <td>
@@ -80,7 +90,7 @@ Use smaller `size` and `thickness` for inline progress indicators.
       <td>
         <code>24</code>
       </td>
-      <td>Ring thickness in pixels</td>
+      <td>Ring thickness in px.</td>
     </tr>
     <tr>
       <td>
@@ -90,17 +100,123 @@ Use smaller `size` and `thickness` for inline progress indicators.
         <code>ReactNode</code>
       </td>
       <td>—</td>
-      <td>Centre content (summary text, number, etc.)</td>
+      <td>Centre content.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>showLegend</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Show a legend.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>Intl.NumberFormat</code>
+      </td>
+      <td>
+        Formats values in ticks, marks and the table. Defaults to{" "}
+        <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSegmentClick</code>
+      </td>
+      <td>
+        <code>(datum, index) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes segments buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>selectedIndex</code>
+      </td>
+      <td>
+        <code>number | null</code>
+      </td>
+      <td>—</td>
+      <td>Controlled selection.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSelect</code>
+      </td>
+      <td>
+        <code>(index | null) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes segments buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required. Describes the chart.</td>
+      <td>Required. Visible title: names the figure and captions the data table.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hideTitle</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Hide the title visually. It still names the chart for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>
+        Generated strings and the number locale. See{" "}
+        <a href="/guides/accessibility/#labels">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dataTable</code>
+      </td>
+      <td>
+        <code>"disclosure" | "visually-hidden"</code>
+      </td>
+      <td>
+        <code>"disclosure"</code>
+      </td>
+      <td>How the data table is offered.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>
+        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -110,7 +226,7 @@ Use smaller `size` and `thickness` for inline progress indicators.
         <code>string</code>
       </td>
       <td>—</td>
-      <td></td>
+      <td>Class on the figure.</td>
     </tr>
   </tbody>
 </table>

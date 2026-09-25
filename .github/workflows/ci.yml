@@ -23,3 +23,18 @@ jobs:
       - run: cd docs && pnpm build
       - run: cd docs && pnpm exec playwright install --with-deps chromium
       - run: cd docs && pnpm test:e2e
+
+  size:
+    name: Bundle size
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      # Per-entry min+gzip budget; also fails if any JS entry imports CSS.
+      - run: pnpm size

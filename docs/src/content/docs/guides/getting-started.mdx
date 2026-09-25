@@ -1,0 +1,50 @@
+---
+title: Getting started
+description: Install raster, load its stylesheet once, and import charts from the main entry or per-chart entry points.
+---
+
+## Install
+
+```sh
+pnpm add @eekodigital/raster
+```
+
+`react` and `react-dom` 19 are peer dependencies. If you use GeoChart, also install its optional peer:
+
+```sh
+pnpm add topojson-client
+```
+
+## Load the stylesheet once
+
+Raster ships one stylesheet. Import it once at your app root, before your own styles:
+
+```ts
+import "@eekodigital/raster/styles.css";
+```
+
+No chart imports CSS itself, so the package's `sideEffects` lists only the stylesheet: bundlers can drop any chart you don't use, but keep the stylesheet import. If the stylesheet is missing, charts still render: marks get their colours from attributes, and the visually hidden summary and title keep an inline visually-hidden style (the data table stays hidden until its button is pressed). Animations, focus rings and the default grid and axis styling do need it.
+
+## Entry points
+
+Import from the main entry, or from a chart's own entry if you'd rather be explicit about what you pull in. Both tree-shake the same way.
+
+| Import                              | Exports                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------- |
+| `@eekodigital/raster`               | Every chart except GeoChart, plus `ChartTooltip` and `useChartTooltip` |
+| `@eekodigital/raster/line-chart`    | `LineChart`                                                            |
+| `@eekodigital/raster/bar-chart`     | `BarChart`                                                             |
+| `@eekodigital/raster/donut-chart`   | `DonutChart`                                                           |
+| `@eekodigital/raster/scatter-chart` | `ScatterChart`                                                         |
+| `@eekodigital/raster/sparkline`     | `Sparkline`                                                            |
+| `@eekodigital/raster/gauge`         | `Gauge`                                                                |
+| `@eekodigital/raster/linear-gauge`  | `LinearGauge`                                                          |
+| `@eekodigital/raster/radar-chart`   | `RadarChart`                                                           |
+| `@eekodigital/raster/chart-tooltip` | `ChartTooltip`, `useChartTooltip`                                      |
+| `@eekodigital/raster/geo`           | `GeoChart` (needs `topojson-client`)                                   |
+| `@eekodigital/raster/theme`         | `rasterVars`, the [theming contract](/guides/theming/)                 |
+| `@eekodigital/raster/styles.css`    | The stylesheet                                                         |
+
+## Fonts, colour and spacing
+
+Charts inherit `font-family` and `color` from where you render them, so they pick up your typography with no configuration. Spacing is internal. To match your colours, map your tokens onto raster's contract; see [Theming charts](/guides/theming/).

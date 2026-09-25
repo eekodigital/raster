@@ -1,17 +1,21 @@
 ---
 title: BarChart
-description: Vertical bar chart for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Fully keyboard navigable with a hidden data table for screen readers.
+description: Vertical or horizontal bar chart, single, stacked or grouped, for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Keyboard navigable, with a data table disclosure.
 ---
 
 import Example from "../../../components/Example.astro";
-import { BarChartBasicDemo, BarChartCustomDemo } from "../../../components/BarChartDemo.tsx";
+import {
+  BarChartBasicDemo,
+  BarChartCustomDemo,
+  BarChartSelectDemo,
+} from "../../../components/BarChartDemo.tsx";
 
 ## Basic
 
-Pass data as an array of `{ label, value }` objects. Colours default to the interactive palette or can be set per bar.
+Pass data as an array of `{ label, value }` objects. Colours default to the raster series palette (`--raster-series-*`) or can be set per bar with `colors`.
 
 <Example
-  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--color-success)', 'var(--color-danger)', 'var(--color-inactive)', 'var(--color-warning)']}\n  aria-label="Conformance results by status"\n/>`}
+  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--demo-good)', 'var(--demo-bad)', 'var(--demo-neutral)', 'var(--demo-warn)']}\n  title="Conformance results by status"\n/>`}
 >
   <BarChartBasicDemo client:load />
 </Example>
@@ -19,17 +23,42 @@ Pass data as an array of `{ label, value }` objects. Colours default to the inte
 ## Custom height
 
 <Example
-  code={`<BarChart\n  data={[...]}\n  height={240}\n  aria-label="Criteria by WCAG principle"\n/>`}
+  code={`<BarChart\n  data={[...]}\n  height={240}\n  title="Criteria by WCAG principle"\n/>`}
 >
   <BarChartCustomDemo client:load />
 </Example>
 
+## Stacked, with selection
+
+Pass `series` and `values` with `stacked` (or `grouped`). With `onSelect`, bars become toggle buttons; selecting a bar selects its whole category.
+
+<Example
+  code={`<BarChart\n  data={[{ label: 'Q1', value: 0 }, { label: 'Q2', value: 0 }, { label: 'Q3', value: 0 }]}\n  series={['North', 'South']}\n  values={[[12, 8], [15, 11], [9, 14]]}\n  stacked\n  title="Sales by region (select a quarter)"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
+>
+  <BarChartSelectDemo client:load />
+</Example>
+
 ## Accessibility
 
-- SVG has `role="img"` with `aria-label`
-- Each bar is focusable with a descriptive `aria-label` (e.g. "Pass: 42")
-- Arrow keys navigate between bars
-- A hidden `<table>` provides the same data for screen readers
+- A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
+- The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
+- Each bar is labelled `{x}: {y}, 2 of 4` (stacked/grouped: `{series}, {x}: {y}, 2 of 4`, inside a `role="group"` per series). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
+- Stacked and grouped bars select a whole category.
+- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- Escape (inside the chart only) hides the tooltip and clears the selection, announcing the cleared selection in a polite live region; it doesn't close a surrounding dialog.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode bars use system colours; in stacked and grouped charts, series after the first are outlined with their legend line's dash pattern.
+
+| Key                                                        | Action                               |
+| ---------------------------------------------------------- | ------------------------------------ |
+| ← / → (↑ / ↓ when horizontal)                              | Previous / next mark                 |
+| Home / End                                                 | First / last mark                    |
+| PageUp / PageDown                                          | Back / forward 10 marks              |
+| ↑ / ↓ (stacked: ↑ climbs the stack; ← / → when horizontal) | Previous / next series               |
+| Tab                                                        | Leave the chart (one tab stop)       |
+| Enter / Space                                              | Toggle selection (interactive marks) |
+| Escape                                                     | Hide the tooltip and clear selection |
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -52,7 +81,7 @@ Pass data as an array of `{ label, value }` objects. Colours default to the inte
       </td>
       <td>—</td>
       <td>
-        Array of <code>{`{ label: string, value: number }`}</code>
+        Required. <code>&#123; label, value &#125;</code> per category.
       </td>
     </tr>
     <tr>
@@ -62,8 +91,115 @@ Pass data as an array of `{ label, value }` objects. Colours default to the inte
       <td>
         <code>string[]</code>
       </td>
-      <td>Interactive palette</td>
-      <td>Colours per bar (CSS values or custom properties)</td>
+      <td>
+        <code>series palette</code>
+      </td>
+      <td>Colour per bar (or per series).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>direction</code>
+      </td>
+      <td>
+        <code>"vertical" | "horizontal"</code>
+      </td>
+      <td>
+        <code>"vertical"</code>
+      </td>
+      <td>Bar direction.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>series</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>—</td>
+      <td>Series names for stacked/grouped bars.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>values</code>
+      </td>
+      <td>
+        <code>number[][]</code>
+      </td>
+      <td>—</td>
+      <td>
+        <code>values[category][series]</code> for stacked/grouped bars.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>stacked</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Stack series.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>grouped</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Group series side by side.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>xLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>X-axis title.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>yLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Y-axis title.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>grid</code>
+      </td>
+      <td>
+        <code>"horizontal" | "vertical" | "both" | "none"</code>
+      </td>
+      <td>
+        <code>"horizontal"</code>
+      </td>
+      <td>Grid lines.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>Intl.NumberFormat</code>
+      </td>
+      <td>
+        Formats values in ticks, marks and the table. Defaults to{" "}
+        <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -75,17 +211,109 @@ Pass data as an array of `{ label, value }` objects. Colours default to the inte
       <td>
         <code>200</code>
       </td>
-      <td>Chart height in pixels</td>
+      <td>Plot height in px (horizontal: 36px per bar, min 120).</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>aspectRatio</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>
+        Width ÷ height, instead of <code>height</code>. The plot box is sized in CSS either way, so
+        server-rendered and hydrated layouts match.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>onBarClick</code>
+      </td>
+      <td>
+        <code>(datum, index, seriesIndex?) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes bars buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>selectedIndex</code>
+      </td>
+      <td>
+        <code>number | null</code>
+      </td>
+      <td>—</td>
+      <td>Controlled selection (category index).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSelect</code>
+      </td>
+      <td>
+        <code>(index | null) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes bars buttons; called on toggle and Escape.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required. Describes the chart for screen readers.</td>
+      <td>Required. Visible title: names the figure and captions the data table.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hideTitle</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Hide the title visually. It still names the chart for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>
+        Generated strings and the number locale. See{" "}
+        <a href="/guides/accessibility/#labels">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dataTable</code>
+      </td>
+      <td>
+        <code>"disclosure" | "visually-hidden"</code>
+      </td>
+      <td>
+        <code>"disclosure"</code>
+      </td>
+      <td>How the data table is offered.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>
+        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -95,7 +323,7 @@ Pass data as an array of `{ label, value }` objects. Colours default to the inte
         <code>string</code>
       </td>
       <td>—</td>
-      <td></td>
+      <td>Class on the figure.</td>
     </tr>
   </tbody>
 </table>

@@ -1,0 +1,161 @@
+---
+title: Theming charts
+description: Charts read a small, documented set of --raster-* custom properties. Map your app's tokens onto them once, where your theme switches.
+---
+
+Raster doesn't ship a theme or design tokens. Charts read a small contract of `--raster-*` custom properties and nothing else from the page. Every property has a fallback, so an unthemed chart is still legible, and your app maps its own tokens onto the contract wherever its theme switches.
+
+:::caution[Set `color-scheme` on your dark themes]
+The default series palette, surface and tooltip colours choose between light and dark values with CSS `light-dark()`, which follows the element's `color-scheme`, not your theme class. If a dark theme doesn't set `color-scheme: dark`, every series you haven't mapped keeps its **light** colour on your dark background. Set it wherever your theme switches (see [`color-scheme`](#color-scheme)), or map all the `--raster-*` properties you rely on.
+:::
+
+## The contract
+
+| Property                                  | Used for                                                                                                                         | Fallback when unset                                                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `--raster-text`                           | Values, centre content, legend text                                                                                              | `currentColor`                                                              |
+| `--raster-text-subtle`                    | Tick and axis labels, legend                                                                                                     | `--raster-text`, then `currentColor`                                        |
+| `--raster-axis`                           | Axis baselines and radar spokes                                                                                                  | `currentColor`                                                              |
+| `--raster-grid`                           | Grid lines, gauge tracks (Gauge draws its track at 15% opacity)                                                                  | `color-mix(in srgb, currentColor 25%, transparent)` (Gauge: `currentColor`) |
+| `--raster-focus`                          | Focus ring on marks and the "Show data table" button                                                                             | `currentColor`                                                              |
+| `--raster-selected`                       | Outline on the selected mark                                                                                                     | `currentColor`                                                              |
+| `--raster-surface`                        | Gaps between map regions and around markers, the empty end of the map scale, the halo between a focused point and its focus ring | `light-dark(#ffffff, #121212)`                                              |
+| `--raster-tooltip-bg`                     | Tooltip background                                                                                                               | `light-dark(#1f1f1f, #f5f5f5)`                                              |
+| `--raster-tooltip-text`                   | Tooltip text                                                                                                                     | `light-dark(#ffffff, #121212)`                                              |
+| `--raster-series-1` … `--raster-series-8` | Series colours, in order                                                                                                         | Raster's default palette (below)                                            |
+
+Per-series and per-datum `color` props (`series[].color`, `colors`, `DonutDatum.color`, and so on) always win over the contract.
+
+Raster declares nothing at `:root`. Each chart reads the property where it's used, so a value you set on a theme class or a wrapper element applies to the charts inside it.
+
+## Map only what you need
+
+You don't have to map the whole contract. Anything you leave unset uses its fallback, so an app with one brand colour can set just that and the text colour:
+
+```css
+:root {
+  --raster-text: var(--color-text);
+  --raster-focus: var(--color-text);
+  --raster-series-1: var(--color-brand);
+}
+```
+
+With vanilla-extract, `createGlobalTheme` and `assignVars` need a value for all 17 keys. For a partial mapping, set the properties through `vars`, using `rasterVars` for the names:
+
+```ts
+import { globalStyle } from "@vanilla-extract/css";
+import { rasterVars } from "@eekodigital/raster/theme";
+import { vars } from "./theme.css";
+
+globalStyle(":root", {
+  vars: {
+    [rasterVars.text]: vars.color.text,
+    [rasterVars.focus]: vars.color.text,
+    [rasterVars.series1]: vars.color.brand,
+  },
+});
+```
+
+Unmapped series still fall back to the default palette, which needs [`color-scheme`](#color-scheme) to pick its dark values.
+
+## Plain CSS
+
+To map the whole contract, set every property once, next to your theme. Because the mapping uses `var()` references, charts follow your theme when it switches.
+
+```css
+:root {
+  --raster-text: var(--color-text);
+  --raster-text-subtle: var(--color-text-subtle);
+  --raster-grid: var(--color-border);
+  --raster-axis: var(--color-border-strong);
+  --raster-focus: var(--color-focus-ring);
+  --raster-selected: var(--color-text);
+  --raster-surface: var(--color-surface);
+  --raster-tooltip-bg: var(--color-text);
+  --raster-tooltip-text: var(--color-surface);
+  --raster-series-1: var(--color-interactive);
+  --raster-series-2: var(--color-success);
+}
+```
+
+## vanilla-extract
+
+`@eekodigital/raster/theme` exports `rasterVars`, a plain object of `var(--raster-*)` strings (series are `series1`…`series8`) with its TypeScript type. It has no runtime dependencies, and it has the shape vanilla-extract expects of a theme contract.
+
+```ts
+import { createGlobalTheme } from "@vanilla-extract/css";
+import { rasterVars } from "@eekodigital/raster/theme";
+import { vars } from "./theme.css";
+
+createGlobalTheme(":root", rasterVars, {
+  text: vars.color.text,
+  textSubtle: vars.color.textSubtle,
+  surface: vars.color.surface,
+  grid: vars.color.border,
+  axis: vars.color.borderStrong,
+  focus: vars.color.focusRing,
+  selected: vars.color.text,
+  tooltipBg: vars.color.text,
+  tooltipText: vars.color.surface,
+  series1: vars.color.accent,
+  series2: vars.color.success,
+  // …series3–series8
+});
+```
+
+If you theme with classes, use `assignVars(rasterVars, { … })` inside each theme class's `vars` instead. Both require a value for every key; to set only some, use `globalStyle` with `vars` as in [Map only what you need](#map-only-what-you-need).
+
+## Focus colours
+
+`--raster-focus` colours both the ring around a focused mark and the outline of the "Show data table" button. A focused point also gets a halo in `--raster-surface` between the mark and the ring, so the ring stays visible even when it's the same colour as the series.
+
+If you want a different colour for the button, for example your brand's focus ring on controls and the text colour on chart marks, override its class. Class names are stable:
+
+```css
+.raster-chart__table-toggle:focus-visible {
+  outline-color: var(--color-focus-ring);
+}
+```
+
+## The default palette
+
+With no `--raster-series-*` set, series use eight colours derived from the Okabe–Ito palette. They are reordered so that neighbouring series stay distinguishable with protanopia or deuteranopia, and adjusted so each one has at least 3:1 contrast against its surface (WCAG 1.4.11, non-text contrast). Light and dark sets are chosen separately; a unit test recomputes the contrast.
+
+| Series | Light                    | Dark      |
+| ------ | ------------------------ | --------- |
+| 1      | `#0072b2` blue           | `#308dcf` |
+| 2      | `#d55e00` vermillion     | `#d55e00` |
+| 3      | `#059c72` bluish green   | `#009e73` |
+| 4      | `#7a4fb0` purple         | `#9a7fd0` |
+| 5      | `#b87f09` orange         | `#c28608` |
+| 6      | `#3093c6` sky blue       | `#3e9ed2` |
+| 7      | `#968d09` olive          | `#a19705` |
+| 8      | `#c2709e` reddish purple | `#c775a3` |
+
+Light values are checked against `#ffffff` and `#f5f5f5`, dark values against `#121212` and `#262626`. If your surfaces are very different, set your own series colours.
+
+### `color-scheme`
+
+The palette and the other fixed fallbacks pick their light or dark value with CSS `light-dark()`, which follows the `color-scheme` of the element. **If your dark theme doesn't set `color-scheme: dark`, charts keep the light values**: series 2–8, the surface and the tooltip stay light-theme colours on a dark page. Set it where your theme switches:
+
+```css
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+```
+
+With vanilla-extract, add `colorScheme: "dark"` to the dark theme class's style.
+
+`light-dark()` needs Chrome or Edge 123, Firefox 120 or Safari 17.5 or later. In older browsers the fallbacks are invalid, so unmapped series render black. If you support those browsers, set every `--raster-series-*` you use and the tooltip and surface properties.
+
+## Forced colours
+
+In Windows High Contrast and other forced-colours modes, browsers keep the fill and stroke you author on SVG, so a brand palette would survive into a high-contrast theme. Raster's stylesheet overrides that under `@media (forced-colors: active)`:
+
+- text, axes and grid use `CanvasText`;
+- focus and selection use `Highlight`;
+- series marks use `CanvasText`, with point and segment fills alternating with `GrayText`, and each series' lines and legend swatch get their own dash pattern;
+- in multi-series bar charts, series 1 stays solid and later series become outlined bars carrying their legend line's dash pattern;
+- legend swatches are inline SVG, so they follow the same rules as the marks.
+
+The data table ("Show data table") carries every value in all modes.

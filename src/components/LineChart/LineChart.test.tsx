@@ -1,190 +1,463 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "../../test-utils/axe.js";
+import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { LineChart } from "./LineChart.js";
 
 const SERIES = [{ name: "Assessed", data: [10, 25, 40, 60, 86] }];
-const LABELS = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"];
+const CATEGORIES = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"];
+const MULTI = [
+  { name: "Pass", data: [5, 10, 15] },
+  { name: "Fail", data: [1, 2, 3] },
+];
+const MONTHS = ["Jan", "Feb", "Mar"];
 
-describe("LineChart", () => {
-  it('renders an SVG with role="img"', () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    const svg = screen.getByRole("img", { name: "Progress" });
-    expect(svg.tagName.toLowerCase()).toBe("svg");
-  });
-
-  it("renders data points with aria-labels", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    expect(screen.getByRole("img", { name: "Assessed, Week 1: 10" })).toBeDefined();
-    expect(screen.getByRole("img", { name: "Assessed, Week 5: 86" })).toBeDefined();
-  });
-
-  it("renders series as a group", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    expect(screen.getByRole("group", { name: "Assessed" })).toBeDefined();
-  });
-
-  it("renders a hidden data table", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    const table = screen.getByRole("table", { name: "Progress" });
-    expect(table).toBeDefined();
-  });
-
-  it("renders legend for multi-series", () => {
-    const multi = [
-      { name: "Series A", data: [5, 10, 15] },
-      { name: "Series B", data: [1, 2, 3] },
-    ];
-    render(<LineChart series={multi} labels={["Jan", "Feb", "Mar"]} aria-label="Trend" />);
-    expect(screen.getAllByText("Series A").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Series B").length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("does not render legend for single series", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    expect(document.querySelector('[class*="legend "]')).toBeNull();
-  });
-
-  it("renders area fill when area prop is true", () => {
-    const { container } = render(
-      <LineChart series={SERIES} labels={LABELS} area aria-label="Area chart" />,
+describe("LineChart structure", () => {
+  it("is a figure named by its visible title and described by a summary", () => {
+    render(<LineChart series={MULTI} categories={MONTHS} title="Results" />);
+    const figure = screen.getByRole("figure", { name: "Results" });
+    const summary = document.getElementById(figure.getAttribute("aria-describedby")!);
+    expect(summary?.textContent).toBe(
+      "Line chart, 2 series, 6 points. Jan to Mar. Values from 1 to 15.",
     );
-    const paths = container.querySelectorAll("path");
-    expect(paths.length).toBeGreaterThan(0);
+    expect(screen.getByText("Results")).toBeTruthy();
   });
 
-  it("first data point is focusable", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    const first = screen.getByRole("img", { name: "Assessed, Week 1: 10" });
-    expect(first.getAttribute("tabindex")).toBe("0");
+  it("renders the SVG as a chart group and each series as a group", () => {
+    const { container } = render(<LineChart series={MULTI} categories={MONTHS} title="Results" />);
+    const svg = container.querySelector("svg")!;
+    expect(svg.getAttribute("role")).toBe("group");
+    expect(svg.getAttribute("aria-roledescription")).toBe("chart");
+    screen.getByRole("group", { name: "Pass, 3 points" });
+    screen.getByRole("group", { name: "Fail, 3 points" });
+    expect(container.innerHTML).not.toMatch(/graphics-/);
   });
 
-  it("renders area path elements when area prop is true", () => {
-    render(<LineChart series={SERIES} labels={LABELS} area aria-label="Area" />);
-    // With area=true, there should be an area path (fill != "none") in addition to the line path
-    const region = screen.getByRole("group", { name: "Assessed" });
-    const paths = region.querySelectorAll("path");
-    // At least 2 paths: one for the area fill, one for the line stroke
-    expect(paths.length).toBeGreaterThanOrEqual(2);
+  it("labels static marks as images: {series}, {x}: {y}, n of m", () => {
+    render(<LineChart series={SERIES} categories={CATEGORIES} title="Progress" />);
+    screen.getByRole("img", { name: "Assessed, Week 1: 10, 1 of 5" });
+    screen.getByRole("img", { name: "Assessed, Week 5: 86, 5 of 5" });
+    expect(screen.queryAllByRole("button", { name: /Assessed/ })).toHaveLength(0);
   });
 
-  it("hidden data table contains correct values", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    const table = screen.getByRole("table", { name: "Progress" });
-    expect(table.textContent).toContain("10");
-    expect(table.textContent).toContain("86");
-    expect(table.textContent).toContain("Week 1");
-    expect(table.textContent).toContain("Week 5");
-  });
-
-  it('renders grid lines when grid="both"', () => {
-    const { container } = render(
-      <LineChart series={SERIES} labels={LABELS} grid="both" aria-label="Grid" />,
+  it("makes marks toggle buttons when selectable", () => {
+    const onSelect = vi.fn();
+    render(
+      <LineChart series={SERIES} categories={CATEGORIES} title="Progress" onSelect={onSelect} />,
     );
-    // With grid="both", there should be dashed grid lines (strokeDasharray)
-    const dashedLines = container.querySelectorAll("line[stroke-dasharray]");
-    expect(dashedLines.length).toBeGreaterThan(0);
+    const mark = screen.getByRole("button", { name: "Assessed, Week 3: 40, 3 of 5" });
+    expect(mark.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(mark);
+    expect(mark.getAttribute("aria-pressed")).toBe("true");
+    expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 2 });
+    fireEvent.click(mark);
+    expect(mark.getAttribute("aria-pressed")).toBe("false");
+    expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
-  it('hides grid lines when grid="none"', () => {
-    const { container } = render(
-      <LineChart series={SERIES} labels={LABELS} grid="none" aria-label="No grid" />,
-    );
-    // With grid="none", no dashed lines should appear
-    const dashedLines = container.querySelectorAll("line[stroke-dasharray]");
-    expect(dashedLines.length).toBe(0);
-  });
-
-  it("onPointClick fires with correct arguments", () => {
+  it("fires onPointClick and makes marks buttons", () => {
     const onClick = vi.fn();
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Click" onPointClick={onClick} />);
-    const point = screen.getByRole("img", { name: "Assessed, Week 3: 40" });
-    fireEvent.click(point);
+    render(
+      <LineChart series={SERIES} categories={CATEGORIES} title="Click" onPointClick={onClick} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Assessed, Week 3: 40, 3 of 5" }));
     expect(onClick).toHaveBeenCalledWith(0, 2, 40);
   });
 
-  it('renders smooth curve path when curve="smooth"', () => {
-    render(<LineChart series={SERIES} labels={LABELS} curve="smooth" aria-label="Smooth" />);
-    const region = screen.getByRole("group", { name: "Assessed" });
-    const paths = region.querySelectorAll("path");
-    expect(paths.length).toBeGreaterThan(0);
-    // Smooth curves use C (cubic bezier) commands from catmullRomPath
-    const d = paths[0].getAttribute("d") ?? "";
-    expect(d).toContain("C");
+  it("follows a controlled selection", () => {
+    const { rerender } = render(
+      <LineChart
+        series={SERIES}
+        categories={CATEGORIES}
+        title="P"
+        selectedIndex={null}
+        onSelect={() => {}}
+      />,
+    );
+    const mark = () => screen.getByRole("button", { name: /Week 2/ });
+    expect(mark().getAttribute("aria-pressed")).toBe("false");
+    rerender(
+      <LineChart
+        series={SERIES}
+        categories={CATEGORIES}
+        title="P"
+        selectedIndex={{ series: 0, point: 1 }}
+        onSelect={() => {}}
+      />,
+    );
+    expect(mark().getAttribute("aria-pressed")).toBe("true");
+    expect(mark().hasAttribute("data-selected")).toBe(true);
+    expect(screen.getByRole("button", { name: /Week 1/ }).hasAttribute("data-dimmed")).toBe(true);
   });
 
-  it("renders stacked area elements when stacked and area are true", () => {
-    const multi = [
-      { name: "Series A", data: [5, 10, 15] },
-      { name: "Series B", data: [3, 6, 9] },
-    ];
-    render(
-      <LineChart series={multi} labels={["Jan", "Feb", "Mar"]} stacked area aria-label="Stacked" />,
+  it("doesn't point marks at the tooltip with aria-describedby", () => {
+    const { container } = render(<LineChart series={SERIES} categories={CATEGORIES} title="P" />);
+    expect(container.querySelector("[aria-describedby^='chart-tooltip']")).toBeNull();
+    const mark = screen.getByRole("img", { name: /Week 2/ });
+    fireEvent.mouseEnter(mark);
+    const tip = container.querySelector(".raster-tooltip")!;
+    expect(tip.textContent).toBe("Assessed, Week 2: 25, 2 of 5");
+    expect(tip.getAttribute("aria-hidden")).toBe("true");
+    fireEvent.mouseLeave(mark);
+  });
+
+  it("draws a different marker shape per series", () => {
+    render(<LineChart series={MULTI} categories={MONTHS} title="Results" />);
+    const a = screen.getByRole("img", { name: /^Pass, Jan/ }).getAttribute("d");
+    const b = screen.getByRole("img", { name: /^Fail, Jan/ }).getAttribute("d");
+    expect(a).toMatch(/a/); // circle arcs
+    expect(b).toMatch(/^M[^a]+Z$/); // square
+  });
+
+  it("renders a legend with marker shapes for multi-series only", () => {
+    const { container, rerender } = render(
+      <LineChart series={MULTI} categories={MONTHS} title="Results" />,
     );
-    // Each series should have an area path
-    const regions = screen.getAllByRole("group");
-    expect(regions.length).toBe(2);
-    for (const region of regions) {
-      const paths = region.querySelectorAll("path");
-      // At least 2 paths per series: area + line
-      expect(paths.length).toBeGreaterThanOrEqual(2);
+    expect(container.querySelectorAll(".raster-legend__marker")).toHaveLength(2);
+    rerender(<LineChart series={SERIES} categories={CATEGORIES} title="P" />);
+    expect(container.querySelector(".raster-legend")).toBeNull();
+  });
+
+  it("formats numbers with Intl by default", () => {
+    render(
+      <LineChart
+        series={[{ name: "Views", data: [1200, 3400] }]}
+        categories={["A", "B"]}
+        title="V"
+      />,
+    );
+    screen.getByRole("img", { name: "Views, A: 1,200, 1 of 2" });
+  });
+
+  it("takes generated strings and the locale from labels", () => {
+    render(
+      <LineChart
+        series={[{ name: "Aufrufe", data: [1200, 3400] }]}
+        categories={["A", "B"]}
+        title="V"
+        labels={{
+          locale: "de",
+          chart: "Diagramm",
+          showTable: "Tabelle anzeigen",
+          tableCaption: (t) => `Daten für ${t}`,
+          mark: ({ series, x, y, index, count }) =>
+            `${series}, ${x}: ${y}, ${index + 1} von ${count}`,
+        }}
+      />,
+    );
+    screen.getByRole("img", { name: "Aufrufe, A: 1.200, 1 von 2" });
+    fireEvent.click(screen.getByRole("button", { name: "Tabelle anzeigen" }));
+    screen.getByRole("table", { name: "Daten für V" });
+  });
+});
+
+describe("LineChart data table", () => {
+  it("is a disclosure with a caption, scoped headers and formatted values", () => {
+    render(
+      <LineChart series={MULTI} categories={MONTHS} title="Results" formatValue={(v) => `${v}%`} />,
+    );
+    const table = openTable();
+    expect(screen.getByRole("table", { name: "Data for Results" })).toBe(table);
+    expect(tableText(table)).toEqual([
+      ["Period", "Pass", "Fail"],
+      ["Jan", "5%", "1%"],
+      ["Feb", "10%", "2%"],
+      ["Mar", "15%", "3%"],
+    ]);
+    expect(table.querySelector("th[scope=row]")?.textContent).toBe("Jan");
+  });
+
+  it("can be visually hidden instead", () => {
+    render(
+      <LineChart series={SERIES} categories={CATEGORIES} title="P" dataTable="visually-hidden" />,
+    );
+    expect(screen.queryByRole("button", { name: "Show data table" })).toBeNull();
+    expect(screen.getByRole("table", { name: "Data for P" }).classList).toContain("raster-sr-only");
+  });
+});
+
+describe("LineChart keyboard", () => {
+  const mark = (name: RegExp) => screen.getByRole("img", { name });
+
+  it("has one tab stop that follows arrow keys", () => {
+    render(<LineChart series={MULTI} categories={MONTHS} title="R" />);
+    expect(tabStops()).toEqual(["Pass, Jan: 5, 1 of 3"]);
+    press(mark(/^Pass, Jan/), "ArrowRight");
+    expect(focusedName()).toBe("Pass, Feb: 10, 2 of 3");
+    expect(tabStops()).toEqual(["Pass, Feb: 10, 2 of 3"]);
+    press(mark(/^Pass, Feb/), "ArrowDown");
+    expect(focusedName()).toBe("Fail, Feb: 2, 2 of 3");
+    press(mark(/^Fail, Feb/), "ArrowUp");
+    expect(focusedName()).toBe("Pass, Feb: 10, 2 of 3");
+    press(mark(/^Pass, Feb/), "End");
+    expect(focusedName()).toBe("Pass, Mar: 15, 3 of 3");
+    press(mark(/^Pass, Mar/), "Home");
+    expect(focusedName()).toBe("Pass, Jan: 5, 1 of 3");
+    press(mark(/^Pass, Jan/), "PageDown");
+    expect(focusedName()).toBe("Pass, Mar: 15, 3 of 3");
+    press(mark(/^Pass, Mar/), "PageUp");
+    expect(focusedName()).toBe("Pass, Jan: 5, 1 of 3");
+  });
+
+  it("toggles selection with Enter and Space, and Escape clears it within the chart", () => {
+    const onSelect = vi.fn();
+    const outer = vi.fn();
+    render(
+      <div onKeyDown={outer}>
+        <LineChart series={MULTI} categories={MONTHS} title="R" onSelect={onSelect} />
+      </div>,
+    );
+    const feb = screen.getByRole("button", { name: /^Pass, Feb/ });
+    press(feb, "Enter");
+    expect(feb.getAttribute("aria-pressed")).toBe("true");
+    press(feb, " ");
+    expect(feb.getAttribute("aria-pressed")).toBe("false");
+    press(feb, "Enter");
+    outer.mockClear();
+    press(feb, "Escape");
+    expect(feb.getAttribute("aria-pressed")).toBe("false");
+    expect(outer).not.toHaveBeenCalled();
+    expect(screen.getByRole("status").textContent).toBe("Selection cleared");
+    // Escape elsewhere on the page doesn't touch the chart.
+    press(feb, "Enter");
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    expect(feb.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("keeps the tooltip for the selected mark on blur", () => {
+    const { container } = render(
+      <LineChart series={SERIES} categories={CATEGORIES} title="P" onSelect={() => {}} />,
+    );
+    const m = screen.getByRole("button", { name: /Week 2/ });
+    fireEvent.focus(m);
+    fireEvent.click(m);
+    fireEvent.blur(m);
+    fireEvent.mouseLeave(m);
+    expect(container.querySelector(".raster-tooltip")?.hasAttribute("data-visible")).toBe(true);
+  });
+
+  it("dismisses the tooltip with Escape, including a pinned one, without leaving the chart", () => {
+    const outer = vi.fn();
+    const { container } = render(
+      <div onKeyDown={outer}>
+        <LineChart series={SERIES} categories={CATEGORIES} title="P" onSelect={() => {}} />
+      </div>,
+    );
+    const tip = () => container.querySelector(".raster-tooltip")!.hasAttribute("data-visible");
+    const m = screen.getByRole("button", { name: /Week 2/ });
+    // Hover/focus tooltip (WCAG 1.4.13: dismissible without moving focus).
+    fireEvent.mouseEnter(m);
+    expect(tip()).toBe(true);
+    press(m, "Escape");
+    expect(tip()).toBe(false);
+    expect(outer).not.toHaveBeenCalled();
+    // Pinned by a selection: Escape clears both.
+    fireEvent.focus(m);
+    fireEvent.click(m);
+    fireEvent.blur(m);
+    expect(tip()).toBe(true);
+    press(m, "Escape");
+    expect(tip()).toBe(false);
+    expect(m.getAttribute("aria-pressed")).toBe("false");
+    // Nothing left to dismiss: Escape passes through.
+    press(m, "Escape");
+    expect(outer).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("LineChart sizing", () => {
+  it("sizes the plot box in CSS from height", () => {
+    const { container } = render(
+      <LineChart series={SERIES} categories={CATEGORIES} title="P" height={180} />,
+    );
+    const plot = container.querySelector<HTMLElement>(".raster-chart__plot")!;
+    expect(plot.style.height).toBe("180px");
+    expect(container.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 720 180");
+  });
+
+  it("accepts aspectRatio instead of height", () => {
+    const { container } = render(
+      <LineChart series={SERIES} categories={CATEGORIES} title="P" aspectRatio={4} />,
+    );
+    const plot = container.querySelector<HTMLElement>(".raster-chart__plot")!;
+    expect(plot.style.aspectRatio).toMatch(/^4/);
+    expect(container.querySelector("svg")?.getAttribute("viewBox")).toBe("0 0 720 180");
+  });
+});
+
+describe("LineChart drawing", () => {
+  it("renders grid lines per the grid prop", () => {
+    const { container, rerender } = render(
+      <LineChart series={SERIES} categories={CATEGORIES} grid="both" title="G" />,
+    );
+    const count = () => container.querySelectorAll("line.raster-chart__grid").length;
+    expect(count()).toBeGreaterThan(5);
+    rerender(<LineChart series={SERIES} categories={CATEGORIES} grid="vertical" title="G" />);
+    expect(count()).toBe(5);
+    rerender(<LineChart series={SERIES} categories={CATEGORIES} grid="none" title="G" />);
+    expect(count()).toBe(0);
+  });
+
+  it("renders an area path under the line", () => {
+    const { container } = render(
+      <LineChart series={SERIES} categories={CATEGORIES} area title="A" />,
+    );
+    expect(container.querySelectorAll(".raster-line__area")).toHaveLength(1);
+  });
+
+  it('renders a smooth curve when curve="smooth"', () => {
+    const { container } = render(
+      <LineChart series={SERIES} categories={CATEGORIES} curve="smooth" area title="S" />,
+    );
+    expect(container.querySelector(".raster-line__line")?.getAttribute("d")).toContain("C");
+  });
+
+  it("stacks areas, linear and smooth", () => {
+    for (const curve of ["linear", "smooth"] as const) {
+      const { container, unmount } = render(
+        <LineChart series={MULTI} categories={MONTHS} stacked area curve={curve} title="S" />,
+      );
+      expect(container.querySelectorAll(".raster-line__area")).toHaveLength(2);
+      // Stacked marks keep the original (unstacked) values in their labels.
+      screen.getByRole("img", { name: "Fail, Mar: 3, 3 of 3" });
+      unmount();
     }
   });
 
-  it("renders smooth stacked area path", () => {
-    const multi = [
-      { name: "Series A", data: [5, 10, 15] },
-      { name: "Series B", data: [3, 6, 9] },
-    ];
+  it("renders axis titles", () => {
     render(
-      <LineChart
-        series={multi}
-        labels={["Jan", "Feb", "Mar"]}
-        stacked
-        area
-        curve="smooth"
-        aria-label="Smooth stacked"
-      />,
+      <LineChart series={SERIES} categories={CATEGORIES} title="P" xLabel="Week" yLabel="Count" />,
     );
-    const regions = screen.getAllByRole("group");
-    expect(regions.length).toBe(2);
-  });
-
-  it("renders with a fixed-px width and no viewBox so internals don't scale", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    const svg = screen.getByRole("img", { name: "Progress" });
-    expect(svg.getAttribute("width")).toBe("720");
-    expect(svg.getAttribute("viewBox")).toBeNull();
+    expect(screen.getByText("Week")).toBeTruthy();
+    expect(screen.getByText("Count")).toBeTruthy();
   });
 
   it("anchors the first and last visible labels so they don't extend past the plot", () => {
-    const { container } = render(<LineChart series={SERIES} labels={LABELS} aria-label="Edges" />);
+    const { container } = render(<LineChart series={SERIES} categories={CATEGORIES} title="E" />);
     const texts = Array.from(container.querySelectorAll("svg text"));
-    const first = texts.find((t) => t.textContent === "Week 1");
-    const last = texts.find((t) => t.textContent === "Week 5");
-    expect(first?.getAttribute("text-anchor")).toBe("start");
-    expect(last?.getAttribute("text-anchor")).toBe("end");
+    expect(texts.find((t) => t.textContent === "Week 1")?.getAttribute("text-anchor")).toBe(
+      "start",
+    );
+    expect(texts.find((t) => t.textContent === "Week 5")?.getAttribute("text-anchor")).toBe("end");
   });
 
-  it("omits empty-string labels so consumers can decimate semantically", () => {
+  it("omits empty-string categories from the axis so consumers can decimate", () => {
     const data = Array.from({ length: 10 }, (_, i) => i);
     const decimated = data.map((_, i) => (i % 5 === 0 ? `D${i}` : ""));
     const { container } = render(
-      <LineChart series={[{ name: "Series", data }]} labels={decimated} aria-label="Sparse" />,
+      <LineChart series={[{ name: "Series", data }]} categories={decimated} title="Sparse" />,
     );
-    // Count <text> elements whose content matches our label pattern — these
-    // are the rendered x-axis labels. The hidden sr-only data table uses <td>
-    // for the period column, so it doesn't match.
-    const texts = Array.from(container.querySelectorAll("svg text")).map(
-      (el) => el.textContent ?? "",
-    );
+    const texts = Array.from(container.querySelectorAll("svg text")).map((el) => el.textContent);
     expect(texts).toContain("D0");
     expect(texts).toContain("D5");
-    expect(texts.some((t) => /^D[1-46-9]$/.test(t))).toBe(false);
+    expect(texts.some((t) => /^D[1-46-9]$/.test(t ?? ""))).toBe(false);
   });
 
-  it("sr-only data table is marked display:block so its table layout can't leak into parent scrollHeight", () => {
-    render(<LineChart series={SERIES} labels={LABELS} aria-label="Progress" />);
-    const table = screen.getByRole("table", { name: "Progress" });
-    expect(table.className).toMatch(/srOnly/);
+  describe("x-axis ticks", () => {
+    const DAYS = Array.from({ length: 30 }, (_, i) => `2026-09-${String(i + 1).padStart(2, "0")}`);
+    const DATA = [{ name: "Visitors", data: DAYS.map((_, i) => i * 10) }];
+    const ticksOf = (root: Element) =>
+      [...root.querySelectorAll("text.raster-chart__tick")]
+        .filter((t) => t.getAttribute("y") !== null && !t.hasAttribute("dy"))
+        .map((t) => [t.textContent, t.getAttribute("text-anchor")]);
+
+    it("thins ticks with xTickFilter but keeps full categories in point names and the table", () => {
+      const { container } = render(
+        <LineChart
+          series={DATA}
+          categories={DAYS}
+          title="Visits"
+          xTickFilter={(i) => i % 7 === 0}
+        />,
+      );
+      expect(ticksOf(container).map(([t]) => t)).toEqual([
+        "2026-09-01",
+        "2026-09-08",
+        "2026-09-15",
+        "2026-09-22",
+        "2026-09-29",
+      ]);
+      // A point whose tick is hidden still has its x value.
+      screen.getByRole("img", { name: "Visitors, 2026-09-02: 10, 2 of 30" });
+      const rows = tableText(openTable());
+      expect(rows[2]).toEqual(["2026-09-02", "10"]);
+    });
+
+    it("formats tick text with formatXTick, and hides ticks it returns '' for", () => {
+      const { container } = render(
+        <LineChart
+          series={DATA}
+          categories={DAYS}
+          title="Visits"
+          xTickFilter={() => true}
+          formatXTick={(c, i) => (i % 10 === 0 ? c.slice(8) : "")}
+        />,
+      );
+      expect(ticksOf(container).map(([t]) => t)).toEqual(["01", "11", "21"]);
+      screen.getByRole("img", { name: "Visitors, 2026-09-11: 100, 11 of 30" });
+    });
+
+    it("anchors only the true first and last categories to the plot edges", () => {
+      const { container } = render(
+        <LineChart
+          series={DATA}
+          categories={DAYS}
+          title="Visits"
+          xTickFilter={(i) => i % 7 === 0}
+        />,
+      );
+      // 2026-09-29 is the last *visible* tick but not the last category: it centres.
+      expect(ticksOf(container)).toEqual([
+        ["2026-09-01", "start"],
+        ["2026-09-08", "middle"],
+        ["2026-09-15", "middle"],
+        ["2026-09-22", "middle"],
+        ["2026-09-29", "middle"],
+      ]);
+    });
+
+    it("always labels the last category when thinning automatically", () => {
+      const { container } = render(
+        <LineChart series={DATA} categories={DAYS} title="Visits" xLabelMinSpacing={100} />,
+      );
+      const ticks = ticksOf(container);
+      expect(ticks[0]).toEqual(["2026-09-01", "start"]);
+      expect(ticks.at(-1)).toEqual(["2026-09-30", "end"]);
+      expect(ticks.slice(1, -1).every(([, a]) => a === "middle")).toBe(true);
+      expect(ticks.length).toBeLessThan(10);
+    });
+
+    it("centres a lone category", () => {
+      const { container } = render(
+        <LineChart series={[{ name: "One", data: [3] }]} categories={["Only"]} title="One" />,
+      );
+      expect(ticksOf(container)).toEqual([["Only", "middle"]]);
+    });
+  });
+
+  it("handles a single point and no data", () => {
+    const { container } = render(
+      <LineChart series={[{ name: "One", data: [3] }]} categories={["Only"]} title="One" />,
+    );
+    screen.getByRole("img", { name: "One, Only: 3, 1 of 1" });
+    const { container: empty } = render(<LineChart series={[]} categories={[]} title="Empty" />);
+    expect(empty.querySelector("svg")).toBeTruthy();
+    expect(container).toBeTruthy();
+  });
+});
+
+describe("LineChart axe", () => {
+  it("has no violations when static", async () => {
+    const { container } = render(<LineChart series={MULTI} categories={MONTHS} title="R" />);
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("has no violations when interactive and selected", async () => {
+    const { container } = render(
+      <LineChart series={MULTI} categories={MONTHS} title="R" onSelect={() => {}} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Pass, Feb/ }));
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
