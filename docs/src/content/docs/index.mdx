@@ -1,39 +1,54 @@
 ---
 title: Raster
-description: Design system by Eeko Digital — components, tokens, and patterns for building accessible web applications.
+description: Light, accessible SVG charts for React. No d3, zero runtime dependencies, themable through CSS custom properties.
 template: splash
 hero:
   title: Raster
-  tagline: Design system by Eeko Digital — components, tokens, and patterns for building accessible web applications.
+  tagline: Light, accessible SVG charts for React. No d3, zero runtime dependencies, themable through a small set of CSS custom properties.
   actions:
     - text: Get started
-      link: /foundations/principles/
+      link: /guides/getting-started/
       icon: right-arrow
-    - text: Components
-      link: /components/buttons/
+    - text: Browse the charts
+      link: /components/line-chart/
       variant: minimal
 ---
 
-## Quick links
+Raster is a small React chart library by [Eeko Digital](https://eeko.digital): LineChart, BarChart, DonutChart, ScatterChart, Sparkline, Gauge, LinearGauge, RadarChart and GeoChart.
 
-- [Design principles](/foundations/principles/)
-- [Button](/components/buttons/)
-- [Table](/components/tables/)
-- [TextInputField](/components/text-input/)
-- [TextareaField](/components/textarea/)
-- [SelectField](/components/select/)
-- [Checkbox](/components/checkboxes/)
-- [Radio](/components/radios/)
+Up to version 2 it was a design system. Version 3 keeps only the charts; see [Migrating from v2](/guides/migrating/).
 
-## Using the design system
+## Design goals
 
-Install the package and import what you need. The CSS tokens must be loaded once at the root of your app.
+These goals decide what goes into raster and what stays out. Where a chart doesn't meet one yet, the gap is listed.
+
+| Goal                                          | Where it stands                                                                                                                                                                                                                                                                                                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Light.** No feature bloat.                  | Zero runtime dependencies. Each chart is its own entry point, under 4.5 KB min+gzip including shared helpers (Sparkline about 1.6 KB, LineChart about 4.3 KB). GeoChart and its `topojson-client` peer live at `@eekodigital/raster/geo`, so the main entry never pulls them in. CI enforces a size budget per entry. |
+| **Themable enough for our apps.**             | Charts read a documented set of `--raster-*` custom properties, and every one has a fallback, so an unthemed chart is still legible. Per-series and per-datum `color` props override the theme. See [Theming charts](/guides/theming/).                                                                               |
+| **SVG, for accessibility and interactivity.** | SVG marks, a visually hidden data table, arrow-key navigation between marks, and tooltips on hover and focus. Richer labelling, a visible table toggle and full keyboard coverage for every mode are in progress.                                                                                                     |
+| **Not based on d3.**                          | Scales, ticks, curves and arcs come from raster's own `chart-math` (about 220 lines).                                                                                                                                                                                                                                 |
+| **TypeScript native.**                        | Written in TypeScript; types ship with the package.                                                                                                                                                                                                                                                                   |
+| **Responsive.**                               | Cartesian charts track their container width and draw at display pixels, thinning or rotating labels to fit. Height is still fixed, and Donut, Gauge and Sparkline have fixed sizes; container-sized versions are in progress.                                                                                        |
+
+If these goals don't match yours, [Compared with alternatives](/guides/comparison/) lists what else is out there.
+
+## Quick start
 
 ```sh
 pnpm add @eekodigital/raster
 ```
 
-```ts
-import "@eekodigital/raster/tokens.css"; // CSS custom properties (colours, spacing, type)
-import { Button, Table, TextInputField } from "@eekodigital/raster";
+```tsx
+// Once, at your app root:
+import "@eekodigital/raster/styles.css";
+
+// Anywhere:
+import { LineChart } from "@eekodigital/raster";
+
+<LineChart
+  series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
+  labels={["Mon", "Tue", "Wed", "Thu"]}
+  aria-label="Visitors this week"
+/>;
 ```

@@ -10,7 +10,7 @@ import { GeoChartBasicDemo, GeoChartMarkersDemo } from "../../../components/GeoC
 
 Regions coloured by value using a three-colour scale (red → amber → green).
 
-<Example code={`import { GeoChart } from '@eekodigital/raster';
+<Example code={`import { GeoChart } from '@eekodigital/raster/geo';
 import world from 'world-atlas/countries-110m.json';
 
 <GeoChart
@@ -20,7 +20,7 @@ import world from 'world-atlas/countries-110m.json';
     { id: '840', value: 65, label: 'United States' },
     { id: '392', value: 85, label: 'Japan' },
   ]}
-  colorScale={['var(--color-danger)', 'var(--color-warning)', 'var(--color-success)']}
+  colorScale={['var(--demo-bad)', 'var(--demo-warn)', 'var(--demo-good)']}
   aria-label="Compliance by country"
 />`}>
   <GeoChartBasicDemo client:only="react" />

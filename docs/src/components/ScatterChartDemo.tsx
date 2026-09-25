@@ -28,7 +28,7 @@ export function ScatterChartMultiDemo() {
             { x: 25, y: 5 },
             { x: 40, y: 8 },
           ],
-          color: "var(--color-interactive)",
+          color: "var(--demo-accent)",
         },
         {
           name: "Audit 2",
@@ -37,7 +37,7 @@ export function ScatterChartMultiDemo() {
             { x: 30, y: 3 },
             { x: 50, y: 10 },
           ],
-          color: "var(--color-success)",
+          color: "var(--demo-good)",
         },
       ]}
       xLabel="Elements"

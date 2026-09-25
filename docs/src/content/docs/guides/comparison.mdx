@@ -1,0 +1,36 @@
+---
+title: Compared with alternatives
+description: How raster compares with other React and JavaScript chart libraries on its design goals, checked September 2026.
+---
+
+Raster exists because no library we found meets its [design goals](/) together: **light, SVG, and not based on d3**. This page is the evidence, and a guide to picking something else if raster doesn't fit.
+
+Sizes are min+gzip from `npm view` and bundlephobia, checked in September 2026. They change often, so treat them as rough.
+
+## SVG libraries for React: all use d3
+
+| Library         | Size   | Notes                                                                      |
+| --------------- | ------ | -------------------------------------------------------------------------- |
+| Recharts 3.10   | 151 KB | Bundles d3 through `victory-vendor`, and depends on Redux.                 |
+| visx            | Varies | d3 through `@visx/vendor`. Primitives only: you build each chart yourself. |
+| Nivo            | 96 KB  | Uses `d3-shape` and `d3-scale`.                                            |
+| MUI X Charts    | 124 KB | d3 through a vendor package. Needs `@mui/material` and Emotion.            |
+| Victory         | 108 KB | d3 through `victory-vendor`.                                               |
+| Observable Plot | 128 KB | All of d3, and not React.                                                  |
+
+## Options without d3: canvas, large or paid
+
+| Library             | Size   | Notes                              |
+| ------------------- | ------ | ---------------------------------- |
+| Chart.js            | —      | Renders to canvas, not SVG.        |
+| AG Charts Community | 411 KB | Canvas.                            |
+| ECharts             | 368 KB | Not React. SVG renderer available. |
+| Highcharts          | —      | Commercial licence.                |
+
+## Where raster stands
+
+Raster's charts are 0.6–4.3 KB min+gzip each, render SVG, use no d3 and have no runtime dependencies. That's the gap it fills.
+
+It also does less. There's no zooming, brushing, animation API, or large chart catalogue. If you need those, one of the libraries above is the better choice.
+
+**Accessibility is table stakes, not raster's differentiator.** AG Charts Community and MUI X Charts both ship keyboard navigation and screen-reader support out of the box. Raster aims to match them (SVG marks, a hidden data table, arrow-key navigation, tooltips on focus), not to claim it's uniquely accessible.

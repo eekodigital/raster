@@ -1,4 +1,4 @@
-import { GeoChart } from "@eekodigital/raster";
+import { GeoChart } from "@eekodigital/raster/geo";
 // @ts-ignore — world-atlas JSON doesn't match Topology type exactly
 import world from "world-atlas/countries-110m.json";
 
@@ -41,7 +41,7 @@ export function GeoChartBasicDemo() {
     <GeoChart
       topology={world as any}
       data={sampleData}
-      colorScale={["var(--color-danger)", "var(--color-warning)", "var(--color-success)"]}
+      colorScale={["var(--demo-bad)", "var(--demo-warn)", "var(--demo-good)"]}
       legendLabel="Renewable energy %"
       formatValue={(v) => `${v}%`}
       aria-label="Renewable energy as a share of total energy consumption by country"
@@ -53,12 +53,12 @@ export function GeoChartMarkersDemo() {
   return (
     <GeoChart
       topology={world as any}
-      colorScale={["var(--color-border)"]}
+      colorScale={["var(--demo-muted)"]}
       markers={[
-        { lat: 51.5, lon: -0.1, size: 8, label: "London", color: "var(--color-danger)" },
-        { lat: 48.9, lon: 2.3, size: 6, label: "Paris", color: "var(--color-danger)" },
-        { lat: 40.7, lon: -74.0, size: 7, label: "New York", color: "var(--color-danger)" },
-        { lat: 35.7, lon: 139.7, size: 5, label: "Tokyo", color: "var(--color-danger)" },
+        { lat: 51.5, lon: -0.1, size: 8, label: "London", color: "var(--demo-bad)" },
+        { lat: 48.9, lon: 2.3, size: 6, label: "Paris", color: "var(--demo-bad)" },
+        { lat: 40.7, lon: -74.0, size: 7, label: "New York", color: "var(--demo-bad)" },
+        { lat: 35.7, lon: 139.7, size: 5, label: "Tokyo", color: "var(--demo-bad)" },
       ]}
       aria-label="Office locations"
     />

@@ -19,7 +19,7 @@ import { RadarChartBasicDemo, RadarChartMultiDemo } from "../../../components/Ra
 Compare current state against a target or another audit.
 
 <Example
-  code={`<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[\n    { name: 'Current', data: [80, 65, 90, 70], color: 'var(--color-interactive)' },\n    { name: 'Target', data: [100, 100, 100, 100], color: 'var(--color-success)' },\n  ]}\n  max={100}\n  aria-label="Current vs target"\n/>`}
+  code={`<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[\n    { name: 'Current', data: [80, 65, 90, 70], color: 'var(--demo-accent)' },\n    { name: 'Target', data: [100, 100, 100, 100], color: 'var(--demo-good)' },\n  ]}\n  max={100}\n  aria-label="Current vs target"\n/>`}
 >
   <RadarChartMultiDemo client:load />
 </Example>

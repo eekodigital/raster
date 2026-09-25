@@ -1,0 +1,48 @@
+---
+title: Exporting charts
+description: Every chart takes an exportRef that downloads it as a standalone SVG or PNG.
+---
+
+Pass a ref to a chart's `exportRef` prop to get a `ChartExportHandle`:
+
+```ts title="ChartExportHandle"
+type ChartExportHandle = {
+  // filename defaults to "chart.svg"
+  exportSVG: (filename?: string) => void;
+  // filename defaults to "chart.png", scale to 2
+  exportPNG: (filename?: string, scale?: number) => Promise<void>;
+};
+```
+
+```tsx title="VisitorsChart.tsx"
+import { useRef } from "react";
+import { LineChart, type ChartExportHandle } from "@eekodigital/raster";
+
+export function VisitorsChart() {
+  const exportRef = useRef<ChartExportHandle>(null);
+  return (
+    <>
+      <LineChart
+        series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
+        labels={["Mon", "Tue", "Wed", "Thu"]}
+        exportRef={exportRef}
+        aria-label="Visitors this week"
+      />
+      <button type="button" onClick={() => exportRef.current?.exportSVG("visitors.svg")}>
+        Download SVG
+      </button>
+      <button type="button" onClick={() => exportRef.current?.exportPNG("visitors.png", 3)}>
+        Download PNG
+      </button>
+    </>
+  );
+}
+```
+
+All charts except LinearGauge (which is HTML, not SVG) support `exportRef`.
+
+## How it works
+
+- The chart's `<svg>` is cloned, and the computed fill, stroke, font and opacity of every element are written onto the clone as attributes. That resolves `--raster-*` custom properties and the stylesheet, so the file looks the same outside your app, in the theme that was active when you exported.
+- `exportPNG` draws that SVG onto a canvas at `scale` times its on-screen size (2 by default, for sharp output on high-density screens) and downloads the result.
+- Only the `<svg>` is exported. The legend and tooltip are HTML outside it and aren't included. Donut and Gauge centre content is HTML inside a `<foreignObject>`: it's kept in SVG exports, but some browsers leave it out of PNGs.

@@ -14,9 +14,9 @@ export function LineChartMultiDemo() {
   return (
     <LineChart
       series={[
-        { name: "Pass", data: [0, 5, 12, 20, 30, 42], color: "var(--color-success)" },
-        { name: "Fail", data: [0, 1, 3, 5, 6, 8], color: "var(--color-danger)" },
-        { name: "N/A", data: [0, 2, 4, 7, 10, 12], color: "var(--color-inactive)" },
+        { name: "Pass", data: [0, 5, 12, 20, 30, 42], color: "var(--demo-good)" },
+        { name: "Fail", data: [0, 1, 3, 5, 6, 8], color: "var(--demo-bad)" },
+        { name: "N/A", data: [0, 2, 4, 7, 10, 12], color: "var(--demo-neutral)" },
       ]}
       labels={["Jan", "Feb", "Mar", "Apr", "May", "Jun"]}
       aria-label="Results trend by status"
@@ -27,9 +27,7 @@ export function LineChartMultiDemo() {
 export function LineChartAreaDemo() {
   return (
     <LineChart
-      series={[
-        { name: "Assessed", data: [10, 25, 40, 60, 72, 86], color: "var(--color-interactive)" },
-      ]}
+      series={[{ name: "Assessed", data: [10, 25, 40, 60, 72, 86], color: "var(--demo-accent)" }]}
       labels={["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"]}
       area
       aria-label="Assessment progress (area)"

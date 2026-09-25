@@ -11,7 +11,7 @@ import { GaugeBasicDemo } from "../../../components/GaugeDemo.tsx";
 Different sizes, colours, and format functions.
 
 <Example
-  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<Gauge value={3.5} max={4} label="Score" format={(v) => v.toFixed(1)} color="var(--color-success)" aria-label="Score: 3.5/4" />\n<Gauge value={45} max={100} label="Complete" format={(v) => \`\${v}%\`} size={80} thickness={8} aria-label="45% complete" />`}
+  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} label="Assessed" aria-label="72 of 86 assessed" />\n<Gauge value={3.5} max={4} label="Score" format={(v) => v.toFixed(1)} color="var(--demo-good)" aria-label="Score: 3.5/4" />\n<Gauge value={45} max={100} label="Complete" format={(v) => \`\${v}%\`} size={80} thickness={8} aria-label="45% complete" />`}
 >
   <GaugeBasicDemo client:load />
 </Example>
@@ -66,7 +66,7 @@ Different sizes, colours, and format functions.
         <code>string</code>
       </td>
       <td>
-        <code>--color-interactive</code>
+        <code>--raster-series-1</code>
       </td>
       <td>Fill colour</td>
     </tr>
