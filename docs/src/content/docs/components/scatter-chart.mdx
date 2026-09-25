@@ -12,7 +12,7 @@ import {
 ## Basic
 
 <Example
-  code={`import { ScatterChart } from '@eekodigital/raster';\n\n<ScatterChart\n  data={[\n    { x: 12, y: 3, label: 'Homepage' },\n    { x: 28, y: 7, label: 'Dashboard' },\n  ]}\n  xLabel="Page complexity"\n  yLabel="Issues found"\n  aria-label="Complexity vs issues"\n/>`}
+  code={`import { ScatterChart } from '@eekodigital/raster';\n\n<ScatterChart\n  data={[\n    { x: 12, y: 3, label: 'Homepage' },\n    { x: 28, y: 7, label: 'Dashboard' },\n  ]}\n  xLabel="Page complexity"\n  yLabel="Issues found"\n  title="Complexity vs issues"\n/>`}
 >
   <ScatterChartBasicDemo client:load />
 </Example>
@@ -20,10 +20,33 @@ import {
 ## Multi-series
 
 <Example
-  code={`<ScatterChart\n  series={[\n    { name: 'Audit 1', data: [...], color: 'var(--demo-accent)' },\n    { name: 'Audit 2', data: [...], color: 'var(--demo-good)' },\n  ]}\n  xLabel="Elements"\n  yLabel="Violations"\n  aria-label="Audit comparison"\n/>`}
+  code={`<ScatterChart\n  series={[\n    { name: 'Audit 1', data: [...], color: 'var(--demo-accent)' },\n    { name: 'Audit 2', data: [...], color: 'var(--demo-good)' },\n  ]}\n  xLabel="Elements"\n  yLabel="Violations"\n  title="Audit comparison"\n/>`}
 >
   <ScatterChartMultiDemo client:load />
 </Example>
+
+## Accessibility
+
+- A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
+- The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
+- Named series are `role="group"`s. Each point is labelled `{series}, {x}: {y}, 3 of 12` (with its `label` when given). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
+- Points use a different marker shape per series.
+- Arrow keys move in x order, so left and right match the drawing.
+- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
+
+| Key               | Action                               |
+| ----------------- | ------------------------------------ |
+| ← / →             | Previous / next mark                 |
+| Home / End        | First / last mark                    |
+| PageUp / PageDown | Back / forward 10 marks              |
+| ↑ / ↓             | Previous / next series               |
+| Tab               | Leave the chart (one tab stop)       |
+| Enter / Space     | Toggle selection (interactive marks) |
+| Escape            | Clear selection                      |
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -46,7 +69,7 @@ import {
       </td>
       <td>—</td>
       <td>
-        Single series: <code>{`{ x, y, label? }`}</code>
+        Single series: <code>&#123; x, y, label? &#125;</code>.
       </td>
     </tr>
     <tr>
@@ -58,7 +81,7 @@ import {
       </td>
       <td>—</td>
       <td>
-        Multi-series: <code>{`{ name, data, color? }`}</code>
+        Named series: <code>&#123; name, data, color? &#125;</code>.
       </td>
     </tr>
     <tr>
@@ -69,7 +92,7 @@ import {
         <code>string</code>
       </td>
       <td>—</td>
-      <td>X-axis title</td>
+      <td>X-axis title.</td>
     </tr>
     <tr>
       <td>
@@ -79,7 +102,7 @@ import {
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Y-axis title</td>
+      <td>Y-axis title.</td>
     </tr>
     <tr>
       <td>
@@ -91,39 +114,146 @@ import {
       <td>
         <code>"both"</code>
       </td>
-      <td>Grid line visibility</td>
+      <td>Grid lines.</td>
     </tr>
     <tr>
       <td>
         <code>formatValue</code>
       </td>
       <td>
-        <code>(v: number) =&gt; string</code>
+        <code>(value: number) =&gt; string</code>
       </td>
       <td>
-        <code>String</code>
+        <code>Intl.NumberFormat</code>
       </td>
-      <td>Format tick values</td>
+      <td>
+        Formats values in ticks, marks and the table. Defaults to{" "}
+        <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>240</code>
+      </td>
+      <td>Plot height in px.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aspectRatio</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>
+        Width ÷ height, instead of <code>height</code>. The plot box is sized in CSS either way, so
+        server-rendered and hydrated layouts match.
+      </td>
     </tr>
     <tr>
       <td>
         <code>onPointClick</code>
       </td>
       <td>
-        <code>(point, si, pi) =&gt; void</code>
+        <code>(point, seriesIndex, pointIndex) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Click handler per point</td>
+      <td>Makes points buttons.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>selectedIndex</code>
+      </td>
+      <td>
+        <code>&#123; series, point &#125; | null</code>
+      </td>
+      <td>—</td>
+      <td>Controlled selection.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSelect</code>
+      </td>
+      <td>
+        <code>(index | null) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes points buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required.</td>
+      <td>Required. Visible title: names the figure and captions the data table.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hideTitle</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Hide the title visually. It still names the chart for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>
+        Generated strings and the number locale. See{" "}
+        <a href="/guides/accessibility/#labels">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dataTable</code>
+      </td>
+      <td>
+        <code>"disclosure" | "visually-hidden"</code>
+      </td>
+      <td>
+        <code>"disclosure"</code>
+      </td>
+      <td>How the data table is offered.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>
+        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Class on the figure.</td>
     </tr>
   </tbody>
 </table>

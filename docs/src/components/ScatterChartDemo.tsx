@@ -12,7 +12,7 @@ export function ScatterChartBasicDemo() {
       ]}
       xLabel="Page complexity"
       yLabel="Issues found"
-      aria-label="Complexity vs accessibility issues"
+      title="Complexity vs accessibility issues"
     />
   );
 }
@@ -42,7 +42,7 @@ export function ScatterChartMultiDemo() {
       ]}
       xLabel="Elements"
       yLabel="Violations"
-      aria-label="Audit comparison"
+      title="Audit comparison"
     />
   );
 }

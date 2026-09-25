@@ -9,6 +9,7 @@ const PAGES = [
   // Site shell and guides
   { label: "Homepage", path: "/" },
   { label: "Getting started", path: "/guides/getting-started" },
+  { label: "Accessibility", path: "/guides/accessibility" },
   { label: "Theming charts", path: "/guides/theming" },
   { label: "Exporting charts", path: "/guides/exporting" },
   { label: "Comparison", path: "/guides/comparison" },
@@ -23,6 +24,7 @@ const PAGES = [
   { label: "LineChart", path: "/components/line-chart" },
   { label: "LinearGauge", path: "/components/linear-gauge" },
   { label: "RadarChart", path: "/components/radar-chart" },
+  { label: "ScatterChart", path: "/components/scatter-chart" },
   { label: "Sparkline", path: "/components/sparkline" },
 ];
 

@@ -9,7 +9,7 @@ import { RadarChartBasicDemo, RadarChartMultiDemo } from "../../../components/Ra
 ## Basic
 
 <Example
-  code={`import { RadarChart } from '@eekodigital/raster';\n\n<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[{ name: 'Current', data: [80, 65, 90, 70] }]}\n  aria-label="POUR principle scores"\n/>`}
+  code={`import { RadarChart } from '@eekodigital/raster';\n\n<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[{ name: 'Current', data: [80, 65, 90, 70] }]}\n  title="POUR principle scores"\n/>`}
 >
   <RadarChartBasicDemo client:load />
 </Example>
@@ -19,10 +19,31 @@ import { RadarChartBasicDemo, RadarChartMultiDemo } from "../../../components/Ra
 Compare current state against a target or another audit.
 
 <Example
-  code={`<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[\n    { name: 'Current', data: [80, 65, 90, 70], color: 'var(--demo-accent)' },\n    { name: 'Target', data: [100, 100, 100, 100], color: 'var(--demo-good)' },\n  ]}\n  max={100}\n  aria-label="Current vs target"\n/>`}
+  code={`<RadarChart\n  axes={['Perceivable', 'Operable', 'Understandable', 'Robust']}\n  series={[\n    { name: 'Current', data: [80, 65, 90, 70], color: 'var(--demo-accent)' },\n    { name: 'Target', data: [100, 100, 100, 100], color: 'var(--demo-good)' },\n  ]}\n  max={100}\n  title="Current vs target"\n/>`}
 >
   <RadarChartMultiDemo client:load />
 </Example>
+
+## Accessibility
+
+- A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
+- The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
+- Each series is a `role="group"`; each point is labelled `{series}, {axis}: {value}, 2 of 5`. With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
+- Points use a different marker shape per series, and lines a different dash pattern in forced-colours mode.
+- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
+
+| Key           | Action                               |
+| ------------- | ------------------------------------ |
+| ← / →         | Previous / next axis (wraps)         |
+| Home / End    | First / last axis                    |
+| ↑ / ↓         | Previous / next series               |
+| Tab           | Leave the chart                      |
+| Enter / Space | Toggle selection (interactive marks) |
+| Escape        | Clear selection                      |
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -44,7 +65,7 @@ Compare current state against a target or another audit.
         <code>string[]</code>
       </td>
       <td>—</td>
-      <td>Axis labels (one per data point)</td>
+      <td>Required. Axis names.</td>
     </tr>
     <tr>
       <td>
@@ -54,7 +75,9 @@ Compare current state against a target or another audit.
         <code>RadarSeries[]</code>
       </td>
       <td>—</td>
-      <td>{`{ name, data: number[], color? }`}</td>
+      <td>
+        Required. <code>&#123; name, data, color? &#125;</code>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -63,20 +86,10 @@ Compare current state against a target or another audit.
       <td>
         <code>number</code>
       </td>
-      <td>Auto</td>
-      <td>Maximum axis value. Auto-detected if not set.</td>
-    </tr>
-    <tr>
       <td>
-        <code>size</code>
+        <code>data max</code>
       </td>
-      <td>
-        <code>number</code>
-      </td>
-      <td>
-        <code>300</code>
-      </td>
-      <td>Chart size in pixels</td>
+      <td>Value at the rim.</td>
     </tr>
     <tr>
       <td>
@@ -88,17 +101,131 @@ Compare current state against a target or another audit.
       <td>
         <code>4</code>
       </td>
-      <td>Number of grid levels</td>
+      <td>Grid rings.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>size</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Fixed diameter in px. Omit to fill the container's width (square).</td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>Intl.NumberFormat</code>
+      </td>
+      <td>
+        Formats values in ticks, marks and the table. Defaults to{" "}
+        <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>onPointClick</code>
+      </td>
+      <td>
+        <code>(series, axis, value) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes points buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>selectedIndex</code>
+      </td>
+      <td>
+        <code>&#123; series, point &#125; | null</code>
+      </td>
+      <td>—</td>
+      <td>Controlled selection.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSelect</code>
+      </td>
+      <td>
+        <code>(index | null) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes points buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required.</td>
+      <td>Required. Visible title: names the figure and captions the data table.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hideTitle</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Hide the title visually. It still names the chart for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>
+        Generated strings and the number locale. See{" "}
+        <a href="/guides/accessibility/#labels">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dataTable</code>
+      </td>
+      <td>
+        <code>"disclosure" | "visually-hidden"</code>
+      </td>
+      <td>
+        <code>"disclosure"</code>
+      </td>
+      <td>How the data table is offered.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>
+        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Class on the figure.</td>
     </tr>
   </tbody>
 </table>

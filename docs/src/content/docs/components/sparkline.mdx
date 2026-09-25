@@ -9,10 +9,18 @@ import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
 ## Examples
 
 <Example
-  code={`import { Sparkline } from '@eekodigital/raster';\n\n<Sparkline data={[10, 25, 18, 40, 35, 60, 72, 86]} color="var(--demo-good)" aria-label="Upward trend" />\n<Sparkline data={[5, 15, 10, 30, 25, 45]} fill color="var(--demo-accent)" aria-label="Growth" />`}
+  code={`import { Sparkline } from '@eekodigital/raster';\n\n<Sparkline width={80} data={[10, 25, 18, 40, 35, 60, 72, 86]} color="var(--demo-good)" title="Upward trend" />\n<Sparkline width={80} data={[5, 15, 10, 30, 25, 45]} fill color="var(--demo-accent)" title="Growth" />`}
 >
   <SparklineDemo client:load />
 </Example>
+
+## Accessibility
+
+- The drawing is `aria-hidden`. A visually hidden text summary carries the information instead of a data table: `{title}: Sparkline, 8 points. Values from 10 to 86. First 10, last 86.`
+- It has no marks to focus, so it adds no tab stops.
+- Reword or translate the summary with `labels.summary`.
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
 
 ## Props
 
@@ -34,7 +42,17 @@ import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
         <code>number[]</code>
       </td>
       <td>—</td>
-      <td>Data points (minimum 2)</td>
+      <td>Required. Two or more values.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required. What the values are. Not displayed; it leads the text summary.</td>
     </tr>
     <tr>
       <td>
@@ -43,10 +61,8 @@ import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
       <td>
         <code>number</code>
       </td>
-      <td>
-        <code>80</code>
-      </td>
-      <td>Width in pixels</td>
+      <td>—</td>
+      <td>Fixed width in px. Omit to fill the container's width.</td>
     </tr>
     <tr>
       <td>
@@ -58,7 +74,7 @@ import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
       <td>
         <code>24</code>
       </td>
-      <td>Height in pixels</td>
+      <td>Height in px.</td>
     </tr>
     <tr>
       <td>
@@ -68,9 +84,9 @@ import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
         <code>string</code>
       </td>
       <td>
-        <code>--raster-series-1</code>
+        <code>series 1</code>
       </td>
-      <td>Line colour</td>
+      <td>Line colour.</td>
     </tr>
     <tr>
       <td>
@@ -82,17 +98,49 @@ import { SparklineDemo } from "../../../components/SparklineDemo.tsx";
       <td>
         <code>false</code>
       </td>
-      <td>Fill area below line</td>
+      <td>Fill below the line.</td>
     </tr>
     <tr>
       <td>
-        <code>aria-label</code>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>Intl.NumberFormat</code>
+      </td>
+      <td>Formats values in the summary.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>Summary wording and number locale.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>SVG/PNG export.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required.</td>
+      <td></td>
     </tr>
   </tbody>
 </table>

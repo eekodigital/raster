@@ -1,4 +1,5 @@
 import { BarChart } from "@eekodigital/raster";
+import { useState } from "react";
 
 export function BarChartBasicDemo() {
   return (
@@ -10,7 +11,7 @@ export function BarChartBasicDemo() {
         { label: "To do", value: 24 },
       ]}
       colors={["var(--demo-good)", "var(--demo-bad)", "var(--demo-neutral)", "var(--demo-warn)"]}
-      aria-label="Conformance results by status"
+      title="Conformance results by status"
     />
   );
 }
@@ -25,7 +26,34 @@ export function BarChartCustomDemo() {
         { label: "Robust", value: 6 },
       ]}
       height={240}
-      aria-label="Criteria by WCAG principle"
+      title="Criteria by WCAG principle"
     />
+  );
+}
+
+export function BarChartSelectDemo() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const data = [
+    { label: "Q1", value: 0 },
+    { label: "Q2", value: 0 },
+    { label: "Q3", value: 0 },
+  ];
+  return (
+    <div style={{ width: "100%" }}>
+      <BarChart
+        data={data}
+        series={["North", "South"]}
+        values={[
+          [12, 8],
+          [15, 11],
+          [9, 14],
+        ]}
+        stacked
+        title="Sales by region (select a quarter)"
+        selectedIndex={selected}
+        onSelect={setSelected}
+      />
+      <p>{selected === null ? "Nothing selected" : `Selected: ${data[selected].label}`}</p>
+    </div>
   );
 }

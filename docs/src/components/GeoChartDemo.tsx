@@ -44,7 +44,7 @@ export function GeoChartBasicDemo() {
       colorScale={["var(--demo-bad)", "var(--demo-warn)", "var(--demo-good)"]}
       legendLabel="Renewable energy %"
       formatValue={(v) => `${v}%`}
-      aria-label="Renewable energy as a share of total energy consumption by country"
+      title="Renewable energy as a share of total energy consumption by country"
     />
   );
 }
@@ -60,7 +60,7 @@ export function GeoChartMarkersDemo() {
         { lat: 40.7, lon: -74.0, size: 7, label: "New York", color: "var(--demo-bad)" },
         { lat: 35.7, lon: 139.7, size: 5, label: "Tokyo", color: "var(--demo-bad)" },
       ]}
-      aria-label="Office locations"
+      title="Office locations"
     />
   );
 }

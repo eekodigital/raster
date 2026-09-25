@@ -21,7 +21,7 @@ import world from 'world-atlas/countries-110m.json';
     { id: '392', value: 85, label: 'Japan' },
   ]}
   colorScale={['var(--demo-bad)', 'var(--demo-warn)', 'var(--demo-good)']}
-  aria-label="Compliance by country"
+  title="Compliance by country"
 />`}>
   <GeoChartBasicDemo client:only="react" />
 </Example>
@@ -39,7 +39,7 @@ Bubble markers at lat/lon coordinates overlaid on the choropleth.
     { lat: 48.9, lon: 2.3, size: 6, label: 'Paris' },
     { lat: 40.7, lon: -74.0, size: 7, label: 'New York' },
   ]}
-  aria-label="Compliance with office markers"
+  title="Compliance with office markers"
 />`}
 >
   <GeoChartMarkersDemo client:only="react" />
@@ -68,16 +68,280 @@ Pass a `filter` array of feature IDs to show only specific regions:
 <GeoChart topology={world} filter={["GBR", "IRL"]} data={ukData} />
 ```
 
+## Accessibility
+
+- A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
+- The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
+- Regions and markers are two `role="group"`s. Every region is focusable, labelled `{name}: {value}, 3 of 177`, or `{name}: No data` when it has none. Markers are labelled `Markers, {label}, 1 of 4`. With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
+- The data table lists every region (including those with no data) and every marker.
+- Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
+
+| Key               | Action                               |
+| ----------------- | ------------------------------------ |
+| ← / →             | Previous / next region or marker     |
+| Home / End        | First / last                         |
+| PageUp / PageDown | Back / forward 10                    |
+| ↑ / ↓             | Switch between regions and markers   |
+| Tab               | Leave the map                        |
+| Enter / Space     | Toggle selection (interactive marks) |
+| Escape            | Clear selection                      |
+
+See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
+
 ## Props
 
-| Prop            | Type                                    | Default           | Description                              |
-| --------------- | --------------------------------------- | ----------------- | ---------------------------------------- |
-| `topology`      | `Topology`                              | —                 | TopoJSON data (e.g. from world-atlas)    |
-| `data`          | `GeoRegionDatum[]`                      | `[]`              | `{ id, value, label? }` per region       |
-| `colorScale`    | `string[]`                              | Interactive scale | Colours from low to high value           |
-| `markers`       | `GeoMarker[]`                           | `[]`              | `{ lat, lon, size?, label, color? }`     |
-| `projection`    | `"mercator" \| "equirectangular" \| fn` | `"mercator"`      | Map projection                           |
-| `filter`        | `string[]`                              | —                 | Feature IDs to include (show only these) |
-| `onRegionClick` | `(datum, id) => void`                   | —                 | Click handler per region                 |
-| `onMarkerClick` | `(marker, index) => void`               | —                 | Click handler per marker                 |
-| `aria-label`    | `string`                                | —                 | Required.                                |
+<table class="props-table">
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>topology</code>
+      </td>
+      <td>
+        <code>GeoTopology</code>
+      </td>
+      <td>—</td>
+      <td>
+        Required. TopoJSON, e.g. <code>world-atlas</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>objectName</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>first object</code>
+      </td>
+      <td>Topology object to draw.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>data</code>
+      </td>
+      <td>
+        <code>GeoRegionDatum[]</code>
+      </td>
+      <td>
+        <code>[]</code>
+      </td>
+      <td>
+        <code>&#123; id, value, label? &#125;</code> per region.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>colorScale</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>
+        <code>series 1 ramp</code>
+      </td>
+      <td>Colours from low to high.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>markers</code>
+      </td>
+      <td>
+        <code>GeoMarker[]</code>
+      </td>
+      <td>
+        <code>[]</code>
+      </td>
+      <td>
+        <code>&#123; lat, lon, label, value?, size?, color? &#125;</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>projection</code>
+      </td>
+      <td>
+        <code>"mercator" | "equirectangular" | fn</code>
+      </td>
+      <td>
+        <code>"mercator"</code>
+      </td>
+      <td>Map projection.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>filter</code>
+      </td>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>—</td>
+      <td>Only draw these region ids.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>legendLabel</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Colour-scale legend title.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>Intl.NumberFormat</code>
+      </td>
+      <td>
+        Formats values in ticks, marks and the table. Defaults to{" "}
+        <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>height</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>—</td>
+      <td>Plot height in px.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>aspectRatio</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>16 / 9</code>
+      </td>
+      <td>Width ÷ height. The map fills its container's width.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onRegionClick</code>
+      </td>
+      <td>
+        <code>(datum, id) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes regions buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onMarkerClick</code>
+      </td>
+      <td>
+        <code>(marker, index) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes markers buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>selectedIndex</code>
+      </td>
+      <td>
+        <code>&#123; region &#125; | &#123; marker &#125; | null</code>
+      </td>
+      <td>—</td>
+      <td>Controlled selection.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onSelect</code>
+      </td>
+      <td>
+        <code>(selection | null) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Makes regions and markers buttons.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>title</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Required. Visible title: names the figure and captions the data table.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>hideTitle</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Hide the title visually. It still names the chart for assistive technology.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>Partial&lt;ChartLabels&gt;</code>
+      </td>
+      <td>English</td>
+      <td>
+        Generated strings and the number locale. See{" "}
+        <a href="/guides/accessibility/#labels">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dataTable</code>
+      </td>
+      <td>
+        <code>"disclosure" | "visually-hidden"</code>
+      </td>
+      <td>
+        <code>"disclosure"</code>
+      </td>
+      <td>How the data table is offered.</td>
+    </tr>
+    <tr>
+      <td>
+        <code>exportRef</code>
+      </td>
+      <td>
+        <code>Ref&lt;ChartExportHandle&gt;</code>
+      </td>
+      <td>—</td>
+      <td>
+        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>className</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Class on the figure.</td>
+    </tr>
+  </tbody>
+</table>
