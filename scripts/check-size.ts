@@ -16,21 +16,27 @@ import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
 
-/** Budgets in gzipped bytes. Raise deliberately, in the PR that needs it. */
+/**
+ * Budgets in gzipped bytes. Raise deliberately, in the PR that needs it.
+ *
+ * Framed charts carry the shared accessibility layer (figure + summary, data
+ * table disclosure, `labels`, state-based roving focus, selection + live
+ * region): about 1.3–2.5 KB per entry, set in the raster-3 a11y PR.
+ */
 const BUDGETS: Record<string, number> = {
-  ".": 10_000,
-  "./bar-chart": 5_000,
+  ".": 10_800,
+  "./bar-chart": 6_300,
   "./chart-tooltip": 800,
-  "./donut-chart": 3_750,
+  "./donut-chart": 5_200,
   "./gauge": 2_000,
-  "./geo": 4_000,
-  "./line-chart": 5_000,
+  "./geo": 5_700,
+  "./line-chart": 6_300,
   "./linear-gauge": 800,
-  "./radar-chart": 3_200,
-  "./scatter-chart": 4_300,
-  "./sparkline": 2_000,
+  "./radar-chart": 5_300,
+  "./scatter-chart": 5_800,
+  "./sparkline": 2_400,
   "./theme": 300,
-  "./styles.css": 3_300,
+  "./styles.css": 3_400,
 };
 
 const root = resolve(import.meta.dirname, "..");
