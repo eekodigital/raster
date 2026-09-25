@@ -101,6 +101,69 @@ test.describe("server rendering", () => {
   });
 });
 
+test.describe("marks in a real browser", () => {
+  test.use({ colorScheme: "light" });
+
+  const opacity = (page: Page, selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).opacity);
+
+  test("areas keep their opacity after fading in, and selection dims other points", async ({
+    page,
+  }) => {
+    await page.goto("/components/line-chart");
+    await page.waitForLoadState("networkidle");
+    const area = figure(page, "Assessment progress (area)").locator(".raster-line__area");
+    await expect.poll(() => area.evaluate((el) => getComputedStyle(el).opacity)).toBe("0.15");
+
+    const chart = figure(page, "Results trend (select a point)");
+    await chart.getByRole("button", { name: "Pass, Jan: 0, 1 of 6" }).focus();
+    await page.keyboard.press("Enter");
+    const other = chart.getByRole("button", { name: "Pass, Feb: 5, 2 of 6" });
+    await expect.poll(() => other.evaluate((el) => getComputedStyle(el).opacity)).toBe("0.3");
+    expect(await opacity(page, ".raster-line__point[data-selected]")).toBe("1");
+  });
+
+  test("the tooltip stays inside the chart at the rightmost point", async ({ page }) => {
+    await page.goto("/components/line-chart");
+    await page.waitForLoadState("networkidle");
+    const chart = figure(page, "Results trend by status");
+    await chart.getByRole("img", { name: "N/A, Jun: 12, 6 of 6" }).hover();
+    const tip = chart.locator(".raster-tooltip[data-visible]");
+    await expect(tip).toHaveCount(1);
+    const plot = await chart.locator(".raster-chart__plot").boundingBox();
+    await expect
+      .poll(async () => {
+        const b = await tip.boundingBox();
+        return b!.x + b!.width;
+      })
+      .toBeLessThanOrEqual(plot!.x + plot!.width + 0.5);
+    // Escape dismisses it without moving focus or the pointer (WCAG 1.4.13).
+    await chart.getByRole("img", { name: "N/A, Jun: 12, 6 of 6" }).focus();
+    await page.keyboard.press("Escape");
+    await expect(tip).toHaveCount(0);
+  });
+
+  test("a focused point has a surface halo inside a focus-coloured ring", async ({ page }) => {
+    await page.goto("/components/line-chart");
+    await page.waitForLoadState("networkidle");
+    const chart = figure(page, "Results trend (select a point)");
+    const first = chart.getByRole("button", { name: "Pass, Jan: 0, 1 of 6" });
+    await first.focus();
+    await page.keyboard.press("ArrowRight");
+    const feb = chart.getByRole("button", { name: "Pass, Feb: 5, 2 of 6" });
+    await expect(feb).toBeFocused();
+    const { outline, stroke, fill } = await feb.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { outline: cs.outlineStyle, stroke: cs.stroke, fill: cs.fill };
+    });
+    expect(outline).toBe("solid");
+    expect(stroke).not.toBe(fill);
+  });
+});
+
 test.describe("forced colours", () => {
   test.use({ colorScheme: "light" });
 
@@ -140,6 +203,30 @@ test.describe("forced colours", () => {
 
     const results = await new AxeBuilder({ page }).include(".raster-chart").analyze();
     expect(results.violations).toEqual([]);
+  });
+});
+
+test.describe("forced colours: bars", () => {
+  test.use({ colorScheme: "light" });
+
+  test("stacked bar series after the first are outlined with their legend dash", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await page.goto("/components/bar-chart");
+    await page.waitForLoadState("networkidle");
+    const chart = figure(page, "Sales by region (select a quarter)");
+    const style = (selector: string, prop: string) =>
+      chart
+        .locator(selector)
+        .first()
+        .evaluate((el, p) => getComputedStyle(el).getPropertyValue(p), prop);
+    expect(await style('[data-series="1"] > .raster-bar__bar', "stroke-dasharray")).toBe("none");
+    const bar2 = await style('[data-series="2"] > .raster-bar__bar', "stroke-dasharray");
+    expect(bar2).toBe("6px, 3px");
+    expect(await style('.raster-legend__swatch[data-series="2"] line', "stroke-dasharray")).toBe(
+      bar2,
+    );
   });
 });
 
