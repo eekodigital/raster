@@ -7,7 +7,6 @@
 - 44b5022: **Accessible, responsive charts.** Every chart now shares one accessible structure, keyboard model and sizing model. See the Accessibility guide and "Migrating from v2" for details.
 
   ### Changed (breaking)
-
   - Charts are `role="figure"`s named by a visible **`title`** (replaces `aria-label`; `hideTitle` keeps it for screen readers only) and described by a generated summary. The SVG is `role="group"` with `aria-roledescription="chart"`; series are groups; marks are labelled "{series}, {x}: {y}, 3 of 12".
   - LineChart's x-axis `labels` prop is renamed **`categories`**. `labels` is now the object of generated strings (English defaults, `locale` for `Intl` number formatting).
   - Values are formatted with `Intl.NumberFormat` by default.
@@ -20,7 +19,6 @@
   - Multi-series line, scatter and radar points use a different marker shape per series.
 
   ### Added
-
   - `aspectRatio` as an alternative to `height`; the plot is sized in CSS, so SSR doesn't shift.
   - Keyboard: one tab stop per chart, arrows, Home/End, PageUp/PageDown, Enter/Space; stacked and grouped bars and GeoChart regions and markers are navigable. Escape clears the selection inside the chart only, announced in a polite live region.
   - `min` on Gauge and LinearGauge; `selectedIndex`/`onSelect` on ScatterChart, RadarChart and GeoChart; `value` on GeoChart markers.
@@ -32,7 +30,6 @@
   - `DEFAULT_LABELS` and the types `ChartLabels`, `ChartType`, `MarkLabelParts`, `SummaryParts`, `DataTableMode`, `LinePointIndex`, `ScatterPointIndex`, `RadarPointIndex` and `GeoSelection`.
 
   ### Fixed
-
   - DonutChart's draw-in animation now respects `prefers-reduced-motion`.
   - GeoChart keyboard navigation (focus never moved before) and unreachable markers.
   - Escape no longer listens on `document`, so it doesn't close a surrounding dialog.
@@ -46,13 +43,11 @@
   The 2.x source and docs remain at the `v2.0.1` git tag, and `2.0.1` stays on npm.
 
   ### Removed
-
   - Every non-chart component: Accordion, AlertDialog, Avatar, Badge, Box, Breadcrumbs, Button, Card, Checkbox, Collapsible, DateInput, Details, Dialog, DropdownMenu, ErrorSummary, Fieldset, FileUpload, Flex, Grid, NotificationBanner, OneTimePasswordField, Pagination, PasswordToggleField, Popover, Portal, Progress, Radio, ScrollArea, SegmentedButtons, Select, Separator, Skeleton, SkipLink, Slider, Spinner, SummaryList, Switch, Table, Tabs, Tag, Textarea, TextInput, Toast, Tooltip, Typography.
   - `DataTable` and the `@eekodigital/raster/data-table` entry.
   - `@eekodigital/raster/tokens.css` and `@eekodigital/raster/primitives.css`.
 
   ### Added
-
   - `@eekodigital/raster/styles.css`: the single stylesheet. No JS entry imports CSS, so `sideEffects` now lists only CSS (`["*.css"]`): bundlers can drop unused charts but keep the stylesheet import.
   - `@eekodigital/raster/theme`: `rasterVars`, the typed theming contract.
   - Per-chart entry points: `/line-chart`, `/bar-chart`, `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip`.
@@ -61,7 +56,6 @@
   - Forced-colours styles: system colours, with per-series dash patterns.
 
   ### Migration guide
-
   1. **Load the stylesheet once** at your app root and drop the tokens import:
 
      ```diff
