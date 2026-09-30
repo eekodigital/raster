@@ -28,17 +28,15 @@ jobs:
       - run: pnpm build
 
       # Creates a "Version Packages" PR when changesets exist.
-      # When that PR merges, hasChangesets will be false — time to publish.
+      # When that PR merges, has-changesets will be false — time to publish.
       - id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2.1.2
         with:
-          title: "chore: version package"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pr-title: "chore: version package"
 
       # Publish with OIDC trusted publishing (no NPM_TOKEN needed).
       # Trusted publishing requires npm >= 11.5 and npm's own publish path —
       # pnpm publish doesn't forward the OIDC identity correctly. Node 24
       # ships with npm >= 11.5 so no manual install step is needed.
-      - if: steps.changesets.outputs.hasChangesets == 'false'
+      - if: steps.changesets.outputs.has-changesets == 'false'
         run: npm publish --provenance --access public

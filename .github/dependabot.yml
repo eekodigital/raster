@@ -1,0 +1,93 @@
+version: 2
+
+# Each npm entry below shares the same shape (groups, cooldown, labels, etc.).
+# We'd love to DRY this with YAML anchors, but GitHub's dependabot parser
+# explicitly rejects YAML aliases ("YAML aliases are not supported"), so the
+# config has to be inlined per workspace.
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: npm
+    directory: /docs
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - maintenance
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    ignore:
+      # docs/ runs `astro check`, and @astrojs/check (0.9.10) peers
+      # typescript ^5 || ^6. Stay on TypeScript 6 here until it supports 7.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+    groups:
+      production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: friday
+      time: "12:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 2
+    labels:
+      - maintenance
+      - github-actions
+    cooldown:
+      default-days: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions-minor-and-patch:
+        update-types:
+          - patch
+          - minor
