@@ -1,13 +1,11 @@
 import { configureAxe } from "vitest-axe";
 import type { AxeResults, RunOptions } from "axe-core";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Vitest 5: augment `Matchers` — both `Assertion` and
+// `AsymmetricMatchersContaining` extend it.
 declare module "vitest" {
-  interface Assertion<T = any> {
+  interface Matchers<R extends void | Promise<void> = void | Promise<void>, T = unknown> {
     toHaveNoViolations: (results?: T) => Promise<void>;
-  }
-  interface AsymmetricMatchersContaining {
-    toHaveNoViolations: (results?: unknown) => Promise<void>;
   }
 }
 
