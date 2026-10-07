@@ -19,6 +19,7 @@ import { appendFileSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
+import { clientEntries, entries } from "../tsdown.config.ts";
 
 /**
  * Budgets in gzipped bytes. They're tripwires, not targets: each is about
@@ -98,6 +99,17 @@ for (const f of readdirSync(join(root, "dist")).filter((f) => f.endsWith(".mjs")
     ),
   );
   if (css.some((s) => s.endsWith(".css"))) failures.push(`dist/${f} imports CSS`);
+}
+
+// Component entries start with "use client" (for React Server Components);
+// entries of plain functions and values don't, so server code can call them.
+for (const [name, source] of Object.entries(entries)) {
+  const first = readFileSync(join(root, "dist", `${name}.mjs`), "utf8").split("\n", 1)[0];
+  const marked = first === '"use client";';
+  if (clientEntries.has(name) !== marked)
+    failures.push(
+      `dist/${name}.mjs (${source}) ${marked ? "shouldn't" : "should"} start with "use client"`,
+    );
 }
 
 const rows: string[] = [];

@@ -23,7 +23,7 @@ Raster deliberately leaves out zoom, brushing, Canvas rendering and combined cha
 `ChartFrame`, `ChartDataTable` and `describeChart` are at `@eekodigital/raster/frame` (about 1.6 KB) and in the main entry.
 
 - **Table cells are shown as given.** Format numbers before passing them (`value.toLocaleString(locale)`), so the table matches the summary.
-- **React Server Components:** like raster's charts, `ChartFrame` uses hooks (the table toggle), so import it from a `"use client"` file. It's still rendered on the server during SSR, so the figure, summary and table are in the HTML before JavaScript runs.
+- **React Server Components:** `@eekodigital/raster/frame` starts with `"use client"`, so a Server Component can render `ChartFrame` directly, and it's still server-rendered. Call `describeChart` in a client component, though: see [Server rendering and React Server Components](/guides/getting-started/#server-rendering-and-react-server-components).
 - **Export:** `exportSVG` and `exportPNG` from `/export` only export raster's own charts. They leave a wrapped chart alone rather than export whatever SVG they find; use that library's own export.
 
 ## With TanStack Charts
