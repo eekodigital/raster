@@ -34,6 +34,8 @@ export type ChartFrameProps = Omit<ChartFrameOptions, "labels"> & {
   /** The chart's tooltip, drawn over the SVG. Decorative: marks already carry the text. */
   tooltip?: ReturnType<typeof useChartTooltip>;
   legend?: React.ReactNode;
+  /** HTML over the plot, e.g. a dense chart's focusable slider. */
+  overlay?: React.ReactNode;
   table: ChartTableData;
   // oxlint-disable-next-line no-explicit-any
   selection?: Selection<any>;
@@ -63,6 +65,7 @@ export function ChartFrame({
   svgClassName,
   tooltip,
   legend,
+  overlay,
   table,
   selection,
   children,
@@ -107,6 +110,7 @@ export function ChartFrame({
         >
           {children}
         </svg>
+        {overlay}
         {tooltip && <ChartTooltip id={tooltip.tooltipId} {...tooltip.tooltipProps} decorative />}
       </div>
       {legend}

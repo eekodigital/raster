@@ -20,6 +20,45 @@ export function LineChartDatesDemo() {
   );
 }
 
+// Two years of daily figures: 730 points a series, so the chart is dense.
+const YEAR_DAYS = Array.from({ length: 730 }, (_, i) => Date.UTC(2025, 0, 1) + i * DAY);
+/** Daily traffic: slow growth, a yearly cycle, quieter weekends and a little noise. */
+const traffic = (base: number, seed: number) =>
+  YEAR_DAYS.map((t, i) => {
+    const weekend = [0, 6].includes(new Date(t).getUTCDay()) ? 0.9 : 1;
+    const noise = Math.sin(i * 12.9898 + seed) * 43758.5453;
+    return Math.round(
+      (base + i * 0.2 + base * 0.25 * Math.sin((2 * Math.PI * i) / 365)) * weekend +
+        (noise - Math.floor(noise)) * base * 0.05,
+    );
+  });
+const DENSE = [
+  { name: "Views", data: traffic(400, 1) },
+  { name: "Visitors", data: traffic(180, 2) },
+];
+const DENSE_AXIS = timeAxis(YEAR_DAYS, { interval: "day" });
+
+export function LineChartDenseDemo() {
+  const [selected, setSelected] = useState<LinePointIndex | null>(null);
+  return (
+    <div style={{ width: "100%" }}>
+      <LineChart
+        series={DENSE}
+        x={DENSE_AXIS}
+        labels={{ locale: "en-GB" }}
+        title="Daily traffic, 2025–2026"
+        selectedIndex={selected}
+        onSelect={setSelected}
+      />
+      <p>
+        {selected
+          ? `Selected: ${DENSE[selected.series].name}, ${DENSE[selected.series].data[selected.point]}`
+          : "Nothing selected"}
+      </p>
+    </div>
+  );
+}
+
 export function LineChartBasicDemo() {
   return (
     <LineChart

@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   arcPath,
   catmullRomPath,
+  compactPath,
+  decimate,
+  nearestIndex,
   polylinePath,
   bandScale,
   clamp,
@@ -246,5 +249,39 @@ describe("polylinePath and catmullRomPath", () => {
         { x: 2, y: 0 },
       ]),
     ).toMatch(/^M 0 0 C .* C .*, 2 0$/);
+  });
+});
+
+describe("dense series helpers", () => {
+  it("keeps each pixel column's lowest and highest point, in order", () => {
+    const pts = [
+      { x: 0.1, y: 5 },
+      { x: 0.4, y: 1 },
+      { x: 0.6, y: 9 },
+      { x: 0.9, y: 4 },
+      { x: 1.2, y: 3 },
+    ];
+    expect(decimate(pts)).toEqual([pts[1], pts[2], pts[4]]);
+  });
+
+  it("bounds the output at two points per column", () => {
+    const pts = Array.from({ length: 5000 }, (_, i) => ({ x: i / 10, y: Math.sin(i) }));
+    expect(decimate(pts).length).toBeLessThanOrEqual(1000);
+  });
+
+  it("draws a compact path: one decimal place, implicit line-tos", () => {
+    expect(
+      compactPath([
+        { x: 0, y: 1.234 },
+        { x: 2.05, y: 3 },
+        { x: 4, y: 5.96 },
+      ]),
+    ).toBe("M0 1.2 2.1 3 4 6");
+  });
+
+  it("finds the nearest x by binary search", () => {
+    const xs = [0, 10, 20, 30];
+    expect([-5, 4, 6, 15, 26, 99].map((x) => nearestIndex(xs, x))).toEqual([0, 0, 1, 1, 3, 3]);
+    expect(nearestIndex([], 3)).toBe(-1);
   });
 });

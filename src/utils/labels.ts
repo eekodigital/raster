@@ -42,6 +42,8 @@ export type ChartLabels = {
   showTable: string;
   hideTable: string;
   tableCaption: (title: string) => string;
+  /** Appended to a dense chart's current point when it's selected. */
+  selected: string;
   /** Announced (off focus) when Escape clears a selection. */
   selectionCleared: string;
   /** Map regions without a value, in marks and the data table. */
@@ -90,6 +92,7 @@ export const DEFAULT_LABELS: ChartLabels = {
   showTable: "Show data table",
   hideTable: "Hide data table",
   tableCaption: (title) => `Data for ${title}`,
+  selected: "selected",
   selectionCleared: "Selection cleared",
   noData: "No data",
   regions: "Regions",

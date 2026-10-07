@@ -36,6 +36,45 @@ test.describe("keyboard", () => {
     await expect(jun).toHaveAttribute("tabindex", "0");
   });
 
+  test("LineChart dense mode: one slider, arrows, pointer, selection", async ({ page }) => {
+    await page.goto("/components/line-chart");
+    const chart = figure(page, "Daily traffic, 2025–2026");
+    const slider = chart.getByRole("slider", { name: "Views" });
+    await expect(chart.locator('input, [tabindex="0"]')).toHaveCount(1);
+
+    await slider.focus();
+    await expect(slider).toHaveAttribute(
+      "aria-valuetext",
+      /^Views, 1 January 2025: \d+, 1 of 730$/,
+    );
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("PageDown");
+    await expect(slider).toHaveAttribute(
+      "aria-valuetext",
+      /^Views, 12 January 2025: \d+, 12 of 730$/,
+    );
+    await expect(chart.locator(".raster-line__marker[data-focused]")).toBeVisible();
+    // The focus ring is drawn centred on the marker.
+    const ring = (await chart.locator(".raster-line__ring").boundingBox())!;
+    const dot = (await chart.locator(".raster-line__marker").boundingBox())!;
+    expect(Math.abs(ring.x + ring.width / 2 - (dot.x + dot.width / 2))).toBeLessThan(1);
+    expect(Math.abs(ring.y + ring.height / 2 - (dot.y + dot.height / 2))).toBeLessThan(1);
+    await page.keyboard.press("ArrowDown");
+    await expect(chart.getByRole("slider", { name: "Visitors" })).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(page.getByText(/^Selected: Visitors, \d+$/)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByText("Nothing selected").last()).toBeVisible();
+
+    // Pointer: hovering the middle of the plot shows the tooltip for a mid-range point.
+    const hit = chart.locator(".raster-line__hit");
+    await hit.hover();
+    const tip = chart.locator(".raster-tooltip");
+    await expect(tip).toHaveAttribute("data-visible", "true");
+    await expect(tip).toHaveText(/^(Views|Visitors), \d+ \w+ 202[56]: \d+, \d+ of 730$/);
+  });
+
   test("BarChart: stacked bars are navigable and select a category", async ({ page }) => {
     await page.goto("/components/bar-chart");
     const chart = figure(page, "Sales by region (select a quarter)");
