@@ -1,0 +1,75 @@
+---
+title: Wrapping other charts
+description: Use raster's accessible frame (figure, summary and data table) around a chart raster doesn't draw, such as a TanStack Charts or Canvas chart.
+---
+
+import Example from "../../../components/Example.astro";
+import { FrameDemo } from "../../../components/FrameDemo.tsx";
+
+Raster deliberately leaves out zoom, brushing, Canvas rendering and combined chart types. When a product needs one of those, draw that chart with another library and wrap it in raster's `ChartFrame`. It gets the same accessible structure as raster's own charts, in the server-rendered HTML before any JavaScript runs:
+
+- a `role="figure"` named by the visible title
+- a text summary describing what the chart shows
+- the chart, rendered as it is
+- a legend, if you pass one
+- a **Show data table** disclosure with a captioned table of the values
+
+<Example
+  code={`import { ChartFrame, describeChart } from "@eekodigital/raster/frame";\n\n<ChartFrame\n  title="Views this week (canvas)"\n  summary={describeChart({ type: "line", series: 1, points: 7, x: ["Mon", "Sun"], y: ["340", "610"] })}\n  table={{\n    headers: ["Day", "Views"],\n    rows: days.map((day, i) => ({ key: day, cells: [day, views[i]] })),\n  }}\n>\n  <canvas aria-hidden="true" … />\n</ChartFrame>`}
+>
+  <FrameDemo client:load />
+</Example>
+
+`ChartFrame`, `ChartDataTable` and `describeChart` are at `@eekodigital/raster/frame` (about 1.6 KB) and in the main entry.
+
+## With TanStack Charts
+
+TanStack Charts renders its marks after hydration, with the chart exposed as one `role="img"` whose name you pass in `ariaLabel`. The values aren't in the server HTML. Wrapping it adds the summary and the data table:
+
+```tsx
+import { ChartFrame, describeChart } from "@eekodigital/raster/frame";
+import { Chart } from "@tanstack/charts/react";
+
+<ChartFrame
+  title="Revenue by month"
+  summary={describeChart({
+    type: "line",
+    series: 1,
+    points: 12,
+    x: ["Jan", "Dec"],
+    y: ["£12k", "£48k"],
+  })}
+  table={{
+    headers: ["Month", "Revenue"],
+    rows: months.map((m, i) => ({ key: m, cells: [m, revenue[i]] })),
+  }}
+>
+  <Chart definition={definition} aspectRatio={16 / 9} ariaLabel="Revenue by month, zoomable" />
+</ChartFrame>;
+```
+
+## Hidden or exposed?
+
+- **Interactive charts** (keyboard focus, zoom, selection): leave them exposed. Hiding a focusable element with `aria-hidden` leaves keyboard users on something screen readers can't see. Give it a short name that adds to the title, such as "zoomable", rather than repeating it.
+- **Static charts** (a canvas, an image, an SVG with no focus): hide them with `aria-hidden="true"`. The figure's title, summary and table already carry everything, and the drawing would only be announced as an unlabelled graphic.
+
+## `describeChart`
+
+`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types, or any name ("Heatmap"), used as it is. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
+
+## Props
+
+| Prop        | Type                                       | Description                                                                                     |
+| ----------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `title`     | `string`                                   | Required. Visible title: names the figure and captions the table.                               |
+| `summary`   | `string`                                   | Required. The text alternative: what the chart shows.                                           |
+| `children`  | `ReactNode`                                | Required. The chart, rendered as it is.                                                         |
+| `table`     | `{ headers, rows, caption?, rowHeaders? }` | The data. `caption` defaults to "Data for \{title\}"; the first cell of each row is a row header. |
+| `dataTable` | `"disclosure" \| "visually-hidden"`        | How the table is offered. Default `"disclosure"`.                                               |
+| `hideTitle` | `boolean`                                  | Keep the title for assistive technology but hide it visually.                                   |
+| `legend`    | `ReactNode`                                | Shown under the chart.                                                                          |
+| `labels`    | `Partial<ChartLabels>`                     | Generated strings and the number locale.                                                        |
+| `ref`       | `Ref<HTMLDivElement>`                      | The figure element.                                                                             |
+| `className` | `string`                                   | Class on the figure.                                                                            |
+
+`ChartDataTable` takes `caption`, `headers`, `rows`, `rowHeaders`, `labels`, `mode` and `describedBy` on its own, if a product only needs the table.

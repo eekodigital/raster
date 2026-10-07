@@ -10,7 +10,7 @@ import { plotSize, useContainerWidth } from "../../utils/use-container-width.js"
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
-import { ChartFrame } from "../shared/ChartFrame.js";
+import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 
@@ -267,7 +267,7 @@ export function GeoChart({
   };
 
   return (
-    <ChartFrame
+    <SvgChartFrame
       {...frame}
       labels={labels}
       summary={summary}
@@ -358,6 +358,6 @@ export function GeoChart({
           })}
         </g>
       )}
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }

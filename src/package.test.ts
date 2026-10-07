@@ -17,6 +17,13 @@ describe("package.json", () => {
     expect(pkg.files).toContain("dist");
   });
 
+  it("offers the accessibility frame on its own, at ./frame", () => {
+    expect(pkg.exports["./frame"]).toEqual({
+      types: "./dist/frame.d.mts",
+      import: "./dist/frame.mjs",
+    });
+  });
+
   it("keeps export code out of the chart entries, at ./export", () => {
     expect(pkg.exports["./export"]).toEqual({
       types: "./dist/export.d.mts",

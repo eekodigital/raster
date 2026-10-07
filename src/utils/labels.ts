@@ -17,7 +17,8 @@ export type MarkLabelParts = {
 };
 
 export type SummaryParts = {
-  type: ChartType;
+  /** A raster chart type, or any other chart's name ("Heatmap"), used as it is. */
+  type: ChartType | (string & {});
   series: number;
   /** Total number of marks. */
   points: number;
@@ -125,7 +126,11 @@ export const DEFAULT_LABELS: ChartLabels = {
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,
   summary: ({ type, series, points: count, x, y, first, last, references = [] }, n) =>
     [
-      `${[TYPE_NAMES[type], series > 1 && `${n(series)} series`, points(count, n)]
+      `${[
+        TYPE_NAMES[type as ChartType] ?? type,
+        series > 1 && `${n(series)} series`,
+        points(count, n),
+      ]
         .filter(Boolean)
         .join(", ")}.`,
       x && `${x[0]} to ${x[1]}.`,
@@ -139,6 +144,16 @@ export const DEFAULT_LABELS: ChartLabels = {
 
 export function resolveLabels(overrides?: Partial<ChartLabels>): ChartLabels {
   return overrides ? { ...DEFAULT_LABELS, ...overrides } : DEFAULT_LABELS;
+}
+
+/**
+ * Raster's generated summary ("Line chart, 2 series, 730 points. 1 Jan to 31
+ * Dec. Values from 3 to 412."), for a chart raster doesn't draw, so it reads
+ * like raster's own. Uses `labels.summary`, with counts in `labels.locale`.
+ */
+export function describeChart(parts: SummaryParts, labels?: Partial<ChartLabels>): string {
+  const resolved = resolveLabels(labels);
+  return resolved.summary(parts, numberFormatter(resolved.locale));
 }
 
 const formatters = new Map<string, NumberFormat>();

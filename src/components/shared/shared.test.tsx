@@ -5,7 +5,7 @@ import { axe } from "../../test-utils/axe.js";
 import { DEFAULT_LABELS } from "../../utils/labels.js";
 import { useSelection } from "../../utils/use-selection.js";
 import { ChartDataTable } from "./ChartDataTable.js";
-import { ChartFrame, type ChartFrameProps } from "./ChartFrame.js";
+import { SvgChartFrame, type SvgChartFrameProps } from "./ChartFrame.js";
 import { ChartLegend } from "./ChartLegend.js";
 
 const TABLE = {
@@ -139,11 +139,11 @@ describe("ChartLegend", () => {
   });
 });
 
-function Frame(props: Partial<ChartFrameProps> & { onSelect?: (v: number | null) => void }) {
+function Frame(props: Partial<SvgChartFrameProps> & { onSelect?: (v: number | null) => void }) {
   const plotRef = useRef<HTMLDivElement>(null);
   const selection = useSelection<number>(undefined, props.onSelect, DEFAULT_LABELS);
   return (
-    <ChartFrame
+    <SvgChartFrame
       title="Sales"
       summary="Bar chart, 2 points."
       labels={DEFAULT_LABELS}
@@ -161,7 +161,7 @@ function Frame(props: Partial<ChartFrameProps> & { onSelect?: (v: number | null)
         tabIndex={0}
         onClick={() => selection.toggle(0)}
       />
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }
 

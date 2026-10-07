@@ -39,6 +39,7 @@ export default defineConfig({
             { label: "Accessibility", slug: "guides/accessibility" },
             { label: "Theming charts", slug: "guides/theming" },
             { label: "Exporting charts", slug: "guides/exporting" },
+            { label: "Wrapping other charts", slug: "guides/wrapping" },
             { label: "Compared with alternatives", slug: "guides/comparison" },
             { label: "Migrating from v2", slug: "guides/migrating" },
           ],

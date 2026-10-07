@@ -7,7 +7,7 @@ export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
-import { ChartFrame } from "../shared/ChartFrame.js";
+import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
@@ -100,7 +100,7 @@ export function RadarChart({
   const gridLevels = Array.from({ length: levels }, (_, i) => ((i + 1) / levels) * radius);
 
   return (
-    <ChartFrame
+    <SvgChartFrame
       {...frame}
       labels={labels}
       summary={summary}
@@ -204,6 +204,6 @@ export function RadarChart({
           </g>
         );
       })}
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }

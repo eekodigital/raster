@@ -6,6 +6,8 @@ exports[`public API > exports exactly these names from each entry 1`] = `
 {
   ".": [
     "BarChart",
+    "ChartDataTable",
+    "ChartFrame",
     "ChartTooltip",
     "DEFAULT_LABELS",
     "DonutChart",
@@ -15,11 +17,17 @@ exports[`public API > exports exactly these names from each entry 1`] = `
     "RadarChart",
     "ScatterChart",
     "Sparkline",
+    "describeChart",
     "useChartTooltip",
   ],
   "./export": [
     "exportPNG",
     "exportSVG",
+  ],
+  "./frame": [
+    "ChartDataTable",
+    "ChartFrame",
+    "describeChart",
   ],
   "./geo": [
     "GeoChart",

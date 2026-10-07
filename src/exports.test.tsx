@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as geo from "./geo.js";
 import * as main from "./index.js";
 import * as exporter from "./export.js";
+import * as frame from "./frame.js";
 import * as theme from "./theme.js";
 import * as time from "./time.js";
 import { Gauge } from "./components/Gauge/Gauge.js";
@@ -18,6 +19,7 @@ describe("public API", () => {
       ".": Object.keys(main).sort(),
       "./geo": Object.keys(geo).sort(),
       "./export": Object.keys(exporter).sort(),
+      "./frame": Object.keys(frame).sort(),
       "./theme": Object.keys(theme).sort(),
       "./time": Object.keys(time).sort(),
     }).toMatchSnapshot();

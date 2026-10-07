@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import type React from "react";
+import { resolveLabels } from "../../utils/labels.js";
 import type { ChartLabels } from "../../utils/labels.js";
 
 /**
@@ -38,8 +39,9 @@ export type ChartTableData = {
   rowHeaders?: boolean;
 };
 
-type ChartDataTableProps = ChartTableData & {
-  labels: ChartLabels;
+export type ChartDataTableProps = ChartTableData & {
+  /** Generated strings ("Show data table"…). English by default. */
+  labels?: Partial<ChartLabels>;
   mode?: DataTableMode;
   /** Id of the chart title, so each toggle has context when there are several. */
   describedBy?: string;
@@ -50,10 +52,11 @@ export function ChartDataTable({
   headers,
   rows,
   rowHeaders = true,
-  labels,
+  labels: overrides,
   mode = "disclosure",
   describedBy,
 }: ChartDataTableProps) {
+  const labels = resolveLabels(overrides);
   const [open, setOpen] = useState(false);
   const id = useId();
   const hiddenMode = mode === "visually-hidden";

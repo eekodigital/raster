@@ -218,6 +218,19 @@ test.describe("marks in a real browser", () => {
   });
 });
 
+test.describe("wrapping other charts", () => {
+  test("ChartFrame names, describes and tables a canvas chart", async ({ page }) => {
+    await page.goto("/guides/wrapping");
+    const chart = figure(page, "Views this week (canvas)");
+    await expect(chart).toHaveAccessibleDescription(
+      "Line chart, 7 points. Mon to Sun. Values from 340 to 610.",
+    );
+    await expect(chart.locator("canvas")).toBeVisible();
+    await chart.getByRole("button", { name: "Show data table" }).click();
+    await expect(chart.getByRole("table")).toContainText("Data for Views this week (canvas)");
+  });
+});
+
 test.describe("export", () => {
   test("/export downloads the chart a ref points at", async ({ page }) => {
     await page.goto("/guides/exporting");

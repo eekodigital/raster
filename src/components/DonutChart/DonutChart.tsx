@@ -7,7 +7,7 @@ export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { ALL_ARROW_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
-import { ChartFrame } from "../shared/ChartFrame.js";
+import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
@@ -97,7 +97,7 @@ export function DonutChart({
   let sweepBefore = 0;
 
   return (
-    <ChartFrame
+    <SvgChartFrame
       {...frame}
       className={cn("raster-donut", className)}
       labels={labels}
@@ -170,6 +170,6 @@ export function DonutChart({
           <div className="raster-donut__centre">{children}</div>
         </foreignObject>
       )}
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }
