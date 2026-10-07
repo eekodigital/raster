@@ -1,5 +1,24 @@
 import { LineChart, type LinePointIndex } from "@eekodigital/raster";
+import { timeAxis } from "@eekodigital/raster/time";
 import { useState } from "react";
+
+// Ten weeks of daily views from 1 September 2026, with 9–11 September missing.
+const DAY = 864e5;
+const VIEW_DAYS = Array.from({ length: 70 }, (_, i) => Date.UTC(2026, 8, 1) + i * DAY).filter(
+  (_, i) => i < 8 || i > 10,
+);
+const VIEWS = VIEW_DAYS.map((_, i) => Math.round(120 + 40 * Math.sin(i / 3) + i * 1.5));
+
+export function LineChartDatesDemo() {
+  return (
+    <LineChart
+      series={[{ name: "Views", data: VIEWS }]}
+      x={timeAxis(VIEW_DAYS, { interval: "day" })}
+      labels={{ locale: "en-GB" }}
+      title="Daily views"
+    />
+  );
+}
 
 export function LineChartBasicDemo() {
   return (

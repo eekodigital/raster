@@ -38,8 +38,13 @@ export type ScatterChartProps = ChartFrameOptions &
     xLabel?: string;
     yLabel?: string;
     grid?: GridOption;
-    /** Formats x and y values. Default: `Intl.NumberFormat(labels.locale)`. */
+    /** Formats y values, and x values unless `formatX` is set. Default: `Intl.NumberFormat(labels.locale)`. */
     formatValue?: NumberFormat;
+    /**
+     * Formats x values in ticks, point names, the table and the summary, e.g.
+     * dates from epoch ms. Default: `formatValue`.
+     */
+    formatX?: NumberFormat;
     /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
     onPointClick?: (point: ScatterPoint, seriesIndex: number, pointIndex: number) => void;
     /** `point` is the index in the series' `data`. */
@@ -57,6 +62,7 @@ export function ScatterChart({
   yLabel,
   grid = "both",
   formatValue,
+  formatX,
   onPointClick,
   selectedIndex,
   onSelect,
@@ -70,6 +76,7 @@ export function ScatterChart({
   const selection = useSelection<ScatterPointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
 
+  const fx = formatX ?? format;
   const series: ScatterSeries[] = seriesProp ?? (data ? [{ name: "Data", data }] : []);
   const named = !!seriesProp;
   const allPoints = series.flatMap((s) => s.data);
@@ -90,7 +97,13 @@ export function ScatterChart({
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const xTicks = ticks(xMin, xMax, 5);
   const yTicks = ticks(yMin, yMax, 5);
-  const xTickSkip = labelSkip(xTicks.length, plotWidth, 40);
+  // Custom x labels (e.g. dates) can be wider than numbers: thin by their
+  // estimated width (7 px a character, plus a gap).
+  const xTickSkip = labelSkip(
+    xTicks.length,
+    plotWidth,
+    formatX ? Math.max(40, ...xTicks.map((t) => fx(t).length * 7 + 12)) : 40,
+  );
 
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";
@@ -115,7 +128,7 @@ export function ScatterChart({
       type: "scatter",
       series: series.length,
       points: allPoints.length,
-      x: allPoints.length ? [format(xMin), format(xMax)] : undefined,
+      x: allPoints.length ? [fx(xMin), fx(xMax)] : undefined,
       y: allPoints.length ? [format(yMin), format(yMax)] : undefined,
     },
     n,
@@ -158,7 +171,7 @@ export function ScatterChart({
             cells: [
               ...(series.length > 1 ? [s.name] : []),
               ...(hasPointLabels ? [p.label ?? ""] : []),
-              format(p.x),
+              fx(p.x),
               format(p.y),
             ],
           })),
@@ -193,7 +206,7 @@ export function ScatterChart({
                 textAnchor="middle"
                 className="raster-chart__tick"
               >
-                {format(tick)}
+                {fx(tick)}
               </text>
             )}
           </g>
@@ -234,7 +247,7 @@ export function ScatterChart({
           const color = s.color ?? seriesColor(si);
           const points = order[si].map((pi, item) => {
             const p = s.data[pi];
-            const x = format(p.x);
+            const x = fx(p.x);
             const selected = selection.isSelected({ series: si, point: pi });
             return (
               <path

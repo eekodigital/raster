@@ -82,6 +82,52 @@ describe("ScatterChart structure", () => {
     ]);
   });
 
+  it("formats x with formatX and y with formatValue, in ticks, names, table and summary", () => {
+    const day = (d: number) => Date.UTC(2026, 9, d);
+    const formatX = (v: number) =>
+      new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(
+        v,
+      );
+    const { container } = render(
+      <ScatterChart
+        data={[
+          { x: day(1), y: 0.5 },
+          { x: day(3), y: 0.25 },
+        ]}
+        formatX={formatX}
+        formatValue={(v) => `${v * 100}%`}
+        title="Rate"
+      />,
+    );
+    screen.getByRole("img", { name: "3 Oct: 25%, 2 of 2" });
+    const figure = screen.getByRole("figure", { name: "Rate" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Scatter chart, 2 points. 1 Oct to 3 Oct. Values from 25% to 50%.",
+    );
+    const ticks = [...container.querySelectorAll("text.raster-chart__tick")].map(
+      (t) => t.textContent,
+    );
+    expect(ticks.some((t) => t?.endsWith(" Oct"))).toBe(true);
+    expect(ticks).toContain("50%");
+    expect(tableText(openTable())[1]).toEqual(["1 Oct", "50%"]);
+  });
+
+  it("thins x ticks to fit formatX's labels", () => {
+    const { container } = render(
+      <ScatterChart
+        data={Array.from({ length: 10 }, (_, i) => ({ x: i, y: i }))}
+        formatX={(v) => `Long x-axis label for point ${v}`}
+        title="Wide"
+      />,
+    );
+    const xs = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => t.textContent?.startsWith("Long"))
+      .map((t) => Number(t.getAttribute("x")));
+    expect(xs.length).toBeGreaterThan(1);
+    // Labels are 30 characters: about 210 px plus a gap; numeric ticks are 165 px apart.
+    for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThanOrEqual(222);
+  });
+
   it("supports grid variants and aspectRatio", () => {
     const { container, rerender } = render(
       <ScatterChart data={POINTS} title="G" grid="none" aspectRatio={2} />,

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   arcPath,
+  catmullRomPath,
+  polylinePath,
   bandScale,
   clamp,
   fraction,
@@ -215,5 +217,34 @@ describe("markerPath", () => {
     expect(markerPath(1, 10, 20, 5)).toBe("M5.5 15.5L14.5 15.5L14.5 24.5L5.5 24.5Z");
     // Circle: two arcs through (x-r, y) and (x+r, y).
     expect(markerPath(0, 10, 20, 5)).toBe("M5 20a5 5 0 1 0 10 0a5 5 0 1 0-10 0Z");
+  });
+});
+
+describe("polylinePath and catmullRomPath", () => {
+  it("draws straight segments, and a move for a single point", () => {
+    expect(polylinePath([{ x: 0, y: 1 }])).toBe("M 0 1");
+    expect(
+      polylinePath([
+        { x: 0, y: 1 },
+        { x: 2, y: 3 },
+      ]),
+    ).toBe("M 0 1 L 2 3");
+  });
+
+  it("curves three or more points and draws fewer as straight lines", () => {
+    expect(catmullRomPath([{ x: 0, y: 1 }])).toBe("M 0 1");
+    expect(
+      catmullRomPath([
+        { x: 0, y: 1 },
+        { x: 2, y: 3 },
+      ]),
+    ).toBe("M 0 1 L 2 3");
+    expect(
+      catmullRomPath([
+        { x: 0, y: 0 },
+        { x: 1, y: 1 },
+        { x: 2, y: 0 },
+      ]),
+    ).toMatch(/^M 0 0 C .* C .*, 2 0$/);
   });
 });

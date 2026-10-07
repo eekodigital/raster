@@ -9,6 +9,7 @@ import {
   LineChartMultiDemo,
   LineChartAreaDemo,
   LineChartSelectDemo,
+  LineChartDatesDemo,
 } from "../../../components/LineChartDemo.tsx";
 
 ## Basic
@@ -64,6 +65,28 @@ Keep `categories` complete: they name each point and label the table rows. To th
 ```
 
 Only the first and last categories anchor to the plot edges; every other tick centres on its point.
+
+## Dates
+
+`categories` are evenly spaced, which is right for steps like weeks of a course or survey waves. For dates, pass `x={timeAxis(dates)}` instead. Points are then spaced by elapsed time, so irregular dates are drawn at their real distance apart. The data below is missing 9–11 September:
+
+<Example
+  code={`import { LineChart } from '@eekodigital/raster';\nimport { timeAxis } from '@eekodigital/raster/time';\n\n<LineChart\n  series={[{ name: 'Views', data: views }]}\n  x={timeAxis(days, { interval: 'day' })}\n  labels={{ locale: 'en-GB' }}\n  title="Daily views"\n/>`}
+>
+  <LineChartDatesDemo client:load />
+</Example>
+
+`timeAxis` lives at `@eekodigital/raster/time` (about 1 KB), so charts with categories don't carry date code.
+
+- **Values** are `Date`s, ISO strings or epoch milliseconds, in ascending order, one per data point. Date-only strings like `"2026-10-03"` are UTC midnight.
+- **Ticks** fall on calendar boundaries: days for short ranges, Mondays for medium ones, then months, quarters and years, chosen to fit the width. Month ticks name the year on January and on the first tick.
+- **Gaps:** `interval` (`"day"`, `"week"`, `"month"`, `"quarter"` or `"year"`) is the data's cadence. Where a point is more than one interval after the previous one, the line and area break. Without it, the line joins every point.
+- **Time zone:** ticks and names use UTC unless you pass `timeZone`, e.g. `"Europe/London"`. Server and client render the same thing, because the zone is named rather than taken from the machine.
+- **Names:** points, the summary and the data table use the long date in `labels.locale`: "Views, 3 October 2026: 42, 3 of 12" in `en-GB`, "October 3, 2026" in `en`. Points that aren't at midnight add the time. Pass `format` (`Intl.DateTimeFormatOptions` or a function) to change it. The table's first column is headed `labels.dateColumn` ("Date").
+
+`xTickFilter` and `formatXTick` apply to categories only. `xLabelMinSpacing` sets the minimum px between date ticks, which `timeAxis` otherwise estimates from the width of the locale's labels.
+
+For large series, create the axis with `useMemo` so its formatting and gap checks aren't repeated on every render: `const x = useMemo(() => timeAxis(days, { interval: "day" }), [days])`.
 
 ## Accessibility
 
@@ -121,10 +144,24 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>—</td>
       <td>
-        Required. X-axis categories, one per point. They name each point and label the table rows,
-        so keep them complete and thin the axis with <code>xTickFilter</code> or{" "}
-        <code>formatXTick</code>. (A <code>""</code> category still hides its tick, but also leaves
-        that point without an x value in its name.)
+        Required unless <code>x</code> is given. X-axis categories, one per point, evenly spaced.
+        They name each point and label the table rows, so keep them complete and thin the axis with{" "}
+        <code>xTickFilter</code> or <code>formatXTick</code>. (A <code>""</code> category still
+        hides its tick, but also leaves that point without an x value in its name.)
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>x</code>
+      </td>
+      <td>
+        <code>XAxis</code>
+      </td>
+      <td>—</td>
+      <td>
+        A date axis instead of <code>categories</code>:{" "}
+        <code>timeAxis(dates, &#123; interval?, timeZone?, format? &#125;)</code> from{" "}
+        <code>@eekodigital/raster/time</code>. See <a href="#dates">Dates</a>.
       </td>
     </tr>
     <tr>
@@ -222,7 +259,7 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         Minimum px between x labels before they thin out. Thinning keeps the first and last
-        categories.
+        categories. With <code>x</code>, the default is estimated from the date labels.
       </td>
     </tr>
     <tr>

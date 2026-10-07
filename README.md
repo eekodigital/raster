@@ -46,6 +46,8 @@ import { LineChart } from "@eekodigital/raster";
 
 Each chart also has its own entry (`@eekodigital/raster/line-chart`, `/bar-chart`, `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip`), and GeoChart is only at `@eekodigital/raster/geo`.
 
+For dates, pass `x={timeAxis(dates, { interval: "day" })}` from `@eekodigital/raster/time` instead of `categories`. Points are spaced by elapsed time, ticks fall on days, weeks, months or years, and the line breaks where a day is missing. See [Dates](https://raster.eeko.digital/components/line-chart/#dates).
+
 ## Theming
 
 Map your tokens onto the chart contract once, where your theme switches:
