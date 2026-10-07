@@ -22,6 +22,10 @@ Raster deliberately leaves out zoom, brushing, Canvas rendering and combined cha
 
 `ChartFrame`, `ChartDataTable` and `describeChart` are at `@eekodigital/raster/frame` (about 1.6 KB) and in the main entry.
 
+- **Table cells are shown as given.** Format numbers before passing them (`value.toLocaleString(locale)`), so the table matches the summary.
+- **React Server Components:** like raster's charts, `ChartFrame` uses hooks (the table toggle), so import it from a `"use client"` file. It's still rendered on the server during SSR, so the figure, summary and table are in the HTML before JavaScript runs.
+- **Export:** `exportSVG` and `exportPNG` from `/export` only export raster's own charts. They leave a wrapped chart alone rather than export whatever SVG they find; use that library's own export.
+
 ## With TanStack Charts
 
 TanStack Charts renders its marks after hydration, with the chart exposed as one `role="img"` whose name you pass in `ariaLabel`. The values aren't in the server HTML. Wrapping it adds the summary and the data table:
@@ -55,21 +59,21 @@ import { Chart } from "@tanstack/charts/react";
 
 ## `describeChart`
 
-`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types, or any name ("Heatmap"), used as it is. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
+`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types; for any other chart, add a `name` ("Heatmap") to use in its place. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
 
 ## Props
 
-| Prop        | Type                                       | Description                                                                                     |
-| ----------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `title`     | `string`                                   | Required. Visible title: names the figure and captions the table.                               |
-| `summary`   | `string`                                   | Required. The text alternative: what the chart shows.                                           |
-| `children`  | `ReactNode`                                | Required. The chart, rendered as it is.                                                         |
+| Prop        | Type                                       | Description                                                                                       |
+| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `title`     | `string`                                   | Required. Visible title: names the figure and captions the table.                                 |
+| `summary`   | `string`                                   | Required. The text alternative: what the chart shows.                                             |
+| `children`  | `ReactNode`                                | Required. The chart, rendered as it is.                                                           |
 | `table`     | `{ headers, rows, caption?, rowHeaders? }` | The data. `caption` defaults to "Data for \{title\}"; the first cell of each row is a row header. |
-| `dataTable` | `"disclosure" \| "visually-hidden"`        | How the table is offered. Default `"disclosure"`.                                               |
-| `hideTitle` | `boolean`                                  | Keep the title for assistive technology but hide it visually.                                   |
-| `legend`    | `ReactNode`                                | Shown under the chart.                                                                          |
-| `labels`    | `Partial<ChartLabels>`                     | Generated strings and the number locale.                                                        |
-| `ref`       | `Ref<HTMLDivElement>`                      | The figure element.                                                                             |
-| `className` | `string`                                   | Class on the figure.                                                                            |
+| `dataTable` | `"disclosure" \| "visually-hidden"`        | How the table is offered. Default `"disclosure"`.                                                 |
+| `hideTitle` | `boolean`                                  | Keep the title for assistive technology but hide it visually.                                     |
+| `legend`    | `ReactNode`                                | Shown under the chart.                                                                            |
+| `labels`    | `Partial<ChartLabels>`                     | Generated strings and the number locale.                                                          |
+| `ref`       | `Ref<HTMLDivElement>`                      | The figure element.                                                                               |
+| `className` | `string`                                   | Class on the figure.                                                                              |
 
 `ChartDataTable` takes `caption`, `headers`, `rows`, `rowHeaders`, `labels`, `mode` and `describedBy` on its own, if a product only needs the table.

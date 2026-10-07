@@ -94,12 +94,10 @@ function downloadBlob(blob: Blob, filename: string) {
 function prepareExportSvg(
   target: Element,
 ): { clone: SVGElement; width: number; height: number } | null {
-  // The chart's SVG is marked, so overlays and other SVGs around it are left
-  // out; `target` can also be that SVG itself.
+  // Raster's chart SVG is marked, so overlays, legend swatches and wrapped
+  // non-raster charts are left out; `target` can also be an SVG itself.
   const source = (
-    target.matches("svg")
-      ? target
-      : (target.querySelector("svg[data-raster-chart]") ?? target.querySelector("svg"))
+    target.matches("svg") ? target : target.querySelector("svg[data-raster-chart]")
   ) as SVGSVGElement | null;
   if (!source) return null;
   const clone = source.cloneNode(true) as SVGElement;

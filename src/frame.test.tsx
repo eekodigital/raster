@@ -1,9 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { axe } from "./test-utils/axe.js";
 import { openTable, tableText } from "./test-utils/chart.js";
+import { exportSVG } from "./export.js";
 import { ChartDataTable, ChartFrame, describeChart } from "./frame.js";
 
 const TABLE = {
@@ -112,6 +113,20 @@ describe("ChartDataTable (public)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Show the data" }));
     expect(screen.getByRole("table").querySelector("caption")?.textContent).toBe("Views");
   });
+
+  it("describes its toggle by the caption, so several on a page are distinguishable", () => {
+    render(
+      <>
+        <ChartDataTable caption="Views" {...TABLE} />
+        <ChartDataTable caption="Visitors" {...TABLE} />
+      </>,
+    );
+    const [a, b] = screen.getAllByRole("button", { name: "Show data table" });
+    expect(document.getElementById(a.getAttribute("aria-describedby")!)?.textContent).toBe("Views");
+    expect(document.getElementById(b.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Visitors",
+    );
+  });
 });
 
 describe("describeChart", () => {
@@ -127,9 +142,27 @@ describe("describeChart", () => {
     ).toBe("Line chart, 2 series, 730 points. 1 Jan to 31 Dec. Values from 3 to 412.");
   });
 
-  it("formats counts in the locale, and names other chart types as given", () => {
-    expect(describeChart({ type: "Heatmap", series: 1, points: 1200 }, { locale: "de" })).toBe(
-      "Heatmap, 1.200 points.",
+  it("formats counts in the locale, and takes a name for other chart types", () => {
+    expect(
+      describeChart(
+        { type: "scatter", name: "Heatmap", series: 1, points: 1200 },
+        { locale: "de" },
+      ),
+    ).toBe("Heatmap, 1.200 points.");
+  });
+});
+
+describe("exporting a wrapped chart", () => {
+  it("exports nothing: export is for raster's own charts, not the first SVG it finds", () => {
+    const create = vi.fn(() => "blob:x");
+    URL.createObjectURL = create as typeof URL.createObjectURL;
+    const ref = createRef<HTMLDivElement>();
+    render(
+      <ChartFrame ref={ref} title="V" summary="S" legend={<svg className="swatch" />}>
+        <Other />
+      </ChartFrame>,
     );
+    exportSVG(ref.current);
+    expect(create).not.toHaveBeenCalled();
   });
 });

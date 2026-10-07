@@ -17,8 +17,9 @@ export type MarkLabelParts = {
 };
 
 export type SummaryParts = {
-  /** A raster chart type, or any other chart's name ("Heatmap"), used as it is. */
-  type: ChartType | (string & {});
+  type: ChartType;
+  /** Overrides the chart type's name, e.g. "Heatmap" for a chart raster doesn't draw. */
+  name?: string;
   series: number;
   /** Total number of marks. */
   points: number;
@@ -124,13 +125,9 @@ export const DEFAULT_LABELS: ChartLabels = {
   series: (name, count, n) => `${name}, ${points(count, n)}`,
   mark: ({ series, x, y, index, count }, n) =>
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,
-  summary: ({ type, series, points: count, x, y, first, last, references = [] }, n) =>
+  summary: ({ type, name, series, points: count, x, y, first, last, references = [] }, n) =>
     [
-      `${[
-        TYPE_NAMES[type as ChartType] ?? type,
-        series > 1 && `${n(series)} series`,
-        points(count, n),
-      ]
+      `${[name ?? TYPE_NAMES[type], series > 1 && `${n(series)} series`, points(count, n)]
         .filter(Boolean)
         .join(", ")}.`,
       x && `${x[0]} to ${x[1]}.`,

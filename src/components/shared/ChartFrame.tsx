@@ -6,7 +6,7 @@ import type { ChartLabels } from "../../utils/labels.js";
 import type { Selection } from "../../utils/use-selection.js";
 import { ChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import type { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
-import { ChartDataTable, SR_ONLY_STYLE } from "./ChartDataTable.js";
+import { DataTable, SR_ONLY_STYLE } from "./ChartDataTable.js";
 import type { ChartTableData, DataTableMode } from "./ChartDataTable.js";
 
 /** Props every framed chart accepts. */
@@ -25,23 +25,16 @@ export type ChartFrameOptions = {
 };
 
 /** Props of the public `ChartFrame`, for wrapping a chart raster doesn't draw. */
-export type ChartFrameProps = {
-  /** Visible title. Names the figure and captions the data table. */
-  title: string;
-  /** Keep the title for assistive technology but hide it visually. */
-  hideTitle?: boolean;
+export type ChartFrameProps = ChartFrameOptions & {
   /** The text alternative: what the chart shows. `describeChart` writes one in raster's words. */
   summary: string;
-  /** The data, offered as a table. `caption` defaults to `labels.tableCaption(title)`. */
+  /**
+   * The data, offered as a table. Cells are shown as given, so format numbers
+   * first. `caption` defaults to `labels.tableCaption(title)`.
+   */
   table?: Omit<ChartTableData, "caption"> & { caption?: string };
-  /** How the data table is offered. Default `disclosure`. */
-  dataTable?: DataTableMode;
-  /** Generated strings (English by default) and the number locale. */
-  labels?: Partial<ChartLabels>;
   /** Shown under the chart. */
   legend?: React.ReactNode;
-  className?: string;
-  ref?: React.Ref<HTMLDivElement>;
   /** The chart: any SVG, canvas or HTML, rendered as it is. */
   children: React.ReactNode;
 };
@@ -109,9 +102,7 @@ function Figure({
         {plot(titleId)}
       </div>
       {legend}
-      {table && (
-        <ChartDataTable {...table} labels={labels} mode={dataTable} describedBy={titleId} />
-      )}
+      {table && <DataTable {...table} labels={labels} mode={dataTable} describedBy={titleId} />}
       {status !== undefined && (
         <div role="status" className="raster-sr-only" style={SR_ONLY_STYLE}>
           {status}

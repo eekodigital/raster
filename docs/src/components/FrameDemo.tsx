@@ -11,19 +11,31 @@ function CanvasLine() {
     const el = canvas.current;
     const ctx = el?.getContext("2d");
     if (!el || !ctx) return;
-    const { width, height } = el;
-    const max = Math.max(...VIEWS);
-    ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = getComputedStyle(el).color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    VIEWS.forEach((v, i) => {
-      const x = 10 + (i / (VIEWS.length - 1)) * (width - 20);
-      const y = height - 10 - (v / max) * (height - 20);
-      if (i) ctx.lineTo(x, y);
-      else ctx.moveTo(x, y);
-    });
-    ctx.stroke();
+    const draw = () => {
+      const { width, height } = el;
+      const max = Math.max(...VIEWS);
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = getComputedStyle(el).color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      VIEWS.forEach((v, i) => {
+        const x = 10 + (i / (VIEWS.length - 1)) * (width - 20);
+        const y = height - 10 - (v / max) * (height - 20);
+        if (i) ctx.lineTo(x, y);
+        else ctx.moveTo(x, y);
+      });
+      ctx.stroke();
+    };
+    draw();
+    // Canvas doesn't follow CSS: redraw when the docs theme or colour scheme changes.
+    const observer = new MutationObserver(draw);
+    observer.observe(document.documentElement, { attributes: true });
+    const scheme = matchMedia("(prefers-color-scheme: dark)");
+    scheme.addEventListener("change", draw);
+    return () => {
+      observer.disconnect();
+      scheme.removeEventListener("change", draw);
+    };
   }, []);
   // Not interactive, and the figure carries its text, so it's hidden from assistive technology.
   return (
@@ -50,7 +62,8 @@ export function FrameDemo() {
       })}
       table={{
         headers: ["Day", "Views"],
-        rows: DAYS.map((day, i) => ({ key: day, cells: [day, VIEWS[i]] })),
+        // Cells are shown as given, so format them like the summary.
+        rows: DAYS.map((day, i) => ({ key: day, cells: [day, VIEWS[i].toLocaleString("en")] })),
       }}
     >
       <CanvasLine />
