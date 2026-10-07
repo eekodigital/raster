@@ -52,8 +52,6 @@ const UNITS: Record<TimeInterval, [number, number]> = {
   year: [0, 12],
 };
 const ORDER = Object.keys(UNITS) as TimeInterval[];
-/** Default minimum px per tick label, by unit. */
-const SPACING = [48, 48, 40, 40, 40];
 
 const formats = new Map<string, Intl.DateTimeFormat>();
 
@@ -81,57 +79,92 @@ function wall(t: number, zone: string): number {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
 }
 
-/** The instant at wall-clock time `w` in `zone` (an offset guess, corrected once for DST). */
+/**
+ * The instant at wall-clock time `w` in `zone`. Tries the offsets a day either
+ * side: a time that occurs twice (clocks going back) takes the earlier, and a
+ * time that doesn't occur (clocks going forward) moves forward past the gap.
+ */
 function instant(w: number, zone: string): number {
-  const offset = (t: number) => Math.round((wall(t, zone) - t) / 6e4) * 6e4;
-  return w - offset(w - offset(w));
+  if (zone === "UTC") return w;
+  const [a, b] = [w - 864e5, w + 864e5].map((t) => w - Math.round((wall(t, zone) - t) / 6e4) * 6e4);
+  const ok = (t: number) => wall(t, zone) === w;
+  return ok(a) ? (ok(b) ? Math.min(a, b) : a) : ok(b) ? b : Math.max(a, b);
 }
 
-/** Start of the day, Monday week, month, quarter or year containing `t`. */
-export function floorTime(t: number, unit: TimeInterval, zone = "UTC"): number {
-  const d = new Date(wall(t, zone));
+/** Start of the unit containing wall-clock time `w`. Calendar maths only, no zone. */
+function floorWall(w: number, unit: TimeInterval): number {
+  const d = new Date(w);
   const [days, months] = UNITS[unit];
   const m = d.getUTCMonth();
-  return instant(
-    months
-      ? Date.UTC(d.getUTCFullYear(), m - (m % months), 1)
-      : Date.UTC(d.getUTCFullYear(), m, d.getUTCDate() - (days > 1 ? (d.getUTCDay() + 6) % 7 : 0)),
-    zone,
-  );
+  return months
+    ? Date.UTC(d.getUTCFullYear(), m - (m % months), 1)
+    : Date.UTC(d.getUTCFullYear(), m, d.getUTCDate() - (days > 1 ? (d.getUTCDay() + 6) % 7 : 0));
 }
 
-/** `t` plus one `unit`, in wall-clock time (so a day across DST is 23 or 25 hours). */
-export function addTime(t: number, unit: TimeInterval, zone = "UTC"): number {
-  const d = new Date(wall(t, zone));
+/** Wall-clock time `w` plus one `unit`. */
+function addWall(w: number, unit: TimeInterval): number {
+  const d = new Date(w);
   const [days, months] = UNITS[unit];
   d.setUTCMonth(d.getUTCMonth() + months, d.getUTCDate() + days);
-  return instant(+d, zone);
+  return +d;
 }
+
+/** Start of the day, Monday week, month, quarter or year containing `t`, in `zone`. */
+export function floorTime(t: number, unit: TimeInterval, zone = "UTC"): number {
+  return instant(floorWall(wall(t, zone), unit), zone);
+}
+
+/** `t` plus one `unit` in wall-clock time (so a day across DST is 23 or 25 hours). */
+export function addTime(t: number, unit: TimeInterval, zone = "UTC"): number {
+  return instant(addWall(wall(t, zone), unit), zone);
+}
+
+/** Tick label format for `unit`; `year` adds the year to month labels. */
+const tickFormat = (unit: TimeInterval, year?: boolean): Intl.DateTimeFormatOptions =>
+  unit === "year"
+    ? { year: "numeric" }
+    : unit === "day" || unit === "week"
+      ? { day: "numeric", month: "short" }
+      : year
+        ? { month: "short", year: "numeric" }
+        : { month: "short" };
+
+/** A long sample date (28 September) for estimating tick label widths. */
+const SAMPLE = Date.UTC(2000, 8, 28);
+/** Estimated px per character of the 0.75rem tick font. */
+const CHAR = 7;
 
 /**
  * An x axis of dates for LineChart: `x={timeAxis(dates, { interval: "day" })}`.
  * `values` are Dates, ISO strings (date-only strings are UTC midnight) or
- * epoch ms, in ascending order, one per data point.
+ * epoch ms, one per data point, in ascending order.
  */
 export function timeAxis(
   values: (Date | string | number)[],
   { interval, timeZone: zone = "UTC", format }: TimeAxisOptions = {},
 ): XAxis {
   const ms = values.map((v) => (typeof v === "string" ? Date.parse(v) : +v));
-  const first = ms[0];
-  const last = ms[ms.length - 1];
+  const first = ms.reduce((a, b) => Math.min(a, b), Infinity);
+  const last = ms.reduce((a, b) => Math.max(a, b), -Infinity);
   const px = (t: number, width: number) =>
     last > first ? ((t - first) / (last - first)) * width : width / 2;
+  // Wall-clock times, worked out once: calendar maths on them is zone-free.
+  let walls: number[] | undefined;
+  const wallsOf = () => (walls ??= ms.map((t) => wall(t, zone)));
+  let gaps: boolean[] | undefined;
+  const cache = new Map<TimeInterval, number[]>();
 
   /** Every `unit` boundary in range (capped: callers only need to know it's too many). */
   const boundaries = (unit: TimeInterval) => {
-    const out: number[] = [];
-    for (
-      let t = floorTime(first, unit, zone);
-      t <= last && out.length < 500;
-      t = addTime(t, unit, zone)
-    )
-      if (t >= first) out.push(t);
+    let out = cache.get(unit);
+    if (!out) {
+      cache.set(unit, (out = []));
+      for (let w = floorWall(wall(first, zone), unit); out.length < 500; w = addWall(w, unit)) {
+        const t = instant(w, zone);
+        if (t > last) break;
+        if (t >= first) out.push(t);
+      }
+    }
     return out;
   };
 
@@ -145,7 +178,10 @@ export function timeAxis(
       for (let u = 0; u < ORDER.length; u++) {
         unit = ORDER[u];
         ticks = boundaries(unit);
-        const max = Math.max(1, Math.floor(width / (spacing ?? SPACING[u])));
+        // Room per label: the given spacing, or a long sample label's width plus a gap.
+        const room =
+          spacing ?? dtf(locale, "UTC", tickFormat(unit)).format(SAMPLE).length * CHAR + 12;
+        const max = Math.max(1, Math.floor(width / room));
         if (ticks.length <= max) break;
         // Too many: thin this unit if the next one would leave fewer than two ticks.
         if (u === ORDER.length - 1 || boundaries(ORDER[u + 1]).length < 2) {
@@ -159,25 +195,21 @@ export function timeAxis(
         ticks = [first];
       }
       // Labels near an edge anchor inwards, so they stay inside the plot.
-      const out = ticks.map((value, i): XTick => ({
-        x: px(value, width),
-        anchor: px(value, width) < 24 ? "start" : px(value, width) > width - 24 ? "end" : "middle",
-        text: dtf(
-          locale,
-          zone,
-          unit === "year"
-            ? { year: "numeric" }
-            : unit === "day" || unit === "week"
-              ? { day: "numeric", month: "short" }
-              : !i || !new Date(wall(value, zone)).getUTCMonth()
-                ? { month: "short", year: "numeric" }
-                : { month: "short" },
-        ).format(value),
-      }));
+      const out = ticks.map((value, i): XTick => {
+        const x = px(value, width);
+        return {
+          x,
+          anchor: x < 24 ? "start" : x > width - 24 ? "end" : "middle",
+          text: dtf(
+            locale,
+            zone,
+            tickFormat(unit, !i || !new Date(wall(value, zone)).getUTCMonth()),
+          ).format(value),
+        };
+      });
       // An inward-anchored label reaches its whole width into the plot, so
-      // drop a centred neighbour it would touch. Widths are estimated at 7 px
-      // a character (the 0.75rem tick font).
-      const w = (t: XTick) => t.text.length * 7;
+      // drop a centred neighbour it would touch.
+      const w = (t: XTick) => t.text.length * CHAR;
       return out.filter(
         (t, i, a) =>
           t.anchor !== "middle" ||
@@ -196,7 +228,7 @@ export function timeAxis(
           day: "numeric",
           month: "long",
           year: "numeric",
-          ...(ms.some((t) => floorTime(t, "day", zone) !== t) && {
+          ...(wallsOf().some((w) => floorWall(w, "day") !== w) && {
             hour: "2-digit",
             minute: "2-digit",
           }),
@@ -206,8 +238,9 @@ export function timeAxis(
     },
     gap: (i) =>
       !!interval &&
-      i > 0 &&
-      floorTime(ms[i], interval, zone) >
-        addTime(floorTime(ms[i - 1], interval, zone), interval, zone),
+      (gaps ??= wallsOf().map(
+        (w, j, a) =>
+          j > 0 && floorWall(w, interval) > addWall(floorWall(a[j - 1], interval), interval),
+      ))[i],
   };
 }

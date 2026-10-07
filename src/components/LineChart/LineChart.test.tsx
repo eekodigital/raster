@@ -523,6 +523,22 @@ describe("LineChart with a time axis", () => {
     expect(container.querySelectorAll("line.raster-chart__grid")).toHaveLength(4);
   });
 
+  it("leaves ticks to the time axis: xTickFilter and formatXTick aren't called", () => {
+    const filter = vi.fn(() => true);
+    const formatTick = vi.fn(() => "x");
+    render(
+      <LineChart
+        series={VIEWS}
+        x={timeAxis(DATES)}
+        title="Views"
+        xTickFilter={filter}
+        formatXTick={formatTick}
+      />,
+    );
+    expect(filter).not.toHaveBeenCalled();
+    expect(formatTick).not.toHaveBeenCalled();
+  });
+
   it("breaks the line and area where a point is missing at the interval", () => {
     const x = timeAxis(["2026-10-01", "2026-10-02", "2026-10-04", "2026-10-05"], {
       interval: "day",

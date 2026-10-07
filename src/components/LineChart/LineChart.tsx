@@ -146,17 +146,20 @@ export function LineChart({
   // Which ticks get a label. A filter wins; otherwise defer to consumers who
   // pre-decimated with "" categories; otherwise thin by width, always keeping
   // the last category (and dropping the one before it if that would crowd it).
+  // A time axis places its own ticks.
   const last = count - 1;
   const hasManualXLabels = names.some((l) => l === "");
-  let tickIndices = names.map((_, i) => i);
-  if (xTickFilter) {
-    tickIndices = tickIndices.filter((i) => xTickFilter(i, names[i]));
-  } else if (!hasManualXLabels) {
-    const skip = labelSkip(count, plotWidth, xLabelMinSpacing ?? 30);
-    tickIndices = tickIndices.filter((i) => i % skip === 0);
-    if (last > 0 && tickIndices.at(-1) !== last) {
-      if (last - tickIndices.at(-1)! < skip && tickIndices.length > 1) tickIndices.pop();
-      tickIndices.push(last);
+  let tickIndices = x ? [] : names.map((_, i) => i);
+  if (!x) {
+    if (xTickFilter) {
+      tickIndices = tickIndices.filter((i) => xTickFilter(i, names[i]));
+    } else if (!hasManualXLabels) {
+      const skip = labelSkip(count, plotWidth, xLabelMinSpacing ?? 30);
+      tickIndices = tickIndices.filter((i) => i % skip === 0);
+      if (last > 0 && tickIndices.at(-1) !== last) {
+        if (last - tickIndices.at(-1)! < skip && tickIndices.length > 1) tickIndices.pop();
+        tickIndices.push(last);
+      }
     }
   }
   // Only the true first and last categories sit at the plot edges, so only

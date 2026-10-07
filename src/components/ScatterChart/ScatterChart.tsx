@@ -97,7 +97,13 @@ export function ScatterChart({
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const xTicks = ticks(xMin, xMax, 5);
   const yTicks = ticks(yMin, yMax, 5);
-  const xTickSkip = labelSkip(xTicks.length, plotWidth, 40);
+  // Custom x labels (e.g. dates) can be wider than numbers: thin by their
+  // estimated width (7 px a character, plus a gap).
+  const xTickSkip = labelSkip(
+    xTicks.length,
+    plotWidth,
+    formatX ? Math.max(40, ...xTicks.map((t) => fx(t).length * 7 + 12)) : 40,
+  );
 
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";

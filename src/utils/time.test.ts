@@ -54,6 +54,13 @@ describe("floorTime and addTime", () => {
     expect(floor("2026-10-26T12:00:00Z", "day", zone)).toBe("2026-10-26T00:00:00.000Z");
   });
 
+  it("moves a skipped midnight forward, and keeps later days on midnight", () => {
+    // America/Santiago skips 00:00–01:00 on 6 September 2026.
+    const zone = "America/Santiago";
+    expect(floor("2026-09-06T16:00:00Z", "day", zone)).toBe("2026-09-06T04:00:00.000Z");
+    expect(floor("2026-09-07T16:00:00Z", "day", zone)).toBe("2026-09-07T03:00:00.000Z");
+  });
+
   it("adds calendar units in wall-clock time", () => {
     const add = (iso: string, unit: Parameters<typeof addTime>[1], zone?: string) =>
       new Date(addTime(utc(iso), unit, zone)).toISOString();
@@ -138,6 +145,25 @@ describe("ticks", () => {
     expect(timeAxis([]).ticks(700, "en-GB")).toEqual([]);
   });
 
+  it("keeps ticks on local midnight after a DST change at midnight", () => {
+    const noons = [5, 6, 7, 8, 9].map((d) => Date.UTC(2026, 8, d, 16));
+    const ticks = timeAxis(noons, { timeZone: "America/Santiago" }).ticks(720, "en-GB");
+    expect(ticks.map((t) => t.text)).toEqual(["6 Sept", "7 Sept", "8 Sept", "9 Sept"]);
+  });
+
+  it("estimates spacing from the locale's labels", () => {
+    // German day labels ("10. Sept.") are longer, so 10 days at 480 px thin out.
+    const de = timeAxis(days("2026-09-01", 10)).ticks(480, "de-DE");
+    expect(de.length).toBeLessThan(10);
+    for (let i = 1; i < de.length; i++)
+      expect(de[i].x - de[i - 1].x).toBeGreaterThanOrEqual(de[i].text.length * 7);
+  });
+
+  it("positions reversed values by time", () => {
+    const x = timeAxis(["2026-10-04", "2026-10-02", "2026-10-01"]);
+    expect([0, 1, 2].map((i) => x.position(i, 300))).toEqual([300, 100, 0]);
+  });
+
   it("places ticks on midnight in the time zone", () => {
     const x = timeAxis(["2026-10-01T12:00:00Z", "2026-10-04T12:00:00Z"], {
       timeZone: "America/New_York",
@@ -170,6 +196,12 @@ describe("gaps", () => {
       interval: "month",
     });
     expect([0, 1, 2, 3].map(x.gap)).toEqual([false, false, false, true]);
+  });
+
+  it("doesn't break across a DST change at midnight", () => {
+    const noons = [5, 6, 7, 8, 9].map((d) => Date.UTC(2026, 8, d, 16));
+    const x = timeAxis(noons, { interval: "day", timeZone: "America/Santiago" });
+    expect([0, 1, 2, 3, 4].map(x.gap)).toEqual([false, false, false, false, false]);
   });
 
   it("never breaks without an interval", () => {

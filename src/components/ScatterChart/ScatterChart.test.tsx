@@ -112,6 +112,22 @@ describe("ScatterChart structure", () => {
     expect(tableText(openTable())[1]).toEqual(["1 Oct", "50%"]);
   });
 
+  it("thins x ticks to fit formatX's labels", () => {
+    const { container } = render(
+      <ScatterChart
+        data={Array.from({ length: 10 }, (_, i) => ({ x: i, y: i }))}
+        formatX={(v) => `Long x-axis label for point ${v}`}
+        title="Wide"
+      />,
+    );
+    const xs = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => t.textContent?.startsWith("Long"))
+      .map((t) => Number(t.getAttribute("x")));
+    expect(xs.length).toBeGreaterThan(1);
+    // Labels are 30 characters: about 210 px plus a gap; numeric ticks are 165 px apart.
+    for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1]).toBeGreaterThanOrEqual(222);
+  });
+
   it("supports grid variants and aspectRatio", () => {
     const { container, rerender } = render(
       <ScatterChart data={POINTS} title="G" grid="none" aspectRatio={2} />,
