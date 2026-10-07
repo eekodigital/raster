@@ -8,6 +8,7 @@ import {
   BarChartBasicDemo,
   BarChartCustomDemo,
   BarChartSelectDemo,
+  BarChartReferenceDemo,
 } from "../../../components/BarChartDemo.tsx";
 
 ## Basic
@@ -36,6 +37,16 @@ Pass `series` and `values` with `stacked` (or `grouped`). With `onSelect`, bars 
   code={`<BarChart\n  data={[{ label: 'Q1', value: 0 }, { label: 'Q2', value: 0 }, { label: 'Q3', value: 0 }]}\n  series={['North', 'South']}\n  values={[[12, 8], [15, 11], [9, 14]]}\n  stacked\n  title="Sales by region (select a quarter)"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
 >
   <BarChartSelectDemo client:load />
+</Example>
+
+## Reference lines
+
+`referenceLines` draws dashed, labelled lines across the value axis: vertical for `direction="horizontal"`. The value scale stretches to include each line. They're named in the summary and the table caption, and aren't focusable. See [LineChart's reference lines](/components/line-chart/#reference-lines) for wording and styling.
+
+<Example
+  code={`<BarChart\n  data={days}\n  referenceLines={[{ value: 40, label: 'Daily goal' }]}\n  title="Issues fixed this week"\n/>`}
+>
+  <BarChartReferenceDemo client:load />
 </Example>
 
 ## Accessibility
@@ -199,6 +210,19 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         Formats values in ticks, marks and the table. Defaults to{" "}
         <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>referenceLines</code>
+      </td>
+      <td>
+        <code>&#123; value: number, label: string &#125;[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Targets and thresholds across the value axis, as dashed, labelled lines. See{" "}
+        <a href="#reference-lines">Reference lines</a>.
       </td>
     </tr>
     <tr>

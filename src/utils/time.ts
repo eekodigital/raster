@@ -19,6 +19,10 @@ export type XAxis = {
   values: number[];
   /** Point `i`'s x in a plot `width` px wide. */
   position: (i: number, width: number) => number;
+  /** Any value's x in a plot `width` px wide (e.g. a reference line). */
+  at: (value: number, width: number) => number;
+  /** Any value as text, like `names` (e.g. a reference line). */
+  format: (value: number, locale: string) => string;
   /** Ticks for a plot `width` px wide, at least `spacing` px apart. */
   ticks: (width: number, locale: string, spacing?: number) => XTick[];
   /** Each point's x as text, for its name, the summary and the data table. */
@@ -168,9 +172,33 @@ export function timeAxis(
     return out;
   };
 
+  /**
+   * How values are named: `format`, or the long date, plus the time if any
+   * point isn't at midnight.
+   */
+  const formatter = (locale: string) => {
+    if (typeof format === "function") return (t: number) => format(new Date(t));
+    const f = dtf(
+      locale,
+      zone,
+      format ?? {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        ...(wallsOf().some((w) => floorWall(w, "day") !== w) && {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+    );
+    return (t: number) => f.format(t);
+  };
+
   return {
     values: ms,
     position: (i, width) => px(ms[i], width),
+    at: px,
+    format: (value, locale) => formatter(locale)(value),
     ticks(width, locale, spacing) {
       if (!ms.length) return [];
       let unit: TimeInterval = "day";
@@ -219,23 +247,7 @@ export function timeAxis(
           ),
       );
     },
-    names(locale) {
-      if (typeof format === "function") return ms.map((t) => format(new Date(t)));
-      const f = dtf(
-        locale,
-        zone,
-        format ?? {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          ...(wallsOf().some((w) => floorWall(w, "day") !== w) && {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      );
-      return ms.map((t) => f.format(t));
-    },
+    names: (locale) => ms.map(formatter(locale)),
     gap: (i) =>
       !!interval &&
       (gaps ??= wallsOf().map(

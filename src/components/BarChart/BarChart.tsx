@@ -11,7 +11,7 @@ import type { NumberFormat } from "../../utils/labels.js";
 import { DEFAULT_SERIES_COLORS } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
+export type { ChartExportHandle, ReferenceLine };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -19,6 +19,8 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
+import { ReferenceLines, referenceCaption } from "../shared/ReferenceLines.js";
+import type { PlacedReference, ReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 
 export type BarDatum = {
@@ -50,6 +52,8 @@ export type BarChartProps = ChartFrameOptions &
     selectedIndex?: number | null;
     onSelect?: (index: number | null) => void;
     exportRef?: React.Ref<ChartExportHandle>;
+    /** Targets, thresholds or goals across the value axis: dashed, labelled lines, named in the summary and table caption. */
+    referenceLines?: (Omit<ReferenceLine, "axis" | "value"> & { value: number })[];
   };
 
 const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
@@ -76,6 +80,7 @@ export function BarChart({
   aspectRatio,
   exportRef,
   labels: labelOverrides,
+  referenceLines = [],
   ...frame
 }: BarChartProps) {
   const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
@@ -98,14 +103,22 @@ export function BarChart({
 
   const cell = (i: number, si: number) => multi?.values[i]?.[si] ?? 0;
   const barValues = multi ? multi.values.flat() : data.map((d) => d.value);
+  // The value scale reaches every reference line.
   const maxVal = Math.max(
     ...(multi && stacked ? multi.values.map((row) => sum(row)) : barValues),
+    ...referenceLines.map((r) => r.value),
     1,
   );
 
   const categoryScale = bandScale(data.length, [0, isHorizontal ? plotHeight : plotWidth], 0.2);
   const valueScale = linearScale([0, maxVal], isHorizontal ? [0, plotWidth] : [plotHeight, 0]);
   const valueTicks = ticks(0, maxVal, 4);
+  const references = referenceLines.map((r): PlacedReference => ({
+    at: valueScale(r.value),
+    vertical: isHorizontal,
+    text: labels.referenceLine(r.label, format(r.value)),
+  }));
+  const referenceTexts = references.map((r) => r.text);
   const skip = isHorizontal
     ? labelSkip(data.length, plotHeight, 20)
     : labelSkip(data.length, plotWidth, rotateLabels ? 18 : 30);
@@ -140,6 +153,7 @@ export function BarChart({
       points: barValues.length,
       x: data.length ? [data[0].label, data[data.length - 1].label] : undefined,
       y: barValues.length ? [format(minVal), format(maxBar)] : undefined,
+      references: referenceTexts,
     },
     n,
   );
@@ -277,7 +291,7 @@ export function BarChart({
         )
       }
       table={{
-        caption: labels.tableCaption(frame.title),
+        caption: referenceCaption(labels.tableCaption(frame.title), referenceTexts, labels),
         headers: [labels.categoryColumn, ...(multi ? multi.series : [labels.valueColumn])],
         rows: data.map((d, i) => ({
           key: i,
@@ -377,6 +391,7 @@ export function BarChart({
         })}
 
         {multi ? renderSeriesBars(multi) : renderSimpleBars()}
+        <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
       </g>
     </ChartFrame>
   );

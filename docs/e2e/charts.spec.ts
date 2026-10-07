@@ -206,6 +206,22 @@ test.describe("marks in a real browser", () => {
 test.describe("forced colours", () => {
   test.use({ colorScheme: "light" });
 
+  test("reference lines stay dashed in system colours", async ({ page }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await page.goto("/components/line-chart");
+    const line = figure(page, "Assessment progress against target").locator(
+      ".raster-chart__reference-line",
+    );
+    // A horizontal line has no height, so check it's there and styled, not "visible".
+    await expect(line).toHaveCount(1);
+    const style = await line.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { dash: cs.strokeDasharray, stroke: cs.stroke };
+    });
+    expect(style.dash).not.toBe("none");
+    expect(style.stroke).not.toMatch(/var\(/);
+  });
+
   test("series use system colours, dash patterns and marker shapes", async ({ page }) => {
     await page.emulateMedia({ forcedColors: "active" });
     await page.goto("/components/line-chart");
