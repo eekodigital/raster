@@ -72,8 +72,8 @@ export type ChartLabels = {
   yColumn: string;
   /** A reference line's text, in the SVG and the summary: "Target: 90". */
   referenceLine: (label: string, value: string) => string;
-  /** Appended to the data table caption when a chart has reference lines. */
-  referenceNote: (lines: string[]) => string;
+  /** The data table caption when a chart has reference lines: `caption` plus a note of them. */
+  referenceNote: (caption: string, lines: string[]) => string;
   series: (name: string, count: number, n: NumberFormat) => string;
   mark: (parts: MarkLabelParts, n: NumberFormat) => string;
   summary: (parts: SummaryParts, n: NumberFormat) => string;
@@ -118,8 +118,8 @@ export const DEFAULT_LABELS: ChartLabels = {
   xColumn: "X",
   yColumn: "Y",
   referenceLine: (label, value) => `${label}: ${value}`,
-  referenceNote: (lines) =>
-    `Reference ${lines.length === 1 ? "line" : "lines"}: ${lines.join("; ")}.`,
+  referenceNote: (caption, lines) =>
+    `${caption}. Reference ${lines.length === 1 ? "line" : "lines"}: ${lines.join("; ")}.`,
   series: (name, count, n) => `${name}, ${points(count, n)}`,
   mark: ({ series, x, y, index, count }, n) =>
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,

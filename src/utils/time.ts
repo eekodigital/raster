@@ -19,10 +19,10 @@ export type XAxis = {
   values: number[];
   /** Point `i`'s x in a plot `width` px wide. */
   position: (i: number, width: number) => number;
-  /** Any value's x in a plot `width` px wide (e.g. a reference line). */
-  at: (value: number, width: number) => number;
-  /** Any value as text, like `names` (e.g. a reference line). */
-  format: (value: number, locale: string) => string;
+  /** Any value's x in a plot `width` px wide, or NaN off a one-value axis (reference lines). */
+  at?: (value: number, width: number) => number;
+  /** Any value as text, like `names` (reference lines). */
+  format?: (value: number, locale: string) => string;
   /** Ticks for a plot `width` px wide, at least `spacing` px apart. */
   ticks: (width: number, locale: string, spacing?: number) => XTick[];
   /** Each point's x as text, for its name, the summary and the data table. */
@@ -197,7 +197,7 @@ export function timeAxis(
   return {
     values: ms,
     position: (i, width) => px(ms[i], width),
-    at: px,
+    at: (t, width) => (last > first || t === first ? px(t, width) : NaN),
     format: (value, locale) => formatter(locale)(value),
     ticks(width, locale, spacing) {
       if (!ms.length) return [];

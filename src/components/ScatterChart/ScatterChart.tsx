@@ -3,7 +3,7 @@ import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle, ReferenceLine };
+export type { ChartExportHandle, NumericReferenceLine };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -11,8 +11,13 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { ReferenceLines, referenceCaption } from "../shared/ReferenceLines.js";
-import type { PlacedReference, ReferenceLine } from "../shared/ReferenceLines.js";
+import {
+  ReferenceLines,
+  placeReferences,
+  referenceCaption,
+  referenceValues,
+} from "../shared/ReferenceLines.js";
+import type { NumericReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 
 export type ScatterPoint = {
@@ -54,7 +59,7 @@ export type ScatterChartProps = ChartFrameOptions &
     onSelect?: (index: ScatterPointIndex | null) => void;
     exportRef?: React.Ref<ChartExportHandle>;
     /** Targets, thresholds or goals: dashed, labelled lines across y (or x with `axis: "x"`), named in the summary and table caption. */
-    referenceLines?: (Omit<ReferenceLine, "value"> & { value: number })[];
+    referenceLines?: NumericReferenceLine[];
   };
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
@@ -101,10 +106,8 @@ export function ScatterChart({
   const ys = allPoints.map((p) => p.y);
   const [dataXMin, dataXMax] = xs.length ? extent(xs) : [0, 1];
   const [dataYMin, dataYMax] = ys.length ? extent(ys) : [0, 1];
-  const refsOn = (axis: "x" | "y") =>
-    referenceLines.filter((r) => (r.axis ?? "y") === axis).map((r) => r.value);
-  const [xMin, xMax] = extent([dataXMin, dataXMax, ...refsOn("x")]);
-  const [yMin, yMax] = extent([dataYMin, dataYMax, ...refsOn("y")]);
+  const [xMin, xMax] = extent([dataXMin, dataXMax, ...referenceValues(referenceLines, "x")]);
+  const [yMin, yMax] = extent([dataYMin, dataYMax, ...referenceValues(referenceLines, "y")]);
 
   const xScale = linearScale([xMin, xMax], [0, plotWidth]);
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
@@ -136,14 +139,18 @@ export function ScatterChart({
     onActivate: activate,
   });
 
-  const references = referenceLines.map((r): PlacedReference => {
-    const vertical = r.axis === "x";
-    return {
-      at: vertical ? xScale(r.value) : yScale(r.value),
-      vertical,
-      text: labels.referenceLine(r.label, vertical ? fx(r.value) : format(r.value)),
-    };
-  });
+  const references = placeReferences(
+    referenceLines,
+    (r) =>
+      Number.isFinite(r.value)
+        ? r.axis === "x"
+          ? [xScale(r.value), fx(r.value)]
+          : [yScale(r.value), format(r.value)]
+        : null,
+    plotWidth,
+    plotHeight,
+    labels,
+  );
   const referenceTexts = references.map((r) => r.text);
 
   const summary = labels.summary(

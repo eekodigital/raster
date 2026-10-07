@@ -6,7 +6,7 @@ export type { ChartExportHandle } from "./utils/use-chart-export.js";
 export { DEFAULT_LABELS } from "./utils/labels.js";
 export type { ChartLabels, ChartType, MarkLabelParts, SummaryParts } from "./utils/labels.js";
 export type { DataTableMode } from "./components/shared/ChartDataTable.js";
-export type { ReferenceLine } from "./components/shared/ReferenceLines.js";
+export type { NumericReferenceLine, ReferenceLine } from "./components/shared/ReferenceLines.js";
 export { BarChart } from "./components/BarChart/BarChart.js";
 export type { BarChartProps, BarDatum } from "./components/BarChart/BarChart.js";
 export { ChartTooltip, useChartTooltip } from "./components/ChartTooltip/ChartTooltip.js";

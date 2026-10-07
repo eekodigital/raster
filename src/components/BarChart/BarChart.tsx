@@ -11,7 +11,7 @@ import type { NumberFormat } from "../../utils/labels.js";
 import { DEFAULT_SERIES_COLORS } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle, ReferenceLine };
+export type { ChartExportHandle, NumericReferenceLine };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -19,8 +19,13 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { ReferenceLines, referenceCaption } from "../shared/ReferenceLines.js";
-import type { PlacedReference, ReferenceLine } from "../shared/ReferenceLines.js";
+import {
+  ReferenceLines,
+  placeReferences,
+  referenceCaption,
+  referenceValues,
+} from "../shared/ReferenceLines.js";
+import type { NumericReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 
 export type BarDatum = {
@@ -53,7 +58,7 @@ export type BarChartProps = ChartFrameOptions &
     onSelect?: (index: number | null) => void;
     exportRef?: React.Ref<ChartExportHandle>;
     /** Targets, thresholds or goals across the value axis: dashed, labelled lines, named in the summary and table caption. */
-    referenceLines?: (Omit<ReferenceLine, "axis" | "value"> & { value: number })[];
+    referenceLines?: Omit<NumericReferenceLine, "axis">[];
   };
 
 const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
@@ -106,18 +111,21 @@ export function BarChart({
   // The value scale reaches every reference line.
   const maxVal = Math.max(
     ...(multi && stacked ? multi.values.map((row) => sum(row)) : barValues),
-    ...referenceLines.map((r) => r.value),
+    ...referenceValues(referenceLines, "y"),
     1,
   );
 
   const categoryScale = bandScale(data.length, [0, isHorizontal ? plotHeight : plotWidth], 0.2);
   const valueScale = linearScale([0, maxVal], isHorizontal ? [0, plotWidth] : [plotHeight, 0]);
   const valueTicks = ticks(0, maxVal, 4);
-  const references = referenceLines.map((r): PlacedReference => ({
-    at: valueScale(r.value),
-    vertical: isHorizontal,
-    text: labels.referenceLine(r.label, format(r.value)),
-  }));
+  // Lines below zero fall off the plot (bars start at 0) and are left out.
+  const references = placeReferences(
+    referenceLines.map((r) => ({ ...r, axis: isHorizontal ? ("x" as const) : undefined })),
+    (r) => (Number.isFinite(r.value) ? [valueScale(r.value), format(r.value)] : null),
+    plotWidth,
+    plotHeight,
+    labels,
+  );
   const referenceTexts = references.map((r) => r.text);
   const skip = isHorizontal
     ? labelSkip(data.length, plotHeight, 20)

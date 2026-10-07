@@ -22,8 +22,13 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
-import { ReferenceLines, referenceCaption } from "../shared/ReferenceLines.js";
-import type { PlacedReference, ReferenceLine } from "../shared/ReferenceLines.js";
+import {
+  ReferenceLines,
+  placeReferences,
+  referenceCaption,
+  referenceValues,
+} from "../shared/ReferenceLines.js";
+import type { ReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 import { DenseOverlay } from "./DenseOverlay.js";
 
@@ -149,7 +154,7 @@ export function LineChart({
   const allValues = stackedData.flat();
   const [minVal, maxVal] = allValues.length ? extent(allValues) : [0, 1];
   // The value scale reaches every horizontal reference line.
-  const yRefs = referenceLines.filter((r) => r.axis !== "x").map((r) => +r.value);
+  const yRefs = referenceValues(referenceLines, "y");
   const yMin = Math.min(0, minVal, ...yRefs);
   const yMax = Math.max(maxVal, 1, ...yRefs);
 
@@ -163,16 +168,19 @@ export function LineChart({
     x ? x.position(i, plotWidth) : count <= 1 ? plotWidth / 2 : (i / (count - 1)) * plotWidth;
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const yTicks = ticks(yMin, yMax, 4);
-  // Vertical lines need a time axis, and are left out when off the plot.
-  const references = referenceLines.flatMap((r): PlacedReference[] => {
-    const v = typeof r.value === "string" && r.axis === "x" ? Date.parse(r.value) : +r.value;
-    if (r.axis !== "x")
-      return [{ at: yScale(v), vertical: false, text: labels.referenceLine(r.label, format(v)) }];
-    const at = x ? x.at(v, plotWidth) : NaN;
-    return at >= 0 && at <= plotWidth
-      ? [{ at, vertical: true, text: labels.referenceLine(r.label, x!.format(v, labels.locale)) }]
-      : [];
-  });
+  // Vertical lines need a time axis that can place them.
+  const references = placeReferences(
+    referenceLines,
+    (r) => {
+      if (r.axis !== "x")
+        return Number.isFinite(r.value) ? [yScale(r.value), format(r.value)] : null;
+      const v = typeof r.value === "string" ? Date.parse(r.value) : +r.value;
+      return x?.at && x.format ? [x.at(v, plotWidth), x.format(v, labels.locale)] : null;
+    },
+    plotWidth,
+    plotHeight,
+    labels,
+  );
   const referenceTexts = references.map((r) => r.text);
   // Which ticks get a label. A filter wins; otherwise defer to consumers who
   // pre-decimated with "" categories; otherwise thin by width, always keeping

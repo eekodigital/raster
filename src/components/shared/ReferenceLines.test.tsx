@@ -144,15 +144,71 @@ describe("reference lines", () => {
         title="P"
         labels={{
           referenceLine: (label, value) => `${label} = ${value}`,
-          referenceNote: (lines) => `Linien: ${lines.join(", ")}.`,
+          tableCaption: (title) => `Daten für ${title}.`,
+          referenceNote: (caption, lines) => `${caption} Linien: ${lines.join(", ")}.`,
         }}
         referenceLines={[{ value: 90, label: "Ziel" }]}
       />,
     );
     expect(summaryOf("P")).toMatch(/Ziel = 90\.$/);
+    // referenceNote gets the whole caption, so punctuation is the translator's.
     expect(openTable().querySelector("caption")?.textContent).toBe(
-      "Data for P. Linien: Ziel = 90.",
+      "Daten für P. Linien: Ziel = 90.",
     );
+  });
+
+  it("leaves out lines it can't place, and keeps the scale finite", () => {
+    const { container, unmount } = render(
+      <LineChart
+        series={SERIES}
+        categories={WEEKS}
+        title="P"
+        // A date without axis "x" isn't a y value: the type rejects it, and it's left out.
+        referenceLines={[{ value: "2026-10-02", label: "Launch" } as never]}
+      />,
+    );
+    expect(refs(container)).toHaveLength(0);
+    expect(container.innerHTML).not.toContain("NaN");
+    expect(summaryOf("P")).toBe("Line chart, 5 points. W1 to W5. Values from 10 to 86.");
+    unmount();
+
+    // A one-date time axis can't place other dates.
+    const one = render(
+      <LineChart
+        series={[{ name: "V", data: [1] }]}
+        x={timeAxis(["2026-10-01"])}
+        title="One"
+        referenceLines={[{ value: "2030-01-01", label: "Later", axis: "x" }]}
+      />,
+    );
+    expect(refs(one.container)).toHaveLength(0);
+    one.unmount();
+
+    // Bars start at zero: a negative line would sit below the axis.
+    const bars = render(
+      <BarChart
+        data={[{ label: "A", value: 4 }]}
+        title="Bars"
+        referenceLines={[{ value: -5, label: "Floor" }]}
+      />,
+    );
+    expect(refs(bars.container)).toHaveLength(0);
+    expect(summaryOf("Bars")).not.toMatch(/Floor/);
+  });
+
+  it("flips a vertical label that wouldn't fit to the right", () => {
+    const { container } = render(
+      <ScatterChart
+        data={[
+          { x: 0, y: 1 },
+          { x: 100, y: 2 },
+        ]}
+        title="S"
+        referenceLines={[{ value: 80, label: "A long reference label", axis: "x" }]}
+      />,
+    );
+    const text = container.querySelector(".raster-chart__reference-label")!;
+    expect(text.getAttribute("text-anchor")).toBe("end");
   });
 
   it("server-renders the line, summary and caption", () => {

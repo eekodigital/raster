@@ -93,7 +93,12 @@
   stroke-dasharray: 2 4;
 }
 
-/* Reference lines (targets, thresholds): dashed, and longer dashes than the grid. */
+/* Reference lines (targets, thresholds): dashed, and longer dashes than the
+   grid. The pointer passes through to marks underneath. */
+.raster-chart__reference {
+  pointer-events: none;
+}
+
 .raster-chart__reference-line {
   stroke: var(--raster-reference, var(--raster-text-subtle, var(--raster-text, currentColor)));
   stroke-width: 1.5;
