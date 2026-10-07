@@ -104,6 +104,7 @@ export function ChartFrame({
       </p>
       <div ref={plotRef} className="raster-chart__plot" style={plotStyle} data-chart-container>
         <svg
+          data-raster-chart=""
           className={cn("raster-chart__svg", svgClassName)}
           width="100%"
           height="100%"

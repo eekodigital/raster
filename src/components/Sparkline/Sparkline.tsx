@@ -1,11 +1,9 @@
-import { useRef, useImperativeHandle } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter, resolveLabels } from "../../utils/labels.js";
 import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
-import { useMergedRef } from "../../utils/use-merged-ref.js";
+import { useRootRef } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
 export type { ChartExportHandle };
@@ -48,10 +46,7 @@ export function Sparkline({
   ref,
   className,
 }: SparklineProps) {
-  const containerRef = useRef<HTMLSpanElement>(null);
-  const exportHandle = useChartExport(containerRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const rootRef = useMergedRef(containerRef, ref);
+  const { rootRef } = useRootRef<HTMLSpanElement>(exportRef, ref);
   if (data.length < 2) return null;
 
   const labels = resolveLabels(labelOverrides);
@@ -93,6 +88,7 @@ export function Sparkline({
       data-chart-container
     >
       <svg
+        data-raster-chart=""
         width="100%"
         height="100%"
         viewBox={`0 0 ${w} ${height}`}

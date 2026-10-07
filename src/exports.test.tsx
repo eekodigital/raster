@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react";
+import { act, render, waitFor } from "@testing-library/react";
 import { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as geo from "./geo.js";
@@ -52,7 +52,8 @@ describe("SVG export", () => {
         exportRef={ref}
       />,
     );
-    await act(() => ref.current!.exportSVG());
+    act(() => ref.current!.exportSVG());
+    await waitFor(() => expect(blobs).toHaveLength(1));
     const svg = await blobs[0].text();
     // useId values vary between runs; normalise them.
     expect(svg.replaceAll(/_r_\w+_/g, "_id_")).toMatchSnapshot();

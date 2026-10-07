@@ -32,20 +32,20 @@ import { rolldown } from "rolldown";
  * 1.3–2.5 KB per entry. `/time` is the opt-in date axis for LineChart.
  */
 const BUDGETS: Record<string, number> = {
-  "./bar-chart": 7_500,
+  "./bar-chart": 7_400,
   "./chart-tooltip": 900,
-  "./donut-chart": 6_200,
-  "./gauge": 2_300,
-  "./geo": 6_800,
-  "./line-chart": 9_100,
+  "./donut-chart": 5_600,
+  "./gauge": 1_700,
+  "./geo": 6_200,
+  "./line-chart": 9_300,
   "./linear-gauge": 900,
-  "./radar-chart": 6_400,
-  "./scatter-chart": 7_100,
-  "./sparkline": 2_900,
+  "./radar-chart": 5_800,
+  "./scatter-chart": 7_000,
+  "./sparkline": 2_300,
   "./theme": 300,
   "./time": 1_600,
-  "./export": 1_200,
-  "./styles.css": 2_900,
+  "./export": 1_100,
+  "./styles.css": 3_000,
 };
 
 const root = resolve(import.meta.dirname, "..");
@@ -59,11 +59,17 @@ function localImports(file: string): string[] {
 }
 
 /**
- * Tree-shaken, minified, gzipped size of everything `entry` exports. Chunks
- * loaded with `import()` (e.g. export code behind `exportRef`) aren't counted:
- * they're fetched only when used.
+ * Tripwire for each entry's lazily loaded chunks (`import()`, e.g. the export
+ * code behind the deprecated `exportRef`). They're fetched only when used, so
+ * they don't count towards the entry, but they mustn't grow unnoticed.
  */
-async function bundledSize(entry: string): Promise<number> {
+const LAZY_BUDGET = 1_200;
+
+/**
+ * Tree-shaken, minified, gzipped size of everything `entry` exports, and of
+ * the chunks it loads with `import()`.
+ */
+async function bundledSize(entry: string): Promise<{ size: number; lazy: number }> {
   const bundle = await rolldown({
     input: entry,
     external: (id) => !id.startsWith(".") && !id.startsWith("/"),
@@ -71,11 +77,14 @@ async function bundledSize(entry: string): Promise<number> {
   });
   const { output } = await bundle.generate({ format: "esm", minify: true });
   await bundle.close();
-  return output.reduce(
-    (total, chunk) =>
-      total + (chunk.type === "chunk" && !chunk.isDynamicEntry ? gzipSync(chunk.code).length : 0),
-    0,
-  );
+  let size = 0;
+  let lazy = 0;
+  for (const chunk of output) {
+    if (chunk.type !== "chunk") continue;
+    if (chunk.isDynamicEntry) lazy += gzipSync(chunk.code).length;
+    else size += gzipSync(chunk.code).length;
+  }
+  return { size, lazy };
 }
 
 const failures: string[] = [];
@@ -95,13 +104,17 @@ for (const [key, value] of Object.entries(pkg.exports as Record<string, unknown>
   if (key === "./package.json" || key === ".") continue;
   const target = typeof value === "string" ? value : (value as { import: string }).import;
   const file = join(root, target);
-  const size = target.endsWith(".css") ? gz(file) : await bundledSize(file);
+  const { size, lazy } = target.endsWith(".css")
+    ? { size: gz(file), lazy: 0 }
+    : await bundledSize(file);
+  if (lazy > LAZY_BUDGET)
+    failures.push(`${key} loads ${lazy} B gz lazily, over the ${LAZY_BUDGET} B lazy budget`);
   const budget = BUDGETS[key];
   if (budget === undefined) failures.push(`${key} has no budget in scripts/check-size.ts`);
   else if (size > budget) failures.push(`${key} is ${size} B gz, over its ${budget} B budget`);
   const status = budget === undefined || size > budget ? "❌" : "✅";
   rows.push(
-    `| \`${key}\` | ${(size / 1024).toFixed(2)} KB | ${((budget ?? 0) / 1024).toFixed(2)} KB | ${status} |`,
+    `| \`${key}\` | ${(size / 1024).toFixed(2)} KB${lazy ? ` (+${(lazy / 1024).toFixed(2)} KB lazy)` : ""} | ${((budget ?? 0) / 1024).toFixed(2)} KB | ${status} |`,
   );
 }
 

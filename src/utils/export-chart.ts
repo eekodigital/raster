@@ -91,9 +91,16 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-function prepareExportSvg(container: Element): { clone: SVGElement; source: SVGSVGElement } | null {
-  // The chart's own SVG comes first; overlays (e.g. a dense chart's) follow it.
-  const source = container.querySelector("svg");
+function prepareExportSvg(
+  target: Element,
+): { clone: SVGElement; width: number; height: number } | null {
+  // The chart's SVG is marked, so overlays and other SVGs around it are left
+  // out; `target` can also be that SVG itself.
+  const source = (
+    target.matches("svg")
+      ? target
+      : (target.querySelector("svg[data-raster-chart]") ?? target.querySelector("svg"))
+  ) as SVGSVGElement | null;
   if (!source) return null;
   const clone = source.cloneNode(true) as SVGElement;
 
@@ -104,7 +111,7 @@ function prepareExportSvg(container: Element): { clone: SVGElement; source: SVGS
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
   inlineComputedStyles(clone, source);
-  return { clone, source };
+  return { clone, width, height };
 }
 
 /**
@@ -127,7 +134,6 @@ export async function exportPNG(
 ): Promise<void> {
   const result = target && prepareExportSvg(target);
   if (!result) return;
-  const { width, height } = result.source.getBoundingClientRect();
   const svgString = new XMLSerializer().serializeToString(result.clone);
-  downloadBlob(await svgToPng(svgString, width, height, scale), filename);
+  downloadBlob(await svgToPng(svgString, result.width, result.height, scale), filename);
 }

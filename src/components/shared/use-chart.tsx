@@ -1,8 +1,8 @@
-import { useImperativeHandle, useRef } from "react";
+import { useRef } from "react";
 import type React from "react";
 import { numberFormatter, resolveLabels } from "../../utils/labels.js";
 import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
+import { useExportRef } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 import type { useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
@@ -16,8 +16,7 @@ export function useChart(
   exportRef: React.Ref<ChartExportHandle> | undefined,
 ) {
   const plotRef = useRef<HTMLDivElement>(null);
-  const exportHandle = useChartExport(plotRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
+  useExportRef(exportRef, plotRef);
   const labels = resolveLabels(labelOverrides);
   const n = numberFormatter(labels.locale);
   const tooltip = useChartTooltip();

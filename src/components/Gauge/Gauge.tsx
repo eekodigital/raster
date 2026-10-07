@@ -1,10 +1,9 @@
-import { useId, useImperativeHandle, useRef } from "react";
+import { useId } from "react";
 import { fraction } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
-import { useMergedRef } from "../../utils/use-merged-ref.js";
+import { useRootRef } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
 export type { ChartExportHandle };
@@ -44,10 +43,7 @@ export function Gauge({
   ref,
   className,
 }: GaugeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const exportHandle = useChartExport(containerRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
-  const rootRef = useMergedRef(containerRef, ref);
+  const { containerRef, rootRef } = useRootRef<HTMLDivElement>(exportRef, ref);
   const measured = useContainerWidth(containerRef, 120);
   const size = sizeProp ?? measured;
   const labelId = useId();
@@ -71,7 +67,13 @@ export function Gauge({
       aria-valuetext={text}
       data-chart-container
     >
-      <svg className="raster-gauge__svg" width="100%" height="100%" viewBox={`0 0 ${size} ${size}`}>
+      <svg
+        data-raster-chart=""
+        className="raster-gauge__svg"
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${size} ${size}`}
+      >
         <circle
           className="raster-gauge__track"
           cx={c}
