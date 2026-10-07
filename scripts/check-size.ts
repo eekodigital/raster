@@ -6,6 +6,10 @@
  * a consumer pays for `import * from "@eekodigital/raster/<entry>"`. Bare
  * imports (react, topojson-client) are peers and aren't counted.
  *
+ * The main entry has no budget: nobody imports all of it, and importing one
+ * chart from it costs the same as that chart's own entry, because
+ * `sideEffects` (checked in src/package.test.ts) lets bundlers drop the rest.
+ *
  * Also fails if any built JS imports CSS: styles ship only as
  * `dist/styles.css`, so `sideEffects` can stay limited to CSS (`["*.css"]`).
  *
@@ -29,7 +33,6 @@ import { rolldown } from "rolldown";
  * total went down.
  */
 const BUDGETS: Record<string, number> = {
-  ".": 11_300,
   "./bar-chart": 6_600,
   "./chart-tooltip": 800,
   "./donut-chart": 5_450,
@@ -83,7 +86,7 @@ for (const f of readdirSync(join(root, "dist")).filter((f) => f.endsWith(".mjs")
 
 const rows: string[] = [];
 for (const [key, value] of Object.entries(pkg.exports as Record<string, unknown>)) {
-  if (key === "./package.json") continue;
+  if (key === "./package.json" || key === ".") continue;
   const target = typeof value === "string" ? value : (value as { import: string }).import;
   const file = join(root, target);
   const size = target.endsWith(".css") ? gz(file) : await bundledSize(file);
