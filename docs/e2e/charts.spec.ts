@@ -218,6 +218,25 @@ test.describe("marks in a real browser", () => {
   });
 });
 
+test.describe("export", () => {
+  test("/export downloads the chart a ref points at", async ({ page }) => {
+    await page.goto("/guides/exporting");
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download SVG", exact: true }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toBe("visitors.svg");
+    const svg = await (await file.createReadStream()).toArray();
+    expect(Buffer.concat(svg).toString()).toMatch(/^<svg[^>]*aria-roledescription="chart"/);
+  });
+
+  test("exportRef loads the export code on first use", async ({ page }) => {
+    await page.goto("/guides/exporting");
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download SVG (exportRef)" }).click();
+    expect((await download).suggestedFilename()).toBe("visitors-legacy.svg");
+  });
+});
+
 test.describe("forced colours", () => {
   test.use({ colorScheme: "light" });
 

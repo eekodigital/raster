@@ -1,10 +1,9 @@
-import { useRef, useImperativeHandle } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter, resolveLabels } from "../../utils/labels.js";
 import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
+import { useRootRef } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
 export type { ChartExportHandle };
@@ -22,7 +21,10 @@ export type SparklineProps = {
   /** Formats values in the summary. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
   labels?: Partial<ChartLabels>;
+  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
   exportRef?: React.Ref<ChartExportHandle>;
+  /** The chart's root element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
+  ref?: React.Ref<HTMLSpanElement>;
   className?: string;
 };
 
@@ -41,11 +43,10 @@ export function Sparkline({
   formatValue,
   labels: labelOverrides,
   exportRef,
+  ref,
   className,
 }: SparklineProps) {
-  const containerRef = useRef<HTMLSpanElement>(null);
-  const exportHandle = useChartExport(containerRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
+  const { rootRef } = useRootRef<HTMLSpanElement>(exportRef, ref);
   if (data.length < 2) return null;
 
   const labels = resolveLabels(labelOverrides);
@@ -81,12 +82,13 @@ export function Sparkline({
 
   return (
     <span
-      ref={containerRef}
+      ref={rootRef}
       className={cn("raster-sparkline", className)}
       style={{ width: width ?? "100%", height }}
       data-chart-container
     >
       <svg
+        data-raster-chart=""
         width="100%"
         height="100%"
         viewBox={`0 0 ${w} ${height}`}

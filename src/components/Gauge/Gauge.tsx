@@ -1,9 +1,9 @@
-import { useId, useImperativeHandle, useRef } from "react";
+import { useId } from "react";
 import { fraction } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
+import { useRootRef } from "../../utils/use-chart-export.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
 export type { ChartExportHandle };
@@ -22,7 +22,10 @@ export type GaugeProps = {
   thickness?: number;
   /** Formats the displayed value and `aria-valuetext`. Default: `Intl.NumberFormat("en")`. */
   format?: (value: number) => string;
+  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
   exportRef?: React.Ref<ChartExportHandle>;
+  /** The chart's root element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
+  ref?: React.Ref<HTMLDivElement>;
   className?: string;
 };
 
@@ -37,11 +40,10 @@ export function Gauge({
   thickness = 10,
   format = numberFormatter("en"),
   exportRef,
+  ref,
   className,
 }: GaugeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const exportHandle = useChartExport(containerRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
+  const { containerRef, rootRef } = useRootRef<HTMLDivElement>(exportRef, ref);
   const measured = useContainerWidth(containerRef, 120);
   const size = sizeProp ?? measured;
   const labelId = useId();
@@ -54,7 +56,7 @@ export function Gauge({
 
   return (
     <div
-      ref={containerRef}
+      ref={rootRef}
       className={cn("raster-gauge", className)}
       style={sizeProp ? { width: sizeProp, height: sizeProp } : undefined}
       role="meter"
@@ -65,7 +67,13 @@ export function Gauge({
       aria-valuetext={text}
       data-chart-container
     >
-      <svg className="raster-gauge__svg" width="100%" height="100%" viewBox={`0 0 ${size} ${size}`}>
+      <svg
+        data-raster-chart=""
+        className="raster-gauge__svg"
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${size} ${size}`}
+      >
         <circle
           className="raster-gauge__track"
           cx={c}

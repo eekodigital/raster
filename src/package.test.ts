@@ -17,6 +17,13 @@ describe("package.json", () => {
     expect(pkg.files).toContain("dist");
   });
 
+  it("keeps export code out of the chart entries, at ./export", () => {
+    expect(pkg.exports["./export"]).toEqual({
+      types: "./dist/export.d.mts",
+      import: "./dist/export.mjs",
+    });
+  });
+
   it("keeps date code out of the chart entries, at ./time", () => {
     expect(pkg.exports["./time"]).toEqual({
       types: "./dist/time.d.mts",

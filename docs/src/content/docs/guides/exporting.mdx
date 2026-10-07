@@ -1,48 +1,52 @@
 ---
 title: Exporting charts
-description: Every chart takes an exportRef that downloads it as a standalone SVG or PNG.
+description: Download any chart as a standalone SVG or PNG with exportSVG and exportPNG from @eekodigital/raster/export.
 ---
 
-Pass a ref to a chart's `exportRef` prop to get a `ChartExportHandle`:
+import Example from "../../../components/Example.astro";
+import { ExportDemo, ExportRefDemo } from "../../../components/ExportDemo.tsx";
 
-```ts title="ChartExportHandle"
-type ChartExportHandle = {
-  // filename defaults to "chart.svg"
-  exportSVG: (filename?: string) => void;
-  // filename defaults to "chart.png", scale to 2
-  exportPNG: (filename?: string, scale?: number) => Promise<void>;
-};
+Export lives in its own entry, `@eekodigital/raster/export`, so apps that don't export don't bundle it (about 0.9 KB). Give the chart a `ref` and pass the element to `exportSVG` or `exportPNG`:
+
+```ts title="@eekodigital/raster/export"
+// target: the chart (its ref) or any element containing it. Filename defaults to "chart.svg".
+function exportSVG(target: Element | null, filename?: string): void;
+// Filename defaults to "chart.png", scale to 2.
+function exportPNG(target: Element | null, filename?: string, scale?: number): Promise<void>;
 ```
 
-```tsx title="VisitorsChart.tsx"
-import { useRef } from "react";
-import { LineChart, type ChartExportHandle } from "@eekodigital/raster";
+<Example
+  code={`import { useRef } from "react";\nimport { LineChart } from "@eekodigital/raster";\nimport { exportPNG, exportSVG } from "@eekodigital/raster/export";\n\nexport function VisitorsChart() {\n  const chart = useRef<HTMLDivElement>(null);\n  return (\n    <>\n      <LineChart ref={chart} series={series} categories={days} title="Visitors this week" />\n      <button type="button" onClick={() => exportSVG(chart.current, "visitors.svg")}>\n        Download SVG\n      </button>\n      <button type="button" onClick={() => exportPNG(chart.current, "visitors.png", 3)}>\n        Download PNG\n      </button>\n    </>\n  );\n}`}
+>
+  <ExportDemo client:load />
+</Example>
 
-export function VisitorsChart() {
-  const exportRef = useRef<ChartExportHandle>(null);
-  return (
-    <>
-      <LineChart
-        series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
-        categories={["Mon", "Tue", "Wed", "Thu"]}
-        exportRef={exportRef}
-        title="Visitors this week"
-      />
-      <button type="button" onClick={() => exportRef.current?.exportSVG("visitors.svg")}>
-        Download SVG
-      </button>
-      <button type="button" onClick={() => exportRef.current?.exportPNG("visitors.png", 3)}>
-        Download PNG
-      </button>
-    </>
-  );
-}
-```
-
-All charts except LinearGauge (which is HTML, not SVG) support `exportRef`.
+Every SVG chart takes a `ref`: it points at the chart's figure (or, for Gauge and Sparkline, its root element). LinearGauge is HTML, not SVG, so it can't be exported.
 
 ## How it works
 
 - The chart's `<svg>` is cloned, and the computed fill, stroke, font and opacity of every element are written onto the clone as attributes. That resolves `--raster-*` custom properties and the stylesheet, so the file looks the same outside your app, in the theme that was active when you exported.
 - `exportPNG` draws that SVG onto a canvas at `scale` times its on-screen size (2 by default, for sharp output on high-density screens) and downloads the result.
 - Only the `<svg>` is exported. The legend and tooltip are HTML outside it and aren't included. Donut and Gauge centre content is HTML inside a `<foreignObject>`: it's kept in SVG exports, but some browsers leave it out of PNGs.
+
+## Migrating from `exportRef`
+
+`exportRef` still works but is deprecated, and will be removed in 4.0. It no longer bundles the export code into every chart. When a chart is given an `exportRef`, it loads the export code in the background, so exports work as before. Charts without one never load it.
+
+<Example
+  code={`const exportRef = useRef<ChartExportHandle>(null);\n\n<LineChart exportRef={exportRef} … />\n<button onClick={() => exportRef.current?.exportSVG("visitors.svg")}>Download SVG</button>`}
+>
+  <ExportRefDemo client:load />
+</Example>
+
+To migrate, swap `exportRef` for a `ref` and call the functions:
+
+```diff
+- const exportRef = useRef<ChartExportHandle>(null);
+- <LineChart exportRef={exportRef} … />
+- exportRef.current?.exportPNG("chart.png", 3);
++ import { exportPNG } from "@eekodigital/raster/export";
++ const chart = useRef<HTMLDivElement>(null);
++ <LineChart ref={chart} … />
++ exportPNG(chart.current, "chart.png", 3);
+```

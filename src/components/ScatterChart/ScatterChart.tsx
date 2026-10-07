@@ -57,6 +57,7 @@ export type ScatterChartProps = ChartFrameOptions &
     /** `point` is the index in the series' `data`. */
     selectedIndex?: ScatterPointIndex | null;
     onSelect?: (index: ScatterPointIndex | null) => void;
+    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
     exportRef?: React.Ref<ChartExportHandle>;
     /** Targets, thresholds or goals: dashed, labelled lines across y (or x with `axis: "x"`), named in the summary and table caption. */
     referenceLines?: NumericReferenceLine[];

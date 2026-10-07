@@ -75,6 +75,10 @@
       "types": "./dist/sparkline.d.mts",
       "import": "./dist/sparkline.mjs"
     },
+    "./export": {
+      "types": "./dist/export.d.mts",
+      "import": "./dist/export.mjs"
+    },
     "./time": {
       "types": "./dist/time.d.mts",
       "import": "./dist/time.mjs"

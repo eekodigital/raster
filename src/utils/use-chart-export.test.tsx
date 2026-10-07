@@ -1,7 +1,8 @@
-import { act, render } from "@testing-library/react";
-import { createRef, useImperativeHandle, useRef } from "react";
+import { act, render, waitFor } from "@testing-library/react";
+import { createRef, useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useChartExport, type ChartExportHandle } from "./use-chart-export.js";
+import { exportSVG } from "./export-chart.js";
+import { useExportRef, useRootRef, type ChartExportHandle } from "./use-chart-export.js";
 
 function Chart({
   handle,
@@ -11,12 +12,11 @@ function Chart({
   empty?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const exporter = useChartExport(ref);
-  useImperativeHandle(handle, () => exporter, [exporter]);
+  useExportRef(handle, ref);
   return (
     <div ref={ref} data-chart-container>
       {!empty && (
-        <svg width={100} height={50}>
+        <svg data-raster-chart="" width={100} height={50}>
           <line className="raster-chart__axis" x1={0} x2={100} style={{ stroke: "red" }} />
         </svg>
       )}
@@ -24,7 +24,7 @@ function Chart({
   );
 }
 
-describe("useChartExport", () => {
+describe("useChartExport (exportRef, loaded on first use)", () => {
   let clicked: HTMLAnchorElement[];
   let blobs: Blob[];
 
@@ -50,7 +50,7 @@ describe("useChartExport", () => {
     render(<Chart handle={handle} />);
     act(() => handle.current!.exportSVG("my-chart.svg"));
 
-    expect(clicked).toHaveLength(1);
+    await waitFor(() => expect(clicked).toHaveLength(1));
     expect(clicked[0].download).toBe("my-chart.svg");
     expect(blobs[0].type).toBe("image/svg+xml");
     const svg = await blobs[0].text();
@@ -58,11 +58,11 @@ describe("useChartExport", () => {
     expect(svg).toMatch(/<line[^>]*stroke="red"/);
   });
 
-  it("exportSVG uses a default filename", () => {
+  it("exportSVG uses a default filename", async () => {
     const handle = createRef<ChartExportHandle>();
     render(<Chart handle={handle} />);
     act(() => handle.current!.exportSVG());
-    expect(clicked[0].download).toBe("chart.svg");
+    await waitFor(() => expect(clicked[0]?.download).toBe("chart.svg"));
   });
 
   it("does nothing when the container has no SVG", async () => {
@@ -124,5 +124,57 @@ describe("useChartExport", () => {
     const handle = createRef<ChartExportHandle>();
     render(<Chart handle={handle} />);
     await expect(handle.current!.exportPNG()).rejects.toThrow("Canvas 2D context unavailable");
+  });
+});
+
+describe("useRootRef", () => {
+  function Root({ outer }: { outer: React.Ref<HTMLDivElement> }) {
+    const { rootRef } = useRootRef<HTMLDivElement>(undefined, outer);
+    return <div ref={rootRef} />;
+  }
+
+  it("keeps a callback ref's cleanup, and calls a plain callback with null on unmount", () => {
+    const cleanup = vi.fn();
+    const withCleanup = vi.fn(() => cleanup);
+    const { unmount } = render(<Root outer={withCleanup} />);
+    expect(withCleanup).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+    unmount();
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(withCleanup).toHaveBeenCalledTimes(1);
+
+    const plain = vi.fn();
+    const r = render(<Root outer={plain} />);
+    r.unmount();
+    expect(plain).toHaveBeenLastCalledWith(null);
+  });
+
+  it("sets and clears an object ref", () => {
+    const ref = createRef<HTMLDivElement>();
+    const { unmount } = render(<Root outer={ref} />);
+    expect(ref.current).toBeInstanceOf(HTMLDivElement);
+    unmount();
+    expect(ref.current).toBeNull();
+  });
+});
+
+describe("exportSVG target", () => {
+  it("takes the chart's SVG itself, and prefers the marked chart SVG", async () => {
+    const blobs: Blob[] = [];
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    URL.createObjectURL = vi.fn(
+      (b: Blob) => (blobs.push(b), "blob:x"),
+    ) as typeof URL.createObjectURL;
+    URL.revokeObjectURL = vi.fn();
+    const { container } = render(
+      <div>
+        <svg aria-hidden="true" className="decoy" />
+        <svg data-raster-chart="" className="chart" />
+      </div>,
+    );
+    exportSVG(container.firstElementChild);
+    exportSVG(container.querySelector("svg.chart"));
+    expect(await blobs[0].text()).toContain('class="chart"');
+    expect(await blobs[1].text()).toContain('class="chart"');
+    vi.restoreAllMocks();
   });
 });
