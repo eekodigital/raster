@@ -65,7 +65,7 @@ The contract is `--raster-text`, `--raster-text-subtle`, `--raster-reference`, `
 
 ## Exporting
 
-Every SVG chart takes an `exportRef` with `exportSVG(filename?)` and `exportPNG(filename?, scale?)`. See [Exporting charts](https://raster.eeko.digital/guides/exporting/).
+Give a chart a `ref` and pass it to `exportSVG` or `exportPNG` from `@eekodigital/raster/export`. It's a separate entry, so apps that don't export don't bundle it. The older `exportRef` prop still works (it loads the export code on first use) but is deprecated. See [Exporting charts](https://raster.eeko.digital/guides/exporting/).
 
 ## Development
 

@@ -32,6 +32,7 @@ export type DonutChartProps = ChartFrameOptions & {
   onSegmentClick?: (datum: DonutDatum, index: number) => void;
   selectedIndex?: number | null;
   onSelect?: (index: number | null) => void;
+  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
   exportRef?: React.Ref<ChartExportHandle>;
 };
 

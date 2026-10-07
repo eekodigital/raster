@@ -44,6 +44,7 @@ const BUDGETS: Record<string, number> = {
   "./sparkline": 2_900,
   "./theme": 300,
   "./time": 1_600,
+  "./export": 1_200,
   "./styles.css": 2_900,
 };
 
@@ -57,7 +58,11 @@ function localImports(file: string): string[] {
   return specs.map((m) => m[1]).filter((s) => s.startsWith("."));
 }
 
-/** Tree-shaken, minified, gzipped size of everything `entry` exports. */
+/**
+ * Tree-shaken, minified, gzipped size of everything `entry` exports. Chunks
+ * loaded with `import()` (e.g. export code behind `exportRef`) aren't counted:
+ * they're fetched only when used.
+ */
 async function bundledSize(entry: string): Promise<number> {
   const bundle = await rolldown({
     input: entry,
@@ -67,7 +72,8 @@ async function bundledSize(entry: string): Promise<number> {
   const { output } = await bundle.generate({ format: "esm", minify: true });
   await bundle.close();
   return output.reduce(
-    (total, chunk) => total + (chunk.type === "chunk" ? gzipSync(chunk.code).length : 0),
+    (total, chunk) =>
+      total + (chunk.type === "chunk" && !chunk.isDynamicEntry ? gzipSync(chunk.code).length : 0),
     0,
   );
 }

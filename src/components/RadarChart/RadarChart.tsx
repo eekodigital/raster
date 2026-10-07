@@ -33,6 +33,7 @@ export type RadarChartProps = ChartFrameOptions & {
   onPointClick?: (seriesIndex: number, axisIndex: number, value: number) => void;
   selectedIndex?: RadarPointIndex | null;
   onSelect?: (index: RadarPointIndex | null) => void;
+  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
   exportRef?: React.Ref<ChartExportHandle>;
 };
 

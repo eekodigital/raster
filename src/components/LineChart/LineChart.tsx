@@ -94,6 +94,7 @@ export type LineChartProps = ChartFrameOptions &
     onPointClick?: (seriesIndex: number, pointIndex: number, value: number) => void;
     selectedIndex?: LinePointIndex | null;
     onSelect?: (index: LinePointIndex | null) => void;
+    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
     exportRef?: React.Ref<ChartExportHandle>;
     /**
      * Dense mode for long series: each series is one downsampled path with no

@@ -24,7 +24,7 @@ function Chart({
   );
 }
 
-describe("useChartExport", () => {
+describe("useChartExport (exportRef, loaded on first use)", () => {
   let clicked: HTMLAnchorElement[];
   let blobs: Blob[];
 
@@ -48,7 +48,7 @@ describe("useChartExport", () => {
   it("exportSVG downloads a standalone SVG with computed styles inlined", async () => {
     const handle = createRef<ChartExportHandle>();
     render(<Chart handle={handle} />);
-    act(() => handle.current!.exportSVG("my-chart.svg"));
+    await act(() => handle.current!.exportSVG("my-chart.svg"));
 
     expect(clicked).toHaveLength(1);
     expect(clicked[0].download).toBe("my-chart.svg");
@@ -58,17 +58,17 @@ describe("useChartExport", () => {
     expect(svg).toMatch(/<line[^>]*stroke="red"/);
   });
 
-  it("exportSVG uses a default filename", () => {
+  it("exportSVG uses a default filename", async () => {
     const handle = createRef<ChartExportHandle>();
     render(<Chart handle={handle} />);
-    act(() => handle.current!.exportSVG());
+    await act(() => handle.current!.exportSVG());
     expect(clicked[0].download).toBe("chart.svg");
   });
 
   it("does nothing when the container has no SVG", async () => {
     const handle = createRef<ChartExportHandle>();
     render(<Chart handle={handle} empty />);
-    act(() => handle.current!.exportSVG());
+    await act(() => handle.current!.exportSVG());
     await handle.current!.exportPNG();
     expect(clicked).toHaveLength(0);
   });

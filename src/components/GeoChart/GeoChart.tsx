@@ -65,6 +65,7 @@ export type GeoChartProps = ChartFrameOptions &
     legendLabel?: string;
     /** Formats values in marks, the legend and the table. Default: `Intl.NumberFormat(labels.locale)`. */
     formatValue?: NumberFormat;
+    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
     exportRef?: React.Ref<ChartExportHandle>;
   };
 

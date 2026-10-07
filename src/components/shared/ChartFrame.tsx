@@ -19,6 +19,8 @@ export type ChartFrameOptions = {
   /** How the data table is offered. Default `disclosure`. */
   dataTable?: DataTableMode;
   className?: string;
+  /** The chart's figure element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
+  ref?: React.Ref<HTMLDivElement>;
 };
 
 export type ChartFrameProps = Omit<ChartFrameOptions, "labels"> & {
@@ -52,6 +54,7 @@ export type ChartFrameProps = Omit<ChartFrameOptions, "labels"> & {
  * surrounding dialog stays open.
  */
 export function ChartFrame({
+  ref,
   title,
   hideTitle,
   labels,
@@ -76,6 +79,7 @@ export function ChartFrame({
 
   return (
     <div
+      ref={ref}
       role="figure"
       aria-labelledby={titleId}
       aria-describedby={summaryId}

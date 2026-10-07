@@ -56,6 +56,7 @@ export type BarChartProps = ChartFrameOptions &
     /** Selected category index. In stacked/grouped mode the whole category is selected. */
     selectedIndex?: number | null;
     onSelect?: (index: number | null) => void;
+    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
     exportRef?: React.Ref<ChartExportHandle>;
     /** Targets, thresholds or goals across the value axis: dashed, labelled lines, named in the summary and table caption. */
     referenceLines?: Omit<NumericReferenceLine, "axis">[];
