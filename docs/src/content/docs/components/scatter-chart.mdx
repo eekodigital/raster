@@ -25,6 +25,21 @@ import {
   <ScatterChartMultiDemo client:load />
 </Example>
 
+## Reference lines
+
+`referenceLines` draws dashed, labelled lines: across y by default, or vertical at an x value with `axis: "x"`. Both scales stretch to include them. The x value is worded with `formatX`. They're named in the summary and the table caption, and aren't focusable.
+
+```tsx
+<ScatterChart
+  data={points}
+  referenceLines={[
+    { value: 4.5, label: "Pass mark" },
+    { value: 60, label: "Time limit", axis: "x" },
+  ]}
+  title="Score against time taken"
+/>
+```
+
 ## Accessibility
 
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
@@ -145,6 +160,19 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         Formats x values separately, e.g. epoch milliseconds as dates:{" "}
         <code>(ms) =&gt; dateFormat.format(ms)</code>. Ticks stay at evenly spaced numbers, thinned
         to fit the formatted labels.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>referenceLines</code>
+      </td>
+      <td>
+        <code>&#123; value: number, label: string, axis?: "x" | "y" &#125;[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        Targets and thresholds as dashed, labelled lines, across y or (with <code>axis: "x"</code>)
+        x. See <a href="#reference-lines">Reference lines</a>.
       </td>
     </tr>
     <tr>

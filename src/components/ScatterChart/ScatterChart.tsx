@@ -3,7 +3,7 @@ import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
+export type { ChartExportHandle, NumericReferenceLine };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -11,6 +11,13 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
+import {
+  ReferenceLines,
+  placeReferences,
+  referenceCaption,
+  referenceValues,
+} from "../shared/ReferenceLines.js";
+import type { NumericReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 
 export type ScatterPoint = {
@@ -51,6 +58,8 @@ export type ScatterChartProps = ChartFrameOptions &
     selectedIndex?: ScatterPointIndex | null;
     onSelect?: (index: ScatterPointIndex | null) => void;
     exportRef?: React.Ref<ChartExportHandle>;
+    /** Targets, thresholds or goals: dashed, labelled lines across y (or x with `axis: "x"`), named in the summary and table caption. */
+    referenceLines?: NumericReferenceLine[];
   };
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
@@ -70,6 +79,7 @@ export function ScatterChart({
   aspectRatio,
   exportRef,
   labels: labelOverrides,
+  referenceLines = [],
   ...frame
 }: ScatterChartProps) {
   const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
@@ -90,8 +100,14 @@ export function ScatterChart({
   const plotWidth = size.width - MARGIN.left - MARGIN.right;
   const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
 
-  const [xMin, xMax] = allPoints.length ? extent(allPoints.map((p) => p.x)) : [0, 1];
-  const [yMin, yMax] = allPoints.length ? extent(allPoints.map((p) => p.y)) : [0, 1];
+  // The data's range (for the summary), and the scales' range, which also
+  // reaches every reference line.
+  const xs = allPoints.map((p) => p.x);
+  const ys = allPoints.map((p) => p.y);
+  const [dataXMin, dataXMax] = xs.length ? extent(xs) : [0, 1];
+  const [dataYMin, dataYMax] = ys.length ? extent(ys) : [0, 1];
+  const [xMin, xMax] = extent([dataXMin, dataXMax, ...referenceValues(referenceLines, "x")]);
+  const [yMin, yMax] = extent([dataYMin, dataYMax, ...referenceValues(referenceLines, "y")]);
 
   const xScale = linearScale([xMin, xMax], [0, plotWidth]);
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
@@ -123,13 +139,28 @@ export function ScatterChart({
     onActivate: activate,
   });
 
+  const references = placeReferences(
+    referenceLines,
+    (r) =>
+      Number.isFinite(r.value)
+        ? r.axis === "x"
+          ? [xScale(r.value), fx(r.value)]
+          : [yScale(r.value), format(r.value)]
+        : null,
+    plotWidth,
+    plotHeight,
+    labels,
+  );
+  const referenceTexts = references.map((r) => r.text);
+
   const summary = labels.summary(
     {
       type: "scatter",
       series: series.length,
       points: allPoints.length,
-      x: allPoints.length ? [fx(xMin), fx(xMax)] : undefined,
-      y: allPoints.length ? [format(yMin), format(yMax)] : undefined,
+      x: allPoints.length ? [fx(dataXMin), fx(dataXMax)] : undefined,
+      y: allPoints.length ? [format(dataYMin), format(dataYMax)] : undefined,
+      references: referenceTexts,
     },
     n,
   );
@@ -155,7 +186,7 @@ export function ScatterChart({
         )
       }
       table={{
-        caption: labels.tableCaption(frame.title),
+        caption: referenceCaption(labels.tableCaption(frame.title), referenceTexts, labels),
         // A point may have no label and a multi-series row no unique key, so
         // no cell is guaranteed to identify its row.
         rowHeaders: false,
@@ -293,6 +324,7 @@ export function ScatterChart({
             </g>
           );
         })}
+        <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
       </g>
     </ChartFrame>
   );

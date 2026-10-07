@@ -10,6 +10,7 @@ const SVG_STYLE_PROPS = [
   "stroke-linejoin",
   "stroke-dasharray",
   "stroke-dashoffset",
+  "paint-order",
   "opacity",
   "font-family",
   "font-size",

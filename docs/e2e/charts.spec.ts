@@ -75,6 +75,21 @@ test.describe("keyboard", () => {
     await expect(tip).toHaveText(/^(Views|Visitors), \d+ \w+ 202[56]: \d+, \d+ of 730$/);
   });
 
+  test("reference lines don't block the pointer on marks underneath", async ({ page }) => {
+    // Bars grow in; with reduced motion they're drawn at full height at once.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/components/bar-chart");
+    const chart = figure(page, "Issues fixed this week");
+    await chart.scrollIntoViewIfNeeded();
+    // The dashed line crosses Thursday's bar (45, over the goal of 40). The
+    // line ignores the pointer, so point at the crossing rather than hover it.
+    const bar = (await chart.getByRole("img", { name: /^Thu/ }).boundingBox())!;
+    const line = (await chart.locator(".raster-chart__reference-line").boundingBox())!;
+    await page.mouse.move(bar.x + bar.width / 2, line.y + line.height / 2);
+    await expect(chart.locator(".raster-tooltip")).toHaveAttribute("data-visible", "true");
+    await expect(chart.locator(".raster-tooltip")).toHaveText(/^Thu/);
+  });
+
   test("BarChart: stacked bars are navigable and select a category", async ({ page }) => {
     await page.goto("/components/bar-chart");
     const chart = figure(page, "Sales by region (select a quarter)");
@@ -205,6 +220,27 @@ test.describe("marks in a real browser", () => {
 
 test.describe("forced colours", () => {
   test.use({ colorScheme: "light" });
+
+  test("reference lines stay dashed in system colours", async ({ page }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await page.goto("/components/line-chart");
+    const line = figure(page, "Assessment progress against target").locator(
+      ".raster-chart__reference-line",
+    );
+    // A horizontal line has no height, so check it's there and styled, not "visible".
+    await expect(line).toHaveCount(1);
+    const style = await line.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const probe = document.createElement("span");
+      probe.style.color = "CanvasText";
+      document.body.append(probe);
+      const canvasText = getComputedStyle(probe).color;
+      probe.remove();
+      return { dash: cs.strokeDasharray, stroke: cs.stroke, canvasText };
+    });
+    expect(style.dash).not.toBe("none");
+    expect(style.stroke).toBe(style.canvasText);
+  });
 
   test("series use system colours, dash patterns and marker shapes", async ({ page }) => {
     await page.emulateMedia({ forcedColors: "active" });

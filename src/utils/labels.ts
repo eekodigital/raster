@@ -27,6 +27,8 @@ export type SummaryParts = {
   y?: [string, string];
   first?: string;
   last?: string;
+  /** Reference lines, each already worded by `referenceLine` ("Target: 90"). */
+  references?: string[];
 };
 
 /**
@@ -68,6 +70,10 @@ export type ChartLabels = {
   /** Scatter x/y columns when `xLabel`/`yLabel` aren't given. */
   xColumn: string;
   yColumn: string;
+  /** A reference line's text, in the SVG and the summary: "Target: 90". */
+  referenceLine: (label: string, value: string) => string;
+  /** The data table caption when a chart has reference lines: `caption` plus a note of them. */
+  referenceNote: (caption: string, lines: string[]) => string;
   series: (name: string, count: number, n: NumberFormat) => string;
   mark: (parts: MarkLabelParts, n: NumberFormat) => string;
   summary: (parts: SummaryParts, n: NumberFormat) => string;
@@ -111,10 +117,13 @@ export const DEFAULT_LABELS: ChartLabels = {
   labelColumn: "Label",
   xColumn: "X",
   yColumn: "Y",
+  referenceLine: (label, value) => `${label}: ${value}`,
+  referenceNote: (caption, lines) =>
+    `${caption}. Reference ${lines.length === 1 ? "line" : "lines"}: ${lines.join("; ")}.`,
   series: (name, count, n) => `${name}, ${points(count, n)}`,
   mark: ({ series, x, y, index, count }, n) =>
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,
-  summary: ({ type, series, points: count, x, y, first, last }, n) =>
+  summary: ({ type, series, points: count, x, y, first, last, references = [] }, n) =>
     [
       `${[TYPE_NAMES[type], series > 1 && `${n(series)} series`, points(count, n)]
         .filter(Boolean)
@@ -122,6 +131,7 @@ export const DEFAULT_LABELS: ChartLabels = {
       x && `${x[0]} to ${x[1]}.`,
       y && `Values from ${y[0]} to ${y[1]}.`,
       first !== undefined && `First ${first}, last ${last}.`,
+      ...references.map((r) => `${r}.`),
     ]
       .filter(Boolean)
       .join(" "),

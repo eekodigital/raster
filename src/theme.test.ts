@@ -10,6 +10,7 @@ const SRC = import.meta.dirname;
 const CONTRACT = [
   "--raster-text",
   "--raster-text-subtle",
+  "--raster-reference",
   "--raster-surface",
   "--raster-grid",
   "--raster-axis",
@@ -57,6 +58,7 @@ describe("/theme contract", () => {
         "axis": "var(--raster-axis)",
         "focus": "var(--raster-focus)",
         "grid": "var(--raster-grid)",
+        "reference": "var(--raster-reference)",
         "selected": "var(--raster-selected)",
         "series1": "var(--raster-series-1)",
         "series2": "var(--raster-series-2)",

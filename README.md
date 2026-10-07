@@ -61,7 +61,7 @@ Map your tokens onto the chart contract once, where your theme switches:
 }
 ```
 
-The contract is `--raster-text`, `--raster-text-subtle`, `--raster-surface`, `--raster-grid`, `--raster-axis`, `--raster-focus`, `--raster-selected`, `--raster-tooltip-bg`, `--raster-tooltip-text` and `--raster-series-1` to `--raster-series-8`. For vanilla-extract, `@eekodigital/raster/theme` exports it as `rasterVars`. Unset properties fall back to `currentColor` and a validated light/dark palette. See [Theming charts](https://raster.eeko.digital/guides/theming/).
+The contract is `--raster-text`, `--raster-text-subtle`, `--raster-reference`, `--raster-surface`, `--raster-grid`, `--raster-axis`, `--raster-focus`, `--raster-selected`, `--raster-tooltip-bg`, `--raster-tooltip-text` and `--raster-series-1` to `--raster-series-8`. For vanilla-extract, `@eekodigital/raster/theme` exports it as `rasterVars`. Unset properties fall back to `currentColor` and a validated light/dark palette. See [Theming charts](https://raster.eeko.digital/guides/theming/).
 
 ## Exporting
 

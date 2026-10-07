@@ -11,6 +11,7 @@ import {
   LineChartSelectDemo,
   LineChartDatesDemo,
   LineChartDenseDemo,
+  LineChartReferenceDemo,
 } from "../../../components/LineChartDemo.tsx";
 
 ## Basic
@@ -88,6 +89,20 @@ Only the first and last categories anchor to the plot edges; every other tick ce
 `xTickFilter` and `formatXTick` apply to categories only. `xLabelMinSpacing` sets the minimum px between date ticks, which `timeAxis` otherwise estimates from the width of the locale's labels.
 
 For large series, create the axis with `useMemo` so its formatting and gap checks aren't repeated on every render: `const x = useMemo(() => timeAxis(days, { interval: "day" }), [days])`.
+
+## Reference lines
+
+`referenceLines` draws dashed, labelled lines for targets, thresholds and goals. The value scale stretches to include each line.
+
+<Example
+  code={`<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  categories={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  referenceLines={[{ value: 80, label: 'Target' }]}\n  title="Assessment progress against target"\n/>`}
+>
+  <LineChartReferenceDemo client:load />
+</Example>
+
+- **Vertical lines:** with a [date axis](#dates), `{ value: "2026-10-05", label: "Launch", axis: "x" }` draws a vertical line at that date. A date outside the data's range is left out. Categories have no in-between values, so they don't take x lines.
+- **Accessibility:** the line isn't focusable, and its SVG label is hidden from assistive technology. The same text is at the end of the summary ("… Target: 80.") and in the table caption ("Data for … Reference line: Target: 80."). Reword both with `labels.referenceLine` and `labels.referenceNote`.
+- **Styling:** the colour is `--raster-reference`, falling back to `--raster-text-subtle`. The line keeps its dash in forced-colours mode, so it stays distinct from series lines.
 
 ## Large series
 
@@ -180,6 +195,19 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         A date axis instead of <code>categories</code>:{" "}
         <code>timeAxis(dates, &#123; interval?, timeZone?, format? &#125;)</code> from{" "}
         <code>@eekodigital/raster/time</code>. See <a href="#dates">Dates</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>referenceLines</code>
+      </td>
+      <td>
+        <code>ReferenceLine[]</code>
+      </td>
+      <td>—</td>
+      <td>
+        <code>&#123; value, label, axis? &#125;</code>: targets and thresholds as dashed, labelled
+        lines. See <a href="#reference-lines">Reference lines</a>.
       </td>
     </tr>
     <tr>

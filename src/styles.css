@@ -93,6 +93,29 @@
   stroke-dasharray: 2 4;
 }
 
+/* Reference lines (targets, thresholds): dashed, and longer dashes than the
+   grid. The pointer passes through to marks underneath. */
+.raster-chart__reference {
+  pointer-events: none;
+}
+
+.raster-chart__reference-line {
+  stroke: var(--raster-reference, var(--raster-text-subtle, var(--raster-text, currentColor)));
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+/* A surface-coloured halo keeps the label readable where data runs under it. */
+.raster-chart__reference-label {
+  fill: var(--raster-reference, var(--raster-text-subtle, var(--raster-text, currentColor)));
+  font-size: 0.75rem;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--raster-surface, light-dark(#ffffff, #121212));
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
 .raster-chart__tick {
   font-size: 0.75rem;
   fill: var(--raster-text-subtle, var(--raster-text, currentColor));
@@ -613,7 +636,16 @@
  * by per-series dash patterns.
  */
 @media (forced-colors: active) {
+  .raster-chart__reference-line {
+    stroke: CanvasText;
+  }
+
+  .raster-chart__reference-label {
+    stroke: Canvas;
+  }
+
   .raster-chart__tick,
+  .raster-chart__reference-label,
   .raster-legend,
   .raster-donut__centre,
   .raster-gauge__value,

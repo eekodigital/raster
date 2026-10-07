@@ -14,7 +14,7 @@ import type { XAxis, XTick } from "../../utils/time.js";
 import { seriesColor } from "../../utils/palette.js";
 import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle, XAxis };
+export type { ChartExportHandle, ReferenceLine, XAxis };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -22,6 +22,13 @@ import { useSelection } from "../../utils/use-selection.js";
 import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
+import {
+  ReferenceLines,
+  placeReferences,
+  referenceCaption,
+  referenceValues,
+} from "../shared/ReferenceLines.js";
+import type { ReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 import { DenseOverlay } from "./DenseOverlay.js";
 
@@ -95,6 +102,8 @@ export type LineChartProps = ChartFrameOptions &
      * has more than 200 points.
      */
     dense?: boolean | number;
+    /** Targets, thresholds or goals (`axis: "x"` needs a time axis): dashed, labelled lines, named in the summary and table caption. */
+    referenceLines?: ReferenceLine[];
   };
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
@@ -121,6 +130,7 @@ export function LineChart({
   exportRef,
   labels: labelOverrides,
   dense,
+  referenceLines = [],
   ...frame
 }: LineChartProps) {
   const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
@@ -143,8 +153,10 @@ export function LineChart({
 
   const allValues = stackedData.flat();
   const [minVal, maxVal] = allValues.length ? extent(allValues) : [0, 1];
-  const yMin = Math.min(0, minVal);
-  const yMax = Math.max(maxVal, 1);
+  // The value scale reaches every horizontal reference line.
+  const yRefs = referenceValues(referenceLines, "y");
+  const yMin = Math.min(0, minVal, ...yRefs);
+  const yMax = Math.max(maxVal, 1, ...yRefs);
 
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";
@@ -156,6 +168,20 @@ export function LineChart({
     x ? x.position(i, plotWidth) : count <= 1 ? plotWidth / 2 : (i / (count - 1)) * plotWidth;
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const yTicks = ticks(yMin, yMax, 4);
+  // Vertical lines need a time axis that can place them.
+  const references = placeReferences(
+    referenceLines,
+    (r) => {
+      if (r.axis !== "x")
+        return Number.isFinite(r.value) ? [yScale(r.value), format(r.value)] : null;
+      const v = typeof r.value === "string" ? Date.parse(r.value) : +r.value;
+      return x?.at && x.format ? [x.at(v, plotWidth), x.format(v, labels.locale)] : null;
+    },
+    plotWidth,
+    plotHeight,
+    labels,
+  );
+  const referenceTexts = references.map((r) => r.text);
   // Which ticks get a label. A filter wins; otherwise defer to consumers who
   // pre-decimated with "" categories; otherwise thin by width, always keeping
   // the last category (and dropping the one before it if that would crowd it).
@@ -233,6 +259,7 @@ export function LineChart({
       points: rawValues.length,
       x: named.length ? [named[0], named[named.length - 1]] : undefined,
       y: rawValues.length ? [format(rawMin), format(rawMax)] : undefined,
+      references: referenceTexts,
     },
     n,
   );
@@ -276,7 +303,7 @@ export function LineChart({
         )
       }
       table={{
-        caption: labels.tableCaption(frame.title),
+        caption: referenceCaption(labels.tableCaption(frame.title), referenceTexts, labels),
         headers: [x ? labels.dateColumn : labels.periodColumn, ...series.map((s) => s.name)],
         rows: names.map((label, i) => ({
           key: i,
@@ -445,6 +472,8 @@ export function LineChart({
             </g>
           );
         })}
+
+        <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
       </g>
     </ChartFrame>
   );

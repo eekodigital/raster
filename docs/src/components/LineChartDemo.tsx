@@ -59,6 +59,17 @@ export function LineChartDenseDemo() {
   );
 }
 
+export function LineChartReferenceDemo() {
+  return (
+    <LineChart
+      series={[{ name: "Assessed", data: [10, 25, 40, 60, 72, 86] }]}
+      categories={["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"]}
+      referenceLines={[{ value: 80, label: "Target" }]}
+      title="Assessment progress against target"
+    />
+  );
+}
+
 export function LineChartBasicDemo() {
   return (
     <LineChart

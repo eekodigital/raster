@@ -16,6 +16,22 @@ export function BarChartBasicDemo() {
   );
 }
 
+export function BarChartReferenceDemo() {
+  return (
+    <BarChart
+      data={[
+        { label: "Mon", value: 32 },
+        { label: "Tue", value: 41 },
+        { label: "Wed", value: 28 },
+        { label: "Thu", value: 45 },
+        { label: "Fri", value: 38 },
+      ]}
+      referenceLines={[{ value: 40, label: "Daily goal" }]}
+      title="Issues fixed this week"
+    />
+  );
+}
+
 export function BarChartCustomDemo() {
   return (
     <BarChart
