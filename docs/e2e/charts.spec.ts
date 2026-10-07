@@ -250,6 +250,27 @@ test.describe("export", () => {
   });
 });
 
+test.describe("focus ring", () => {
+  for (const reducedMotion of ["reduce", "no-preference"] as const) {
+    test(`the tooltip clears a focused point's ring (motion: ${reducedMotion})`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion });
+      await page.goto("/components/line-chart");
+      const chart = figure(page, "Results trend by status");
+      const point = chart.locator(".raster-line__point").nth(2);
+      await point.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(1200); // let the draw-in finish
+      await point.focus();
+      await page.waitForTimeout(300); // and the focus scale
+      const box = (await point.boundingBox())!;
+      const tip = (await chart.locator(".raster-tooltip").boundingBox())!;
+      // The ring is a 2 px outline 1 px outside the point.
+      expect(tip.y + tip.height).toBeLessThanOrEqual(box.y - 3);
+    });
+  }
+});
+
 test.describe("forced colours", () => {
   test.use({ colorScheme: "light" });
 

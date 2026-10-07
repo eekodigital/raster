@@ -29,9 +29,34 @@ export const entries = {
   sparkline: "src/components/Sparkline/Sparkline.tsx",
 } as const;
 
+/**
+ * Entries that export React components start with `"use client"`, so React
+ * Server Components can import them directly. They're still server-rendered
+ * (SSR); the directive only marks where hydration starts. Entries of plain
+ * functions and values (`time`, `theme`, `export`) stay unmarked, so server
+ * code can call them.
+ */
+export const clientEntries = new Set<string>([
+  "index",
+  "frame",
+  "geo",
+  "bar-chart",
+  "chart-tooltip",
+  "donut-chart",
+  "gauge",
+  "line-chart",
+  "linear-gauge",
+  "radar-chart",
+  "scatter-chart",
+  "sparkline",
+]);
+
 export default defineConfig({
   entry: entries,
   format: ["esm"],
+  outputOptions: {
+    banner: (chunk) => (chunk.isEntry && clientEntries.has(chunk.name) ? '"use client";' : ""),
+  },
   dts: true,
   clean: true,
   hooks: {

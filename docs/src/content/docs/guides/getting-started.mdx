@@ -29,21 +29,37 @@ No chart imports CSS itself, so the package's `sideEffects` lists only the style
 
 Import from the main entry, or from a chart's own entry if you'd rather be explicit about what you pull in. Both tree-shake the same way.
 
-| Import                              | Exports                                                                |
-| ----------------------------------- | ---------------------------------------------------------------------- |
-| `@eekodigital/raster`               | Every chart except GeoChart, plus `ChartTooltip` and `useChartTooltip` |
-| `@eekodigital/raster/line-chart`    | `LineChart`                                                            |
-| `@eekodigital/raster/bar-chart`     | `BarChart`                                                             |
-| `@eekodigital/raster/donut-chart`   | `DonutChart`                                                           |
-| `@eekodigital/raster/scatter-chart` | `ScatterChart`                                                         |
-| `@eekodigital/raster/sparkline`     | `Sparkline`                                                            |
-| `@eekodigital/raster/gauge`         | `Gauge`                                                                |
-| `@eekodigital/raster/linear-gauge`  | `LinearGauge`                                                          |
-| `@eekodigital/raster/radar-chart`   | `RadarChart`                                                           |
-| `@eekodigital/raster/chart-tooltip` | `ChartTooltip`, `useChartTooltip`                                      |
-| `@eekodigital/raster/geo`           | `GeoChart` (needs `topojson-client`)                                   |
-| `@eekodigital/raster/theme`         | `rasterVars`, the [theming contract](/guides/theming/)                 |
-| `@eekodigital/raster/styles.css`    | The stylesheet                                                         |
+| Import                              | Exports                                                                                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `@eekodigital/raster`               | Every chart except GeoChart, plus `ChartTooltip`, `useChartTooltip`, `ChartFrame`, `ChartDataTable` and `describeChart` |
+| `@eekodigital/raster/line-chart`    | `LineChart`                                                                                                             |
+| `@eekodigital/raster/bar-chart`     | `BarChart`                                                                                                              |
+| `@eekodigital/raster/donut-chart`   | `DonutChart`                                                                                                            |
+| `@eekodigital/raster/scatter-chart` | `ScatterChart`                                                                                                          |
+| `@eekodigital/raster/sparkline`     | `Sparkline`                                                                                                             |
+| `@eekodigital/raster/gauge`         | `Gauge`                                                                                                                 |
+| `@eekodigital/raster/linear-gauge`  | `LinearGauge`                                                                                                           |
+| `@eekodigital/raster/radar-chart`   | `RadarChart`                                                                                                            |
+| `@eekodigital/raster/chart-tooltip` | `ChartTooltip`, `useChartTooltip`                                                                                       |
+| `@eekodigital/raster/geo`           | `GeoChart` (needs `topojson-client`)                                                                                    |
+| `@eekodigital/raster/time`          | `timeAxis`, for [dates on LineChart](/components/line-chart/#dates)                                                     |
+| `@eekodigital/raster/export`        | `exportSVG`, `exportPNG`: [exporting charts](/guides/exporting/)                                                        |
+| `@eekodigital/raster/frame`         | `ChartFrame`, `ChartDataTable`, `describeChart`: [wrapping other charts](/guides/wrapping/)                             |
+| `@eekodigital/raster/theme`         | `rasterVars`, the [theming contract](/guides/theming/)                                                                  |
+| `@eekodigital/raster/styles.css`    | The stylesheet                                                                                                          |
+
+## Server rendering and React Server Components
+
+Every chart renders on the server: the figure, summary, data table and named marks are in the HTML before any JavaScript runs.
+
+With React Server Components (the Next.js App Router), the entries that export components start with `"use client"`, so you can import a chart straight into a Server Component page. `"use client"` doesn't stop server rendering. The chart is still rendered to HTML on the server; it only marks where the browser takes over (hydration) for keyboard, tooltips and selection.
+
+A few props can't be passed from a Server Component, because they hold functions, which can't cross from server to client:
+
+- `x={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, `onSelect` and other callbacks
+- `labels` with function overrides (`summary`, `mark`, …)
+
+Put a chart that needs them in a small client component of your own (a file starting with `"use client"`), and pass it plain data from the server. `timeAxis` (`/time`), `exportSVG` (`/export`) and `rasterVars` (`/theme`) aren't marked, so server code can import them. `describeChart` comes from a component entry, so call it in a client component, or write the summary yourself.
 
 ## Fonts, colour and spacing
 
