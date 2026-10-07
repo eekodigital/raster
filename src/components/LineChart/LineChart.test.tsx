@@ -692,9 +692,14 @@ describe("LineChart dense mode", () => {
     const marker = () => container.querySelector(".raster-line__marker");
     expect(marker()).toBeNull();
     fireEvent.focus(slider());
-    expect(marker()?.getAttribute("aria-hidden")).toBe("true");
+    expect(marker()?.closest(".raster-line__overlay")?.getAttribute("aria-hidden")).toBe("true");
     expect(marker()?.hasAttribute("data-focused")).toBe(true);
-    expect(container.querySelector(".raster-line__ring")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelectorAll(".raster-tooltip")).toHaveLength(1);
+    expect(
+      container
+        .querySelector(".raster-line__overlay + .raster-tooltip")
+        ?.hasAttribute("data-visible"),
+    ).toBe(true);
     fireEvent.blur(slider());
     expect(marker()).toBeNull();
   });
@@ -739,18 +744,64 @@ describe("LineChart dense mode", () => {
       />,
     );
     const hit = container.querySelector(".raster-line__hit")!;
-    expect(hit.getAttribute("aria-hidden")).toBe("true");
+    expect(hit.closest(".raster-line__overlay")?.getAttribute("aria-hidden")).toBe("true");
     // happy-dom rects are at 0,0: the plot starts at the 50 px left margin.
     // Point 150 of 300 sits at 150 / 299 × 662 ≈ 332 px; y near the top is the Views line.
-    fireEvent.mouseMove(hit, { clientX: 50 + 332, clientY: 20 });
+    fireEvent.pointerMove(hit, { clientX: 50 + 332, clientY: 20 });
     expect(container.querySelector(".raster-line__marker")).toBeTruthy();
     fireEvent.click(hit, { clientX: 50 + 332, clientY: 20 });
     expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 150 });
     // Near the bottom, the Low series is nearer.
     fireEvent.click(hit, { clientX: 50 + 332, clientY: 150 });
     expect(onSelect).toHaveBeenLastCalledWith({ series: 1, point: 150 });
-    fireEvent.mouseLeave(hit);
+    fireEvent.pointerLeave(hit);
     expect(container.querySelector(".raster-line__marker:not([data-selected])")).toBeNull();
+  });
+
+  it("keeps pointer and keyboard apart: hovering doesn't move the slider, blur keeps the hover", () => {
+    const { container } = render(
+      <LineChart series={[big(300)]} categories={days(300)} title="V" />,
+    );
+    const hit = container.querySelector(".raster-line__hit")!;
+    fireEvent.focus(slider());
+    fireEvent.pointerMove(hit, { clientX: 50 + 332, clientY: 20 });
+    expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
+    // The focused point and the hovered point both show.
+    expect(container.querySelectorAll(".raster-line__marker")).toHaveLength(2);
+    fireEvent.blur(slider());
+    expect(container.querySelectorAll(".raster-line__marker")).toHaveLength(1);
+  });
+
+  it("skips an empty first series, so there's always a slider", () => {
+    render(
+      <LineChart
+        series={[{ name: "Empty", data: [] }, big(300, "Visits")]}
+        categories={days(300)}
+        title="V"
+      />,
+    );
+    expect(slider().getAttribute("aria-label")).toBe("Visits");
+  });
+
+  it("announces selection changes in the live region", () => {
+    render(<LineChart series={[big(300)]} categories={days(300)} title="V" onSelect={() => {}} />);
+    fireEvent.keyDown(slider(), { key: "Enter" });
+    expect(screen.getByRole("status").textContent).toBe("Views, Day 1: 100, 1 of 300, selected");
+    fireEvent.keyDown(slider(), { key: " " });
+    expect(screen.getByRole("status").textContent).toBe("Selection cleared");
+  });
+
+  it("doesn't re-render the chart while hovering", () => {
+    // A full render formats every table row; hovering should only name the hovered point.
+    const format = vi.fn((v: number) => String(v));
+    const { container } = render(
+      <LineChart series={[big(300)]} categories={days(300)} title="V" formatValue={format} />,
+    );
+    const hit = container.querySelector(".raster-line__hit")!;
+    format.mockClear();
+    for (const clientX of [100, 200, 300, 400])
+      fireEvent.pointerMove(hit, { clientX, clientY: 20 });
+    expect(format.mock.calls.length).toBeLessThan(20);
   });
 
   it("draws straight, compact, downsampled lines with no per-point marks", () => {
@@ -760,8 +811,8 @@ describe("LineChart dense mode", () => {
     const d = container.querySelector(".raster-line__line")!.getAttribute("d")!;
     expect(d).not.toMatch(/[CL]/);
     expect(d).not.toMatch(/\.\d\d/);
-    // At most two points per pixel column of the 662 px plot.
-    expect(d.split(" ").length / 2).toBeLessThanOrEqual(2 * 663);
+    // At most four points (first, lowest, highest, last) per pixel column of the 662 px plot.
+    expect(d.split(" ").length / 2).toBeLessThanOrEqual(4 * 663);
     expect(container.querySelectorAll(".raster-line__point")).toHaveLength(0);
     expect(container.querySelector(".raster-line__area")).toBeTruthy();
   });

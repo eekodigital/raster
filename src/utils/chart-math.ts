@@ -271,32 +271,33 @@ export function markerPath(index: number, x: number, y: number, r: number): stri
 type XY = { x: number; y: number };
 
 /**
- * Downsamples a line for drawing: keeps the lowest and highest point in each
- * 1 px column, in their original order, so the line looks the same at that
- * resolution. Long series shrink to at most two points per pixel.
+ * Downsamples a line for drawing (M4): keeps the first, lowest, highest and
+ * last point in each 1 px column, in their original order, so the line looks
+ * the same at that resolution. Long series shrink to at most four points per
+ * pixel.
  */
 export function decimate<T extends XY>(points: T[]): T[] {
   const out: T[] = [];
   let col = NaN;
+  let first = 0;
   let lo = 0;
   let hi = 0;
-  const flush = () => {
+  const flush = (last: number) => {
     if (col !== col) return;
-    out.push(points[Math.min(lo, hi)]);
-    if (lo !== hi) out.push(points[Math.max(lo, hi)]);
+    for (const i of [...new Set([first, lo, hi, last])].sort((a, b) => a - b)) out.push(points[i]);
   };
   points.forEach((p, i) => {
     const c = Math.floor(p.x);
     if (c !== col) {
-      flush();
+      flush(i - 1);
       col = c;
-      lo = hi = i;
+      first = lo = hi = i;
     } else {
       if (p.y < points[lo].y) lo = i;
       if (p.y > points[hi].y) hi = i;
     }
   });
-  flush();
+  flush(points.length - 1);
   return out;
 }
 

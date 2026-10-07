@@ -14,7 +14,7 @@ At 1,000 points the server HTML drops from about 310 KB to 62 KB, with the SVG g
   - **Keys:** the same as other charts. ← / →, Home / End and PageUp / PageDown move between points, ↑ / ↓ move between series, Enter / Space select (", selected" is added to the value), and Escape clears.
   - **Marker:** a marker with a drawn focus ring shows the current point.
   - **Pointer:** hovering over the plot moves to the nearest point (binary search on x) and shows the tooltip; clicking selects it.
-  - **Drawing:** lines are 1.5 px, at most two points per pixel column, with coordinates to 0.1 px. Smooth curves are drawn straight. A point left on its own by a gap still gets a dot.
+  - **Drawing:** lines are 1.5 px, at most four points per pixel column (first, lowest, highest, last), with coordinates to 0.1 px. Smooth curves are drawn straight. A point left on its own by a gap still gets a dot.
   - **Still in the HTML:** the summary and data table.
 - `labels.selected` ("selected").
 - `ChartFrame` takes an `overlay`. It's internal for now.

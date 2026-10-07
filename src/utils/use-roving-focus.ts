@@ -33,7 +33,8 @@ function findRow(counts: readonly number[], from: number, dir: 1 | -1): number {
   return -1;
 }
 
-function clampPosition(counts: readonly number[], { row, item }: Position): Position {
+/** `at`, kept inside `counts`, moving off empty rows. */
+export function clampPosition(counts: readonly number[], { row, item }: Position): Position {
   let r = row < counts.length ? findRow(counts, row, 1) : -1;
   if (r === -1) r = findRow(counts, Math.min(row, counts.length - 1), -1);
   if (r === -1) return { row: 0, item: 0 };

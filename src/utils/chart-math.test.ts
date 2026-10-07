@@ -253,20 +253,32 @@ describe("polylinePath and catmullRomPath", () => {
 });
 
 describe("dense series helpers", () => {
-  it("keeps each pixel column's lowest and highest point, in order", () => {
+  it("keeps each pixel column's first, lowest, highest and last point, in order", () => {
     const pts = [
       { x: 0.1, y: 5 },
+      { x: 0.2, y: 6 },
       { x: 0.4, y: 1 },
       { x: 0.6, y: 9 },
+      { x: 0.7, y: 7 },
       { x: 0.9, y: 4 },
       { x: 1.2, y: 3 },
     ];
-    expect(decimate(pts)).toEqual([pts[1], pts[2], pts[4]]);
+    expect(decimate(pts)).toEqual([pts[0], pts[2], pts[3], pts[5], pts[6]]);
   });
 
-  it("bounds the output at two points per column", () => {
+  it("keeps a spike's fall inside its column", () => {
+    const pts = [
+      { x: 0.1, y: 0 },
+      { x: 0.5, y: 100 },
+      { x: 0.9, y: 0 },
+      { x: 1.1, y: 0 },
+    ];
+    expect(decimate(pts)).toEqual(pts);
+  });
+
+  it("bounds the output at four points per column", () => {
     const pts = Array.from({ length: 5000 }, (_, i) => ({ x: i / 10, y: Math.sin(i) }));
-    expect(decimate(pts).length).toBeLessThanOrEqual(1000);
+    expect(decimate(pts).length).toBeLessThanOrEqual(2000);
   });
 
   it("draws a compact path: one decimal place, implicit line-tos", () => {

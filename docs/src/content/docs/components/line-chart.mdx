@@ -91,7 +91,7 @@ For large series, create the axis with `useMemo` so its formatting and gap check
 
 ## Large series
 
-Above 200 points in a series, LineChart switches to dense mode. Each series is drawn as one path, downsampled to at most two points per pixel column (which looks the same), with no per-point marks. At 1,000 points that takes the server HTML from about 310 KB to about 62 KB, and the SVG from 261 KB to 13 KB.
+Above 200 points in a series, LineChart switches to dense mode. Each series is drawn as one path, downsampled to the first, lowest, highest and last point in each pixel column (which looks the same), with no per-point marks. At 1,000 points that takes the server HTML from about 310 KB to about 62 KB, and the SVG from 261 KB to 13 KB.
 
 <Example
   code={`<LineChart\n  series={[\n    { name: 'Views', data: views },       // 730 days\n    { name: 'Visitors', data: visitors },\n  ]}\n  x={timeAxis(days, { interval: 'day' })}\n  title="Daily traffic, 2025–2026"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
