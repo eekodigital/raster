@@ -16,7 +16,7 @@ import { plotSize, useContainerWidth } from "../../utils/use-container-width.js"
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
-import { ChartFrame } from "../shared/ChartFrame.js";
+import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import {
@@ -282,7 +282,7 @@ export function BarChart({
   const showVGrid = grid === "vertical" || grid === "both";
 
   return (
-    <ChartFrame
+    <SvgChartFrame
       {...frame}
       labels={labels}
       summary={summary}
@@ -402,6 +402,6 @@ export function BarChart({
         {multi ? renderSeriesBars(multi) : renderSimpleBars()}
         <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
       </g>
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }

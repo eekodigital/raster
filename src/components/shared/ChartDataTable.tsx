@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import type React from "react";
+import { resolveLabels } from "../../utils/labels.js";
 import type { ChartLabels } from "../../utils/labels.js";
 
 /**
@@ -38,14 +39,27 @@ export type ChartTableData = {
   rowHeaders?: boolean;
 };
 
-type ChartDataTableProps = ChartTableData & {
-  labels: ChartLabels;
+export type ChartDataTableProps = ChartTableData & {
+  /** Generated strings ("Show data table"…). English by default. */
+  labels?: Partial<ChartLabels>;
+  /** How the table is offered. Default `disclosure`. */
   mode?: DataTableMode;
   /** Id of the chart title, so each toggle has context when there are several. */
   describedBy?: string;
 };
 
-export function ChartDataTable({
+/**
+ * A data table offered as a "Show data table" disclosure (or visually hidden),
+ * captioned, with scoped headers. Cells are shown as given: format numbers
+ * before passing them. On its own, the toggle is described by the caption, so
+ * several tables on a page stay distinguishable.
+ */
+export function ChartDataTable({ labels, ...props }: ChartDataTableProps) {
+  return <DataTable {...props} labels={resolveLabels(labels)} />;
+}
+
+/** The table inside raster's charts, which pass resolved labels. */
+export function DataTable({
   caption,
   headers,
   rows,
@@ -53,7 +67,7 @@ export function ChartDataTable({
   labels,
   mode = "disclosure",
   describedBy,
-}: ChartDataTableProps) {
+}: Omit<ChartDataTableProps, "labels"> & { labels: ChartLabels }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const hiddenMode = mode === "visually-hidden";
@@ -65,7 +79,7 @@ export function ChartDataTable({
       style={hiddenMode ? SR_ONLY_STYLE : undefined}
       hidden={!hiddenMode && !open}
     >
-      <caption>{caption}</caption>
+      <caption id={`${id}-caption`}>{caption}</caption>
       <thead>
         <tr>
           {headers.map((h, i) => (
@@ -106,7 +120,7 @@ export function ChartDataTable({
         className="raster-chart__table-toggle"
         aria-expanded={open}
         aria-controls={id}
-        aria-describedby={describedBy}
+        aria-describedby={describedBy ?? `${id}-caption`}
         onClick={() => setOpen(!open)}
       >
         {open ? labels.hideTable : labels.showTable}
