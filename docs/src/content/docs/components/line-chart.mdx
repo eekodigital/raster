@@ -10,6 +10,7 @@ import {
   LineChartAreaDemo,
   LineChartSelectDemo,
   LineChartDatesDemo,
+  LineChartDenseDemo,
 } from "../../../components/LineChartDemo.tsx";
 
 ## Basic
@@ -88,6 +89,23 @@ Only the first and last categories anchor to the plot edges; every other tick ce
 
 For large series, create the axis with `useMemo` so its formatting and gap checks aren't repeated on every render: `const x = useMemo(() => timeAxis(days, { interval: "day" }), [days])`.
 
+## Large series
+
+Above 200 points in a series, LineChart switches to dense mode. Each series is drawn as one path, downsampled to the first, lowest, highest and last point in each pixel column (which looks the same), with no per-point marks. At 1,000 points that takes the server HTML from about 310 KB to about 62 KB, and the SVG from 261 KB to 13 KB.
+
+<Example
+  code={`<LineChart\n  series={[\n    { name: 'Views', data: views },       // 730 days\n    { name: 'Visitors', data: visitors },\n  ]}\n  x={timeAxis(days, { interval: 'day' })}\n  title="Daily traffic, 2025–2026"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
+>
+  <LineChartDenseDemo client:load />
+</Example>
+
+- **One control.** The chart has a single focusable slider (a visually hidden `<input type="range">`). Its name is the series, and `aria-valuetext` names the current point, e.g. "Views, 3 October 2025: 512, 276 of 730". Screen readers announce each change, NVDA switches into focus mode so the arrow keys reach the chart, and VoiceOver on iOS can swipe through the points.
+- **Same keys** as other charts: ← / → point, Home / End, PageUp / PageDown 10 points, ↑ / ↓ series, Enter / Space select (", selected" is added to the value), Escape clear.
+- **Marker:** the current point shows a marker with the focus ring while the slider has focus. Pointing anywhere over the plot moves it to the nearest point and shows the tooltip; clicking selects that point.
+- **Still in the HTML:** the summary and the data table, so every value is available without JavaScript.
+- `curve="smooth"` is drawn straight in dense mode, because curves can't be seen at that density and cost about three times the bytes.
+- `dense={false}` keeps per-point marks, `dense` forces dense mode, and `dense={500}` changes the threshold.
+
 ## Accessibility
 
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
@@ -162,6 +180,22 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         A date axis instead of <code>categories</code>:{" "}
         <code>timeAxis(dates, &#123; interval?, timeZone?, format? &#125;)</code> from{" "}
         <code>@eekodigital/raster/time</code>. See <a href="#dates">Dates</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dense</code>
+      </td>
+      <td>
+        <code>boolean | number</code>
+      </td>
+      <td>
+        <code>200</code>
+      </td>
+      <td>
+        Dense mode: one path per series and a single slider instead of per-point marks. A number is
+        the threshold (points in the longest series); <code>true</code> or <code>false</code> forces
+        it. See <a href="#large-series">Large series</a>.
       </td>
     </tr>
     <tr>

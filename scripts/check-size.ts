@@ -37,7 +37,7 @@ const BUDGETS: Record<string, number> = {
   "./donut-chart": 6_200,
   "./gauge": 2_300,
   "./geo": 6_800,
-  "./line-chart": 7_700,
+  "./line-chart": 9_100,
   "./linear-gauge": 900,
   "./radar-chart": 6_400,
   "./scatter-chart": 7_100,

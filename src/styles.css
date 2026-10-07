@@ -192,6 +192,11 @@
   animation: raster-line-draw 0.8s ease both;
 }
 
+/* Dense series: a thinner line keeps detail readable at a point per pixel. */
+.raster-line__line--dense {
+  stroke-width: 1.5;
+}
+
 .raster-line__area {
   opacity: 0.15;
   animation: raster-fade-in 0.6s ease 0.4s backwards;
@@ -226,6 +231,27 @@
 .raster-scatter__point:focus,
 .raster-radar__point:focus {
   outline: none;
+}
+
+/* Dense LineChart: one marker follows the slider or pointer. It appears at
+   once (no fade-in) and lets the pointer through to the hit area. While the
+   slider has focus, the marker gets the halo and a drawn ring. */
+.raster-line__marker,
+.raster-line__ring {
+  animation: none;
+  pointer-events: none;
+}
+
+.raster-line__marker[data-focused] {
+  transform: scale(1.6);
+  stroke: var(--raster-surface, light-dark(#ffffff, #121212));
+  stroke-width: 2;
+}
+
+.raster-line__ring {
+  fill: none;
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 2;
 }
 
 /* Surface halo inside the focus ring: visible even if focus = series colour. */
@@ -740,6 +766,7 @@
 
   /* Focus and selection */
   .raster-line__point:focus-visible,
+  .raster-line__ring,
   .raster-scatter__point:focus-visible,
   .raster-radar__point:focus-visible,
   .raster-geo__region:focus-visible,

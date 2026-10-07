@@ -1,5 +1,7 @@
 import {
   catmullRomPath,
+  compactPath,
+  decimate,
   polylinePath,
   extent,
   linearScale,
@@ -21,6 +23,7 @@ import { ChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import { DenseOverlay } from "./DenseOverlay.js";
 
 export type LineSeries = {
   name: string;
@@ -85,6 +88,13 @@ export type LineChartProps = ChartFrameOptions &
     selectedIndex?: LinePointIndex | null;
     onSelect?: (index: LinePointIndex | null) => void;
     exportRef?: React.Ref<ChartExportHandle>;
+    /**
+     * Dense mode for long series: each series is one downsampled path with no
+     * per-point marks, and a single slider steps through the points. `true` or
+     * `false` forces it; a number is the threshold. Default: on when a series
+     * has more than 200 points.
+     */
+    dense?: boolean | number;
   };
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
@@ -110,11 +120,14 @@ export function LineChart({
   aspectRatio,
   exportRef,
   labels: labelOverrides,
+  dense,
   ...frame
 }: LineChartProps) {
   const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
   const selection = useSelection<LinePointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
+  const longest = Math.max(0, ...series.map((s) => s.data.length));
+  const isDense = typeof dense === "boolean" ? dense : longest > (dense ?? 200);
 
   const size = plotSize(useContainerWidth(plotRef, 720), { height: heightProp, aspectRatio }, 200);
   const plotWidth = size.width - MARGIN.left - MARGIN.right;
@@ -176,7 +189,16 @@ export function LineChart({
 
   const activate = interactive
     ? (si: number, pi: number) => {
-        selection.toggle({ series: si, point: pi });
+        const point = { series: si, point: pi };
+        // A dense chart's slider has no pressed state to report, so announce it.
+        selection.toggle(
+          point,
+          isDense
+            ? selection.isSelected(point)
+              ? labels.selectionCleared
+              : `${pointLabel(si, pi)}, ${labels.selected}`
+            : undefined,
+        );
         onPointClick?.(si, pi, series[si].data[pi]);
       }
     : undefined;
@@ -187,6 +209,19 @@ export function LineChart({
     rowKeys: VERTICAL_KEYS,
     onActivate: activate,
   });
+
+  const pos = stackedData.map((d) => d.map((v, i) => ({ x: xScale(i), y: yScale(v) })));
+  const pointLabel = (si: number, pi: number) =>
+    labels.mark(
+      {
+        series: series[si].name,
+        x: names[pi] ?? "",
+        y: format(series[si].data[pi]),
+        index: pi,
+        count: series[si].data.length,
+      },
+      n,
+    );
 
   const rawValues = series.flatMap((s) => s.data);
   const [rawMin, rawMax] = rawValues.length ? extent(rawValues) : [0, 0];
@@ -212,12 +247,31 @@ export function LineChart({
       width={size.width}
       height={size.height}
       selection={selection}
-      tooltip={tooltip}
+      tooltip={isDense ? undefined : tooltip}
       legend={
         series.length > 1 && (
           <ChartLegend
             marker
             items={series.map((s, i) => ({ label: s.name, color: s.color ?? seriesColor(i) }))}
+          />
+        )
+      }
+      overlay={
+        isDense && (
+          <DenseOverlay
+            width={size.width}
+            height={size.height}
+            left={MARGIN.left}
+            top={MARGIN.top}
+            plotWidth={plotWidth}
+            plotHeight={plotHeight}
+            pos={pos}
+            xs={names.map((_, i) => xScale(i))}
+            series={series.map((s, i) => ({ name: s.name, color: s.color ?? seriesColor(i) }))}
+            label={pointLabel}
+            selectedText={labels.selected}
+            selection={selection}
+            activate={activate}
           />
         )
       }
@@ -292,9 +346,8 @@ export function LineChart({
           const color = s.color ?? seriesColor(si);
           // Each point carries its area baseline: the series below, or the x axis.
           const below = stacked && si > 0 && stackedData[si - 1];
-          const points = stackedData[si].map((v, i) => ({
-            x: xScale(i),
-            y: yScale(v),
+          const points = pos[si].map((p, i) => ({
+            ...p,
             b: below ? yScale(below[i]) : plotHeight,
           }));
           if (!points.length) return null;
@@ -305,12 +358,15 @@ export function LineChart({
             if (!i || x?.gap(i)) runs.push([]);
             runs[runs.length - 1].push(p);
           });
-          const path = curve === "smooth" ? catmullRomPath : polylinePath;
-          const linePath = runs.map(path).join(" ");
+          // Dense lines are straight (curves can't be seen at that density),
+          // downsampled and compact.
+          const drawn = isDense ? runs.map(decimate) : runs;
+          const path = isDense ? compactPath : curve === "smooth" ? catmullRomPath : polylinePath;
+          const linePath = drawn.map(path).join(" ");
           // Each run's area closes along its baseline, right to left.
           const areaPath =
             area &&
-            runs
+            drawn
               .map(
                 (r) =>
                   `${path(r)} ${path(
@@ -321,26 +377,30 @@ export function LineChart({
               )
               .join(" ");
 
-          // Line length for the draw-in animation. Across gaps it overstates,
-          // which only means the line finishes drawing a little early.
-          const lineLength = points.reduce(
-            (len, p, j) =>
-              j === 0 ? 0 : len + Math.hypot(p.x - points[j - 1].x, p.y - points[j - 1].y),
+          // Length of the drawn line, for the draw-in animation.
+          const lineLength = drawn.reduce(
+            (len, r) =>
+              r.reduce(
+                (l, p, j) => (j ? l + Math.hypot(p.x - r[j - 1].x, p.y - r[j - 1].y) : l),
+                len,
+              ),
             0,
           );
 
           return (
             <g
               key={s.name}
-              role="group"
-              aria-label={labels.series(s.name, s.data.length, n)}
+              role={isDense ? undefined : "group"}
+              aria-label={isDense ? undefined : labels.series(s.name, s.data.length, n)}
               data-series={(si % 8) + 1}
             >
               {areaPath && <path d={areaPath} fill={color} className="raster-line__area" />}
               <path
                 d={linePath}
                 stroke={color}
-                className="raster-line__line"
+                className={
+                  isDense ? "raster-line__line raster-line__line--dense" : "raster-line__line"
+                }
                 style={
                   {
                     "--line-length": `${lineLength}`,
@@ -348,36 +408,40 @@ export function LineChart({
                   } as React.CSSProperties
                 }
               />
-              {points.map((p, pi) => {
-                const selected = selection.isSelected({ series: si, point: pi });
-                return (
-                  <path
-                    key={pi}
-                    d={markerPath(si, p.x, p.y, 3.5)}
-                    fill={color}
-                    className="raster-line__point"
-                    {...markProps({
-                      label: labels.mark(
-                        {
-                          series: s.name,
-                          x: names[pi] ?? "",
-                          y: format(s.data[pi]),
-                          index: pi,
-                          count: s.data.length,
-                        },
-                        n,
-                      ),
-                      row: si,
-                      item: pi,
-                      roving,
-                      tooltip,
-                      onActivate: activate,
-                      selected,
-                      dimmed: selection.selected !== null && !selected,
-                    })}
-                  />
-                );
-              })}
+              {isDense && runs.some((r) => r.length === 1) && (
+                // Points a gap leaves on their own would otherwise vanish.
+                <path
+                  d={runs
+                    .filter((r) => r.length === 1)
+                    .map((r) => markerPath(si, r[0].x, r[0].y, 2))
+                    .join("")}
+                  fill={color}
+                  className="raster-line__dots"
+                  aria-hidden="true"
+                />
+              )}
+              {!isDense &&
+                points.map((p, pi) => {
+                  const selected = selection.isSelected({ series: si, point: pi });
+                  return (
+                    <path
+                      key={pi}
+                      d={markerPath(si, p.x, p.y, 3.5)}
+                      fill={color}
+                      className="raster-line__point"
+                      {...markProps({
+                        label: pointLabel(si, pi),
+                        row: si,
+                        item: pi,
+                        roving,
+                        tooltip,
+                        onActivate: activate,
+                        selected,
+                        dimmed: selection.selected !== null && !selected,
+                      })}
+                    />
+                  );
+                })}
             </g>
           );
         })}

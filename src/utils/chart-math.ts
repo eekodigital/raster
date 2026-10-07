@@ -267,3 +267,55 @@ export function markerPath(index: number, x: number, y: number, r: number): stri
   }
   return `${d}Z`;
 }
+
+type XY = { x: number; y: number };
+
+/**
+ * Downsamples a line for drawing (M4): keeps the first, lowest, highest and
+ * last point in each 1 px column, in their original order, so the line looks
+ * the same at that resolution. Long series shrink to at most four points per
+ * pixel.
+ */
+export function decimate<T extends XY>(points: T[]): T[] {
+  const out: T[] = [];
+  let col = NaN;
+  let first = 0;
+  let lo = 0;
+  let hi = 0;
+  const flush = (last: number) => {
+    if (col !== col) return;
+    for (const i of [...new Set([first, lo, hi, last])].sort((a, b) => a - b)) out.push(points[i]);
+  };
+  points.forEach((p, i) => {
+    const c = Math.floor(p.x);
+    if (c !== col) {
+      flush(i - 1);
+      col = c;
+      first = lo = hi = i;
+    } else {
+      if (p.y < points[lo].y) lo = i;
+      if (p.y > points[hi].y) hi = i;
+    }
+  });
+  flush(points.length - 1);
+  return out;
+}
+
+const r1 = (v: number) => Math.round(v * 10) / 10;
+
+/** Straight-line path with coordinates to 0.1 px and implicit line-tos: small for long series. */
+export function compactPath(points: XY[]): string {
+  return `M${points.map((p) => `${r1(p.x)} ${r1(p.y)}`).join(" ")}`;
+}
+
+/** Index of the value in ascending `xs` nearest to `x` (binary search); -1 when empty. */
+export function nearestIndex(xs: number[], x: number): number {
+  let lo = 0;
+  let hi = xs.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (xs[mid] < x) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo > 0 && x - xs[lo - 1] <= xs[lo] - x ? lo - 1 : hi;
+}

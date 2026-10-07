@@ -11,11 +11,15 @@ export function sameSelection<T>(a: T | null, b: T | null): boolean {
 export type Selection<T> = {
   selected: T | null;
   isSelected: (value: T) => boolean;
-  /** Select `value`, or clear it if it's already selected. */
-  toggle: (value: T) => void;
+  /**
+   * Select `value`, or clear it if it's already selected. `announce` is said
+   * in the live region, for controls with no pressed state of their own (a
+   * dense chart's slider).
+   */
+  toggle: (value: T, announce?: string) => void;
   /** Clears the selection; returns false when there was nothing to clear. */
   clear: () => boolean;
-  /** Text for the chart's live region (off-focus changes only). */
+  /** Text for the chart's live region (off-focus changes, and `announce`). */
   announcement: string;
 };
 
@@ -43,8 +47,8 @@ export function useSelection<T>(
   return {
     selected,
     isSelected: (value) => selected !== null && sameSelection(selected, value),
-    toggle: (value) => {
-      setAnnouncement("");
+    toggle: (value, announce = "") => {
+      setAnnouncement(announce);
       set(sameSelection(selected, value) ? null : value);
     },
     clear: () => {

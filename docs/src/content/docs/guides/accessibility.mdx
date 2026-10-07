@@ -37,6 +37,8 @@ Each chart is one Tab stop. The last mark you visited stays the Tab stop when yo
 | Enter / Space     | Toggle selection of the focused mark (interactive charts)                                                    |
 | Escape            | Hide the tooltip and clear the selection. Handled inside the chart only, so a surrounding dialog stays open. |
 
+A LineChart with more than 200 points in a series is [dense](/components/line-chart/#large-series). It has no per-point marks; its one Tab stop is a slider whose value names the current point. The keys are the same.
+
 DonutChart moves round the ring with any arrow key. RadarChart wraps round its axes. GeoChart moves across regions with ← / →, and ↑ / ↓ switch between regions and markers.
 
 ## Data table
@@ -74,6 +76,7 @@ const de: Partial<ChartLabels> = {
   showTable: "Datentabelle anzeigen",
   hideTable: "Datentabelle ausblenden",
   tableCaption: (title) => `Daten für ${title}`,
+  selected: "ausgewählt",
   selectionCleared: "Auswahl aufgehoben",
   series: (name, count, n) => `${name}, ${n(count)} Punkte`,
   mark: ({ series, x, y, index, count }, n) => {
@@ -94,6 +97,7 @@ const de: Partial<ChartLabels> = {
 | `showTable`                                                                                                                                                                      | `"Show data table"`                                                                                                                                                                                                                        |
 | `hideTable`                                                                                                                                                                      | `"Hide data table"`                                                                                                                                                                                                                        |
 | `tableCaption`                                                                                                                                                                   | `(title) => "Data for {title}"`                                                                                                                                                                                                            |
+| `selected`                                                                                                                                                                       | Added to a dense LineChart's current point when it's selected, and announced on selecting: `"selected"`.                                                                                                                                   |
 | `selectionCleared`                                                                                                                                                               | `"Selection cleared"`                                                                                                                                                                                                                      |
 | `noData`                                                                                                                                                                         | `"No data"` (GeoChart regions without a value)                                                                                                                                                                                             |
 | `regions`, `markers`, `region`, `marker`                                                                                                                                         | GeoChart group names and table types                                                                                                                                                                                                       |
@@ -112,4 +116,5 @@ Raster's tests cover roles, names, keyboard and axe for every chart and mode, bu
 2. Press → a few times. Each step announces the next point with its position. Press End, then Home.
 3. On a multi-series chart press ↓. Expect the same period in the next series ("Fail, Jan: 0, 1 of 6").
 4. On the Selection example, press Space. Expect "selected" or "pressed". Press Escape: expect "Selection cleared", and the button is no longer pressed.
-5. Tab to **Show data table**. Expect "Show data table, collapsed, button". Press Space: expect "expanded". Use VO+⌘T (next table) and table navigation (VO+arrows) to read the caption and cells.
+5. On the dense "Daily traffic" example, Tab to the chart. Expect the slider: "Views, 1 January 2025: …, 1 of 730, slider". Press → and PageDown: each step announces only the new point. Hold → briefly: speech shouldn't build up a backlog. Press ↓: expect "Visitors". Repeat with NVDA (Chrome and Firefox), which should switch to focus mode by itself, and VoiceOver on iOS, swiping up and down.
+6. Tab to **Show data table**. Expect "Show data table, collapsed, button". Press Space: expect "expanded". Use VO+⌘T (next table) and table navigation (VO+arrows) to read the caption and cells.
