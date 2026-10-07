@@ -844,14 +844,15 @@ describe("LineChart dense mode", () => {
   });
 
   it("has no axe violations, static and interactive", async () => {
+    // `dense` forces the same markup on a short series, keeping axe quick.
     const { container, unmount } = render(
-      <LineChart series={[big(300)]} categories={days(300)} title="V" />,
+      <LineChart series={[big(20)]} categories={days(20)} dense title="V" />,
     );
     openTable();
     expect(await axe(container)).toHaveNoViolations();
     unmount();
     const r = render(
-      <LineChart series={[big(300)]} categories={days(300)} title="V" onSelect={() => {}} />,
+      <LineChart series={[big(20)]} categories={days(20)} dense title="V" onSelect={() => {}} />,
     );
     fireEvent.keyDown(slider(), { key: "Enter" });
     expect(await axe(r.container)).toHaveNoViolations();
