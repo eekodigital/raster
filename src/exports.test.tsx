@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as geo from "./geo.js";
 import * as main from "./index.js";
 import * as theme from "./theme.js";
+import * as time from "./time.js";
 import { LineChart } from "./components/LineChart/LineChart.js";
 import type { ChartExportHandle } from "./utils/use-chart-export.js";
 
@@ -13,6 +14,7 @@ describe("public API", () => {
       ".": Object.keys(main).sort(),
       "./geo": Object.keys(geo).sort(),
       "./theme": Object.keys(theme).sort(),
+      "./time": Object.keys(time).sort(),
     }).toMatchSnapshot();
   });
 });

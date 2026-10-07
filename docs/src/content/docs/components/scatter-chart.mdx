@@ -32,7 +32,7 @@ import {
 - Named series are `role="group"`s. Each point is labelled `{series}, {x}: {y}, 3 of 12` (with its `label` when given). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
 - Points use a different marker shape per series.
 - Arrow keys move in x order, so left and right match the drawing.
-- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatX` and `formatValue`.
 - Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
 - Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
 
@@ -127,8 +127,23 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>Intl.NumberFormat</code>
       </td>
       <td>
-        Formats values in ticks, marks and the table. Defaults to{" "}
-        <code>Intl.NumberFormat(labels.locale)</code>.
+        Formats y values, and x values unless <code>formatX</code> is set, in ticks, marks, the
+        table and the summary. Defaults to <code>Intl.NumberFormat(labels.locale)</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatX</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+      </td>
+      <td>
+        <code>formatValue</code>
+      </td>
+      <td>
+        Formats x values separately, e.g. epoch milliseconds as dates:{" "}
+        <code>(ms) =&gt; dateFormat.format(ms)</code>. Ticks stay evenly spaced numbers.
       </td>
     </tr>
     <tr>

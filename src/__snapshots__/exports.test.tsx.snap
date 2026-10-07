@@ -23,5 +23,8 @@ exports[`public API > exports exactly these names from each entry 1`] = `
   "./theme": [
     "rasterVars",
   ],
+  "./time": [
+    "timeAxis",
+  ],
 }
 `;

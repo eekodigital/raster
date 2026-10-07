@@ -56,6 +56,8 @@ export type ChartLabels = {
   valueColumn: string;
   percentageColumn: string;
   periodColumn: string;
+  /** First column of a LineChart with a time axis. */
+  dateColumn: string;
   axisColumn: string;
   nameColumn: string;
   typeColumn: string;
@@ -98,6 +100,7 @@ export const DEFAULT_LABELS: ChartLabels = {
   valueColumn: "Value",
   percentageColumn: "Percentage",
   periodColumn: "Period",
+  dateColumn: "Date",
   axisColumn: "Axis",
   nameColumn: "Name",
   typeColumn: "Type",

@@ -199,14 +199,18 @@ export function pieAngles(values: number[]): { start: number; end: number }[] {
   return angles;
 }
 
+/** Straight-line SVG path through `points` (just a move for one point). */
+export function polylinePath(points: { x: number; y: number }[]): string {
+  return `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")}`;
+}
+
 /**
  * Generate a smooth SVG path using Catmull-Rom interpolation.
  * Converts a set of points into cubic bezier curves for smooth lines.
  * Tension controls curvature (0 = straight lines, 1 = full catmull-rom).
  */
 export function catmullRomPath(points: { x: number; y: number }[], tension = 0.5): string {
-  if (points.length < 2) return "";
-  if (points.length === 2) return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+  if (points.length < 3) return polylinePath(points);
 
   const parts: string[] = [`M ${points[0].x} ${points[0].y}`];
 

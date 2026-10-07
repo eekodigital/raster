@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "../../test-utils/axe.js";
 import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
+import { renderToString } from "react-dom/server";
+import { timeAxis } from "../../utils/time.js";
 import { LineChart } from "./LineChart.js";
 
 const SERIES = [{ name: "Assessed", data: [10, 25, 40, 60, 86] }];
@@ -324,6 +326,16 @@ describe("LineChart drawing", () => {
     }
   });
 
+  it("closes stacked smooth areas along the series below, right to left", () => {
+    const { container } = render(
+      <LineChart series={MULTI} categories={MONTHS} stacked area curve="smooth" title="S" />,
+    );
+    // Fail (stacked on Pass, drawn first) runs out left to right, then back from the right.
+    const d = container.querySelector(".raster-line__area")!.getAttribute("d")!;
+    const back = /\sL ([\d.]+) /.exec(d)!;
+    expect(Number(back[1])).toBe(662);
+  });
+
   it("renders axis titles", () => {
     render(
       <LineChart series={SERIES} categories={CATEGORIES} title="P" xLabel="Week" yLabel="Count" />,
@@ -458,6 +470,133 @@ describe("LineChart axe", () => {
       <LineChart series={MULTI} categories={MONTHS} title="R" onSelect={() => {}} />,
     );
     fireEvent.click(screen.getByRole("button", { name: /^Pass, Feb/ }));
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("LineChart with a time axis", () => {
+  const VIEWS = [{ name: "Views", data: [10, 20, 30] }];
+  const DATES = ["2026-10-01", "2026-10-02", "2026-10-04"];
+  const GB = { locale: "en-GB" };
+  /** x of each point, from its marker path (a circle starts 3.5 left of centre). */
+  const pointXs = (root: Element) =>
+    [...root.querySelectorAll(".raster-line__point")].map(
+      (p) => Number(/^M([\d.-]+)/.exec(p.getAttribute("d")!)![1]) + 3.5,
+    );
+
+  it("spaces points by elapsed time, not index", () => {
+    const { container } = render(
+      <LineChart series={VIEWS} x={timeAxis(DATES)} title="Views" labels={GB} />,
+    );
+    // Plot is 720 - 58 = 662 wide over 3 days.
+    expect(pointXs(container).map(Math.round)).toEqual([0, 221, 662]);
+  });
+
+  it("names points, the summary and the table with formatted dates", () => {
+    render(<LineChart series={VIEWS} x={timeAxis(DATES)} title="Views" labels={GB} />);
+    screen.getByRole("img", { name: "Views, 2 October 2026: 20, 2 of 3" });
+    const figure = screen.getByRole("figure", { name: "Views" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Line chart, 3 points. 1 October 2026 to 4 October 2026. Values from 10 to 30.",
+    );
+    expect(tableText(openTable())).toEqual([
+      ["Date", "Views"],
+      ["1 October 2026", "10"],
+      ["2 October 2026", "20"],
+      ["4 October 2026", "30"],
+    ]);
+  });
+
+  it("draws calendar ticks, anchoring labels at the plot edges, with grid lines at ticks", () => {
+    const { container } = render(
+      <LineChart series={VIEWS} x={timeAxis(DATES)} title="Views" labels={GB} grid="vertical" />,
+    );
+    const ticks = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => !t.hasAttribute("dy"))
+      .map((t) => [t.textContent, t.getAttribute("text-anchor")]);
+    expect(ticks).toEqual([
+      ["1 Oct", "start"],
+      ["2 Oct", "middle"],
+      ["3 Oct", "middle"],
+      ["4 Oct", "end"],
+    ]);
+    expect(container.querySelectorAll("line.raster-chart__grid")).toHaveLength(4);
+  });
+
+  it("breaks the line and area where a point is missing at the interval", () => {
+    const x = timeAxis(["2026-10-01", "2026-10-02", "2026-10-04", "2026-10-05"], {
+      interval: "day",
+    });
+    for (const curve of ["linear", "smooth"] as const) {
+      const { container, unmount } = render(
+        <LineChart
+          series={[
+            { name: "A", data: [1, 2, 3, 4] },
+            { name: "B", data: [1, 1, 1, 1] },
+          ]}
+          x={x}
+          area
+          stacked
+          curve={curve}
+          title="Gaps"
+        />,
+      );
+      for (const line of container.querySelectorAll(".raster-line__line"))
+        expect(line.getAttribute("d")!.match(/M/g)).toHaveLength(2);
+      for (const area of container.querySelectorAll(".raster-line__area"))
+        expect(area.getAttribute("d")!.match(/Z/g)).toHaveLength(2);
+      unmount();
+    }
+    // Without an interval, the same data joins up.
+    const { container } = render(<LineChart series={VIEWS} x={timeAxis(DATES)} title="Joined" />);
+    expect(
+      container.querySelector(".raster-line__line")!.getAttribute("d")!.match(/M/g),
+    ).toHaveLength(1);
+  });
+
+  it("keeps one tab stop and moves point by point across gaps", () => {
+    const { container } = render(
+      <LineChart
+        series={VIEWS}
+        x={timeAxis(DATES, { interval: "day" })}
+        title="Views"
+        labels={GB}
+      />,
+    );
+    expect(tabStops(container)).toEqual(["Views, 1 October 2026: 10, 1 of 3"]);
+    press(screen.getByRole("img", { name: /1 of 3/ }), "ArrowRight");
+    expect(focusedName()).toBe("Views, 2 October 2026: 20, 2 of 3");
+    press(document.activeElement!, "ArrowRight");
+    expect(focusedName()).toBe("Views, 4 October 2026: 30, 3 of 3");
+    press(document.activeElement!, "Home");
+    expect(focusedName()).toBe("Views, 1 October 2026: 10, 1 of 3");
+  });
+
+  it("server-renders the summary, table, names and one tab stop", () => {
+    const html = renderToString(
+      <LineChart
+        series={VIEWS}
+        x={timeAxis(DATES, { interval: "day" })}
+        title="Views"
+        labels={GB}
+      />,
+    );
+    expect(html).toContain("1 October 2026 to 4 October 2026. Values from 10 to 30.");
+    expect(html).toContain('aria-label="Views, 4 October 2026: 30, 3 of 3"');
+    expect(html).toContain('<th scope="row">2 October 2026</th>');
+    expect(html.match(/tabindex="0"/g)).toHaveLength(1);
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <LineChart
+        series={VIEWS}
+        x={timeAxis(DATES, { interval: "day" })}
+        title="Views"
+        onSelect={() => {}}
+      />,
+    );
+    openTable();
     expect(await axe(container)).toHaveNoViolations();
   });
 });

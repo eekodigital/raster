@@ -14,6 +14,7 @@ import { minifyCss } from "./src/utils/minify-css.ts";
 export const entries = {
   index: "src/index.ts",
   theme: "src/theme.ts",
+  time: "src/time.ts",
   geo: "src/geo.ts",
   "bar-chart": "src/components/BarChart/BarChart.tsx",
   "chart-tooltip": "src/components/ChartTooltip/ChartTooltip.tsx",

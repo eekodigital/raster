@@ -21,6 +21,7 @@ export type {
   LineChartProps,
   LinePointIndex,
   LineSeries,
+  XAxis,
 } from "./components/LineChart/LineChart.js";
 export { RadarChart } from "./components/RadarChart/RadarChart.js";
 export type {

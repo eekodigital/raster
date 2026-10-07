@@ -17,6 +17,13 @@ describe("package.json", () => {
     expect(pkg.files).toContain("dist");
   });
 
+  it("keeps date code out of the chart entries, at ./time", () => {
+    expect(pkg.exports["./time"]).toEqual({
+      types: "./dist/time.d.mts",
+      import: "./dist/time.mjs",
+    });
+  });
+
   it("declares topojson-client as an optional peer", () => {
     expect(pkg.peerDependencies["topojson-client"]).toBeDefined();
     expect(pkg.peerDependenciesMeta["topojson-client"]).toEqual({ optional: true });

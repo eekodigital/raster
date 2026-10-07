@@ -44,6 +44,7 @@ const BUDGETS: Record<string, number> = {
   "./scatter-chart": 6_150,
   "./sparkline": 2_500,
   "./theme": 300,
+  "./time": 1_200,
   "./styles.css": 2_550,
 };
 
