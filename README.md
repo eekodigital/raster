@@ -77,6 +77,10 @@ pnpm size    # per-entry bundle-size budget (after build)
 pnpm dev     # library watch + docs site
 ```
 
+### Releasing
+
+Work merges into `develop`, with a changeset (`pnpm changeset`) for anything users will notice. A release is a PR from `develop` into `main`. On `main`, the release workflow opens a "chore: version package" PR. Merging that publishes to npm, tags the commit `vX.Y.Z` and creates a GitHub release from the changelog.
+
 ## License
 
 MIT
