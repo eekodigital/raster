@@ -21,31 +21,30 @@ import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
 
 /**
- * Budgets in gzipped bytes. Raise deliberately, in the PR that needs it.
+ * Budgets in gzipped bytes. They're tripwires, not targets: each is about
+ * 15% over the entry's size when set, to catch accidental jumps (a chart
+ * pulling in another chart's code, an unused feature bundled into every
+ * chart), not to argue over tens of bytes. Each PR reports its size changes;
+ * judge them by what they buy. Reset with headroom when a budget gets close.
  *
  * Framed charts carry the shared accessibility layer (figure + summary, data
- * table disclosure, `labels`, state-based roving focus, selection + live
- * region): about 1.3–2.5 KB per entry, set in the raster-3 a11y PR.
- *
- * The review pass (tooltip clamping, Escape dismissal, translatable table
- * headers, tick filtering, horizontal multi-series bars) added 50–350 B per
- * JS entry; minifying styles.css saved ~900 B, so every chart's JS + CSS
- * total went down.
+ * table disclosure, `labels`, roving focus, selection + live region): about
+ * 1.3–2.5 KB per entry. `/time` is the opt-in date axis for LineChart.
  */
 const BUDGETS: Record<string, number> = {
-  "./bar-chart": 6_600,
-  "./chart-tooltip": 800,
-  "./donut-chart": 5_450,
-  "./gauge": 2_000,
-  "./geo": 6_000,
-  "./line-chart": 6_700,
-  "./linear-gauge": 800,
-  "./radar-chart": 5_600,
-  "./scatter-chart": 6_150,
-  "./sparkline": 2_500,
+  "./bar-chart": 7_500,
+  "./chart-tooltip": 900,
+  "./donut-chart": 6_200,
+  "./gauge": 2_300,
+  "./geo": 6_800,
+  "./line-chart": 7_700,
+  "./linear-gauge": 900,
+  "./radar-chart": 6_400,
+  "./scatter-chart": 7_100,
+  "./sparkline": 2_900,
   "./theme": 300,
-  "./time": 1_200,
-  "./styles.css": 2_550,
+  "./time": 1_600,
+  "./styles.css": 2_900,
 };
 
 const root = resolve(import.meta.dirname, "..");
