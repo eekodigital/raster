@@ -58,3 +58,24 @@ jobs:
 
       - if: steps.npm-version.outputs.published == 'false'
         run: npm publish --provenance --access public
+
+      # Tag each published version (vX.Y.Z, annotated) and publish its
+      # changelog section as a GitHub release. Skips when the tag exists, so
+      # re-runs and ordinary pushes to main are no-ops.
+      - if: steps.changesets.outputs.has-changesets == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "$tag already exists; nothing to tag."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "$tag"
+          git push origin "refs/tags/$tag"
+          awk -v h="## $version" '$0 == h { f = 1; next } /^## / && f { exit } f' CHANGELOG.md > release-notes.md
+          echo "npm: https://www.npmjs.com/package/@eekodigital/raster/v/$version" >> release-notes.md
+          gh release create "$tag" --verify-tag --title "$tag" --notes-file release-notes.md --latest
