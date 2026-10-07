@@ -34,7 +34,12 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm --filter @eekodigital/raster test:coverage
       - run: cd docs && pnpm build
-      - run: cd docs && pnpm exec playwright install --with-deps chromium
+      # The runner image already has Chrome's system libraries, so only the
+      # browser is downloaded (from Playwright's CDN). --with-deps used apt,
+      # whose mirror once hung until the job timed out.
+      - name: Install Playwright's Chromium
+        run: cd docs && pnpm exec playwright install chromium
+        timeout-minutes: 5
       - run: cd docs && pnpm test:e2e
 
   size:
