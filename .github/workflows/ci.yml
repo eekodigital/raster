@@ -2,8 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
+  # Draft PRs don't run CI; marking one ready does.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
 
 # A newer push to the same PR or feature branch cancels the run it
 # supersedes; pushes to main and develop always run to completion.
@@ -13,6 +18,7 @@ concurrency:
 
 jobs:
   check:
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -33,6 +39,7 @@ jobs:
 
   size:
     name: Bundle size
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
