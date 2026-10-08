@@ -16,7 +16,7 @@ export type LinearGaugeProps = {
   /** Formats the value for display and `aria-valuetext`. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: (value: number) => string;
   /** The number locale (`labels.locale`), as for the other charts. */
-  labels?: ChartLabelOverrides;
+  labels?: Pick<ChartLabelOverrides, "locale">;
   /** Visible value text. Default: "{value} / {max}". */
   formatLabel?: (value: number, max: number) => string;
   className?: string;

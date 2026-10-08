@@ -94,7 +94,6 @@ export type LineChartProps = ChartFrameOptions &
      * Default 30 for categories; a time axis estimates it from its labels.
      */
     xLabelMinSpacing?: number;
-    /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
     /**
      * Called when a mark is clicked (or activated with Enter/Space), with its
      * index (as `onSelect` gives it), value and no datum. Passing this (or
@@ -216,8 +215,9 @@ export function LineChart({
   const xTicks = x
     ? x
         .ticks(plotWidth, labels.locale, xLabelMinSpacing)
-        .filter((t, i) => !xTickFilter || xTickFilter(i, t.text))
-        .map((t, i) => (formatXTick ? { ...t, text: formatXTick(t.text, i) } : t))
+        .map((t, i) => ({ t, i }))
+        .filter(({ t, i }) => !xTickFilter || xTickFilter(i, t.text))
+        .map(({ t, i }) => (formatXTick ? { ...t, text: formatXTick(t.text, i) } : t))
         .filter((t) => t.text !== "")
     : tickIndices
         .map((i): XTick => ({

@@ -304,3 +304,20 @@ describe("BarChart axe", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 });
+
+describe("BarChart data you pass", () => {
+  it("gives a single series' own datum back to onMarkClick", () => {
+    const onMarkClick = vi.fn();
+    const data = [{ label: "Pass", value: 42, id: "p1" }];
+    render(<BarChart data={data} title="R" onMarkClick={onMarkClick} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Pass/ }));
+    expect(onMarkClick.mock.calls[0][0].datum).toBe(data[0]);
+  });
+
+  it("renders an empty chart, not a crash, for v3-style or missing props", () => {
+    const v3 = { data: [{ label: "Q1", value: 0 }], series: ["North"], values: [[1]] };
+    type Props = React.ComponentProps<typeof BarChart>;
+    expect(() => render(<BarChart {...(v3 as unknown as Props)} title="Old" />)).not.toThrow();
+    expect(() => render(<BarChart {...({} as Props)} title="Nothing" />)).not.toThrow();
+  });
+});

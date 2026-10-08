@@ -44,7 +44,7 @@ Raster 4 adds date axes, dense mode for long series, reference lines, a public a
    + series={[{ name: "North", data: [12, 15] }, { name: "South", data: [8, 11] }]}
    ```
 
-   Single series stay `data={[{ label, value }]}`.
+   Single series stay `data={[{ label, value }]}`, but their selection changes too: `selectedIndex` and `onSelect` use `{ series: 0, point }` instead of a number. (DonutChart keeps a number: it has one series.)
 
 6. **Gauge and LinearGauge take `title` and `formatValue`** like the other charts, instead of `label` and `format`. Their default number format follows `labels.locale`.
 7. **LineChart's date axis prop is `xAxis`** (it was `x` in the 3.1 pre-release docs), matching ScatterChart's new `xAxis`.

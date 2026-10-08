@@ -533,6 +533,22 @@ describe("LineChart with a time axis", () => {
     expect(container.querySelectorAll("line.raster-chart__grid")).toHaveLength(4);
   });
 
+  it("gives formatXTick each date tick's original index, after xTickFilter", () => {
+    const seen: number[] = [];
+    render(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES)}
+        labels={GB}
+        title="Views"
+        xTickFilter={(i) => i % 2 === 0}
+        formatXTick={(text, i) => (seen.push(i), text)}
+      />,
+    );
+    // Ticks 0–3 (1–4 Oct); the filter keeps 0 and 2, and formatXTick sees those indices.
+    expect(seen.slice(-2)).toEqual([0, 2]);
+  });
+
   it("filters and formats date ticks with xTickFilter and formatXTick", () => {
     const { container } = render(
       <LineChart

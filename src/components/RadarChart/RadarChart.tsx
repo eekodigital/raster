@@ -28,7 +28,6 @@ export type RadarChartProps = ChartFrameOptions & {
   levels?: number;
   /** Formats values in marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
   /**
    * Called when a mark is clicked (or activated with Enter/Space), with its
    * index (as `onSelect` gives it), value and no datum. Passing this (or

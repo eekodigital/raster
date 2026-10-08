@@ -86,7 +86,7 @@ Only the first and last categories anchor to the plot edges; every other tick ce
 - **Time zone:** ticks and names use UTC unless you pass `timeZone`, e.g. `"Europe/London"`. Server and client render the same thing, because the zone is named rather than taken from the machine.
 - **Names:** points, the summary and the data table use the long date in `labels.locale`: "Views, 3 October 2026: 42, 3 of 12" in `en-GB`, "October 3, 2026" in `en`. The default locale is `en` (US order), so set `labels={{ locale: "en-GB" }}` (or your users' locale) for day-first dates. Points that aren't at midnight add the time. Pass `format` (`Intl.DateTimeFormatOptions` or a function) to change it. The table's first column is headed `labels.dateColumn` ("Date").
 
-`xTickFilter` and `formatXTick` apply to categories only. `xLabelMinSpacing` sets the minimum px between date ticks, which `timeAxis` otherwise estimates from the width of the locale's labels.
+`xTickFilter` and `formatXTick` work on date ticks too: they get each tick's index and text ("3 Oct"), so you can thin or reword them. `xLabelMinSpacing` sets the minimum px between date ticks, which `timeAxis` otherwise estimates from the width of the locale's labels.
 
 For large series, create the axis with `useMemo` so its formatting and gap checks aren't repeated on every render: `const x = useMemo(() => timeAxis(days, { interval: "day" }), [days])`.
 
@@ -333,8 +333,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>—</td>
       <td>
-        Which x ticks to label. Replaces the automatic thinning. Points and the table keep every
-        category.
+        Which x ticks to label, given each tick's index and text. With categories it replaces the
+        automatic thinning; with a date axis it filters the calendar ticks. Points and the table
+        keep every value.
       </td>
     </tr>
     <tr>
@@ -346,7 +347,8 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>—</td>
       <td>
-        Text for an x tick, e.g. a short date. Return <code>""</code> to hide it.
+        Text for an x tick, given its text and index (a category, or a date tick's label). Return
+        <code>""</code> to hide it.
       </td>
     </tr>
     <tr>

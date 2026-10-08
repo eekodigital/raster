@@ -10,9 +10,9 @@ type Tooltip = ReturnType<typeof useChartTooltip>;
  * What a chart's `onMarkClick` receives: the mark's `index` (the same value
  * `onSelect` gives for it), its `value`, and its data, where it has some.
  */
-export type MarkClick<Index, Datum = undefined> = {
+export type MarkClick<Index, Datum = undefined, Value = number> = {
   index: Index;
-  value?: number;
+  value: Value;
   datum: Datum;
 };
 

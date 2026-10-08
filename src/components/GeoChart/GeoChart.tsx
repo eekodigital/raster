@@ -61,7 +61,9 @@ export type GeoChartProps = ChartFrameOptions &
      * gives it), value and data (a region without data has none). Passing this
      * (or `onSelect`/`selectedIndex`) makes regions and markers toggle buttons.
      */
-    onMarkClick?: (mark: MarkClick<GeoSelection, GeoRegionDatum | GeoMarker | undefined>) => void;
+    onMarkClick?: (
+      mark: MarkClick<GeoSelection, GeoRegionDatum | GeoMarker | undefined, number | undefined>,
+    ) => void;
     selectedIndex?: GeoSelection | null;
     onSelect?: (selection: GeoSelection | null) => void;
     legendLabel?: string;

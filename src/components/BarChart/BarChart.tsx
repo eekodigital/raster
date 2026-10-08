@@ -118,12 +118,13 @@ export function BarChart({
 
   // One shape inside: series × categories. `data` is a single unnamed series.
   const multi = !!seriesProp;
-  const categories = seriesProp ? categoriesProp! : data!.map((d) => d.label);
-  const rows: BarSeries[] = seriesProp ?? [{ name: "", data: data!.map((d) => d.value) }];
+  // Missing props (from plain JS, or the v3 API) render an empty chart, not a crash.
+  const categories = seriesProp ? (categoriesProp ?? []) : (data ?? []).map((d) => d.label);
+  const rows: BarSeries[] = seriesProp ?? [{ name: "", data: (data ?? []).map((d) => d.value) }];
   const count = categories.length;
   const cell = (si: number, i: number) => rows[si].data[i] ?? 0;
   const color = (si: number, i: number) =>
-    multi ? (rows[si].color ?? seriesColor(si)) : (data![i].color ?? seriesColor(i));
+    multi ? (rows[si].color ?? seriesColor(si)) : (data?.[i]?.color ?? seriesColor(i));
 
   const isHorizontal = direction === "horizontal";
   const width = useContainerWidth(plotRef, 720);
@@ -169,7 +170,8 @@ export function BarChart({
         onMarkClick?.({
           index,
           value: cell(si, i),
-          datum: { label: categories[i], value: cell(si, i) },
+          // A single series gives back your own datum; several, the bar's { label, value }.
+          datum: multi ? { label: categories[i], value: cell(si, i) } : data![i],
         });
       }
     : undefined;

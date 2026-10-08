@@ -27,7 +27,6 @@ export type DonutChartProps = ChartFrameOptions & {
   showLegend?: boolean;
   /** Formats values in marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  /** Passing this (or `onSelect`/`selectedIndex`) makes segments toggle buttons. */
   /**
    * Called when a mark is clicked (or activated with Enter/Space), with its
    * index (as `onSelect` gives it), value and segment. Passing this (or

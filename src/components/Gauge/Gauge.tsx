@@ -22,7 +22,7 @@ export type GaugeProps = {
   /** Formats the displayed value and `aria-valuetext`. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: (value: number) => string;
   /** The number locale (`labels.locale`), as for the other charts. */
-  labels?: ChartLabelOverrides;
+  labels?: Pick<ChartLabelOverrides, "locale">;
   /** The chart's root element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
   ref?: React.Ref<HTMLDivElement>;
   className?: string;

@@ -59,7 +59,6 @@ export type ScatterChartProps = ChartFrameOptions &
      * calendar boundaries and x values are worded as dates. Overrides `formatX`.
      */
     xAxis?: XAxis;
-    /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
     /**
      * Called when a mark is clicked (or activated with Enter/Space), with its
      * index (as `onSelect` gives it), value (its y) and point. Passing this (or
