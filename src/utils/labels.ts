@@ -121,7 +121,7 @@ export const DEFAULT_LABELS: ChartLabels = {
   yColumn: "Y",
   referenceLine: (label, value) => `${label}: ${value}`,
   referenceNote: (caption, lines) =>
-    `${caption}. Reference ${lines.length === 1 ? "line" : "lines"}: ${lines.join("; ")}.`,
+    `${caption}, with ${lines.length === 1 ? "a reference line" : "reference lines"} (${lines.join("; ")})`,
   series: (name, count, n) => `${name}, ${points(count, n)}`,
   mark: ({ series, x, y, index, count }, n) =>
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,

@@ -75,6 +75,10 @@
       "types": "./dist/sparkline.d.mts",
       "import": "./dist/sparkline.mjs"
     },
+    "./labels": {
+      "types": "./dist/labels.d.mts",
+      "import": "./dist/labels.mjs"
+    },
     "./frame": {
       "types": "./dist/frame.d.mts",
       "import": "./dist/frame.mjs"

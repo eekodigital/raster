@@ -37,12 +37,21 @@ type GridOption = "horizontal" | "vertical" | "both" | "none";
 
 export type BarChartProps = ChartFrameOptions &
   PlotSizeOptions & {
+    /**
+     * One bar per category: `{ label, value, color? }[]`. (Unlike LineChart,
+     * which takes `series` of `{ name, data }` with `categories`.) For stacked
+     * or grouped bars, `data` still names the categories, and `series` with
+     * `values` give the numbers.
+     */
     data: BarDatum[];
     colors?: string[];
     direction?: "vertical" | "horizontal";
     stacked?: boolean;
     grouped?: boolean;
-    /** Series names for stacked/grouped bars. */
+    /**
+     * Series names for stacked/grouped bars, with `values`. Just names: not
+     * LineChart's `{ name, data }` series.
+     */
     series?: string[];
     /** `values[category][series]` for stacked/grouped bars. */
     values?: number[][];

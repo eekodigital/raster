@@ -47,6 +47,7 @@ const BUDGETS: Record<string, number> = {
   "./time": 1_600,
   "./export": 1_100,
   "./frame": 2_000,
+  "./labels": 1_000,
   "./styles.css": 3_000,
 };
 

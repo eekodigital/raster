@@ -84,7 +84,7 @@ Only the first and last categories anchor to the plot edges; every other tick ce
 - **Ticks** fall on calendar boundaries: days for short ranges, Mondays for medium ones, then months, quarters and years, chosen to fit the width. Month ticks name the year on January and on the first tick.
 - **Gaps:** `interval` (`"day"`, `"week"`, `"month"`, `"quarter"` or `"year"`) is the data's cadence. Where a point is more than one interval after the previous one, the line and area break. Without it, the line joins every point.
 - **Time zone:** ticks and names use UTC unless you pass `timeZone`, e.g. `"Europe/London"`. Server and client render the same thing, because the zone is named rather than taken from the machine.
-- **Names:** points, the summary and the data table use the long date in `labels.locale`: "Views, 3 October 2026: 42, 3 of 12" in `en-GB`, "October 3, 2026" in `en`. Points that aren't at midnight add the time. Pass `format` (`Intl.DateTimeFormatOptions` or a function) to change it. The table's first column is headed `labels.dateColumn` ("Date").
+- **Names:** points, the summary and the data table use the long date in `labels.locale`: "Views, 3 October 2026: 42, 3 of 12" in `en-GB`, "October 3, 2026" in `en`. The default locale is `en` (US order), so set `labels={{ locale: "en-GB" }}` (or your users' locale) for day-first dates. Points that aren't at midnight add the time. Pass `format` (`Intl.DateTimeFormatOptions` or a function) to change it. The table's first column is headed `labels.dateColumn` ("Date").
 
 `xTickFilter` and `formatXTick` apply to categories only. `xLabelMinSpacing` sets the minimum px between date ticks, which `timeAxis` otherwise estimates from the width of the locale's labels.
 
@@ -101,7 +101,7 @@ For large series, create the axis with `useMemo` so its formatting and gap check
 </Example>
 
 - **Vertical lines:** with a [date axis](#dates), `{ value: "2026-10-05", label: "Launch", axis: "x" }` draws a vertical line at that date. A date outside the data's range is left out. Categories have no in-between values, so they don't take x lines.
-- **Accessibility:** the line isn't focusable, and its SVG label is hidden from assistive technology. The same text is at the end of the summary ("… Target: 80.") and in the table caption ("Data for … Reference line: Target: 80."). Reword both with `labels.referenceLine` and `labels.referenceNote`.
+- **Accessibility:** the line isn't focusable, and its SVG label is hidden from assistive technology. The same text is at the end of the summary ("… Target: 80.") and in the table caption ("Data for …, with a reference line (Target: 80)"). Reword both with `labels.referenceLine` and `labels.referenceNote`.
 - **Styling:** the colour is `--raster-reference`, falling back to `--raster-text-subtle`. The line keeps its dash in forced-colours mode, so it stays distinct from series lines.
 
 ## Large series

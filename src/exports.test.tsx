@@ -5,6 +5,7 @@ import * as geo from "./geo.js";
 import * as main from "./index.js";
 import * as exporter from "./export.js";
 import * as frame from "./frame.js";
+import * as labelsEntry from "./labels.js";
 import * as theme from "./theme.js";
 import * as time from "./time.js";
 import { Gauge } from "./components/Gauge/Gauge.js";
@@ -20,6 +21,7 @@ describe("public API", () => {
       "./geo": Object.keys(geo).sort(),
       "./export": Object.keys(exporter).sort(),
       "./frame": Object.keys(frame).sort(),
+      "./labels": Object.keys(labelsEntry).sort(),
       "./theme": Object.keys(theme).sort(),
       "./time": Object.keys(time).sort(),
     }).toMatchSnapshot();

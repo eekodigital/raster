@@ -32,6 +32,10 @@ exports[`public API > exports exactly these names from each entry 1`] = `
   "./geo": [
     "GeoChart",
   ],
+  "./labels": [
+    "DEFAULT_LABELS",
+    "describeChart",
+  ],
   "./theme": [
     "rasterVars",
   ],

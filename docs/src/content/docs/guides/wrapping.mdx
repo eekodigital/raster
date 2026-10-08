@@ -23,7 +23,7 @@ Raster deliberately leaves out zoom, brushing, Canvas rendering and combined cha
 `ChartFrame`, `ChartDataTable` and `describeChart` are at `@eekodigital/raster/frame` (about 1.6 KB) and in the main entry.
 
 - **Table cells are shown as given.** Format numbers before passing them (`value.toLocaleString(locale)`), so the table matches the summary.
-- **React Server Components:** `@eekodigital/raster/frame` starts with `"use client"`, so a Server Component can render `ChartFrame` directly, and it's still server-rendered. Call `describeChart` in a client component, though: see [Server rendering and React Server Components](/guides/getting-started/#server-rendering-and-react-server-components).
+- **React Server Components:** `@eekodigital/raster/frame` starts with `"use client"`, so a Server Component can render `ChartFrame` directly, and it's still server-rendered. To build the summary on the server, import `describeChart` from `@eekodigital/raster/labels`, which isn't marked. See [Server rendering and React Server Components](/guides/getting-started/#server-rendering-and-react-server-components).
 - **Export:** `exportSVG` and `exportPNG` from `/export` only export raster's own charts. They leave a wrapped chart alone rather than export whatever SVG they find; use that library's own export.
 
 ## With TanStack Charts
@@ -59,7 +59,7 @@ import { Chart } from "@tanstack/charts/react";
 
 ## `describeChart`
 
-`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types; for any other chart, add a `name` ("Heatmap") to use in its place. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
+`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types. For any other chart, pick the closest type and give a `name` ("Heatmap") to use in its place: `{ type: "bar", name: "Heatmap", … }`. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
 
 ## Props
 

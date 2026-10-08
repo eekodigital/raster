@@ -6,7 +6,7 @@ LineChart, BarChart, DonutChart, ScatterChart, Sparkline, Gauge, LinearGauge, Ra
 
 Docs: [raster.eeko.digital](https://raster.eeko.digital)
 
-> **Upgrading from 2.x?** Raster 3 is charts only: the UI components, design tokens and DataTable have been removed. See the [migration guide](https://raster.eeko.digital/guides/migrating/) or the [3.0.0 changelog entry](./CHANGELOG.md).
+> **Upgrading from 2.x?** Raster 3 is charts only: the UI components, design tokens and DataTable have been removed. See the [migration guide](https://raster.eeko.digital/guides/migrating/) or the [changelog](https://github.com/eekodigital/raster/blob/main/CHANGELOG.md).
 
 ## Design goals
 
@@ -35,18 +35,43 @@ Load the stylesheet once at your app root. Charts don't import CSS themselves, s
 
 ```tsx
 import "@eekodigital/raster/styles.css";
-import { LineChart } from "@eekodigital/raster";
+import { BarChart, LineChart } from "@eekodigital/raster";
 
+// LineChart: series of { name, data }, one value per category.
 <LineChart
   series={[{ name: "Visitors", data: [120, 180, 150, 240] }]}
   categories={["Mon", "Tue", "Wed", "Thu"]}
   title="Visitors this week"
 />;
+
+// BarChart: one { label, value } per bar.
+<BarChart
+  data={[
+    { label: "Pass", value: 42 },
+    { label: "Fail", value: 8 },
+  ]}
+  title="Results"
+/>;
 ```
 
-Each chart also has its own entry (`@eekodigital/raster/line-chart`, `/bar-chart`, `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip`), and GeoChart is only at `@eekodigital/raster/geo`.
+Every chart server-renders: the figure, summary, data table and named marks are in the HTML before JavaScript runs, and the data table opens without JavaScript.
 
-For dates, pass `x={timeAxis(dates, { interval: "day" })}` from `@eekodigital/raster/time` instead of `categories`. Points are spaced by elapsed time, ticks fall on days, weeks, months or years, and the line breaks where a day is missing. See [Dates](https://raster.eeko.digital/components/line-chart/#dates).
+### Entry points
+
+The main entry has every chart except GeoChart. Each chart also has its own entry (`/line-chart`, `/bar-chart`, …), plus `/geo`, `/time` (`timeAxis`), `/export` (`exportSVG`, `exportPNG`), `/frame` (`ChartFrame`, `ChartDataTable`, `describeChart`), `/labels` (`describeChart`, `DEFAULT_LABELS`), `/theme` and `/styles.css`. See [Entry points](https://raster.eeko.digital/guides/getting-started/#entry-points) for what each exports.
+
+### React Server Components
+
+Entries with components start with `"use client"`, so a Server Component (e.g. the Next.js App Router) can render charts directly, with plain-data props. They're still server-rendered; the directive marks where hydration starts. Props that are functions can't come from a Server Component, so build those in a client component of your own:
+
+- `x={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, callbacks such as `onSelect`
+- `labels` with function overrides
+
+`/time`, `/export`, `/labels` and `/theme` aren't marked, so server code can call `timeAxis`, `describeChart` and the rest. TypeScript won't catch a function prop passed from a Server Component; the framework reports it when the page renders.
+
+### Dates
+
+For dates, pass `x={timeAxis(dates, { interval: "day" })}` from `/time` instead of `categories`. Points are spaced by elapsed time, ticks fall on days, weeks, months or years, and the line breaks where a day is missing. Dates are worded in `labels.locale`, which is `"en"` (US order, "October 3, 2026") by default: pass `labels={{ locale: "en-GB" }}` for "3 October 2026". See [Dates](https://raster.eeko.digital/components/line-chart/#dates).
 
 ## Theming
 

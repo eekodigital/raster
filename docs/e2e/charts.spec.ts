@@ -122,18 +122,26 @@ test.describe("keyboard", () => {
 
 test("data table disclosure shows a captioned table", async ({ page }) => {
   await page.goto("/components/line-chart");
+  await page.waitForLoadState("networkidle"); // hydrated, so the label follows the state
   const chart = figure(page, "Assessment progress over time");
-  const toggle = chart.getByRole("button", { name: "Show data table" });
-  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  const toggle = chart.locator("summary", { hasText: "Show data table" });
   await expect(chart.getByRole("table")).toBeHidden();
   await toggle.click();
-  await expect(chart.getByRole("button", { name: "Hide data table" })).toHaveAttribute(
-    "aria-expanded",
-    "true",
-  );
+  await expect(chart.locator("summary")).toHaveText("Hide data table");
   const table = chart.getByRole("table", { name: "Data for Assessment progress over time" });
   await expect(table).toBeVisible();
   await expect(table.getByRole("rowheader", { name: "Week 6" })).toBeVisible();
+});
+
+test("the data table opens without JavaScript", async ({ browser }) => {
+  const page = await browser.newPage({ javaScriptEnabled: false });
+  await page.goto("/components/line-chart");
+  const chart = figure(page, "Assessment progress over time");
+  await chart.locator("summary", { hasText: "Show data table" }).click();
+  const table = chart.getByRole("table", { name: "Data for Assessment progress over time" });
+  await expect(table).toBeVisible();
+  await expect(table.getByRole("rowheader", { name: "Week 6" })).toBeVisible();
+  await page.close();
 });
 
 test.describe("server rendering", () => {
@@ -226,7 +234,7 @@ test.describe("wrapping other charts", () => {
       "Line chart, 7 points. Mon to Sun. Values from 340 to 610.",
     );
     await expect(chart.locator("canvas")).toBeVisible();
-    await chart.getByRole("button", { name: "Show data table" }).click();
+    await chart.locator("summary", { hasText: "Show data table" }).click();
     await expect(chart.getByRole("table")).toContainText("Data for Views this week (canvas)");
   });
 });

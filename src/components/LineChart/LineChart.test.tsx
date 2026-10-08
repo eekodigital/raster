@@ -148,7 +148,7 @@ describe("LineChart structure", () => {
       />,
     );
     screen.getByRole("img", { name: "Aufrufe, A: 1.200, 1 von 2" });
-    fireEvent.click(screen.getByRole("button", { name: "Tabelle anzeigen" }));
+    fireEvent.click(screen.getByText("Tabelle anzeigen", { selector: "summary" }));
     screen.getByRole("table", { name: "Daten für V" });
   });
 });
@@ -173,7 +173,7 @@ describe("LineChart data table", () => {
     render(
       <LineChart series={SERIES} categories={CATEGORIES} title="P" dataTable="visually-hidden" />,
     );
-    expect(screen.queryByRole("button", { name: "Show data table" })).toBeNull();
+    expect(document.querySelector("details")).toBeNull();
     expect(screen.getByRole("table", { name: "Data for P" }).classList).toContain("raster-sr-only");
   });
 });

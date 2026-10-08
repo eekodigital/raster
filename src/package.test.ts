@@ -17,6 +17,13 @@ describe("package.json", () => {
     expect(pkg.files).toContain("dist");
   });
 
+  it('offers describeChart and the labels without "use client", at ./labels', () => {
+    expect(pkg.exports["./labels"]).toEqual({
+      types: "./dist/labels.d.mts",
+      import: "./dist/labels.mjs",
+    });
+  });
+
   it("offers the accessibility frame on its own, at ./frame", () => {
     expect(pkg.exports["./frame"]).toEqual({
       types: "./dist/frame.d.mts",

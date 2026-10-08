@@ -18,20 +18,22 @@ const TABLE = {
 };
 
 describe("ChartDataTable", () => {
-  it("is a collapsed disclosure by default", () => {
+  it("is a closed native disclosure by default, with the table inside it", () => {
     render(<ChartDataTable {...TABLE} labels={DEFAULT_LABELS} />);
-    const button = screen.getByRole("button", { name: "Show data table" });
-    expect(button.getAttribute("aria-expanded")).toBe("false");
-    expect(screen.queryByRole("table")).toBeNull();
-    const table = document.getElementById(button.getAttribute("aria-controls")!)!;
-    expect(table.hidden).toBe(true);
+    const summary = screen.getByText("Show data table", { selector: "summary" });
+    const details = summary.parentElement as HTMLDetailsElement;
+    expect(details.tagName).toBe("DETAILS");
+    expect(details.open).toBe(false);
+    // The table is in the HTML (no `hidden`), so it opens without JavaScript.
+    const table = details.querySelector("table")!;
+    expect(table.hidden).toBe(false);
   });
 
   it("expands to a captioned table with scoped headers", () => {
     render(<ChartDataTable {...TABLE} labels={DEFAULT_LABELS} />);
-    fireEvent.click(screen.getByRole("button", { name: "Show data table" }));
-    const button = screen.getByRole("button", { name: "Hide data table" });
-    expect(button.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(screen.getByText("Show data table", { selector: "summary" }));
+    const summary = screen.getByText("Hide data table", { selector: "summary" });
+    expect((summary.parentElement as HTMLDetailsElement).open).toBe(true);
     screen.getByRole("table", { name: "Data for Sales" });
     expect(document.querySelector("caption")?.textContent).toBe("Data for Sales");
     expect(
@@ -47,8 +49,9 @@ describe("ChartDataTable", () => {
       ["Feb", "row"],
     ]);
     expect(screen.getAllByRole("cell").map((td) => td.textContent)).toEqual(["10", "12"]);
-    fireEvent.click(button);
-    expect(screen.queryByRole("table")).toBeNull();
+    fireEvent.click(summary);
+    expect((summary.parentElement as HTMLDetailsElement).open).toBe(false);
+    expect(summary.textContent).toBe("Show data table");
   });
 
   it("end-aligns data column headers to match their cells", () => {
@@ -98,7 +101,7 @@ describe("ChartDataTable", () => {
         <ChartDataTable {...TABLE} labels={DEFAULT_LABELS} describedBy="t" />
       </>,
     );
-    expect(screen.getByRole("button").getAttribute("aria-describedby")).toBe("t");
+    expect(document.querySelector("summary")?.getAttribute("aria-describedby")).toBe("t");
   });
 });
 
@@ -236,7 +239,7 @@ describe("ChartFrame", () => {
     const { container } = render(
       <Frame legend={<ChartLegend items={[{ label: "A", color: "red" }]} />} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Show data table" }));
+    fireEvent.click(screen.getByText("Show data table", { selector: "summary" }));
     expect(await axe(container)).toHaveNoViolations();
   });
 });
