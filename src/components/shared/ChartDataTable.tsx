@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import { resolveLabels } from "../../utils/labels.js";
 import type { ChartLabels } from "../../utils/labels.js";
@@ -70,12 +70,16 @@ export function DataTable({
   describedBy,
 }: Omit<ChartDataTableProps, "labels"> & { labels: ChartLabels }) {
   const [open, setOpen] = useState(false);
+  const details = useRef<HTMLDetailsElement>(null);
   const id = useId();
+  // The disclosure may have been opened before hydration: start from its real state.
+  useLayoutEffect(() => {
+    if (details.current?.open) setOpen(true);
+  }, []);
   const hiddenMode = mode === "visually-hidden";
 
   const table = (
     <table
-      id={id}
       className={hiddenMode ? "raster-sr-only" : "raster-chart__table"}
       style={hiddenMode ? SR_ONLY_STYLE : undefined}
     >
@@ -117,10 +121,7 @@ export function DataTable({
   // reachable from the server-rendered HTML. With JavaScript, the label
   // follows the state.
   return (
-    <details
-      className="raster-chart__table-details"
-      onToggle={(e) => setOpen(e.currentTarget.open)}
-    >
+    <details ref={details} onToggle={(e) => setOpen(e.currentTarget.open)}>
       <summary
         className="raster-chart__table-toggle"
         aria-describedby={describedBy ?? `${id}-caption`}

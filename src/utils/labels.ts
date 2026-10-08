@@ -148,15 +148,10 @@ export function resolveLabels(overrides?: Partial<ChartLabels>): ChartLabels {
  * Dec. Values from 3 to 412."), for a chart raster doesn't draw, so it reads
  * like raster's own. Uses `labels.summary`, with counts in `labels.locale`.
  */
-export function describeChart(parts: DescribeParts, labels?: Partial<ChartLabels>): string {
+export function describeChart(parts: SummaryParts, labels?: Partial<ChartLabels>): string {
   const resolved = resolveLabels(labels);
-  // Without a type, a custom `labels.summary` gets `type: undefined` and `name`.
-  return resolved.summary(parts as SummaryParts, numberFormatter(resolved.locale));
+  return resolved.summary(parts, numberFormatter(resolved.locale));
 }
-
-/** `describeChart`'s parts: a raster chart `type`, or a `name` for any other chart, or both. */
-export type DescribeParts = Omit<SummaryParts, "type" | "name"> &
-  ({ type: ChartType; name?: string } | { type?: undefined; name: string });
 
 const formatters = new Map<string, NumberFormat>();
 

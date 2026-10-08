@@ -67,6 +67,8 @@ Put a chart that needs them in a small client component of your own (a file star
 In development, Vite discovers each raster entry the first time a page imports it, and reloads the page to optimise it. To skip those reloads, list the entries you use:
 
 ```ts title="vite.config.ts"
+import { defineConfig } from "vite";
+
 export default defineConfig({
   optimizeDeps: {
     include: ["@eekodigital/raster", "@eekodigital/raster/time", "@eekodigital/raster/export"],

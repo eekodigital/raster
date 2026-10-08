@@ -58,17 +58,7 @@ Every chart server-renders: the figure, summary, data table and named marks are 
 
 ### Entry points
 
-| Import                         | What                                                                                                                             |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| `@eekodigital/raster`          | Every chart except GeoChart, `ChartTooltip`, `ChartFrame`, `ChartDataTable`, `describeChart`, `DEFAULT_LABELS`                   |
-| `/line-chart`, `/bar-chart`, … | One chart each: also `/donut-chart`, `/scatter-chart`, `/sparkline`, `/gauge`, `/linear-gauge`, `/radar-chart`, `/chart-tooltip` |
-| `/geo`                         | `GeoChart` (needs the `topojson-client` peer)                                                                                    |
-| `/time`                        | `timeAxis`: [dates on LineChart](https://raster.eeko.digital/components/line-chart/#dates)                                       |
-| `/export`                      | `exportSVG`, `exportPNG`: [exporting](https://raster.eeko.digital/guides/exporting/)                                             |
-| `/frame`                       | `ChartFrame`, `ChartDataTable`, `describeChart`: [wrapping other charts](https://raster.eeko.digital/guides/wrapping/)           |
-| `/labels`                      | `describeChart`, `DEFAULT_LABELS`: callable on the server                                                                        |
-| `/theme`                       | `rasterVars`, the theming contract                                                                                               |
-| `/styles.css`                  | The stylesheet                                                                                                                   |
+The main entry has every chart except GeoChart. Each chart also has its own entry (`/line-chart`, `/bar-chart`, …), plus `/geo`, `/time` (`timeAxis`), `/export` (`exportSVG`, `exportPNG`), `/frame` (`ChartFrame`, `ChartDataTable`, `describeChart`), `/labels` (`describeChart`, `DEFAULT_LABELS`), `/theme` and `/styles.css`. See [Entry points](https://raster.eeko.digital/guides/getting-started/#entry-points) for what each exports.
 
 ### React Server Components
 

@@ -122,6 +122,7 @@ test.describe("keyboard", () => {
 
 test("data table disclosure shows a captioned table", async ({ page }) => {
   await page.goto("/components/line-chart");
+  await page.waitForLoadState("networkidle"); // hydrated, so the label follows the state
   const chart = figure(page, "Assessment progress over time");
   const toggle = chart.locator("summary", { hasText: "Show data table" });
   await expect(chart.getByRole("table")).toBeHidden();

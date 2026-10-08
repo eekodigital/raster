@@ -59,7 +59,7 @@ import { Chart } from "@tanstack/charts/react";
 
 ## `describeChart`
 
-`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types; for any other chart, give a `name` ("Heatmap") instead (with or without a `type`). Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
+`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types. For any other chart, pick the closest type and give a `name` ("Heatmap") to use in its place: `{ type: "bar", name: "Heatmap", … }`. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
 
 ## Props
 

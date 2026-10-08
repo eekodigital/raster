@@ -40,7 +40,9 @@
 
 /* The data table's <summary>, styled as a button; its disclosure marker is hidden. */
 .raster-chart__table-toggle {
-  display: inline-block;
+  /* Keep the summary's own display (list-item): changing it can drop its
+     disclosure semantics in some browser and screen reader pairs. */
+  width: fit-content;
   list-style: none;
   margin-top: 0.5rem;
   padding: 0.25rem 0.5rem;

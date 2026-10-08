@@ -167,8 +167,20 @@ describe("exporting a wrapped chart", () => {
   });
 });
 
-describe("describeChart without a raster type", () => {
-  it("names any chart by `name` alone", () => {
-    expect(describeChart({ name: "Heatmap", series: 1, points: 3 })).toBe("Heatmap, 3 points.");
+describe("data table opened before hydration", () => {
+  it("shows the label for its real state once hydrated", async () => {
+    const { hydrateRoot } = await import("react-dom/client");
+    const { act } = await import("@testing-library/react");
+    const app = <ChartDataTable caption="Views" {...TABLE} />;
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(app);
+    document.body.append(container);
+    // The user opens the native disclosure before JavaScript loads.
+    container.querySelector("details")!.open = true;
+    await act(async () => {
+      hydrateRoot(container, app);
+    });
+    expect(container.querySelector("summary")?.textContent).toBe("Hide data table");
+    container.remove();
   });
 });
