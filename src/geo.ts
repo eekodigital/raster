@@ -1,6 +1,7 @@
 // @eekodigital/raster/geo — GeoChart. Requires the optional peer dependency
 // `topojson-client`.
 export type { ChartLabelOverrides, ChartLabels } from "./utils/labels.js";
+export type { MarkClick } from "./components/shared/use-chart.js";
 export { GeoChart } from "./components/GeoChart/GeoChart.js";
 export type {
   GeoChartProps,

@@ -1,6 +1,6 @@
 ---
 title: BarChart
-description: Vertical or horizontal bar chart, single, stacked or grouped, for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Keyboard navigable, with a data table disclosure.
+description: Vertical or horizontal bar chart, one series or several (grouped or stacked), for comparing values across categories. Zero dependencies — built with SVG and own math utilities. Keyboard navigable, with a data table disclosure.
 ---
 
 import Example from "../../../components/Example.astro";
@@ -16,7 +16,7 @@ import {
 Pass data as an array of `{ label, value }` objects. Colours default to the raster series palette (`--raster-series-*`) or can be set per bar with `colors`.
 
 <Example
-  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42 },\n    { label: 'Fail', value: 8 },\n    { label: 'N/A', value: 12 },\n    { label: 'To do', value: 24 },\n  ]}\n  colors={['var(--demo-good)', 'var(--demo-bad)', 'var(--demo-neutral)', 'var(--demo-warn)']}\n  title="Conformance results by status"\n/>`}
+  code={`import { BarChart } from '@eekodigital/raster';\n\n<BarChart\n  data={[\n    { label: 'Pass', value: 42, color: 'var(--demo-good)' },\n    { label: 'Fail', value: 8, color: 'var(--demo-bad)' },\n    { label: 'N/A', value: 12, color: 'var(--demo-neutral)' },\n    { label: 'To do', value: 24, color: 'var(--demo-warn)' },\n  ]}\n  title="Conformance results by status"\n/>`}
 >
   <BarChartBasicDemo client:load />
 </Example>
@@ -31,10 +31,10 @@ Pass data as an array of `{ label, value }` objects. Colours default to the rast
 
 ## Stacked, with selection
 
-Pass `series` and `values` with `stacked` (or `grouped`). With `onSelect`, bars become toggle buttons; selecting a bar selects its whole category.
+For several series, pass `series` (`{ name, data }`, as on LineChart) with `categories`. They're grouped side by side, or `stacked`. With `onSelect`, bars become toggle buttons, and selecting one selects that bar (`{ series, point }`).
 
 <Example
-  code={`<BarChart\n  data={[{ label: 'Q1', value: 0 }, { label: 'Q2', value: 0 }, { label: 'Q3', value: 0 }]}\n  series={['North', 'South']}\n  values={[[12, 8], [15, 11], [9, 14]]}\n  stacked\n  title="Sales by region (select a quarter)"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
+  code={`<BarChart\n  series={[\n    { name: 'North', data: [12, 15, 9] },\n    { name: 'South', data: [8, 11, 14] },\n  ]}\n  categories={['Q1', 'Q2', 'Q3']}\n  stacked\n  title="Sales by region (select a bar)"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
 >
   <BarChartSelectDemo client:load />
 </Example>
@@ -53,11 +53,10 @@ Pass `series` and `values` with `stacked` (or `grouped`). With `onSelect`, bars 
 
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
 - The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
-- Each bar is labelled `{x}: {y}, 2 of 4` (stacked/grouped: `{series}, {x}: {y}, 2 of 4`, inside a `role="group"` per series). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
-- Stacked and grouped bars select a whole category.
+- Each bar is labelled `{x}: {y}, 2 of 4` (several series: `{series}, {x}: {y}, 2 of 4`, inside a `role="group"` per series). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
 - A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
 - Escape (inside the chart only) hides the tooltip and clears the selection, announcing the cleared selection in a polite live region; it doesn't close a surrounding dialog.
-- Animations stop under `prefers-reduced-motion`. In forced-colours mode bars use system colours; in stacked and grouped charts, series after the first are outlined with their legend line's dash pattern.
+- Animations stop under `prefers-reduced-motion`. In forced-colours mode bars use system colours; with several series, series after the first are outlined with their legend line's dash pattern.
 
 | Key                                                        | Action                               |
 | ---------------------------------------------------------- | ------------------------------------ |
@@ -92,20 +91,22 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>—</td>
       <td>
-        Required. <code>&#123; label, value &#125;</code> per category.
+        One bar per category: <code>&#123; label, value, color? &#125;</code>. Or use{" "}
+        <code>series</code> with <code>categories</code>.
       </td>
     </tr>
     <tr>
       <td>
-        <code>colors</code>
+        <code>series</code>
       </td>
       <td>
-        <code>string[]</code>
+        <code>BarSeries[]</code>
       </td>
+      <td>—</td>
       <td>
-        <code>series palette</code>
+        Several series, as on LineChart: <code>&#123; name, data, color? &#125;</code>, one value
+        per category. Grouped side by side, or <code>stacked</code>.
       </td>
-      <td>Colour per bar (or per series).</td>
     </tr>
     <tr>
       <td>
@@ -121,24 +122,14 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>series</code>
+        <code>categories</code>
       </td>
       <td>
         <code>string[]</code>
       </td>
       <td>—</td>
-      <td>Series names for stacked/grouped bars.</td>
-    </tr>
-    <tr>
       <td>
-        <code>values</code>
-      </td>
-      <td>
-        <code>number[][]</code>
-      </td>
-      <td>—</td>
-      <td>
-        <code>values[category][series]</code> for stacked/grouped bars.
+        The categories, with <code>series</code>.
       </td>
     </tr>
     <tr>
@@ -152,18 +143,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>false</code>
       </td>
       <td>Stack series.</td>
-    </tr>
-    <tr>
-      <td>
-        <code>grouped</code>
-      </td>
-      <td>
-        <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
-      </td>
-      <td>Group series side by side.</td>
     </tr>
     <tr>
       <td>
@@ -252,23 +231,30 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>onBarClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(datum, index, seriesIndex?) =&gt; void</code>
+        <code>(mark: &#123; index: BarPointIndex, value, datum: BarDatum &#125;) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Makes bars buttons.</td>
+      <td>
+        Called when a mark is clicked (or activated with Enter/Space) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is what{" "}
+        <code>onSelect</code> gives. Makes marks toggle buttons.
+      </td>
     </tr>
     <tr>
       <td>
         <code>selectedIndex</code>
       </td>
       <td>
-        <code>number | null</code>
+        <code>BarPointIndex | null</code>
       </td>
       <td>—</td>
-      <td>Controlled selection (category index).</td>
+      <td>
+        The selected bar, <code>&#123; series, point &#125;</code>. Controlled with{" "}
+        <code>onSelect</code>.
+      </td>
     </tr>
     <tr>
       <td>

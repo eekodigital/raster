@@ -9,6 +9,7 @@ import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 
 export type DonutDatum = {
   label: string;
@@ -26,8 +27,12 @@ export type DonutChartProps = ChartFrameOptions & {
   showLegend?: boolean;
   /** Formats values in marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  /** Passing this (or `onSelect`/`selectedIndex`) makes segments toggle buttons. */
-  onSegmentClick?: (datum: DonutDatum, index: number) => void;
+  /**
+   * Called when a mark is clicked (or activated with Enter/Space), with its
+   * index (as `onSelect` gives it), value and segment. Passing this (or
+   * `onSelect`/`selectedIndex`) makes marks toggle buttons.
+   */
+  onMarkClick?: (mark: MarkClick<number, DonutDatum>) => void;
   selectedIndex?: number | null;
   onSelect?: (index: number | null) => void;
 };
@@ -39,7 +44,7 @@ export function DonutChart({
   children,
   showLegend = false,
   formatValue,
-  onSegmentClick,
+  onMarkClick,
   selectedIndex,
   onSelect,
   labels: labelOverrides,
@@ -48,7 +53,7 @@ export function DonutChart({
 }: DonutChartProps) {
   const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<number>(selectedIndex, onSelect, labels);
-  const interactive = !!(onSegmentClick || onSelect || selectedIndex !== undefined);
+  const interactive = !!(onMarkClick || onSelect || selectedIndex !== undefined);
   const measured = useContainerWidth(plotRef, 160);
   const size = sizeProp ?? measured;
 
@@ -67,7 +72,7 @@ export function DonutChart({
     ? (_: number, item: number) => {
         const i = visible[item];
         selection.toggle(i);
-        onSegmentClick?.(data[i], i);
+        onMarkClick?.({ index: i, value: data[i].value, datum: data[i] });
       }
     : undefined;
 

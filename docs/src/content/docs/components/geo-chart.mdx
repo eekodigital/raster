@@ -236,23 +236,18 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>onRegionClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(datum, id) =&gt; void</code>
+        <code>(mark: &#123; index: GeoSelection, value?, datum? &#125;) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Makes regions buttons.</td>
-    </tr>
-    <tr>
       <td>
-        <code>onMarkerClick</code>
+        Called when a region or marker is clicked (or activated) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is{" "}
+        <code>&#123; region &#125;</code> or <code>&#123; marker &#125;</code>, as{" "}
+        <code>onSelect</code> gives it. Makes regions and markers toggle buttons.
       </td>
-      <td>
-        <code>(marker, index) =&gt; void</code>
-      </td>
-      <td>—</td>
-      <td>Makes markers buttons.</td>
     </tr>
     <tr>
       <td>

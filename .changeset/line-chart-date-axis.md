@@ -2,7 +2,7 @@
 "@eekodigital/raster": minor
 ---
 
-**Date axes for LineChart.** Pass `x={timeAxis(dates, options)}` from the new `@eekodigital/raster/time` entry instead of `categories`.
+**Date axes for LineChart.** Pass `xAxis={timeAxis(dates, options)}` from the new `@eekodigital/raster/time` entry instead of `categories`.
 
 ### Added
 
@@ -12,7 +12,7 @@
   - `interval` breaks the line and area where data at that cadence is missing.
   - `timeZone` (IANA, default UTC) places ticks on local boundaries, with the same output on server and client.
   - Point names, the summary and the data table use formatted dates ("Views, 3 October 2026: 42, 3 of 12" in `en-GB`).
-- LineChart `x` prop, and the `XAxis` type.
+- LineChart `xAxis` prop, and the `XAxis` type.
 - ScatterChart `formatX`: formats x values separately from `formatValue`, e.g. epoch ms as dates.
 - `labels.dateColumn` ("Date"), which heads the data table's first column for date axes.
 

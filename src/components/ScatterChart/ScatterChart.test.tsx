@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "../../test-utils/axe.js";
 import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
+import { timeAxis } from "../../utils/time.js";
 import { ScatterChart } from "./ScatterChart.js";
 
 const POINTS = [
@@ -52,14 +53,16 @@ describe("ScatterChart structure", () => {
   });
 
   it("makes points toggle buttons when clickable", () => {
-    const onPointClick = vi.fn();
+    const onMarkClick = vi.fn();
     const onSelect = vi.fn();
-    render(
-      <ScatterChart data={POINTS} title="L" onPointClick={onPointClick} onSelect={onSelect} />,
-    );
+    render(<ScatterChart data={POINTS} title="L" onMarkClick={onMarkClick} onSelect={onSelect} />);
     const peak = screen.getByRole("button", { name: /^Peak/ });
     fireEvent.click(peak);
-    expect(onPointClick).toHaveBeenCalledWith(POINTS[2], 0, 2);
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { series: 0, point: 2 },
+      value: POINTS[2].y,
+      datum: POINTS[2],
+    });
     expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 2 });
     expect(peak.getAttribute("aria-pressed")).toBe("true");
   });
@@ -170,8 +173,38 @@ describe("ScatterChart axe", () => {
     expect(await axe(container)).toHaveNoViolations();
     unmount();
     const { container: c2 } = render(
-      <ScatterChart data={POINTS} title="S" onPointClick={() => {}} />,
+      <ScatterChart data={POINTS} title="S" onMarkClick={() => {}} />,
     );
     expect(await axe(c2)).toHaveNoViolations();
+  });
+});
+
+describe("ScatterChart with a date axis", () => {
+  const day = (d: number) => Date.UTC(2026, 9, d);
+  const points = [
+    { x: day(1), y: 3 },
+    { x: day(4), y: 5 },
+    { x: day(2), y: 4 },
+  ];
+
+  it("places points by date, ticks on days and words x as dates", () => {
+    const { container } = render(
+      <ScatterChart
+        data={points}
+        xAxis={timeAxis(points.map((p) => p.x))}
+        labels={{ locale: "en-GB" }}
+        title="Dated"
+      />,
+    );
+    screen.getByRole("img", { name: "2 October 2026: 4, 2 of 3" });
+    const ticks = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => !t.hasAttribute("dy"))
+      .map((t) => t.textContent);
+    expect(ticks).toEqual(["1 Oct", "2 Oct", "3 Oct", "4 Oct"]);
+    const figure = screen.getByRole("figure", { name: "Dated" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toMatch(
+      /^Scatter chart, 3 points\. 1 October 2026 to 4 October 2026\./,
+    );
+    expect(tableText(openTable())[1]).toEqual(["1 October 2026", "3"]);
   });
 });

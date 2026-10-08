@@ -13,4 +13,4 @@ From trying raster in fresh Next.js 16 and React Router 8 apps:
 ### Added
 
 - `@eekodigital/raster/labels`: `describeChart` and `DEFAULT_LABELS` without `"use client"`, so React Server Components can call them.
-- README: server rendering, React Server Components (which props need a client component), every entry point, a BarChart example, the date locale, and an absolute changelog link (the relative one broke on npm). Getting started: a Vite `optimizeDeps` tip. JSDoc on BarChart's `data`/`series` and LineChart's `x`.
+- README: server rendering, React Server Components (which props need a client component), every entry point, a BarChart example, the date locale, and an absolute changelog link (the relative one broke on npm). Getting started: a Vite `optimizeDeps` tip. JSDoc on BarChart's `data`/`series` and LineChart's `xAxis`.

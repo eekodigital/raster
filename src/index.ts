@@ -22,7 +22,13 @@ export { ChartFrame } from "./components/shared/ChartFrame.js";
 export type { ChartFrameProps } from "./components/shared/ChartFrame.js";
 export type { NumericReferenceLine, ReferenceLine } from "./components/shared/ReferenceLines.js";
 export { BarChart } from "./components/BarChart/BarChart.js";
-export type { BarChartProps, BarDatum } from "./components/BarChart/BarChart.js";
+export type {
+  BarChartProps,
+  BarDatum,
+  BarPointIndex,
+  BarSeries,
+} from "./components/BarChart/BarChart.js";
+export type { MarkClick } from "./components/shared/use-chart.js";
 export { ChartTooltip, useChartTooltip } from "./components/ChartTooltip/ChartTooltip.js";
 export type { ChartTooltipProps } from "./components/ChartTooltip/ChartTooltip.js";
 export { DonutChart } from "./components/DonutChart/DonutChart.js";

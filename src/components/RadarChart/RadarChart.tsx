@@ -9,6 +9,7 @@ import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 
 export type RadarSeries = {
   name: string;
@@ -27,8 +28,12 @@ export type RadarChartProps = ChartFrameOptions & {
   levels?: number;
   /** Formats values in marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
-  onPointClick?: (seriesIndex: number, axisIndex: number, value: number) => void;
+  /**
+   * Called when a mark is clicked (or activated with Enter/Space), with its
+   * index (as `onSelect` gives it), value and no datum. Passing this (or
+   * `onSelect`/`selectedIndex`) makes marks toggle buttons.
+   */
+  onMarkClick?: (mark: MarkClick<RadarPointIndex>) => void;
   selectedIndex?: RadarPointIndex | null;
   onSelect?: (index: RadarPointIndex | null) => void;
 };
@@ -45,7 +50,7 @@ export function RadarChart({
   size: sizeProp,
   levels = 4,
   formatValue,
-  onPointClick,
+  onMarkClick,
   selectedIndex,
   onSelect,
   labels: labelOverrides,
@@ -53,7 +58,7 @@ export function RadarChart({
 }: RadarChartProps) {
   const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<RadarPointIndex>(selectedIndex, onSelect, labels);
-  const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
+  const interactive = !!(onMarkClick || onSelect || selectedIndex !== undefined);
 
   const measured = useContainerWidth(plotRef, 300);
   const size = sizeProp ?? measured;
@@ -68,7 +73,7 @@ export function RadarChart({
   const activate = interactive
     ? (si: number, pi: number) => {
         selection.toggle({ series: si, point: pi });
-        onPointClick?.(si, pi, data[si][pi]);
+        onMarkClick?.({ index: { series: si, point: pi }, value: data[si][pi], datum: undefined });
       }
     : undefined;
 

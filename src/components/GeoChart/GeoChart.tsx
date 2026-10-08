@@ -11,6 +11,7 @@ import { useSelection } from "../../utils/use-selection.js";
 import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 
 /**
  * A TopoJSON topology (e.g. `world-atlas/countries-110m.json`). Typed
@@ -54,10 +55,15 @@ export type GeoChartProps = ChartFrameOptions &
     markers?: GeoMarker[];
     projection?: "mercator" | "equirectangular" | ProjectionFn;
     filter?: string[];
-    /** Passing this (or `onSelect`/`selectedIndex`) makes regions toggle buttons. */
-    onRegionClick?: (datum: GeoRegionDatum | undefined, featureId: string) => void;
-    /** Passing this (or `onSelect`/`selectedIndex`) makes markers toggle buttons. */
-    onMarkerClick?: (marker: GeoMarker, index: number) => void;
+    /**
+     * Called when a region or marker is clicked (or activated with
+     * Enter/Space), with its index (`{ region }` or `{ marker }`, as `onSelect`
+     * gives it), value and data (a region without data has none). Passing this
+     * (or `onSelect`/`selectedIndex`) makes regions and markers toggle buttons.
+     */
+    onMarkClick?: (
+      mark: MarkClick<GeoSelection, GeoRegionDatum | GeoMarker | undefined, number | undefined>,
+    ) => void;
     selectedIndex?: GeoSelection | null;
     onSelect?: (selection: GeoSelection | null) => void;
     legendLabel?: string;
@@ -147,8 +153,7 @@ export function GeoChart({
   markers = [],
   projection = "mercator",
   filter,
-  onRegionClick,
-  onMarkerClick,
+  onMarkClick,
   selectedIndex,
   onSelect,
   legendLabel,
@@ -201,17 +206,19 @@ export function GeoChart({
       : colorScale[0];
 
   const activateRegion =
-    onRegionClick || selectable
+    onMarkClick || selectable
       ? (i: number) => {
-          selection.toggle({ region: regions[i].id });
-          onRegionClick?.(regions[i].datum, regions[i].id);
+          const index = { region: regions[i].id };
+          selection.toggle(index);
+          onMarkClick?.({ index, value: regions[i].datum?.value, datum: regions[i].datum });
         }
       : undefined;
   const activateMarker =
-    onMarkerClick || selectable
+    onMarkClick || selectable
       ? (i: number) => {
-          selection.toggle({ marker: i });
-          onMarkerClick?.(markers[i], i);
+          const index = { marker: i };
+          selection.toggle(index);
+          onMarkClick?.({ index, value: markers[i].value, datum: markers[i] });
         }
       : undefined;
 

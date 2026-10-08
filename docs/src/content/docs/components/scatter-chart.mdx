@@ -25,6 +25,21 @@ import {
   <ScatterChartMultiDemo client:load />
 </Example>
 
+## Dates on x
+
+For dates, give x values as epoch milliseconds and pass a date axis from `@eekodigital/raster/time`. Ticks fall on days, weeks, months or years, and x values are worded as dates in point names, the summary and the table:
+
+```tsx
+import { timeAxis } from "@eekodigital/raster/time";
+
+<ScatterChart
+  data={orders} // { x: Date.parse(order.date), y: order.total }
+  xAxis={timeAxis(orders.map((p) => p.x))}
+  labels={{ locale: "en-GB" }}
+  title="Order value by date"
+/>;
+```
+
 ## Reference lines
 
 `referenceLines` draws dashed, labelled lines: across y by default, or vertical at an x value with `axis: "x"`. Both scales stretch to include them. The x value is worded with `formatX`. They're named in the summary and the table caption, and aren't focusable.
@@ -148,6 +163,20 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
+        <code>xAxis</code>
+      </td>
+      <td>
+        <code>XAxis</code>
+      </td>
+      <td>—</td>
+      <td>
+        A date axis: <code>timeAxis(points.map((p) =&gt; p.x))</code> from{" "}
+        <code>@eekodigital/raster/time</code>, with x as epoch ms. Calendar ticks, and x worded as
+        dates. Overrides <code>formatX</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>formatX</code>
       </td>
       <td>
@@ -202,13 +231,19 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>onPointClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(point, seriesIndex, pointIndex) =&gt; void</code>
+        <code>
+          (mark: &#123; index: ScatterPointIndex, value, datum: ScatterPoint &#125;) =&gt; void
+        </code>
       </td>
       <td>—</td>
-      <td>Makes points buttons.</td>
+      <td>
+        Called when a mark is clicked (or activated with Enter/Space) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is what{" "}
+        <code>onSelect</code> gives. Makes marks toggle buttons.
+      </td>
     </tr>
     <tr>
       <td>

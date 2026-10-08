@@ -27,6 +27,28 @@ Raster 4 adds date axes, dense mode for long series, reference lines, a public a
 
    The `labels` prop's type is now `ChartLabelOverrides` (any `ChartLabels` key, with `chartNames` merged one name at a time).
 
+4. **One click handler on every chart: `onMarkClick`.** It replaces `onPointClick` (LineChart, RadarChart, ScatterChart), `onBarClick`, `onSegmentClick`, `onRegionClick` and `onMarkerClick`, and gets `{ index, value, datum }`. `index` is what `onSelect` gives for that mark:
+
+   ```diff title="Clicks"
+   - onPointClick={(series, point, value) => …}
+   + onMarkClick={({ index, value }) => …} // index: { series, point }
+   ```
+
+   On GeoChart it makes both regions and markers clickable.
+
+5. **BarChart takes series like LineChart.** `series` is `{ name, data, color? }[]` with `categories`, replacing `series` (names), `values` and `data` for categories. `grouped` is the default for several series, so the prop is gone. `colors` is replaced by `color` on each datum or series. Selection picks one bar, `{ series, point }`, instead of a whole category:
+
+   ```diff title="BarChart"
+   - data={quarters} series={["North", "South"]} values={[[12, 8], [15, 11]]}
+   + categories={["Q1", "Q2"]}
+   + series={[{ name: "North", data: [12, 15] }, { name: "South", data: [8, 11] }]}
+   ```
+
+   Single series stay `data={[{ label, value }]}`, but their selection changes too: `selectedIndex` and `onSelect` use `{ series: 0, point }` instead of a number. (DonutChart keeps a number: it has one series.)
+
+6. **Gauge and LinearGauge take `title` and `formatValue`** like the other charts, instead of `label` and `format`. Their default number format follows `labels.locale`.
+7. **LineChart's date axis prop is `xAxis`** (it was `x` in the 3.1 pre-release docs), matching ScatterChart's new `xAxis`.
+
 If you built your own `XAxis` object for LineChart rather than using `timeAxis`, it now needs `at` and `format`.
 
 ## From v2 to v3

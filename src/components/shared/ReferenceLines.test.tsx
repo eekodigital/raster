@@ -57,7 +57,7 @@ describe("reference lines", () => {
     const { container } = render(
       <LineChart
         series={[{ name: "Views", data: [10, 20, 30] }]}
-        x={timeAxis(["2026-10-01", "2026-10-02", "2026-10-04"])}
+        xAxis={timeAxis(["2026-10-01", "2026-10-02", "2026-10-04"])}
         labels={{ locale: "en-GB" }}
         title="Views"
         referenceLines={[
@@ -176,7 +176,7 @@ describe("reference lines", () => {
     const one = render(
       <LineChart
         series={[{ name: "V", data: [1] }]}
-        x={timeAxis(["2026-10-01"])}
+        xAxis={timeAxis(["2026-10-01"])}
         title="One"
         referenceLines={[{ value: "2030-01-01", label: "Later", axis: "x" }]}
       />,
@@ -202,7 +202,7 @@ describe("reference lines", () => {
     const { container } = render(
       <LineChart
         series={[{ name: "V", data: [1, 2] }]}
-        x={plain as typeof axis}
+        xAxis={plain as typeof axis}
         title="Plain"
         referenceLines={[{ value: "2026-10-02", label: "Launch", axis: "x" }]}
       />,

@@ -131,13 +131,17 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>onSegmentClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(datum, index) =&gt; void</code>
+        <code>(mark: &#123; index: number, value, datum: DonutDatum &#125;) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Makes segments buttons.</td>
+      <td>
+        Called when a mark is clicked (or activated with Enter/Space) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is what{" "}
+        <code>onSelect</code> gives. Makes marks toggle buttons.
+      </td>
     </tr>
     <tr>
       <td>

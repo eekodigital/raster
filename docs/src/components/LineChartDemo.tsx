@@ -13,7 +13,7 @@ export function LineChartDatesDemo() {
   return (
     <LineChart
       series={[{ name: "Views", data: VIEWS }]}
-      x={timeAxis(VIEW_DAYS, { interval: "day" })}
+      xAxis={timeAxis(VIEW_DAYS, { interval: "day" })}
       labels={{ locale: "en-GB" }}
       title="Daily views"
     />
@@ -44,7 +44,7 @@ export function LineChartDenseDemo() {
     <div style={{ width: "100%" }}>
       <LineChart
         series={DENSE}
-        x={DENSE_AXIS}
+        xAxis={DENSE_AXIS}
         labels={{ locale: "en-GB" }}
         title="Daily traffic, 2025–2026"
         selectedIndex={selected}

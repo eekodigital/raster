@@ -139,7 +139,7 @@ const SAMPLE = Date.UTC(2000, 8, 28);
 const CHAR = 7;
 
 /**
- * An x axis of dates for LineChart: `x={timeAxis(dates, { interval: "day" })}`.
+ * An x axis of dates for LineChart: `xAxis={timeAxis(dates, { interval: "day" })}`.
  * `values` are Dates, ISO strings (date-only strings are UTC midnight) or
  * epoch ms, one per data point, in ascending order.
  */
@@ -176,7 +176,16 @@ export function timeAxis(
    * How values are named: `format`, or the long date, plus the time if any
    * point isn't at midnight.
    */
+  // Worked out once per locale: deciding whether to show times scans every value.
+  const formatters = new Map<string, (t: number) => string>();
   const formatter = (locale: string) => {
+    const cached = formatters.get(locale);
+    if (cached) return cached;
+    const made = makeFormatter(locale);
+    formatters.set(locale, made);
+    return made;
+  };
+  const makeFormatter = (locale: string) => {
     if (typeof format === "function") return (t: number) => format(new Date(t));
     const f = dtf(
       locale,

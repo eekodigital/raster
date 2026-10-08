@@ -1,6 +1,6 @@
 ---
 title: LinearGauge
-description: Horizontal progress bar with label and value display. Uses role="meter" with proper aria-valuenow and aria-valuemax. Animated fill respects prefers-reduced-motion.
+description: Horizontal progress bar with title and value display. Uses role="meter" with proper aria-valuenow and aria-valuemax. Animated fill respects prefers-reduced-motion.
 ---
 
 import Example from "../../../components/Example.astro";
@@ -9,7 +9,7 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
 ## Examples
 
 <Example
-  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} label="Assessed" />\n<LinearGauge value={45} max={100} label="Complete" color="var(--demo-warn)" formatLabel={(v) => \`\${v}%\`} />\n<LinearGauge value={86} max={86} label="Criteria" color="var(--demo-good)" />`}
+  code={`import { LinearGauge } from '@eekodigital/raster';\n\n<LinearGauge value={72} max={86} title="Assessed" />\n<LinearGauge value={45} max={100} title="Complete" color="var(--demo-warn)" formatLabel={(v) => \`\${v}%\`} />\n<LinearGauge value={86} max={86} title="Criteria" color="var(--demo-good)" />`}
 >
   <LinearGaugeDemo client:load />
 </Example>
@@ -17,7 +17,7 @@ import { LinearGaugeDemo } from "../../../components/LinearGaugeDemo.tsx";
 ## Accessibility
 
 - `role="meter"` with `aria-valuemin`, `aria-valuemax`, `aria-valuenow` and `aria-valuetext` from `format`.
-- Named by the visible `label` through `aria-labelledby`.
+- Named by the visible `title` through `aria-labelledby`.
 - Fills its container's width; the grow animation stops under `prefers-reduced-motion`.
 
 See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
@@ -68,23 +68,35 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>label</code>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Required. Visible label and accessible name.</td>
+      <td>Required. Visible title and accessible name.</td>
     </tr>
     <tr>
       <td>
-        <code>format</code>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>ChartLabelOverrides</code>
+      </td>
+      <td>—</td>
+      <td>
+        <code>locale</code> for the default number format, as on the other charts.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
       </td>
       <td>
-        <code>Intl.NumberFormat("en")</code>
+        <code>Intl.NumberFormat</code>
       </td>
       <td>
         Formats the value and <code>aria-valuetext</code>.

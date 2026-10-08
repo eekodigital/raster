@@ -64,14 +64,14 @@ The main entry has every chart except GeoChart. Each chart also has its own entr
 
 Entries with components start with `"use client"`, so a Server Component (e.g. the Next.js App Router) can render charts directly, with plain-data props. They're still server-rendered; the directive marks where hydration starts. Props that are functions can't come from a Server Component, so build those in a client component of your own:
 
-- `x={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, callbacks such as `onSelect`
+- `xAxis={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, callbacks such as `onSelect`
 - `labels` with function overrides
 
 `/time`, `/export`, `/labels` and `/theme` aren't marked, so server code can call `timeAxis`, `describeChart` and the rest. TypeScript won't catch a function prop passed from a Server Component; the framework reports it when the page renders.
 
 ### Dates
 
-For dates, pass `x={timeAxis(dates, { interval: "day" })}` from `/time` instead of `categories`. Points are spaced by elapsed time, ticks fall on days, weeks, months or years, and the line breaks where a day is missing. Dates are worded in `labels.locale`, which is `"en"` (US order, "October 3, 2026") by default: pass `labels={{ locale: "en-GB" }}` for "3 October 2026". See [Dates](https://raster.eeko.digital/components/line-chart/#dates).
+For dates, pass `xAxis={timeAxis(dates, { interval: "day" })}` from `/time` instead of `categories`. Points are spaced by elapsed time, ticks fall on days, weeks, months or years, and the line breaks where a day is missing. Dates are worded in `labels.locale`, which is `"en"` (US order, "October 3, 2026") by default: pass `labels={{ locale: "en-GB" }}` for "3 October 2026". See [Dates](https://raster.eeko.digital/components/line-chart/#dates).
 
 ## Theming
 

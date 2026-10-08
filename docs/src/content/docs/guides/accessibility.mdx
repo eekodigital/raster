@@ -19,7 +19,7 @@ Every chart follows the same pattern, so once you know one you know them all. Ac
   - `div role="status"`: a polite live region for changes away from focus
 
 - **No `graphics-*` roles.** Support for the Graphics ARIA module is patchy, so charts use `figure`, `group`, `img` and `button`, which every screen reader understands.
-- **Marks are static images unless the chart is interactive.** Pass `onSelect`, `selectedIndex` or a click handler (`onPointClick`, `onBarClick`, …) and marks become `role="button"` with `aria-pressed`.
+- **Marks are static images unless the chart is interactive.** Pass `onSelect`, `selectedIndex` or `onMarkClick` and marks become `role="button"` with `aria-pressed`.
 - **The tooltip is visual only.** Each mark's name already carries the same text, so the tooltip is `aria-hidden` rather than announced twice.
 - **Sparkline** is word-sized, so it has no marks or table: the drawing is hidden and a visually hidden sentence ("Weekly views: Sparkline, 8 points. Values from 10 to 86. First 10, last 86.") takes its place.
 - **Gauge and LinearGauge** are `role="meter"`, named by their visible `label`, with `aria-valuetext` from `format`.
