@@ -61,6 +61,9 @@ export type LineChartProps = ChartFrameOptions &
          * A date axis instead of categories: `timeAxis(dates, options)` from
          * `@eekodigital/raster/time`. Points are spaced by elapsed time, ticks
          * fall on calendar boundaries, and the line breaks at gaps.
+         *
+         * The axis holds functions, so with React Server Components build it in
+         * a client component: a Server Component can't pass it as a prop.
          */
         x: XAxis;
         categories?: never;

@@ -17,6 +17,7 @@ export const entries = {
   time: "src/time.ts",
   export: "src/export.ts",
   frame: "src/frame.ts",
+  labels: "src/labels.ts",
   geo: "src/geo.ts",
   "bar-chart": "src/components/BarChart/BarChart.tsx",
   "chart-tooltip": "src/components/ChartTooltip/ChartTooltip.tsx",

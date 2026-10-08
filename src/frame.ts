@@ -11,4 +11,4 @@ export type {
   DataTableMode,
 } from "./components/shared/ChartDataTable.js";
 export { describeChart } from "./utils/labels.js";
-export type { ChartLabels, SummaryParts } from "./utils/labels.js";
+export type { ChartLabels, DescribeParts, SummaryParts } from "./utils/labels.js";

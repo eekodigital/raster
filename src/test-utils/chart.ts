@@ -14,7 +14,7 @@ export function tabStops(root: ParentNode = document) {
 }
 
 export function openTable() {
-  fireEvent.click(screen.getByRole("button", { name: "Show data table" }));
+  fireEvent.click(screen.getByText("Show data table", { selector: "summary" }));
   return screen.getByRole("table");
 }
 

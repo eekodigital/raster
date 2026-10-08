@@ -73,7 +73,7 @@ describe("ChartFrame (public)", () => {
         <Other />
       </ChartFrame>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Tabelle zeigen" }));
+    fireEvent.click(screen.getByText("Tabelle zeigen", { selector: "summary" }));
     expect(screen.getByRole("table").querySelector("caption")?.textContent).toBe(
       "Tägliche Aufrufe",
     );
@@ -93,7 +93,7 @@ describe("ChartFrame (public)", () => {
         <Other />
       </ChartFrame>,
     );
-    expect(container.querySelector("table, button")).toBeNull();
+    expect(container.querySelector("table, details")).toBeNull();
   });
 
   it("has no axe violations", async () => {
@@ -110,7 +110,7 @@ describe("ChartFrame (public)", () => {
 describe("ChartDataTable (public)", () => {
   it("renders a disclosure table on its own, with partial labels", () => {
     render(<ChartDataTable caption="Views" {...TABLE} labels={{ showTable: "Show the data" }} />);
-    fireEvent.click(screen.getByRole("button", { name: "Show the data" }));
+    fireEvent.click(screen.getByText("Show the data", { selector: "summary" }));
     expect(screen.getByRole("table").querySelector("caption")?.textContent).toBe("Views");
   });
 
@@ -121,7 +121,7 @@ describe("ChartDataTable (public)", () => {
         <ChartDataTable caption="Visitors" {...TABLE} />
       </>,
     );
-    const [a, b] = screen.getAllByRole("button", { name: "Show data table" });
+    const [a, b] = screen.getAllByText("Show data table", { selector: "summary" });
     expect(document.getElementById(a.getAttribute("aria-describedby")!)?.textContent).toBe("Views");
     expect(document.getElementById(b.getAttribute("aria-describedby")!)?.textContent).toBe(
       "Visitors",
@@ -164,5 +164,11 @@ describe("exporting a wrapped chart", () => {
     );
     exportSVG(ref.current);
     expect(create).not.toHaveBeenCalled();
+  });
+});
+
+describe("describeChart without a raster type", () => {
+  it("names any chart by `name` alone", () => {
+    expect(describeChart({ name: "Heatmap", series: 1, points: 3 })).toBe("Heatmap, 3 points.");
   });
 });

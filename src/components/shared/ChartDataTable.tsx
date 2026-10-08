@@ -24,7 +24,8 @@ export const SR_ONLY_STYLE: React.CSSProperties = {
 export type ChartDataTableRow = { key: React.Key; cells: React.ReactNode[] };
 
 /**
- * - `disclosure` (default): a visible "Show data table" button toggles a real,
+ * - `disclosure` (default): a native `<details>` disclosure, "Show data table",
+ *   that opens without JavaScript and reveals a real,
  *   visible table. The reliable path for every user.
  * - `visually-hidden`: the table is always present for assistive technology
  *   only, e.g. when the page already shows the data elsewhere.
@@ -77,7 +78,6 @@ export function DataTable({
       id={id}
       className={hiddenMode ? "raster-sr-only" : "raster-chart__table"}
       style={hiddenMode ? SR_ONLY_STYLE : undefined}
-      hidden={!hiddenMode && !open}
     >
       <caption id={`${id}-caption`}>{caption}</caption>
       <thead>
@@ -113,19 +113,21 @@ export function DataTable({
   );
 
   if (hiddenMode) return table;
+  // A native disclosure: it opens without JavaScript, so the values are
+  // reachable from the server-rendered HTML. With JavaScript, the label
+  // follows the state.
   return (
-    <>
-      <button
-        type="button"
+    <details
+      className="raster-chart__table-details"
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+    >
+      <summary
         className="raster-chart__table-toggle"
-        aria-expanded={open}
-        aria-controls={id}
         aria-describedby={describedBy ?? `${id}-caption`}
-        onClick={() => setOpen(!open)}
       >
         {open ? labels.hideTable : labels.showTable}
-      </button>
+      </summary>
       {table}
-    </>
+    </details>
   );
 }

@@ -47,7 +47,7 @@ describe("reference lines", () => {
       "Line chart, 5 points. W1 to W5. Values from 10 to 86. Target: 90.",
     );
     expect(openTable().querySelector("caption")?.textContent).toBe(
-      "Data for Progress. Reference line: Target: 90.",
+      "Data for Progress, with a reference line (Target: 90)",
     );
     // Not focusable: still one tab stop.
     expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
@@ -132,7 +132,7 @@ describe("reference lines", () => {
     expect(h.y1).toBeGreaterThanOrEqual(0);
     expect(v.x1).toBe(v.x2);
     expect(openTable().querySelector("caption")?.textContent).toBe(
-      "Data for S. Reference lines: Ceiling: 5; Split: x2.",
+      "Data for S, with reference lines (Ceiling: 5; Split: x2)",
     );
   });
 
@@ -222,7 +222,7 @@ describe("reference lines", () => {
     );
     expect(html).toContain('class="raster-chart__reference" aria-hidden="true"');
     expect(html).toContain("Values from 10 to 86. Target: 90.");
-    expect(html).toContain("Data for P. Reference line: Target: 90.");
+    expect(html).toContain("Data for P, with a reference line (Target: 90)");
   });
 
   it("has no axe violations", async () => {

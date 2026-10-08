@@ -10,7 +10,7 @@
   - **BarChart:** across the value axis, so vertical for `direction="horizontal"`.
   - **ScatterChart:** across y, or vertical with `axis: "x"` (worded with `formatX`).
   - **LineChart:** across y, or vertical at a date with `axis: "x"` on a `timeAxis`. Dates outside the data range are left out.
-- **Accessibility:** not focusable, and hidden from assistive technology in the SVG. The same text ends the summary ("… Target: 90.") and is noted in the data table caption ("Data for Progress. Reference line: Target: 90.").
+- **Accessibility:** not focusable, and hidden from assistive technology in the SVG. The same text ends the summary ("… Target: 90.") and is noted in the data table caption ("Data for Progress, with a reference line (Target: 90)").
 - `labels.referenceLine(label, value)` and `labels.referenceNote(caption, lines)` to reword or translate them (the note returns the whole caption, so punctuation is the translator's), and `SummaryParts.references`.
 - `--raster-reference` theming property (`rasterVars.reference`), falling back to `--raster-text-subtle`. In forced-colours mode lines are `CanvasText` and keep their dash, and labels get a halo so they stay readable over data.
 - Optional `XAxis.at` and `XAxis.format`, so time axes can place and name any date. `timeAxis` provides them.

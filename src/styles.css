@@ -38,7 +38,10 @@
   inset: 0;
 }
 
+/* The data table's <summary>, styled as a button; its disclosure marker is hidden. */
 .raster-chart__table-toggle {
+  display: inline-block;
+  list-style: none;
   margin-top: 0.5rem;
   padding: 0.25rem 0.5rem;
   font: inherit;
@@ -48,6 +51,10 @@
   border: 1px solid currentColor;
   border-radius: 0.25rem;
   cursor: pointer;
+}
+
+.raster-chart__table-toggle::-webkit-details-marker {
+  display: none;
 }
 
 .raster-chart__table-toggle:focus-visible {

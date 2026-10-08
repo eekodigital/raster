@@ -45,6 +45,7 @@ Import from the main entry, or from a chart's own entry if you'd rather be expli
 | `@eekodigital/raster/time`          | `timeAxis`, for [dates on LineChart](/components/line-chart/#dates)                                                     |
 | `@eekodigital/raster/export`        | `exportSVG`, `exportPNG`: [exporting charts](/guides/exporting/)                                                        |
 | `@eekodigital/raster/frame`         | `ChartFrame`, `ChartDataTable`, `describeChart`: [wrapping other charts](/guides/wrapping/)                             |
+| `@eekodigital/raster/labels`        | `describeChart`, `DEFAULT_LABELS`, without `"use client"`                                                               |
 | `@eekodigital/raster/theme`         | `rasterVars`, the [theming contract](/guides/theming/)                                                                  |
 | `@eekodigital/raster/styles.css`    | The stylesheet                                                                                                          |
 
@@ -59,7 +60,19 @@ A few props can't be passed from a Server Component, because they hold functions
 - `x={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, `onSelect` and other callbacks
 - `labels` with function overrides (`summary`, `mark`, …)
 
-Put a chart that needs them in a small client component of your own (a file starting with `"use client"`), and pass it plain data from the server. `timeAxis` (`/time`), `exportSVG` (`/export`) and `rasterVars` (`/theme`) aren't marked, so server code can import them. `describeChart` comes from a component entry, so call it in a client component, or write the summary yourself.
+Put a chart that needs them in a small client component of your own (a file starting with `"use client"`), and pass it plain data from the server. `timeAxis` (`/time`), `exportSVG` (`/export`), `describeChart` (`/labels`) and `rasterVars` (`/theme`) aren't marked, so server code can call them. Import `describeChart` from `/labels` in a Server Component: the main entry and `/frame` are marked. TypeScript won't catch a function prop passed from a Server Component; the framework reports it when the page renders.
+
+### Vite
+
+In development, Vite discovers each raster entry the first time a page imports it, and reloads the page to optimise it. To skip those reloads, list the entries you use:
+
+```ts title="vite.config.ts"
+export default defineConfig({
+  optimizeDeps: {
+    include: ["@eekodigital/raster", "@eekodigital/raster/time", "@eekodigital/raster/export"],
+  },
+});
+```
 
 ## Fonts, colour and spacing
 
