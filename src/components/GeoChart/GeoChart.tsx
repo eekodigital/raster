@@ -1,11 +1,10 @@
 import { feature } from "topojson-client";
+import { summarize } from "../../utils/labels.js";
 import { useMemo } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -65,8 +64,6 @@ export type GeoChartProps = ChartFrameOptions &
     legendLabel?: string;
     /** Formats values in marks, the legend and the table. Default: `Intl.NumberFormat(labels.locale)`. */
     formatValue?: NumberFormat;
-    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-    exportRef?: React.Ref<ChartExportHandle>;
   };
 
 // Built-in projections
@@ -159,11 +156,10 @@ export function GeoChart({
   formatValue,
   height,
   aspectRatio,
-  exportRef,
   labels: labelOverrides,
   ...frame
 }: GeoChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
   const selection = useSelection<GeoSelection>(selectedIndex, onSelect, labels);
   const selectable = !!onSelect || selectedIndex !== undefined;
 
@@ -231,13 +227,14 @@ export function GeoChart({
         : undefined,
   });
 
-  const summary = labels.summary(
+  const summary = summarize(
     {
       type: "map",
       series: 1,
       points: regions.length,
       y: values.length ? [format(minVal), format(maxVal)] : undefined,
     },
+    labels,
     n,
   );
 

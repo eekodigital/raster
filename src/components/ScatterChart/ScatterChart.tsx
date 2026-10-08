@@ -1,9 +1,9 @@
 import { extent, linearScale, markerPath, ticks, labelSkip } from "../../utils/chart-math.js";
+import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle, NumericReferenceLine };
+export type { NumericReferenceLine };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -57,8 +57,6 @@ export type ScatterChartProps = ChartFrameOptions &
     /** `point` is the index in the series' `data`. */
     selectedIndex?: ScatterPointIndex | null;
     onSelect?: (index: ScatterPointIndex | null) => void;
-    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-    exportRef?: React.Ref<ChartExportHandle>;
     /** Targets, thresholds or goals: dashed, labelled lines across y (or x with `axis: "x"`), named in the summary and table caption. */
     referenceLines?: NumericReferenceLine[];
   };
@@ -78,12 +76,11 @@ export function ScatterChart({
   onSelect,
   height,
   aspectRatio,
-  exportRef,
   labels: labelOverrides,
   referenceLines = [],
   ...frame
 }: ScatterChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
   const selection = useSelection<ScatterPointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
 
@@ -154,7 +151,7 @@ export function ScatterChart({
   );
   const referenceTexts = references.map((r) => r.text);
 
-  const summary = labels.summary(
+  const summary = summarize(
     {
       type: "scatter",
       series: series.length,
@@ -163,6 +160,7 @@ export function ScatterChart({
       y: allPoints.length ? [format(dataYMin), format(dataYMax)] : undefined,
       references: referenceTexts,
     },
+    labels,
     n,
   );
 

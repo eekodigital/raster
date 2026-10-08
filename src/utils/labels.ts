@@ -16,10 +16,14 @@ export type MarkLabelParts = {
   count: number;
 };
 
-export type SummaryParts = {
-  type: ChartType;
-  /** Overrides the chart type's name, e.g. "Heatmap" for a chart raster doesn't draw. */
-  name?: string;
+/**
+ * What a summary describes. A raster `type` (worded by `labels.chartNames`),
+ * a `name` for any other chart ("Heatmap"), or both: `name` wins.
+ */
+export type SummaryParts = (
+  | { type: ChartType; name?: string }
+  | { type?: undefined; name: string }
+) & {
   series: number;
   /** Total number of marks. */
   points: number;
@@ -32,6 +36,9 @@ export type SummaryParts = {
   /** Reference lines, each already worded by `referenceLine` ("Target: 90"). */
   references?: string[];
 };
+
+/** What `labels.summary` receives: the parts, with the chart's `name` worked out. */
+export type ResolvedSummaryParts = SummaryParts & { name: string };
 
 /**
  * Every string a chart generates. Pass a partial object as the `labels` prop to
@@ -78,10 +85,16 @@ export type ChartLabels = {
   referenceNote: (caption: string, lines: string[]) => string;
   series: (name: string, count: number, n: NumberFormat) => string;
   mark: (parts: MarkLabelParts, n: NumberFormat) => string;
-  summary: (parts: SummaryParts, n: NumberFormat) => string;
+  /** Names of raster's chart types, for summaries ("Line chart"). */
+  chartNames: Record<ChartType, string>;
+  /**
+   * The text summary. `name` is already worked out (from `chartNames`, or the
+   * name a wrapped chart gives), so translations word it once, in `chartNames`.
+   */
+  summary: (parts: ResolvedSummaryParts, n: NumberFormat) => string;
 };
 
-const TYPE_NAMES: Record<ChartType, string> = {
+const CHART_NAMES: Record<ChartType, string> = {
   line: "Line chart",
   bar: "Bar chart",
   donut: "Donut chart",
@@ -125,9 +138,10 @@ export const DEFAULT_LABELS: ChartLabels = {
   series: (name, count, n) => `${name}, ${points(count, n)}`,
   mark: ({ series, x, y, index, count }, n) =>
     `${series ? `${series}, ` : ""}${x}${y === undefined ? "" : `: ${y}`}, ${n(index + 1)} of ${n(count)}`,
-  summary: ({ type, name, series, points: count, x, y, first, last, references = [] }, n) =>
+  chartNames: CHART_NAMES,
+  summary: ({ name, series, points: count, x, y, first, last, references = [] }, n) =>
     [
-      `${[name ?? TYPE_NAMES[type], series > 1 && `${n(series)} series`, points(count, n)]
+      `${[name, series > 1 && `${n(series)} series`, points(count, n)]
         .filter(Boolean)
         .join(", ")}.`,
       x && `${x[0]} to ${x[1]}.`,
@@ -139,8 +153,27 @@ export const DEFAULT_LABELS: ChartLabels = {
       .join(" "),
 };
 
-export function resolveLabels(overrides?: Partial<ChartLabels>): ChartLabels {
-  return overrides ? { ...DEFAULT_LABELS, ...overrides } : DEFAULT_LABELS;
+/**
+ * The `labels` prop: any of `ChartLabels`, with `chartNames` merged (so one
+ * name can be overridden on its own).
+ */
+export type ChartLabelOverrides = Partial<Omit<ChartLabels, "chartNames">> & {
+  chartNames?: Partial<Record<ChartType, string>>;
+};
+
+export function resolveLabels(overrides?: ChartLabelOverrides): ChartLabels {
+  return overrides
+    ? {
+        ...DEFAULT_LABELS,
+        ...overrides,
+        chartNames: { ...DEFAULT_LABELS.chartNames, ...overrides.chartNames },
+      }
+    : DEFAULT_LABELS;
+}
+
+/** A chart's summary in `labels`' words, with its name worked out. */
+export function summarize(parts: SummaryParts, labels: ChartLabels, n: NumberFormat): string {
+  return labels.summary({ ...parts, name: parts.name ?? labels.chartNames[parts.type!] }, n);
 }
 
 /**
@@ -148,9 +181,9 @@ export function resolveLabels(overrides?: Partial<ChartLabels>): ChartLabels {
  * Dec. Values from 3 to 412."), for a chart raster doesn't draw, so it reads
  * like raster's own. Uses `labels.summary`, with counts in `labels.locale`.
  */
-export function describeChart(parts: SummaryParts, labels?: Partial<ChartLabels>): string {
+export function describeChart(parts: SummaryParts, labels?: ChartLabelOverrides): string {
   const resolved = resolveLabels(labels);
-  return resolved.summary(parts, numberFormatter(resolved.locale));
+  return summarize(parts, resolved, numberFormatter(resolved.locale));
 }
 
 const formatters = new Map<string, NumberFormat>();

@@ -41,7 +41,7 @@ export default defineConfig({
             { label: "Exporting charts", slug: "guides/exporting" },
             { label: "Wrapping other charts", slug: "guides/wrapping" },
             { label: "Compared with alternatives", slug: "guides/comparison" },
-            { label: "Migrating from v2", slug: "guides/migrating" },
+            { label: "Migrating", slug: "guides/migrating" },
           ],
         },
         {

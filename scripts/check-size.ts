@@ -33,22 +33,22 @@ import { clientEntries, entries } from "../tsdown.config.ts";
  * 1.3–2.5 KB per entry. `/time` is the opt-in date axis for LineChart.
  */
 const BUDGETS: Record<string, number> = {
-  "./bar-chart": 7_400,
+  "./bar-chart": 7_300,
   "./chart-tooltip": 900,
-  "./donut-chart": 5_600,
-  "./gauge": 1_700,
+  "./donut-chart": 5_500,
+  "./gauge": 1_500,
   "./geo": 6_200,
-  "./line-chart": 9_300,
+  "./line-chart": 9_200,
   "./linear-gauge": 900,
   "./radar-chart": 5_800,
-  "./scatter-chart": 7_000,
-  "./sparkline": 2_300,
+  "./scatter-chart": 6_900,
+  "./sparkline": 2_200,
   "./theme": 300,
   "./time": 1_600,
   "./export": 1_100,
-  "./frame": 2_000,
+  "./frame": 2_100,
   "./labels": 1_000,
-  "./styles.css": 3_000,
+  "./styles.css": 3_100,
 };
 
 const root = resolve(import.meta.dirname, "..");
@@ -62,9 +62,9 @@ function localImports(file: string): string[] {
 }
 
 /**
- * Tripwire for each entry's lazily loaded chunks (`import()`, e.g. the export
- * code behind the deprecated `exportRef`). They're fetched only when used, so
- * they don't count towards the entry, but they mustn't grow unnoticed.
+ * Tripwire for each entry's lazily loaded chunks (`import()`). They're fetched
+ * only when used, so they don't count towards the entry, but they mustn't grow
+ * unnoticed. (None today.)
  */
 const LAZY_BUDGET = 1_200;
 

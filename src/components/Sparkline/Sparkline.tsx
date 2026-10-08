@@ -1,12 +1,10 @@
 import { extent, linearScale } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
-import { numberFormatter, resolveLabels } from "../../utils/labels.js";
-import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
+import { numberFormatter, resolveLabels, summarize } from "../../utils/labels.js";
+import type { NumberFormat, ChartLabelOverrides } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { useRootRef } from "../../utils/use-chart-export.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useRootRef } from "../../utils/use-merged-ref.js";
 
-export type { ChartExportHandle };
 import { SR_ONLY_STYLE } from "../shared/ChartDataTable.js";
 
 export type SparklineProps = {
@@ -20,9 +18,7 @@ export type SparklineProps = {
   fill?: boolean;
   /** Formats values in the summary. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  labels?: Partial<ChartLabels>;
-  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-  exportRef?: React.Ref<ChartExportHandle>;
+  labels?: ChartLabelOverrides;
   /** The chart's root element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
   ref?: React.Ref<HTMLSpanElement>;
   className?: string;
@@ -42,11 +38,10 @@ export function Sparkline({
   fill = false,
   formatValue,
   labels: labelOverrides,
-  exportRef,
   ref,
   className,
 }: SparklineProps) {
-  const { rootRef } = useRootRef<HTMLSpanElement>(exportRef, ref);
+  const { rootRef } = useRootRef<HTMLSpanElement>(ref);
   if (data.length < 2) return null;
 
   const labels = resolveLabels(labelOverrides);
@@ -68,7 +63,7 @@ export function Sparkline({
     ? `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")} L ${points[points.length - 1].x} ${height - padding} L ${padding} ${height - padding} Z`
     : undefined;
 
-  const summary = labels.summary(
+  const summary = summarize(
     {
       type: "sparkline",
       series: 1,
@@ -77,6 +72,7 @@ export function Sparkline({
       first: format(data[0]),
       last: format(data[data.length - 1]),
     },
+    labels,
     n,
   );
 

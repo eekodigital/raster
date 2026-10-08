@@ -9,12 +9,12 @@ import {
   ticks,
   labelSkip,
 } from "../../utils/chart-math.js";
+import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import type { XAxis, XTick } from "../../utils/time.js";
 import { seriesColor } from "../../utils/palette.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle, ReferenceLine, XAxis };
+export type { ReferenceLine, XAxis };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -97,8 +97,6 @@ export type LineChartProps = ChartFrameOptions &
     onPointClick?: (seriesIndex: number, pointIndex: number, value: number) => void;
     selectedIndex?: LinePointIndex | null;
     onSelect?: (index: LinePointIndex | null) => void;
-    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-    exportRef?: React.Ref<ChartExportHandle>;
     /**
      * Dense mode for long series: each series is one downsampled path with no
      * per-point marks, and a single slider steps through the points. `true` or
@@ -131,13 +129,12 @@ export function LineChart({
   onSelect,
   height: heightProp,
   aspectRatio,
-  exportRef,
   labels: labelOverrides,
   dense,
   referenceLines = [],
   ...frame
 }: LineChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
   const selection = useSelection<LinePointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
   const longest = Math.max(0, ...series.map((s) => s.data.length));
@@ -179,7 +176,7 @@ export function LineChart({
       if (r.axis !== "x")
         return Number.isFinite(r.value) ? [yScale(r.value), format(r.value)] : null;
       const v = typeof r.value === "string" ? Date.parse(r.value) : +r.value;
-      return x?.at && x.format ? [x.at(v, plotWidth), x.format(v, labels.locale)] : null;
+      return x ? [x.at(v, plotWidth), x.format(v, labels.locale)] : null;
     },
     plotWidth,
     plotHeight,
@@ -256,7 +253,7 @@ export function LineChart({
   const rawValues = series.flatMap((s) => s.data);
   const [rawMin, rawMax] = rawValues.length ? extent(rawValues) : [0, 0];
   const named = names.filter(Boolean);
-  const summary = labels.summary(
+  const summary = summarize(
     {
       type: "line",
       series: series.length,
@@ -265,6 +262,7 @@ export function LineChart({
       y: rawValues.length ? [format(rawMin), format(rawMax)] : undefined,
       references: referenceTexts,
     },
+    labels,
     n,
   );
 

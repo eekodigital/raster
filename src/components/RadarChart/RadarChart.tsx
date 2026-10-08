@@ -1,9 +1,8 @@
 import { extent, markerPath } from "../../utils/chart-math.js";
+import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
@@ -33,8 +32,6 @@ export type RadarChartProps = ChartFrameOptions & {
   onPointClick?: (seriesIndex: number, axisIndex: number, value: number) => void;
   selectedIndex?: RadarPointIndex | null;
   onSelect?: (index: RadarPointIndex | null) => void;
-  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-  exportRef?: React.Ref<ChartExportHandle>;
 };
 
 function polarToCartesian(cx: number, cy: number, r: number, angleIndex: number, total: number) {
@@ -52,11 +49,10 @@ export function RadarChart({
   onPointClick,
   selectedIndex,
   onSelect,
-  exportRef,
   labels: labelOverrides,
   ...frame
 }: RadarChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
   const selection = useSelection<RadarPointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
 
@@ -86,7 +82,7 @@ export function RadarChart({
   });
 
   const [minVal, maxData] = values.length ? extent(values) : [0, 0];
-  const summary = labels.summary(
+  const summary = summarize(
     {
       type: "radar",
       series: series.length,
@@ -94,6 +90,7 @@ export function RadarChart({
       x: count ? [axes[0], axes[count - 1]] : undefined,
       y: values.length ? [format(minVal), format(maxData)] : undefined,
     },
+    labels,
     n,
   );
 

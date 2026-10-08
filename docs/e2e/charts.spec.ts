@@ -249,13 +249,6 @@ test.describe("export", () => {
     const svg = await (await file.createReadStream()).toArray();
     expect(Buffer.concat(svg).toString()).toMatch(/^<svg[^>]*aria-roledescription="chart"/);
   });
-
-  test("exportRef loads the export code on first use", async ({ page }) => {
-    await page.goto("/guides/exporting");
-    const download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download SVG (exportRef)" }).click();
-    expect((await download).suggestedFilename()).toBe("visitors-legacy.svg");
-  });
 });
 
 test.describe("focus ring", () => {

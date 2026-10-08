@@ -3,10 +3,8 @@ import { fraction } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import { useRootRef } from "../../utils/use-chart-export.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useRootRef } from "../../utils/use-merged-ref.js";
 
-export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 
 export type GaugeProps = {
@@ -22,8 +20,6 @@ export type GaugeProps = {
   thickness?: number;
   /** Formats the displayed value and `aria-valuetext`. Default: `Intl.NumberFormat("en")`. */
   format?: (value: number) => string;
-  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-  exportRef?: React.Ref<ChartExportHandle>;
   /** The chart's root element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
   ref?: React.Ref<HTMLDivElement>;
   className?: string;
@@ -39,11 +35,10 @@ export function Gauge({
   size: sizeProp,
   thickness = 10,
   format = numberFormatter("en"),
-  exportRef,
   ref,
   className,
 }: GaugeProps) {
-  const { containerRef, rootRef } = useRootRef<HTMLDivElement>(exportRef, ref);
+  const { containerRef, rootRef } = useRootRef<HTMLDivElement>(ref);
   const measured = useContainerWidth(containerRef, 120);
   const size = sizeProp ?? measured;
   const labelId = useId();

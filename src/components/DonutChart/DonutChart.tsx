@@ -1,9 +1,8 @@
 import { extent, pieAngles, strokeArcPath, sum } from "../../utils/chart-math.js";
+import { summarize } from "../../utils/labels.js";
 import { cn } from "../../utils/cn.js";
 import type { NumberFormat } from "../../utils/labels.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { ALL_ARROW_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
@@ -32,8 +31,6 @@ export type DonutChartProps = ChartFrameOptions & {
   onSegmentClick?: (datum: DonutDatum, index: number) => void;
   selectedIndex?: number | null;
   onSelect?: (index: number | null) => void;
-  /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-  exportRef?: React.Ref<ChartExportHandle>;
 };
 
 export function DonutChart({
@@ -46,12 +43,11 @@ export function DonutChart({
   onSegmentClick,
   selectedIndex,
   onSelect,
-  exportRef,
   labels: labelOverrides,
   className,
   ...frame
 }: DonutChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
   const selection = useSelection<number>(selectedIndex, onSelect, labels);
   const interactive = !!(onSegmentClick || onSelect || selectedIndex !== undefined);
   const measured = useContainerWidth(plotRef, 160);
@@ -84,13 +80,14 @@ export function DonutChart({
   });
 
   const [minVal, maxVal] = data.length ? extent(data.map((d) => d.value)) : [0, 0];
-  const summary = labels.summary(
+  const summary = summarize(
     {
       type: "donut",
       series: 1,
       points: data.length,
       y: data.length ? [format(minVal), format(maxVal)] : undefined,
     },
+    labels,
     n,
   );
 

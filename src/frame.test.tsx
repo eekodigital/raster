@@ -184,3 +184,15 @@ describe("data table opened before hydration", () => {
     container.remove();
   });
 });
+
+describe("describeChart with only a name", () => {
+  it("names any chart, and a custom summary gets that name", () => {
+    expect(describeChart({ name: "Heatmap", series: 1, points: 3 })).toBe("Heatmap, 3 points.");
+    expect(
+      describeChart(
+        { name: "Heatmap", series: 1, points: 3 },
+        { summary: ({ name, points }, n) => `${name}, ${n(points)} Punkte.`, locale: "de" },
+      ),
+    ).toBe("Heatmap, 3 Punkte.");
+  });
+});

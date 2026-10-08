@@ -1,7 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import { resolveLabels } from "../../utils/labels.js";
-import type { ChartLabels } from "../../utils/labels.js";
+import type { ChartLabels, ChartLabelOverrides } from "../../utils/labels.js";
 
 /**
  * Inline fallback for the visually-hidden rule, so hidden text stays hidden
@@ -42,7 +42,7 @@ export type ChartTableData = {
 
 export type ChartDataTableProps = ChartTableData & {
   /** Generated strings ("Show data table"…). English by default. */
-  labels?: Partial<ChartLabels>;
+  labels?: ChartLabelOverrides;
   /** How the table is offered. Default `disclosure`. */
   mode?: DataTableMode;
   /** Id of the chart title, so each toggle has context when there are several. */

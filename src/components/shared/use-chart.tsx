@@ -1,22 +1,17 @@
 import { useRef } from "react";
-import type React from "react";
 import { numberFormatter, resolveLabels } from "../../utils/labels.js";
-import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
-import { useExportRef } from "../../utils/use-chart-export.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import type { NumberFormat, ChartLabelOverrides } from "../../utils/labels.js";
 import type { useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 
 type Tooltip = ReturnType<typeof useChartTooltip>;
 
-/** Wiring every framed chart shares: labels, number format, tooltip, export. */
+/** Wiring every framed chart shares: labels, number format, tooltip. */
 export function useChart(
-  labelOverrides: Partial<ChartLabels> | undefined,
+  labelOverrides: ChartLabelOverrides | undefined,
   formatValue: NumberFormat | undefined,
-  exportRef: React.Ref<ChartExportHandle> | undefined,
 ) {
   const plotRef = useRef<HTMLDivElement>(null);
-  useExportRef(exportRef, plotRef);
   const labels = resolveLabels(labelOverrides);
   const n = numberFormatter(labels.locale);
   const tooltip = useChartTooltip();

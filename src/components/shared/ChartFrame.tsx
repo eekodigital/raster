@@ -2,7 +2,7 @@ import { useId } from "react";
 import type React from "react";
 import { cn } from "../../utils/cn.js";
 import { resolveLabels } from "../../utils/labels.js";
-import type { ChartLabels } from "../../utils/labels.js";
+import type { ChartLabels, ChartLabelOverrides } from "../../utils/labels.js";
 import type { Selection } from "../../utils/use-selection.js";
 import { ChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 import type { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
@@ -16,7 +16,7 @@ export type ChartFrameOptions = {
   /** Keep the title for assistive technology but hide it visually. */
   hideTitle?: boolean;
   /** Generated strings (English by default) and the number locale. */
-  labels?: Partial<ChartLabels>;
+  labels?: ChartLabelOverrides;
   /** How the data table is offered. Default `disclosure`. */
   dataTable?: DataTableMode;
   className?: string;
