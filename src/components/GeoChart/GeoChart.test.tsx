@@ -153,8 +153,7 @@ describe("GeoChart keyboard and selection", () => {
   });
 
   it("regions and markers become toggle buttons when clickable", () => {
-    const onRegionClick = vi.fn();
-    const onMarkerClick = vi.fn();
+    const onMarkClick = vi.fn();
     const onSelect = vi.fn();
     render(
       <GeoChart
@@ -162,19 +161,26 @@ describe("GeoChart keyboard and selection", () => {
         data={DATA}
         markers={MARKERS}
         title="M"
-        onRegionClick={onRegionClick}
-        onMarkerClick={onMarkerClick}
+        onMarkClick={onMarkClick}
         onSelect={onSelect}
       />,
     );
     const fiji = screen.getByRole("button", { name: /^Fiji/ });
     fireEvent.click(fiji);
-    expect(onRegionClick).toHaveBeenCalledWith(undefined, "FJI");
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { region: "FJI" },
+      value: undefined,
+      datum: undefined,
+    });
     expect(onSelect).toHaveBeenCalledWith({ region: "FJI" });
     expect(fiji.getAttribute("aria-pressed")).toBe("true");
     const paris = screen.getByRole("button", { name: /Paris/ });
     press(paris, "Enter");
-    expect(onMarkerClick).toHaveBeenCalledWith(MARKERS[1], 1);
+    expect(onMarkClick).toHaveBeenLastCalledWith({
+      index: { marker: 1 },
+      value: MARKERS[1].value,
+      datum: MARKERS[1],
+    });
     expect(onSelect).toHaveBeenLastCalledWith({ marker: 1 });
     expect(fiji.getAttribute("aria-pressed")).toBe("false");
     press(paris, "Escape");
@@ -182,10 +188,10 @@ describe("GeoChart keyboard and selection", () => {
     expect(screen.getByRole("status").textContent).toBe("Selection cleared");
   });
 
-  it("only regions are buttons when only regions are clickable", () => {
-    render(<GeoChart topology={TOPOLOGY} markers={MARKERS} title="M" onRegionClick={() => {}} />);
-    expect(screen.getAllByRole("button", { pressed: false }).length).toBe(3);
-    screen.getByRole("img", { name: /London/ });
+  it("onMarkClick makes regions and markers buttons", () => {
+    render(<GeoChart topology={TOPOLOGY} markers={MARKERS} title="M" onMarkClick={() => {}} />);
+    screen.getByRole("button", { name: /London/ });
+    expect(screen.queryAllByRole("img")).toHaveLength(0);
   });
 });
 
@@ -197,7 +203,7 @@ describe("GeoChart axe", () => {
         data={DATA}
         markers={MARKERS}
         title="M"
-        onRegionClick={() => {}}
+        onMarkClick={() => {}}
       />,
     );
     openTable();

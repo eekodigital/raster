@@ -113,7 +113,7 @@ describe("@eekodigital/raster/export with a chart ref", () => {
     const spark = createRef<HTMLSpanElement>();
     render(
       <>
-        <Gauge ref={gauge} value={3} max={10} label="Score" />
+        <Gauge ref={gauge} value={3} max={10} title="Score" />
         <Sparkline ref={spark} data={[1, 2, 3]} title="Trend" />
       </>,
     );

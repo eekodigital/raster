@@ -6,6 +6,16 @@ import { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 
 type Tooltip = ReturnType<typeof useChartTooltip>;
 
+/**
+ * What a chart's `onMarkClick` receives: the mark's `index` (the same value
+ * `onSelect` gives for it), its `value`, and its data, where it has some.
+ */
+export type MarkClick<Index, Datum = undefined> = {
+  index: Index;
+  value?: number;
+  datum: Datum;
+};
+
 /** Wiring every framed chart shares: labels, number format, tooltip. */
 export function useChart(
   labelOverrides: ChartLabelOverrides | undefined,

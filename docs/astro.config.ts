@@ -10,6 +10,9 @@ export default defineConfig({
       expressiveCode: {
         themes: ["github-light-default", "github-dark-default", "github-light-high-contrast"],
         useStarlightDarkModeSwitch: false,
+        // Wrap long lines instead of scrolling: Expressive Code gives a
+        // scrolling block an unnamed role="region", and two on a page fail axe.
+        defaultProps: { wrap: true },
         themeCssRoot: "html",
         themeCssSelector: (theme) => {
           const map: Record<string, string> = {

@@ -139,7 +139,7 @@ const SAMPLE = Date.UTC(2000, 8, 28);
 const CHAR = 7;
 
 /**
- * An x axis of dates for LineChart: `x={timeAxis(dates, { interval: "day" })}`.
+ * An x axis of dates for LineChart: `xAxis={timeAxis(dates, { interval: "day" })}`.
  * `values` are Dates, ISO strings (date-only strings are UTC midnight) or
  * epoch ms, one per data point, in ascending order.
  */

@@ -29,11 +29,15 @@ describe("RadarChart structure", () => {
   });
 
   it("makes points toggle buttons when clickable", () => {
-    const onPointClick = vi.fn();
-    render(<RadarChart axes={AXES} series={SERIES} title="Specs" onPointClick={onPointClick} />);
+    const onMarkClick = vi.fn();
+    render(<RadarChart axes={AXES} series={SERIES} title="Specs" onMarkClick={onMarkClick} />);
     const p = screen.getByRole("button", { name: /^Beta, Range/ });
     fireEvent.click(p);
-    expect(onPointClick).toHaveBeenCalledWith(1, 2, 1);
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { series: 1, point: 2 },
+      value: 1,
+      datum: undefined,
+    });
     expect(p.getAttribute("aria-pressed")).toBe("true");
   });
 

@@ -29,6 +29,7 @@ import {
 } from "../shared/ReferenceLines.js";
 import type { ReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 import { DenseOverlay } from "./DenseOverlay.js";
 
 export type LineSeries = {
@@ -53,7 +54,7 @@ export type LineChartProps = ChartFrameOptions &
          * without an x value in its name.)
          */
         categories: string[];
-        x?: never;
+        xAxis?: never;
       }
     | {
         /**
@@ -64,18 +65,19 @@ export type LineChartProps = ChartFrameOptions &
          * The axis holds functions, so with React Server Components build it in
          * a client component: a Server Component can't pass it as a prop.
          */
-        x: XAxis;
+        xAxis: XAxis;
         categories?: never;
       }
   ) & {
     series: LineSeries[];
     /**
-     * Which x-axis ticks to label, by category index. Replaces the automatic
-     * thinning (`xLabelMinSpacing`). Points and the table keep every category.
-     * Categories only.
+     * Which x-axis ticks to label, given each tick's index and text. With
+     * categories it replaces the automatic thinning (`xLabelMinSpacing`); with
+     * a date axis it filters the calendar ticks. Points and the table keep
+     * every value.
      */
     xTickFilter?: (index: number, category: string) => boolean;
-    /** Text for an x-axis tick. Return `""` to hide it. Default: the category. Categories only. */
+    /** Text for an x-axis tick, given its text and index. Return `""` to hide it. Default: the category, or the date tick's label. */
     formatXTick?: (category: string, index: number) => string;
     area?: boolean;
     stacked?: boolean;
@@ -93,7 +95,12 @@ export type LineChartProps = ChartFrameOptions &
      */
     xLabelMinSpacing?: number;
     /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
-    onPointClick?: (seriesIndex: number, pointIndex: number, value: number) => void;
+    /**
+     * Called when a mark is clicked (or activated with Enter/Space), with its
+     * index (as `onSelect` gives it), value and no datum. Passing this (or
+     * `onSelect`/`selectedIndex`) makes marks toggle buttons.
+     */
+    onMarkClick?: (mark: MarkClick<LinePointIndex>) => void;
     selectedIndex?: LinePointIndex | null;
     onSelect?: (index: LinePointIndex | null) => void;
     /**
@@ -112,7 +119,7 @@ const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
 export function LineChart({
   series,
   categories,
-  x,
+  xAxis: x,
   area = false,
   stacked = false,
   curve = "linear",
@@ -123,7 +130,7 @@ export function LineChart({
   xLabelMinSpacing,
   xTickFilter,
   formatXTick,
-  onPointClick,
+  onMarkClick,
   selectedIndex,
   onSelect,
   height: heightProp,
@@ -135,7 +142,7 @@ export function LineChart({
 }: LineChartProps) {
   const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<LinePointIndex>(selectedIndex, onSelect, labels);
-  const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
+  const interactive = !!(onMarkClick || onSelect || selectedIndex !== undefined);
   const longest = Math.max(0, ...series.map((s) => s.data.length));
   const isDense = typeof dense === "boolean" ? dense : longest > (dense ?? 200);
 
@@ -204,8 +211,14 @@ export function LineChart({
   }
   // Only the true first and last categories sit at the plot edges, so only
   // they anchor inwards; every other label centres on its point.
+  // A date axis places its own ticks; xTickFilter and formatXTick then take
+  // each tick's index and text.
   const xTicks = x
-    ? x.ticks(plotWidth, labels.locale, xLabelMinSpacing)
+    ? x
+        .ticks(plotWidth, labels.locale, xLabelMinSpacing)
+        .filter((t, i) => !xTickFilter || xTickFilter(i, t.text))
+        .map((t, i) => (formatXTick ? { ...t, text: formatXTick(t.text, i) } : t))
+        .filter((t) => t.text !== "")
     : tickIndices
         .map((i): XTick => ({
           x: xScale(i),
@@ -226,7 +239,7 @@ export function LineChart({
               : `${pointLabel(si, pi)}, ${labels.selected}`
             : undefined,
         );
-        onPointClick?.(si, pi, series[si].data[pi]);
+        onMarkClick?.({ index: point, value: series[si].data[pi], datum: undefined });
       }
     : undefined;
 

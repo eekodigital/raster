@@ -57,13 +57,17 @@ describe("LineChart structure", () => {
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
-  it("fires onPointClick and makes marks buttons", () => {
+  it("fires onMarkClick and makes marks buttons", () => {
     const onClick = vi.fn();
     render(
-      <LineChart series={SERIES} categories={CATEGORIES} title="Click" onPointClick={onClick} />,
+      <LineChart series={SERIES} categories={CATEGORIES} title="Click" onMarkClick={onClick} />,
     );
     fireEvent.click(screen.getByRole("button", { name: "Assessed, Week 3: 40, 3 of 5" }));
-    expect(onClick).toHaveBeenCalledWith(0, 2, 40);
+    expect(onClick).toHaveBeenCalledWith({
+      index: { series: 0, point: 2 },
+      value: 40,
+      datum: undefined,
+    });
   });
 
   it("follows a controlled selection", () => {
@@ -486,14 +490,14 @@ describe("LineChart with a time axis", () => {
 
   it("spaces points by elapsed time, not index", () => {
     const { container } = render(
-      <LineChart series={VIEWS} x={timeAxis(DATES)} title="Views" labels={GB} />,
+      <LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Views" labels={GB} />,
     );
     // Plot is 720 - 58 = 662 wide over 3 days.
     expect(pointXs(container).map(Math.round)).toEqual([0, 221, 662]);
   });
 
   it("names points, the summary and the table with formatted dates", () => {
-    render(<LineChart series={VIEWS} x={timeAxis(DATES)} title="Views" labels={GB} />);
+    render(<LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Views" labels={GB} />);
     screen.getByRole("img", { name: "Views, 2 October 2026: 20, 2 of 3" });
     const figure = screen.getByRole("figure", { name: "Views" });
     expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
@@ -509,7 +513,13 @@ describe("LineChart with a time axis", () => {
 
   it("draws calendar ticks, anchoring labels at the plot edges, with grid lines at ticks", () => {
     const { container } = render(
-      <LineChart series={VIEWS} x={timeAxis(DATES)} title="Views" labels={GB} grid="vertical" />,
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES)}
+        title="Views"
+        labels={GB}
+        grid="vertical"
+      />,
     );
     const ticks = [...container.querySelectorAll("text.raster-chart__tick")]
       .filter((t) => !t.hasAttribute("dy"))
@@ -523,20 +533,22 @@ describe("LineChart with a time axis", () => {
     expect(container.querySelectorAll("line.raster-chart__grid")).toHaveLength(4);
   });
 
-  it("leaves ticks to the time axis: xTickFilter and formatXTick aren't called", () => {
-    const filter = vi.fn(() => true);
-    const formatTick = vi.fn(() => "x");
-    render(
+  it("filters and formats date ticks with xTickFilter and formatXTick", () => {
+    const { container } = render(
       <LineChart
         series={VIEWS}
-        x={timeAxis(DATES)}
+        xAxis={timeAxis(DATES)}
+        labels={GB}
         title="Views"
-        xTickFilter={filter}
-        formatXTick={formatTick}
+        xTickFilter={(i) => i % 2 === 0}
+        formatXTick={(text) => text.toUpperCase()}
       />,
     );
-    expect(filter).not.toHaveBeenCalled();
-    expect(formatTick).not.toHaveBeenCalled();
+    const ticks = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => !t.hasAttribute("dy"))
+      .map((t) => t.textContent);
+    // Daily ticks 1–4 Oct, every other one kept, then formatted.
+    expect(ticks).toEqual(["1 OCT", "3 OCT"]);
   });
 
   it("breaks the line and area where a point is missing at the interval", () => {
@@ -550,7 +562,7 @@ describe("LineChart with a time axis", () => {
             { name: "A", data: [1, 2, 3, 4] },
             { name: "B", data: [1, 1, 1, 1] },
           ]}
-          x={x}
+          xAxis={x}
           area
           stacked
           curve={curve}
@@ -564,7 +576,9 @@ describe("LineChart with a time axis", () => {
       unmount();
     }
     // Without an interval, the same data joins up.
-    const { container } = render(<LineChart series={VIEWS} x={timeAxis(DATES)} title="Joined" />);
+    const { container } = render(
+      <LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Joined" />,
+    );
     expect(
       container.querySelector(".raster-line__line")!.getAttribute("d")!.match(/M/g),
     ).toHaveLength(1);
@@ -574,7 +588,7 @@ describe("LineChart with a time axis", () => {
     const { container } = render(
       <LineChart
         series={VIEWS}
-        x={timeAxis(DATES, { interval: "day" })}
+        xAxis={timeAxis(DATES, { interval: "day" })}
         title="Views"
         labels={GB}
       />,
@@ -592,7 +606,7 @@ describe("LineChart with a time axis", () => {
     const html = renderToString(
       <LineChart
         series={VIEWS}
-        x={timeAxis(DATES, { interval: "day" })}
+        xAxis={timeAxis(DATES, { interval: "day" })}
         title="Views"
         labels={GB}
       />,
@@ -607,7 +621,7 @@ describe("LineChart with a time axis", () => {
     const { container } = render(
       <LineChart
         series={VIEWS}
-        x={timeAxis(DATES, { interval: "day" })}
+        xAxis={timeAxis(DATES, { interval: "day" })}
         title="Views"
         onSelect={() => {}}
       />,
@@ -706,20 +720,24 @@ describe("LineChart dense mode", () => {
 
   it("selects with Enter or Space when interactive, and says so in the value", () => {
     const onSelect = vi.fn();
-    const onPointClick = vi.fn();
+    const onMarkClick = vi.fn();
     const { container } = render(
       <LineChart
         series={[big(300)]}
         categories={days(300)}
         title="V"
         onSelect={onSelect}
-        onPointClick={onPointClick}
+        onMarkClick={onMarkClick}
       />,
     );
     fireEvent.keyDown(slider(), { key: "ArrowRight" });
     fireEvent.keyDown(slider(), { key: "Enter" });
     expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 1 });
-    expect(onPointClick).toHaveBeenCalledWith(0, 1, 101);
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { series: 0, point: 1 },
+      value: 101,
+      datum: undefined,
+    });
     expect(valueText()).toBe("Views, Day 2: 101, 2 of 300, selected");
     expect(container.querySelector(".raster-line__marker[data-selected]")).toBeTruthy();
     fireEvent.keyDown(slider(), { key: "Escape" });
@@ -822,7 +840,7 @@ describe("LineChart dense mode", () => {
       Date.UTC(2026, 0, 1 + i + (i >= 150 ? 1 : 0) + (i >= 151 ? 1 : 0)),
     );
     const { container } = render(
-      <LineChart series={[big(300)]} x={timeAxis(dates, { interval: "day" })} title="V" />,
+      <LineChart series={[big(300)]} xAxis={timeAxis(dates, { interval: "day" })} title="V" />,
     );
     expect(
       container.querySelector(".raster-line__line")!.getAttribute("d")!.match(/M/g),

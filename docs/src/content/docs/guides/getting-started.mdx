@@ -57,7 +57,7 @@ With React Server Components (the Next.js App Router), the entries that export c
 
 A few props can't be passed from a Server Component, because they hold functions, which can't cross from server to client:
 
-- `x={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, `onSelect` and other callbacks
+- `xAxis={timeAxis(…)}`, `formatValue`, `formatX`, `formatXTick`, `onSelect` and other callbacks
 - `labels` with function overrides (`summary`, `mark`, …)
 
 Put a chart that needs them in a small client component of your own (a file starting with `"use client"`), and pass it plain data from the server. `timeAxis` (`/time`), `exportSVG` (`/export`), `describeChart` (`/labels`) and `rasterVars` (`/theme`) aren't marked, so server code can call them. Import `describeChart` from `/labels` in a Server Component: the main entry and `/frame` are marked. TypeScript won't catch a function prop passed from a Server Component; the framework reports it when the page renders.

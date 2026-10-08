@@ -92,7 +92,7 @@ test.describe("keyboard", () => {
 
   test("BarChart: stacked bars are navigable and select a category", async ({ page }) => {
     await page.goto("/components/bar-chart");
-    const chart = figure(page, "Sales by region (select a quarter)");
+    const chart = figure(page, "Sales by region (select a bar)");
     await chart.getByRole("button", { name: "North, Q1: 12, 1 of 3" }).focus();
     await page.keyboard.press("ArrowUp");
     const southQ1 = chart.getByRole("button", { name: "South, Q1: 8, 1 of 3" });
@@ -103,7 +103,7 @@ test.describe("keyboard", () => {
       "aria-pressed",
       "true",
     );
-    await expect(page.getByText("Selected: Q2")).toBeVisible();
+    await expect(page.getByText("Selected: South, Q2")).toBeVisible();
   });
 
   test("GeoChart: regions are reachable by arrow keys, markers by ArrowDown", async ({ page }) => {
@@ -344,7 +344,7 @@ test.describe("forced colours: bars", () => {
     await page.emulateMedia({ forcedColors: "active" });
     await page.goto("/components/bar-chart");
     await page.waitForLoadState("networkidle");
-    const chart = figure(page, "Sales by region (select a quarter)");
+    const chart = figure(page, "Sales by region (select a bar)");
     const style = (selector: string, prop: string) =>
       chart
         .locator(selector)

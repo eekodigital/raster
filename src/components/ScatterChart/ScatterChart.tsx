@@ -1,5 +1,6 @@
 import { extent, linearScale, markerPath, ticks, labelSkip } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
+import type { XAxis, XTick } from "../../utils/time.js";
 import { seriesColor } from "../../utils/palette.js";
 
 export type { NumericReferenceLine };
@@ -18,6 +19,7 @@ import {
 } from "../shared/ReferenceLines.js";
 import type { NumericReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 
 export type ScatterPoint = {
   x: number;
@@ -51,8 +53,19 @@ export type ScatterChartProps = ChartFrameOptions &
      * dates from epoch ms. Default: `formatValue`.
      */
     formatX?: NumberFormat;
+    /**
+     * A date axis for x: `timeAxis(points.map((p) => p.x))` from
+     * `@eekodigital/raster/time`, with x values as epoch ms. Ticks fall on
+     * calendar boundaries and x values are worded as dates. Overrides `formatX`.
+     */
+    xAxis?: XAxis;
     /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
-    onPointClick?: (point: ScatterPoint, seriesIndex: number, pointIndex: number) => void;
+    /**
+     * Called when a mark is clicked (or activated with Enter/Space), with its
+     * index (as `onSelect` gives it), value (its y) and point. Passing this (or
+     * `onSelect`/`selectedIndex`) makes marks toggle buttons.
+     */
+    onMarkClick?: (mark: MarkClick<ScatterPointIndex, ScatterPoint>) => void;
     /** `point` is the index in the series' `data`. */
     selectedIndex?: ScatterPointIndex | null;
     onSelect?: (index: ScatterPointIndex | null) => void;
@@ -70,7 +83,8 @@ export function ScatterChart({
   grid = "both",
   formatValue,
   formatX,
-  onPointClick,
+  xAxis,
+  onMarkClick,
   selectedIndex,
   onSelect,
   height,
@@ -81,9 +95,9 @@ export function ScatterChart({
 }: ScatterChartProps) {
   const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<ScatterPointIndex>(selectedIndex, onSelect, labels);
-  const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
+  const interactive = !!(onMarkClick || onSelect || selectedIndex !== undefined);
 
-  const fx = formatX ?? format;
+  const fx = xAxis ? (v: number) => xAxis.format(v, labels.locale) : (formatX ?? format);
   const series: ScatterSeries[] = seriesProp ?? (data ? [{ name: "Data", data }] : []);
   const named = !!seriesProp;
   const allPoints = series.flatMap((s) => s.data);
@@ -106,9 +120,12 @@ export function ScatterChart({
   const [xMin, xMax] = extent([dataXMin, dataXMax, ...referenceValues(referenceLines, "x")]);
   const [yMin, yMax] = extent([dataYMin, dataYMax, ...referenceValues(referenceLines, "y")]);
 
-  const xScale = linearScale([xMin, xMax], [0, plotWidth]);
+  // A date axis places points and ticks on its own (calendar) scale.
+  const xScale = xAxis
+    ? (v: number) => xAxis.at(v, plotWidth)
+    : linearScale([xMin, xMax], [0, plotWidth]);
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
-  const xTicks = ticks(xMin, xMax, 5);
+  const xTicks = xAxis ? [] : ticks(xMin, xMax, 5);
   const yTicks = ticks(yMin, yMax, 5);
   // Custom x labels (e.g. dates) can be wider than numbers: thin by their
   // estimated width (7 px a character, plus a gap).
@@ -117,6 +134,12 @@ export function ScatterChart({
     plotWidth,
     formatX ? Math.max(40, ...xTicks.map((t) => fx(t).length * 7 + 12)) : 40,
   );
+  const xLabels: XTick[] = xAxis
+    ? xAxis.ticks(plotWidth, labels.locale)
+    : xTicks
+        .filter((_, i) => i % xTickSkip === 0)
+        .map((t) => ({ x: xScale(t), text: fx(t), anchor: "middle" }));
+  const xGrid = xAxis ? xLabels.map((t) => t.x) : xTicks.map(xScale);
 
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";
@@ -125,7 +148,8 @@ export function ScatterChart({
     ? (si: number, item: number) => {
         const pi = order[si][item];
         selection.toggle({ series: si, point: pi });
-        onPointClick?.(series[si].data[pi], si, pi);
+        const p = series[si].data[pi];
+        onMarkClick?.({ index: { series: si, point: pi }, value: p.y, datum: p });
       }
     : undefined;
 
@@ -213,28 +237,27 @@ export function ScatterChart({
           </g>
         ))}
 
-        {xTicks.map((tick, i) => (
-          <g key={`x-${tick}`}>
-            {showVGrid && (
-              <line
-                x1={xScale(tick)}
-                x2={xScale(tick)}
-                y1={0}
-                y2={plotHeight}
-                className="raster-chart__grid"
-              />
-            )}
-            {i % xTickSkip === 0 && (
-              <text
-                x={xScale(tick)}
-                y={plotHeight + 16}
-                textAnchor="middle"
-                className="raster-chart__tick"
-              >
-                {fx(tick)}
-              </text>
-            )}
-          </g>
+        {showVGrid &&
+          xGrid.map((gx, i) => (
+            <line
+              key={`xg-${i}`}
+              x1={gx}
+              x2={gx}
+              y1={0}
+              y2={plotHeight}
+              className="raster-chart__grid"
+            />
+          ))}
+        {xLabels.map((t, i) => (
+          <text
+            key={`x-${i}`}
+            x={t.x}
+            y={plotHeight + 16}
+            textAnchor={t.anchor}
+            className="raster-chart__tick"
+          >
+            {t.text}
+          </text>
         ))}
 
         <line

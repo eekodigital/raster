@@ -2,6 +2,7 @@ import { useId } from "react";
 import { fraction } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
+import type { ChartLabelOverrides } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 import { useRootRef } from "../../utils/use-merged-ref.js";
 
@@ -11,15 +12,17 @@ export type GaugeProps = {
   value: number;
   min?: number;
   max: number;
-  /** Visible label; also the meter's accessible name. */
-  label: string;
+  /** Visible title; also the meter's accessible name. */
+  title: string;
   color?: string;
   trackColor?: string;
   /** Fixed diameter in px. Omit to fill the container's width. */
   size?: number;
   thickness?: number;
-  /** Formats the displayed value and `aria-valuetext`. Default: `Intl.NumberFormat("en")`. */
-  format?: (value: number) => string;
+  /** Formats the displayed value and `aria-valuetext`. Default: `Intl.NumberFormat(labels.locale)`. */
+  formatValue?: (value: number) => string;
+  /** The number locale (`labels.locale`), as for the other charts. */
+  labels?: ChartLabelOverrides;
   /** The chart's root element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
   ref?: React.Ref<HTMLDivElement>;
   className?: string;
@@ -29,12 +32,13 @@ export function Gauge({
   value,
   min = 0,
   max,
-  label,
+  title,
   color = seriesColor(0),
   trackColor = "var(--raster-grid, currentColor)",
   size: sizeProp,
   thickness = 10,
-  format = numberFormatter("en"),
+  formatValue,
+  labels,
   ref,
   className,
 }: GaugeProps) {
@@ -47,7 +51,7 @@ export function Gauge({
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - fraction(value, min, max));
   const c = size / 2;
-  const text = format(value);
+  const text = (formatValue ?? numberFormatter(labels?.locale ?? "en"))(value);
 
   return (
     <div
@@ -95,7 +99,7 @@ export function Gauge({
           <div className="raster-gauge__centre">
             <span className="raster-gauge__value">{text}</span>
             <span id={labelId} className="raster-gauge__label">
-              {label}
+              {title}
             </span>
           </div>
         </foreignObject>
