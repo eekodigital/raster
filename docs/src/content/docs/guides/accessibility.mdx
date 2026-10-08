@@ -68,9 +68,9 @@ Changes you make on the focused mark are announced by the mark itself (its `aria
 Every string a chart generates comes from one `labels` prop. Anything you leave out keeps its English default. Numbers go through `Intl.NumberFormat(labels.locale)`: the default `formatValue` uses it, and so do the counts in mark and series names.
 
 ```tsx
-import type { ChartLabels } from "@eekodigital/raster";
+import type { ChartLabelOverrides } from "@eekodigital/raster";
 
-const de: Partial<ChartLabels> = {
+const de: ChartLabelOverrides = {
   locale: "de",
   chart: "Diagramm",
   showTable: "Datentabelle anzeigen",
@@ -84,7 +84,9 @@ const de: Partial<ChartLabels> = {
     const pos = `${n(index + 1)} von ${n(count)}`;
     return [series, value, pos].filter(Boolean).join(", ");
   },
-  summary: (s, n) => `Diagramm, ${n(s.points)} Punkte.`,
+  chartNames: { line: "Liniendiagramm", bar: "Balkendiagramm" },
+  // `name` is already worked out (from chartNames, or a wrapped chart's own name).
+  summary: ({ name, points }, n) => `${name}, ${n(points)} Punkte.`,
 };
 
 <LineChart {...props} labels={de} />;
@@ -106,7 +108,8 @@ const de: Partial<ChartLabels> = {
 | `categoryColumn`, `valueColumn`, `percentageColumn`, `periodColumn`, `dateColumn`, `axisColumn`, `nameColumn`, `typeColumn`, `seriesColumn`, `labelColumn`, `xColumn`, `yColumn` | Data table headers: `"Category"`, `"Value"`, `"Percentage"`, `"Period"`, `"Date"`, `"Axis"`, `"Name"`, `"Type"`, `"Series"`, `"Label"`, `"X"`, `"Y"`. Series columns use the series names; ScatterChart uses `xLabel`/`yLabel` when given. |
 | `series`                                                                                                                                                                         | `(name, count, n) => "{name}, {count} points"`                                                                                                                                                                                             |
 | `mark`                                                                                                                                                                           | `({ series, x, y, index, count }, n) => "{series}, {x}: {y}, {index + 1} of {count}"`                                                                                                                                                      |
-| `summary`                                                                                                                                                                        | `({ type, series, points, x, y, first, last }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."`                                                                                                                  |
+| `chartNames`                                                                                                                                                                     | Names of the chart types in summaries: `{ line: "Line chart", bar: "Bar chart", donut: "Donut chart", … }`. Override one or all; the rest keep their defaults.                                                                             |
+| `summary`                                                                                                                                                                        | `({ name, series, points, x, y, first, last, references }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."`. `name` is already worked out, so translate chart names in `chartNames`.                             |
 
 `DEFAULT_LABELS` is exported if you want to wrap a default.
 

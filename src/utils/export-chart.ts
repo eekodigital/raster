@@ -1,7 +1,7 @@
 /**
  * SVG and PNG export for raster charts. Kept out of the chart entries: import
  * it from `@eekodigital/raster/export`, and only apps that export pay for it.
- * (A chart's `exportRef` loads it on first use.)
+ * Pass the chart (its `ref`), or any element containing it.
  */
 
 /** CSS properties to inline on SVG elements for standalone export. */

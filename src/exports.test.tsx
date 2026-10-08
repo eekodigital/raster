@@ -1,4 +1,4 @@
-import { act, render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as geo from "./geo.js";
@@ -12,7 +12,6 @@ import { Gauge } from "./components/Gauge/Gauge.js";
 import { LineChart } from "./components/LineChart/LineChart.js";
 import { Sparkline } from "./components/Sparkline/Sparkline.js";
 import { exportSVG } from "./export.js";
-import type { ChartExportHandle } from "./utils/use-chart-export.js";
 
 describe("public API", () => {
   it("exports exactly these names from each entry", () => {
@@ -43,7 +42,7 @@ describe("SVG export", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("serialises the chart SVG (structure, marks and accessible names)", async () => {
-    const ref = createRef<ChartExportHandle>();
+    const ref = createRef<HTMLDivElement>();
     render(
       <LineChart
         series={[
@@ -53,11 +52,10 @@ describe("SVG export", () => {
         categories={["Jan", "Feb"]}
         title="Results"
         height={120}
-        exportRef={ref}
+        ref={ref}
       />,
     );
-    act(() => ref.current!.exportSVG());
-    await waitFor(() => expect(blobs).toHaveLength(1));
+    exportSVG(ref.current);
     const svg = await blobs[0].text();
     // useId values vary between runs; normalise them.
     expect(svg.replaceAll(/_r_\w+_/g, "_id_")).toMatchSnapshot();

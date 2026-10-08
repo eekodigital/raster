@@ -20,9 +20,9 @@ export type XAxis = {
   /** Point `i`'s x in a plot `width` px wide. */
   position: (i: number, width: number) => number;
   /** Any value's x in a plot `width` px wide, or NaN off a one-value axis (reference lines). */
-  at?: (value: number, width: number) => number;
+  at: (value: number, width: number) => number;
   /** Any value as text, like `names` (reference lines). */
-  format?: (value: number, locale: string) => string;
+  format: (value: number, locale: string) => string;
   /** Ticks for a plot `width` px wide, at least `spacing` px apart. */
   ticks: (width: number, locale: string, spacing?: number) => XTick[];
   /** Each point's x as text, for its name, the summary and the data table. */

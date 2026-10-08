@@ -1,4 +1,4 @@
-import { LineChart, type ChartExportHandle } from "@eekodigital/raster";
+import { LineChart } from "@eekodigital/raster";
 import { exportPNG, exportSVG } from "@eekodigital/raster/export";
 import { useRef } from "react";
 
@@ -16,26 +16,6 @@ export function ExportDemo() {
         </button>
         <button type="button" onClick={() => exportPNG(chart.current, "visitors.png", 3)}>
           Download PNG
-        </button>
-      </p>
-    </div>
-  );
-}
-
-/** The deprecated exportRef: still works, loading the export code on first use. */
-export function ExportRefDemo() {
-  const exportRef = useRef<ChartExportHandle>(null);
-  return (
-    <div style={{ width: "100%" }}>
-      <LineChart
-        exportRef={exportRef}
-        series={SERIES}
-        categories={DAYS}
-        title="Visitors this week (exportRef)"
-      />
-      <p>
-        <button type="button" onClick={() => exportRef.current?.exportSVG("visitors-legacy.svg")}>
-          Download SVG (exportRef)
         </button>
       </p>
     </div>

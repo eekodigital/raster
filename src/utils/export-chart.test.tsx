@@ -1,20 +1,12 @@
-import { act, render, waitFor } from "@testing-library/react";
-import { createRef, useRef } from "react";
+import { render } from "@testing-library/react";
+import { createRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { exportSVG } from "./export-chart.js";
-import { useExportRef, useRootRef, type ChartExportHandle } from "./use-chart-export.js";
+import { exportPNG, exportSVG } from "./export-chart.js";
+import { useRootRef } from "./use-merged-ref.js";
 
-function Chart({
-  handle,
-  empty = false,
-}: {
-  handle: React.Ref<ChartExportHandle>;
-  empty?: boolean;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  useExportRef(handle, ref);
+function Chart({ target, empty = false }: { target: React.Ref<HTMLDivElement>; empty?: boolean }) {
   return (
-    <div ref={ref} data-chart-container>
+    <div ref={target} data-chart-container>
       {!empty && (
         <svg data-raster-chart="" width={100} height={50}>
           <line className="raster-chart__axis" x1={0} x2={100} style={{ stroke: "red" }} />
@@ -24,7 +16,7 @@ function Chart({
   );
 }
 
-describe("useChartExport (exportRef, loaded on first use)", () => {
+describe("exportSVG and exportPNG", () => {
   let clicked: HTMLAnchorElement[];
   let blobs: Blob[];
 
@@ -46,11 +38,11 @@ describe("useChartExport (exportRef, loaded on first use)", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("exportSVG downloads a standalone SVG with computed styles inlined", async () => {
-    const handle = createRef<ChartExportHandle>();
-    render(<Chart handle={handle} />);
-    act(() => handle.current!.exportSVG("my-chart.svg"));
+    const target = createRef<HTMLDivElement>();
+    render(<Chart target={target} />);
+    exportSVG(target.current, "my-chart.svg");
 
-    await waitFor(() => expect(clicked).toHaveLength(1));
+    expect(clicked).toHaveLength(1);
     expect(clicked[0].download).toBe("my-chart.svg");
     expect(blobs[0].type).toBe("image/svg+xml");
     const svg = await blobs[0].text();
@@ -59,17 +51,17 @@ describe("useChartExport (exportRef, loaded on first use)", () => {
   });
 
   it("exportSVG uses a default filename", async () => {
-    const handle = createRef<ChartExportHandle>();
-    render(<Chart handle={handle} />);
-    act(() => handle.current!.exportSVG());
-    await waitFor(() => expect(clicked[0]?.download).toBe("chart.svg"));
+    const target = createRef<HTMLDivElement>();
+    render(<Chart target={target} />);
+    exportSVG(target.current);
+    expect(clicked[0].download).toBe("chart.svg");
   });
 
   it("does nothing when the container has no SVG", async () => {
-    const handle = createRef<ChartExportHandle>();
-    render(<Chart handle={handle} empty />);
-    act(() => handle.current!.exportSVG());
-    await handle.current!.exportPNG();
+    const target = createRef<HTMLDivElement>();
+    render(<Chart target={target} empty />);
+    exportSVG(target.current);
+    await exportPNG(target.current);
     expect(clicked).toHaveLength(0);
   });
 
@@ -90,9 +82,9 @@ describe("useChartExport (exportRef, loaded on first use)", () => {
     }
     vi.stubGlobal("Image", FakeImage);
 
-    const handle = createRef<ChartExportHandle>();
-    render(<Chart handle={handle} />);
-    await act(() => handle.current!.exportPNG("out.png", 3));
+    const target = createRef<HTMLDivElement>();
+    render(<Chart target={target} />);
+    await exportPNG(target.current, "out.png", 3);
 
     expect(drawImage).toHaveBeenCalledOnce();
     expect(clicked[0].download).toBe("out.png");
@@ -113,23 +105,23 @@ describe("useChartExport (exportRef, loaded on first use)", () => {
     }
     vi.stubGlobal("Image", BrokenImage);
 
-    const handle = createRef<ChartExportHandle>();
-    render(<Chart handle={handle} />);
-    await expect(handle.current!.exportPNG()).rejects.toThrow("Failed to load SVG into image");
+    const target = createRef<HTMLDivElement>();
+    render(<Chart target={target} />);
+    await expect(exportPNG(target.current)).rejects.toThrow("Failed to load SVG into image");
     vi.unstubAllGlobals();
   });
 
   it("exportPNG rejects without a 2D canvas context", async () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
-    const handle = createRef<ChartExportHandle>();
-    render(<Chart handle={handle} />);
-    await expect(handle.current!.exportPNG()).rejects.toThrow("Canvas 2D context unavailable");
+    const target = createRef<HTMLDivElement>();
+    render(<Chart target={target} />);
+    await expect(exportPNG(target.current)).rejects.toThrow("Canvas 2D context unavailable");
   });
 });
 
 describe("useRootRef", () => {
   function Root({ outer }: { outer: React.Ref<HTMLDivElement> }) {
-    const { rootRef } = useRootRef<HTMLDivElement>(undefined, outer);
+    const { rootRef } = useRootRef<HTMLDivElement>(outer);
     return <div ref={rootRef} />;
   }
 

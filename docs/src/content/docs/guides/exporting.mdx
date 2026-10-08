@@ -4,7 +4,7 @@ description: Download any chart as a standalone SVG or PNG with exportSVG and ex
 ---
 
 import Example from "../../../components/Example.astro";
-import { ExportDemo, ExportRefDemo } from "../../../components/ExportDemo.tsx";
+import { ExportDemo } from "../../../components/ExportDemo.tsx";
 
 Export lives in its own entry, `@eekodigital/raster/export`, so apps that don't export don't bundle it (about 0.9 KB). Give the chart a `ref` and pass the element to `exportSVG` or `exportPNG`:
 
@@ -31,15 +31,7 @@ Every SVG chart takes a `ref`: it points at the chart's figure (or, for Gauge an
 
 ## Migrating from `exportRef`
 
-`exportRef` still works but is deprecated, and will be removed in 4.0. It no longer bundles the export code into every chart. When a chart is given an `exportRef`, it loads the export code in the background, so exports work as before. Charts without one never load it.
-
-<Example
-  code={`const exportRef = useRef<ChartExportHandle>(null);\n\n<LineChart exportRef={exportRef} … />\n<button onClick={() => exportRef.current?.exportSVG("visitors.svg")}>Download SVG</button>`}
->
-  <ExportRefDemo client:load />
-</Example>
-
-To migrate, swap `exportRef` for a `ref` and call the functions:
+Raster 4 removes the `exportRef` prop, so charts no longer carry export code. Swap it for a `ref` and call the functions:
 
 ```diff
 - const exportRef = useRef<ChartExportHandle>(null);

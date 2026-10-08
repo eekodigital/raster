@@ -1,10 +1,10 @@
 ---
-"@eekodigital/raster": minor
+"@eekodigital/raster": major
 ---
 
 From trying raster in fresh Next.js 16 and React Router 8 apps:
 
-### Changed
+### Changed (breaking)
 
 - **The data table disclosure is a native `<details>`/`<summary>`**, so it opens without JavaScript and the values are reachable from the server-rendered HTML. (It was a `<button>` that needed JavaScript, with the table `hidden`, which also hid it from assistive technology.) With JavaScript, the label still switches between "Show data table" and "Hide data table".
 

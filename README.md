@@ -6,7 +6,7 @@ LineChart, BarChart, DonutChart, ScatterChart, Sparkline, Gauge, LinearGauge, Ra
 
 Docs: [raster.eeko.digital](https://raster.eeko.digital)
 
-> **Upgrading from 2.x?** Raster 3 is charts only: the UI components, design tokens and DataTable have been removed. See the [migration guide](https://raster.eeko.digital/guides/migrating/) or the [changelog](https://github.com/eekodigital/raster/blob/main/CHANGELOG.md).
+> **Upgrading from 3.x?** Raster 4 removes `exportRef` (use a `ref` and `@eekodigital/raster/export`), makes the data table a native `<details>` disclosure, and passes custom `labels.summary` functions a ready-made `name`. See [Migrating](https://raster.eeko.digital/guides/migrating/) or the [changelog](https://github.com/eekodigital/raster/blob/main/CHANGELOG.md).
 
 ## Design goals
 
@@ -90,7 +90,7 @@ The contract is `--raster-text`, `--raster-text-subtle`, `--raster-reference`, `
 
 ## Exporting
 
-Give a chart a `ref` and pass it to `exportSVG` or `exportPNG` from `@eekodigital/raster/export`. It's a separate entry, so apps that don't export don't bundle it. The older `exportRef` prop still works (it loads the export code on first use) but is deprecated. See [Exporting charts](https://raster.eeko.digital/guides/exporting/).
+Give a chart a `ref` and pass it to `exportSVG` or `exportPNG` from `@eekodigital/raster/export`. It's a separate entry, so apps that don't export don't bundle it. See [Exporting charts](https://raster.eeko.digital/guides/exporting/).
 
 ## Development
 

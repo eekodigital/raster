@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import type React from "react";
 
 /**
@@ -28,4 +28,10 @@ export function useMergedRef<T>(
     },
     [own, ref],
   );
+}
+
+/** Root-element charts (Gauge, Sparkline): their own ref, merged with the caller's `ref`. */
+export function useRootRef<T extends HTMLElement>(ref: React.Ref<T> | undefined) {
+  const containerRef = useRef<T>(null);
+  return { containerRef, rootRef: useMergedRef(containerRef, ref) };
 }

@@ -9,9 +9,8 @@ import {
 } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { DEFAULT_SERIES_COLORS } from "../../utils/palette.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle, NumericReferenceLine };
+export type { NumericReferenceLine };
 import { plotSize, useContainerWidth } from "../../utils/use-container-width.js";
 import type { PlotSizeOptions } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
@@ -65,8 +64,6 @@ export type BarChartProps = ChartFrameOptions &
     /** Selected category index. In stacked/grouped mode the whole category is selected. */
     selectedIndex?: number | null;
     onSelect?: (index: number | null) => void;
-    /** @deprecated Use `ref` with `exportSVG`/`exportPNG` from `@eekodigital/raster/export`. */
-    exportRef?: React.Ref<ChartExportHandle>;
     /** Targets, thresholds or goals across the value axis: dashed, labelled lines, named in the summary and table caption. */
     referenceLines?: Omit<NumericReferenceLine, "axis">[];
   };
@@ -93,12 +90,11 @@ export function BarChart({
   onSelect,
   height: heightProp,
   aspectRatio,
-  exportRef,
   labels: labelOverrides,
   referenceLines = [],
   ...frame
 }: BarChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<number>(selectedIndex, onSelect, labels);
   const interactive = !!(onBarClick || onSelect || selectedIndex !== undefined);
 
@@ -164,17 +160,14 @@ export function BarChart({
   });
 
   const [minVal, maxBar] = barValues.length ? extent(barValues) : [0, 0];
-  const summary = labels.summary(
-    {
-      type: "bar",
-      series: multi ? multi.series.length : 1,
-      points: barValues.length,
-      x: data.length ? [data[0].label, data[data.length - 1].label] : undefined,
-      y: barValues.length ? [format(minVal), format(maxBar)] : undefined,
-      references: referenceTexts,
-    },
-    n,
-  );
+  const summary = describe({
+    type: "bar",
+    series: multi ? multi.series.length : 1,
+    points: barValues.length,
+    x: data.length ? [data[0].label, data[data.length - 1].label] : undefined,
+    y: barValues.length ? [format(minVal), format(maxBar)] : undefined,
+    references: referenceTexts,
+  });
 
   function bar(
     key: React.Key,

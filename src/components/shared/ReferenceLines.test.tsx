@@ -196,6 +196,20 @@ describe("reference lines", () => {
     expect(summaryOf("Bars")).not.toMatch(/Floor/);
   });
 
+  it("skips x lines on a hand-built axis without `at`, instead of crashing", () => {
+    const axis = timeAxis(["2026-10-01", "2026-10-02"]);
+    const { at: _at, format: _format, ...plain } = axis;
+    const { container } = render(
+      <LineChart
+        series={[{ name: "V", data: [1, 2] }]}
+        x={plain as typeof axis}
+        title="Plain"
+        referenceLines={[{ value: "2026-10-02", label: "Launch", axis: "x" }]}
+      />,
+    );
+    expect(refs(container)).toHaveLength(0);
+  });
+
   it("flips a vertical label that wouldn't fit to the right", () => {
     const { container } = render(
       <ScatterChart
