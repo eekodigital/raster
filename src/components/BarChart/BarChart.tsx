@@ -7,7 +7,6 @@ import {
   shouldRotateLabels,
   labelSkip,
 } from "../../utils/chart-math.js";
-import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { DEFAULT_SERIES_COLORS } from "../../utils/palette.js";
 
@@ -95,7 +94,7 @@ export function BarChart({
   referenceLines = [],
   ...frame
 }: BarChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<number>(selectedIndex, onSelect, labels);
   const interactive = !!(onBarClick || onSelect || selectedIndex !== undefined);
 
@@ -161,18 +160,14 @@ export function BarChart({
   });
 
   const [minVal, maxBar] = barValues.length ? extent(barValues) : [0, 0];
-  const summary = summarize(
-    {
-      type: "bar",
-      series: multi ? multi.series.length : 1,
-      points: barValues.length,
-      x: data.length ? [data[0].label, data[data.length - 1].label] : undefined,
-      y: barValues.length ? [format(minVal), format(maxBar)] : undefined,
-      references: referenceTexts,
-    },
-    labels,
-    n,
-  );
+  const summary = describe({
+    type: "bar",
+    series: multi ? multi.series.length : 1,
+    points: barValues.length,
+    x: data.length ? [data[0].label, data[data.length - 1].label] : undefined,
+    y: barValues.length ? [format(minVal), format(maxBar)] : undefined,
+    references: referenceTexts,
+  });
 
   function bar(
     key: React.Key,

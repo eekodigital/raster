@@ -1,5 +1,4 @@
 import { extent, markerPath } from "../../utils/chart-math.js";
-import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 
@@ -52,7 +51,7 @@ export function RadarChart({
   labels: labelOverrides,
   ...frame
 }: RadarChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<RadarPointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
 
@@ -82,17 +81,13 @@ export function RadarChart({
   });
 
   const [minVal, maxData] = values.length ? extent(values) : [0, 0];
-  const summary = summarize(
-    {
-      type: "radar",
-      series: series.length,
-      points: values.length,
-      x: count ? [axes[0], axes[count - 1]] : undefined,
-      y: values.length ? [format(minVal), format(maxData)] : undefined,
-    },
-    labels,
-    n,
-  );
+  const summary = describe({
+    type: "radar",
+    series: series.length,
+    points: values.length,
+    x: count ? [axes[0], axes[count - 1]] : undefined,
+    y: values.length ? [format(minVal), format(maxData)] : undefined,
+  });
 
   const gridLevels = Array.from({ length: levels }, (_, i) => ((i + 1) / levels) * radius);
 

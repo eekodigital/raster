@@ -62,9 +62,9 @@ function localImports(file: string): string[] {
 }
 
 /**
- * Tripwire for each entry's lazily loaded chunks (`import()`). They're fetched
- * only when used, so they don't count towards the entry, but they mustn't grow
- * unnoticed. (None today.)
+ * Tripwire for each entry's lazily loaded chunks (`import()`). None today: it's
+ * kept as a guard, so a chunk that comes back is measured and capped rather than
+ * hidden. They're fetched only when used, so they don't count towards the entry.
  */
 const LAZY_BUDGET = 1_200;
 

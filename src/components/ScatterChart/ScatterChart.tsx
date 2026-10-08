@@ -1,5 +1,4 @@
 import { extent, linearScale, markerPath, ticks, labelSkip } from "../../utils/chart-math.js";
-import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 
@@ -80,7 +79,7 @@ export function ScatterChart({
   referenceLines = [],
   ...frame
 }: ScatterChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<ScatterPointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
 
@@ -151,18 +150,14 @@ export function ScatterChart({
   );
   const referenceTexts = references.map((r) => r.text);
 
-  const summary = summarize(
-    {
-      type: "scatter",
-      series: series.length,
-      points: allPoints.length,
-      x: allPoints.length ? [fx(dataXMin), fx(dataXMax)] : undefined,
-      y: allPoints.length ? [format(dataYMin), format(dataYMax)] : undefined,
-      references: referenceTexts,
-    },
-    labels,
-    n,
-  );
+  const summary = describe({
+    type: "scatter",
+    series: series.length,
+    points: allPoints.length,
+    x: allPoints.length ? [fx(dataXMin), fx(dataXMax)] : undefined,
+    y: allPoints.length ? [format(dataYMin), format(dataYMax)] : undefined,
+    references: referenceTexts,
+  });
 
   return (
     <SvgChartFrame

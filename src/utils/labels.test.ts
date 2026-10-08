@@ -72,6 +72,18 @@ describe("labels", () => {
     expect(summarize({ type: "donut", series: 1, points: 3 }, labels, n)).toBe("Donut chart: 3");
   });
 
+  it("keeps a default chart name when an override leaves it undefined", () => {
+    const labels = resolveLabels({ chartNames: { line: undefined, bar: "Balkendiagramm" } });
+    expect(labels.chartNames.line).toBe("Line chart");
+    expect(labels.chartNames.bar).toBe("Balkendiagramm");
+  });
+
+  it("falls back to the generic chart label with neither a type nor a name", () => {
+    // Only reachable from plain JS or a cast: the type needs one or the other.
+    const parts = { series: 1, points: 2 } as Parameters<typeof summarize>[0];
+    expect(summarize(parts, DEFAULT_LABELS, n)).toBe("chart, 2 points.");
+  });
+
   it("merges overrides over the defaults", () => {
     const labels = resolveLabels({ showTable: "Tabelle anzeigen", locale: "de" });
     expect(labels.showTable).toBe("Tabelle anzeigen");

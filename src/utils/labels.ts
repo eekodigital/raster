@@ -166,14 +166,21 @@ export function resolveLabels(overrides?: ChartLabelOverrides): ChartLabels {
     ? {
         ...DEFAULT_LABELS,
         ...overrides,
-        chartNames: { ...DEFAULT_LABELS.chartNames, ...overrides.chartNames },
+        // A name left undefined (say, a missing translation) keeps its default.
+        chartNames: {
+          ...DEFAULT_LABELS.chartNames,
+          ...Object.fromEntries(
+            Object.entries(overrides.chartNames ?? {}).filter(([, name]) => name !== undefined),
+          ),
+        },
       }
     : DEFAULT_LABELS;
 }
 
 /** A chart's summary in `labels`' words, with its name worked out. */
 export function summarize(parts: SummaryParts, labels: ChartLabels, n: NumberFormat): string {
-  return labels.summary({ ...parts, name: parts.name ?? labels.chartNames[parts.type!] }, n);
+  const name = parts.name ?? (parts.type && labels.chartNames[parts.type]) ?? labels.chart;
+  return labels.summary({ ...parts, name }, n);
 }
 
 /**

@@ -59,7 +59,7 @@ import { Chart } from "@tanstack/charts/react";
 
 ## `describeChart`
 
-`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types. For any other chart, pick the closest type and give a `name` ("Heatmap") to use in its place: `{ type: "bar", name: "Heatmap", … }`. Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
+`describeChart(parts, labels?)` writes the summary in raster's words, from the same parts raster's charts use: `type`, `series`, `points`, and the `x` and `y` ranges already formatted. `type` is one of raster's chart types, worded by `labels.chartNames`. For any other chart, give a `name` instead: `describeChart({ name: "Heatmap", series: 1, points: 120 })` gives "Heatmap, 120 points.". Counts are formatted in `labels.locale`, and `labels.summary` rewords or translates it, exactly as for raster's charts. See [Accessibility](/guides/accessibility/).
 
 ## Props
 
@@ -72,7 +72,7 @@ import { Chart } from "@tanstack/charts/react";
 | `dataTable` | `"disclosure" \| "visually-hidden"`        | How the table is offered. Default `"disclosure"`.                                                 |
 | `hideTitle` | `boolean`                                  | Keep the title for assistive technology but hide it visually.                                     |
 | `legend`    | `ReactNode`                                | Shown under the chart.                                                                            |
-| `labels`    | `Partial<ChartLabels>`                     | Generated strings and the number locale.                                                          |
+| `labels`    | `ChartLabelOverrides`                      | Generated strings and the number locale.                                                          |
 | `ref`       | `Ref<HTMLDivElement>`                      | The figure element.                                                                               |
 | `className` | `string`                                   | Class on the figure.                                                                              |
 

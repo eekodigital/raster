@@ -9,7 +9,6 @@ import {
   ticks,
   labelSkip,
 } from "../../utils/chart-math.js";
-import { summarize } from "../../utils/labels.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import type { XAxis, XTick } from "../../utils/time.js";
 import { seriesColor } from "../../utils/palette.js";
@@ -134,7 +133,7 @@ export function LineChart({
   referenceLines = [],
   ...frame
 }: LineChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<LinePointIndex>(selectedIndex, onSelect, labels);
   const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
   const longest = Math.max(0, ...series.map((s) => s.data.length));
@@ -176,7 +175,8 @@ export function LineChart({
       if (r.axis !== "x")
         return Number.isFinite(r.value) ? [yScale(r.value), format(r.value)] : null;
       const v = typeof r.value === "string" ? Date.parse(r.value) : +r.value;
-      return x ? [x.at(v, plotWidth), x.format(v, labels.locale)] : null;
+      // `at` and `format` are required, but a hand-built axis from plain JS may lack them.
+      return typeof x?.at === "function" ? [x.at(v, plotWidth), x.format(v, labels.locale)] : null;
     },
     plotWidth,
     plotHeight,
@@ -253,18 +253,14 @@ export function LineChart({
   const rawValues = series.flatMap((s) => s.data);
   const [rawMin, rawMax] = rawValues.length ? extent(rawValues) : [0, 0];
   const named = names.filter(Boolean);
-  const summary = summarize(
-    {
-      type: "line",
-      series: series.length,
-      points: rawValues.length,
-      x: named.length ? [named[0], named[named.length - 1]] : undefined,
-      y: rawValues.length ? [format(rawMin), format(rawMax)] : undefined,
-      references: referenceTexts,
-    },
-    labels,
-    n,
-  );
+  const summary = describe({
+    type: "line",
+    series: series.length,
+    points: rawValues.length,
+    x: named.length ? [named[0], named[named.length - 1]] : undefined,
+    y: rawValues.length ? [format(rawMin), format(rawMax)] : undefined,
+    references: referenceTexts,
+  });
 
   return (
     <SvgChartFrame

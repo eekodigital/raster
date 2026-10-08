@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { numberFormatter, resolveLabels } from "../../utils/labels.js";
-import type { NumberFormat, ChartLabelOverrides } from "../../utils/labels.js";
+import { numberFormatter, resolveLabels, summarize } from "../../utils/labels.js";
+import type { ChartLabelOverrides, NumberFormat, SummaryParts } from "../../utils/labels.js";
 import type { useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 
@@ -15,7 +15,9 @@ export function useChart(
   const labels = resolveLabels(labelOverrides);
   const n = numberFormatter(labels.locale);
   const tooltip = useChartTooltip();
-  return { plotRef, labels, n, format: formatValue ?? n, tooltip };
+  /** The chart's summary, in `labels`' words. */
+  const describe = (parts: SummaryParts) => summarize(parts, labels, n);
+  return { plotRef, labels, n, format: formatValue ?? n, tooltip, describe };
 }
 
 type MarkOptions = {

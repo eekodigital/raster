@@ -1,5 +1,4 @@
 import { feature } from "topojson-client";
-import { summarize } from "../../utils/labels.js";
 import { useMemo } from "react";
 import { extent, linearScale } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
@@ -159,7 +158,7 @@ export function GeoChart({
   labels: labelOverrides,
   ...frame
 }: GeoChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<GeoSelection>(selectedIndex, onSelect, labels);
   const selectable = !!onSelect || selectedIndex !== undefined;
 
@@ -227,16 +226,12 @@ export function GeoChart({
         : undefined,
   });
 
-  const summary = summarize(
-    {
-      type: "map",
-      series: 1,
-      points: regions.length,
-      y: values.length ? [format(minVal), format(maxVal)] : undefined,
-    },
-    labels,
-    n,
-  );
+  const summary = describe({
+    type: "map",
+    series: 1,
+    points: regions.length,
+    y: values.length ? [format(minVal), format(maxVal)] : undefined,
+  });
 
   const mark = (
     row: number,

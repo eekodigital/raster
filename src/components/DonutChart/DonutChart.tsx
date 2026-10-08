@@ -1,5 +1,4 @@
 import { extent, pieAngles, strokeArcPath, sum } from "../../utils/chart-math.js";
-import { summarize } from "../../utils/labels.js";
 import { cn } from "../../utils/cn.js";
 import type { NumberFormat } from "../../utils/labels.js";
 
@@ -47,7 +46,7 @@ export function DonutChart({
   className,
   ...frame
 }: DonutChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<number>(selectedIndex, onSelect, labels);
   const interactive = !!(onSegmentClick || onSelect || selectedIndex !== undefined);
   const measured = useContainerWidth(plotRef, 160);
@@ -80,16 +79,12 @@ export function DonutChart({
   });
 
   const [minVal, maxVal] = data.length ? extent(data.map((d) => d.value)) : [0, 0];
-  const summary = summarize(
-    {
-      type: "donut",
-      series: 1,
-      points: data.length,
-      y: data.length ? [format(minVal), format(maxVal)] : undefined,
-    },
-    labels,
-    n,
-  );
+  const summary = describe({
+    type: "donut",
+    series: 1,
+    points: data.length,
+    y: data.length ? [format(minVal), format(maxVal)] : undefined,
+  });
 
   let sweepBefore = 0;
 

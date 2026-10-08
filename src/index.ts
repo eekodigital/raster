@@ -3,7 +3,14 @@
 // GeoChart lives at `@eekodigital/raster/geo` so the main entry never pulls in
 // `topojson-client`. Styles ship separately as `@eekodigital/raster/styles.css`.
 export { DEFAULT_LABELS, describeChart } from "./utils/labels.js";
-export type { ChartLabels, ChartType, MarkLabelParts, SummaryParts } from "./utils/labels.js";
+export type {
+  ChartLabelOverrides,
+  ChartLabels,
+  ChartType,
+  MarkLabelParts,
+  ResolvedSummaryParts,
+  SummaryParts,
+} from "./utils/labels.js";
 export { ChartDataTable } from "./components/shared/ChartDataTable.js";
 export type {
   ChartDataTableProps,
