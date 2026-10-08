@@ -29,25 +29,25 @@ Sizes in the first two tables are min+gzip from `npm view` and bundlephobia, che
 
 ## TanStack Charts 1.0
 
-TanStack Charts 1.0 was released on 5 October 2026. It's the closest alternative in spirit: typed, framework-friendly, SVG by default, with real thought given to accessibility. We measured both with esbuild 0.28 (production, minified, code splitting on), gzip -9, as the size added to a React 19 page that renders nothing else. Raster 3.1 is the release this page ships with; 3.0.0 is shown for reference.
+TanStack Charts 1.0 was released on 5 October 2026. It's the closest alternative in spirit: typed, framework-friendly, SVG by default, with real thought given to accessibility. We measured both with esbuild 0.28 (production, minified), gzip -9, as the size added to a React 19 page that renders nothing else. Raster 4.0 is the release this page ships with; 3.0.0 is shown for reference.
 
-| Size added to a React page   | Raster 3.1 | Raster 3.0.0 | TanStack Charts 1.0.0                |
+| Size added to a React page   | Raster 4.0 | Raster 3.0.0 | TanStack Charts 1.0.0                |
 | ---------------------------- | ---------- | ------------ | ------------------------------------ |
-| One line chart               | 8.6 KB     | 6.7 KB       | 32.0 KB, or 36.1 KB with the tooltip |
-| A line chart and a bar chart | 10.2 KB    | 8.2 KB       | 37.3 KB                              |
-| All 8 non-geo chart types    | 13.8 KB    | 11.6 KB      | –                                    |
+| One line chart               | 8.3 KB     | 6.7 KB       | 32.0 KB, or 36.1 KB with the tooltip |
+| A line chart and a bar chart | 9.8 KB     | 8.2 KB       | 37.3 KB                              |
+| All 8 non-geo chart types    | 13.5 KB    | 11.6 KB      | –                                    |
 | Runtime dependencies         | none       | none         | `tslib` and 13 `d3-*` modules        |
 
-Raster 3.1's line chart grew by about 2 KB for [date axes](/components/line-chart/#dates), [dense mode](/components/line-chart/#large-series) and [reference lines](/components/line-chart/#reference-lines), less the [export code](/guides/exporting/) that moved to its own entry.
+Raster 4.0's line chart grew by about 1.6 KB for [date axes](/components/line-chart/#dates), [dense mode](/components/line-chart/#large-series) and [reference lines](/components/line-chart/#reference-lines), less the [export code](/guides/exporting/) that moved to its own entry.
 
 **Server-rendered HTML** for one line series, before any JavaScript runs:
 
-| Points       | Raster 3.1                                                                                                                         | TanStack Charts 1.0                                                                                        |
+| Points       | Raster 4.0                                                                                                                         | TanStack Charts 1.0                                                                                        |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | 5 points     | 4.2 KB: a figure named by its title, a text summary, a data table, and 5 named points. No axe violations.                          | 5.9 KB: the SVG is `role="img"` with an `aria-label`; marks and axes are `aria-hidden`. No axe violations. |
 | 1,000 points | 59 KB: 13.5 KB of SVG (one path, [dense mode](/components/line-chart/#large-series)), a 46 KB data table, and one focusable slider | 18.8 KB: one path. Values are available only after hydration, through the tooltip.                         |
 
-Both pass axe. The difference is what's in the HTML: with raster, every value is readable without JavaScript, in the summary and the table. With TanStack Charts the values reach assistive technology only once the page has hydrated.
+Both pass axe. The difference is what's in the HTML: with raster, every value is readable without JavaScript, in the summary and in the data table, which opens without JavaScript. With TanStack Charts the values reach assistive technology only once the page has hydrated.
 
 **Where TanStack Charts is better:**
 
