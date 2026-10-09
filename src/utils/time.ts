@@ -8,10 +8,12 @@
  * carry it. Written for raster; no d3.
  */
 
+import { ticksFit, TICK_CHAR, type AxisTick } from "./chart-math.js";
+
 export type TimeInterval = "day" | "week" | "month" | "quarter" | "year";
 
 /** An x-axis tick: position in px, text and anchor. */
-export type XTick = { x: number; text: string; anchor: "start" | "middle" | "end" };
+export type XTick = AxisTick;
 
 /** A LineChart x axis. Build one with `timeAxis`. */
 export type XAxis = {
@@ -55,7 +57,6 @@ const UNITS: Record<TimeInterval, [number, number]> = {
   quarter: [0, 3],
   year: [0, 12],
 };
-const ORDER = Object.keys(UNITS) as TimeInterval[];
 
 const formats = new Map<string, Intl.DateTimeFormat>();
 
@@ -133,10 +134,39 @@ const tickFormat = (unit: TimeInterval, year?: boolean): Intl.DateTimeFormatOpti
         ? { month: "short", year: "numeric" }
         : { month: "short" };
 
-/** A long sample date (28 September) for estimating tick label widths. */
-const SAMPLE = Date.UTC(2000, 8, 28);
-/** Estimated px per character of the 0.75rem tick font. */
-const CHAR = 7;
+/**
+ * Most boundaries worked out per unit. Finer units are capped low: a range
+ * with more than 500 days or months ticks on a coarser unit. Years run to
+ * 100,000, the longest range with ticks.
+ */
+const CAP: Record<TimeInterval, number> = {
+  day: 500,
+  week: 500,
+  month: 500,
+  quarter: 500,
+  year: 100_000,
+};
+
+/** Tick steps, finest first: a unit and how many of it per tick. */
+const STEPS: [TimeInterval, number][] = [
+  ["day", 1],
+  ["day", 2],
+  ["week", 1],
+  ["week", 2],
+  ["month", 1],
+  ["month", 2],
+  ["quarter", 1],
+  ["month", 6],
+  ...[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10_000].map(
+    (k): [TimeInterval, number] => ["year", k],
+  ),
+];
+
+/** Whether wall time `w` starts a k-month or k-year step (Jan, Jul; 2020, 2025). */
+const aligned = (w: number, unit: TimeInterval, k: number) => {
+  const d = new Date(w);
+  return (unit === "year" ? d.getUTCFullYear() : d.getUTCMonth()) % k === 0;
+};
 
 /**
  * An x axis of dates for LineChart: `xAxis={timeAxis(dates, { interval: "day" })}`.
@@ -158,12 +188,19 @@ export function timeAxis(
   let gaps: boolean[] | undefined;
   const cache = new Map<TimeInterval, number[]>();
 
-  /** Every `unit` boundary in range (capped: callers only need to know it's too many). */
+  /**
+   * Every `unit` boundary in range, up to CAP: a capped list doesn't cover the
+   * range, so ticks() skips that unit (it has far too many ticks anyway).
+   */
   const boundaries = (unit: TimeInterval) => {
     let out = cache.get(unit);
     if (!out) {
       cache.set(unit, (out = []));
-      for (let w = floorWall(wall(first, zone), unit); out.length < 500; w = addWall(w, unit)) {
+      for (
+        let w = floorWall(wall(first, zone), unit);
+        out.length < CAP[unit];
+        w = addWall(w, unit)
+      ) {
         const t = instant(w, zone);
         if (t > last) break;
         if (t >= first) out.push(t);
@@ -210,51 +247,38 @@ export function timeAxis(
     format: (value, locale) => formatter(locale)(value),
     ticks(width, locale, spacing) {
       if (!ms.length) return [];
-      let unit: TimeInterval = "day";
-      let ticks: number[] = [];
-      for (let u = 0; u < ORDER.length; u++) {
-        unit = ORDER[u];
-        ticks = boundaries(unit);
-        // Room per label: the given spacing, or a long sample label's width plus a gap.
-        const room =
-          spacing ?? dtf(locale, "UTC", tickFormat(unit)).format(SAMPLE).length * CHAR + 12;
-        const max = Math.max(1, Math.floor(width / room));
-        if (ticks.length <= max) break;
-        // Too many: thin this unit if the next one would leave fewer than two ticks.
-        if (u === ORDER.length - 1 || boundaries(ORDER[u + 1]).length < 2) {
-          const k = Math.ceil(ticks.length / max);
-          ticks = ticks.filter((_, i) => i % k === 0);
-          break;
-        }
+      const label = (unit: TimeInterval, values: number[]) =>
+        values.map((value, i): XTick => {
+          const x = px(value, width);
+          return {
+            x,
+            // Labels near an edge anchor inwards, so they stay inside the plot.
+            anchor: x < 24 ? "start" : x > width - 24 ? "end" : "middle",
+            text: dtf(
+              locale,
+              zone,
+              tickFormat(unit, !i || !new Date(wall(value, zone)).getUTCMonth()),
+            ).format(value),
+          };
+        });
+      // The finest evenly spaced step whose labels don't touch: each candidate
+      // keeps every k-th boundary (aligned to the calendar for months and
+      // years), so ticks are never dropped one at a time.
+      for (const [unit, k] of STEPS) {
+        const all = boundaries(unit);
+        if (all.length >= CAP[unit]) continue;
+        const values = all.filter((t, i) =>
+          unit === "year" || (unit === "month" && k > 1)
+            ? aligned(wall(t, zone), unit, k)
+            : i % k === 0,
+        );
+        // Cheap check first: at least a short label's width per tick.
+        if (!values.length || values.length * 3 * TICK_CHAR > width) continue;
+        const ticks = label(unit, values);
+        if (ticksFit(ticks, spacing)) return ticks;
       }
-      if (!ticks.length) {
-        unit = "day";
-        ticks = [first];
-      }
-      // Labels near an edge anchor inwards, so they stay inside the plot.
-      const out = ticks.map((value, i): XTick => {
-        const x = px(value, width);
-        return {
-          x,
-          anchor: x < 24 ? "start" : x > width - 24 ? "end" : "middle",
-          text: dtf(
-            locale,
-            zone,
-            tickFormat(unit, !i || !new Date(wall(value, zone)).getUTCMonth()),
-          ).format(value),
-        };
-      });
-      // An inward-anchored label reaches its whole width into the plot, so
-      // drop a centred neighbour it would touch.
-      const w = (t: XTick) => t.text.length * CHAR;
-      return out.filter(
-        (t, i, a) =>
-          t.anchor !== "middle" ||
-          !(
-            (a[i - 1]?.anchor === "start" && t.x - w(t) / 2 - a[i - 1].x - w(a[i - 1]) < 4) ||
-            (a[i + 1]?.anchor === "end" && a[i + 1].x - w(a[i + 1]) - t.x - w(t) / 2 < 4)
-          ),
-      );
+      // Nothing in range (or nothing fits): the first point.
+      return label("day", [first]).slice(0, 1);
     },
     names: (locale) => ms.map(formatter(locale)),
     gap: (i) =>

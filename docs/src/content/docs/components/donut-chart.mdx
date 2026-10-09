@@ -31,7 +31,7 @@ Use smaller `size` and `thickness` for inline progress indicators.
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
 - The SVG is a `role="group"` with `aria-roledescription="chart"`; no `graphics-*` roles.
 - Each segment is labelled `{label}: {value} ({percent}), 2 of 4`. Zero-value segments are skipped. With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
-- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- A visible **Show data table** disclosure (a native `<details>`/`<summary>`, so it opens without JavaScript) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
 - Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
 - The draw-in animation is a CSS class, so `prefers-reduced-motion` switches it off.
 - Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
@@ -53,7 +53,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -65,7 +64,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>DonutDatum[]</code>
       </td>
-      <td>—</td>
       <td>
         Required. <code>&#123; label, value, color &#125;</code>.
       </td>
@@ -77,7 +75,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Fixed diameter in px. Omit to fill the container's width (square).</td>
     </tr>
     <tr>
@@ -86,9 +83,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>24</code>
+        <div class="props-table__default">
+          Default: <code>24</code>
+        </div>
       </td>
       <td>Ring thickness in px.</td>
     </tr>
@@ -99,7 +96,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>ReactNode</code>
       </td>
-      <td>—</td>
       <td>Centre content.</td>
     </tr>
     <tr>
@@ -108,9 +104,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Show a legend.</td>
     </tr>
@@ -120,13 +116,13 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>
-        <code>Intl.NumberFormat</code>
-      </td>
-      <td>
-        Formats values in ticks, marks and the table. Defaults to{" "}
-        <code>Intl.NumberFormat(labels.locale)</code>.
+        Formats values in ticks, marks and the table. Defaults to <code>Intl.NumberFormat</code> for{" "}
+        <code>labels.locale</code>.
       </td>
     </tr>
     <tr>
@@ -136,7 +132,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(mark: &#123; index: number, value, datum: DonutDatum &#125;) =&gt; void</code>
       </td>
-      <td>—</td>
       <td>
         Called when a mark is clicked (or activated with Enter/Space) with{" "}
         <code>&#123; index, value, datum &#125;</code>; <code>index</code> is what{" "}
@@ -150,7 +145,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number | null</code>
       </td>
-      <td>—</td>
       <td>Controlled selection.</td>
     </tr>
     <tr>
@@ -160,7 +154,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(index | null) =&gt; void</code>
       </td>
-      <td>—</td>
       <td>Makes segments buttons.</td>
     </tr>
     <tr>
@@ -170,7 +163,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Required. Visible title: names the figure and captions the data table.</td>
     </tr>
     <tr>
@@ -179,9 +171,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Hide the title visually. It still names the chart for assistive technology.</td>
     </tr>
@@ -191,8 +183,8 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>ChartLabelOverrides</code>
+        <div class="props-table__default">Default: English</div>
       </td>
-      <td>English</td>
       <td>
         Generated strings and the number locale. See{" "}
         <a href="/guides/accessibility/#labels">Accessibility</a>.
@@ -204,9 +196,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"disclosure" | "visually-hidden"</code>
-      </td>
-      <td>
-        <code>"disclosure"</code>
+        <div class="props-table__default">
+          Default: <code>"disclosure"</code>
+        </div>
       </td>
       <td>How the data table is offered.</td>
     </tr>
@@ -217,7 +209,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>Ref&lt;HTMLDivElement&gt;</code>
       </td>
-      <td>—</td>
       <td>
         The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
         <code>@eekodigital/raster/export</code>. See{" "}
@@ -231,7 +222,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Class on the figure.</td>
     </tr>
   </tbody>

@@ -13,6 +13,8 @@ export default defineConfig({
         // Wrap long lines instead of scrolling: Expressive Code gives a
         // scrolling block an unnamed role="region", and two on a page fail axe.
         defaultProps: { wrap: true },
+        // Flat, like the code under each demo.
+        styleOverrides: { frames: { frameBoxShadowCssValue: "none" } },
         themeCssRoot: "html",
         themeCssSelector: (theme) => {
           const map: Record<string, string> = {

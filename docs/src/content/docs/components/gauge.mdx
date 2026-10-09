@@ -31,7 +31,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -43,7 +42,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Required.</td>
     </tr>
     <tr>
@@ -52,9 +50,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>0</code>
+        <div class="props-table__default">
+          Default: <code>0</code>
+        </div>
       </td>
       <td>Start of the range.</td>
     </tr>
@@ -65,7 +63,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Required. End of the range.</td>
     </tr>
     <tr>
@@ -75,7 +72,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Required. Visible title and accessible name.</td>
     </tr>
     <tr>
@@ -85,7 +81,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>ChartLabelOverrides</code>
       </td>
-      <td>—</td>
       <td>
         <code>locale</code> for the default number format, as on the other charts.
       </td>
@@ -96,9 +91,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
-      </td>
-      <td>
-        <code>Intl.NumberFormat</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>
         Formats the displayed value and <code>aria-valuetext</code>. Defaults to the number format
@@ -112,7 +107,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Fixed diameter in px. Omit to fill the container's width (square).</td>
     </tr>
     <tr>
@@ -121,9 +115,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>10</code>
+        <div class="props-table__default">
+          Default: <code>10</code>
+        </div>
       </td>
       <td>Ring thickness in px.</td>
     </tr>
@@ -133,9 +127,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string</code>
-      </td>
-      <td>
-        <code>series 1</code>
+        <div class="props-table__default">
+          Default: <code>series 1</code>
+        </div>
       </td>
       <td>Fill colour.</td>
     </tr>
@@ -145,9 +139,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string</code>
-      </td>
-      <td>
-        <code>grid colour</code>
+        <div class="props-table__default">
+          Default: <code>grid colour</code>
+        </div>
       </td>
       <td>Track colour.</td>
     </tr>
@@ -158,7 +152,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>Ref&lt;HTMLDivElement&gt;</code>
       </td>
-      <td>—</td>
       <td>
         The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
         <code>@eekodigital/raster/export</code>. See{" "}
@@ -172,7 +165,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td></td>
     </tr>
   </tbody>

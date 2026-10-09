@@ -7,7 +7,8 @@ import {
   linearScale,
   markerPath,
   ticks,
-  labelSkip,
+  categoryTicks,
+  niceExtent,
 } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import type { XAxis, XTick } from "../../utils/time.js";
@@ -88,10 +89,9 @@ export type LineChartProps = ChartFrameOptions &
     /** Formats values in ticks, marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
     formatValue?: NumberFormat;
     /**
-     * Minimum horizontal space (in display px) between adjacent x-axis labels.
-     * When labels are wider than the default 30px budget (e.g. full dates like
-     * "2026-04-20"), bump this so labels thin out enough not to overlap.
-     * Default 30 for categories; a time axis estimates it from its labels.
+     * Minimum px between adjacent x-axis ticks. Labels already thin out so
+     * they don't touch (by their estimated width); set this to space them
+     * further apart.
      */
     xLabelMinSpacing?: number;
     /**
@@ -161,8 +161,8 @@ export function LineChart({
   const [minVal, maxVal] = allValues.length ? extent(allValues) : [0, 1];
   // The value scale reaches every horizontal reference line.
   const yRefs = referenceValues(referenceLines, "y");
-  const yMin = Math.min(0, minVal, ...yRefs);
-  const yMax = Math.max(maxVal, 1, ...yRefs);
+  // Rounded out to whole ticks, so no point is above the top gridline.
+  const [yMin, yMax] = niceExtent(Math.min(0, minVal, ...yRefs), Math.max(maxVal, 1, ...yRefs), 4);
 
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";
@@ -190,42 +190,30 @@ export function LineChart({
   );
   const referenceTexts = references.map((r) => r.text);
   // Which ticks get a label. A filter wins; otherwise defer to consumers who
-  // pre-decimated with "" categories; otherwise thin by width, always keeping
-  // the last category (and dropping the one before it if that would crowd it).
-  // A time axis places its own ticks.
-  const last = count - 1;
-  const hasManualXLabels = names.some((l) => l === "");
-  let tickIndices = x ? [] : names.map((_, i) => i);
-  if (!x) {
-    if (xTickFilter) {
-      tickIndices = tickIndices.filter((i) => xTickFilter(i, names[i]));
-    } else if (!hasManualXLabels) {
-      const skip = labelSkip(count, plotWidth, xLabelMinSpacing ?? 30);
-      tickIndices = tickIndices.filter((i) => i % skip === 0);
-      if (last > 0 && tickIndices.at(-1) !== last) {
-        if (last - tickIndices.at(-1)! < skip && tickIndices.length > 1) tickIndices.pop();
-        tickIndices.push(last);
-      }
-    }
-  }
-  // Only the true first and last categories sit at the plot edges, so only
-  // they anchor inwards; every other label centres on its point.
+  // pre-decimated with "" categories; otherwise thin to the smallest step
+  // whose labels fit, always keeping the last category. Only the true first
+  // and last categories sit at the plot edges, so only they anchor inwards.
   // A date axis places its own ticks; xTickFilter and formatXTick then take
   // each tick's index and text.
-  const xTicks = x
-    ? x
-        .ticks(plotWidth, labels.locale, xLabelMinSpacing)
-        .map((t, i) => ({ t, i }))
-        .filter(({ t, i }) => !xTickFilter || xTickFilter(i, t.text))
-        .map(({ t, i }) => (formatXTick ? { ...t, text: formatXTick(t.text, i) } : t))
-        .filter((t) => t.text !== "")
-    : tickIndices
-        .map((i): XTick => ({
-          x: xScale(i),
-          text: formatXTick ? formatXTick(names[i], i) : names[i],
-          anchor: last < 1 ? "middle" : i === 0 ? "start" : i === last ? "end" : "middle",
-        }))
-        .filter((t) => t.text !== "");
+  const last = count - 1;
+  const categoryTick = (i: number): XTick => ({
+    x: xScale(i),
+    text: formatXTick ? formatXTick(names[i], i) : names[i],
+    anchor: last < 1 ? "middle" : i === 0 ? "start" : i === last ? "end" : "middle",
+  });
+  const xTicks = (
+    x
+      ? x
+          .ticks(plotWidth, labels.locale, xLabelMinSpacing)
+          .map((t, i) => ({ t, i }))
+          .filter(({ t, i }) => !xTickFilter || xTickFilter(i, t.text))
+          .map(({ t, i }) => (formatXTick ? { ...t, text: formatXTick(t.text, i) } : t))
+      : xTickFilter || names.some((l) => l === "")
+        ? names.flatMap((_, i) =>
+            !xTickFilter || xTickFilter(i, names[i]) ? [categoryTick(i)] : [],
+          )
+        : categoryTicks(count, categoryTick, xLabelMinSpacing)
+  ).filter((t) => t.text !== "");
 
   const activate = interactive
     ? (si: number, pi: number) => {
@@ -484,7 +472,12 @@ export function LineChart({
           );
         })}
 
-        <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
+        <ReferenceLines
+          lines={references}
+          plotWidth={plotWidth}
+          plotHeight={plotHeight}
+          avoid={{ runs: pos }}
+        />
       </g>
     </SvgChartFrame>
   );

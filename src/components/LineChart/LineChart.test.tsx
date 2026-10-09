@@ -291,6 +291,25 @@ describe("LineChart sizing", () => {
   });
 });
 
+describe("LineChart category labels", () => {
+  it("thin so they don't overlap at phone widths, keeping the first and last", () => {
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(300);
+    const { container } = render(
+      <LineChart
+        series={[{ name: "A", data: [1, 2, 3, 4, 5, 6] }]}
+        categories={["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"]}
+        title="T"
+      />,
+    );
+    width.mockRestore();
+    expect(
+      [...container.querySelectorAll(".raster-chart__tick")]
+        .map((t) => t.textContent)
+        .filter((t) => t?.startsWith("Week")),
+    ).toEqual(["Week 1", "Week 3", "Week 6"]);
+  });
+});
+
 describe("LineChart drawing", () => {
   it("renders grid lines per the grid prop", () => {
     const { container, rerender } = render(

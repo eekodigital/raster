@@ -218,11 +218,49 @@ describe("reference lines", () => {
           { x: 100, y: 2 },
         ]}
         title="S"
-        referenceLines={[{ value: 80, label: "A long reference label", axis: "x" }]}
+        referenceLines={[{ value: 100, label: "A long reference label", axis: "x" }]}
       />,
     );
     const text = container.querySelector(".raster-chart__reference-label")!;
     expect(text.getAttribute("text-anchor")).toBe("end");
+  });
+
+  it("moves a label off the data: the left end when the right is taken", () => {
+    const anchorOf = (root: Element) =>
+      root.querySelector(".raster-chart__reference-label")!.getAttribute("text-anchor");
+    // The line climbs through the right end of a target at 80.
+    const line = render(
+      <LineChart
+        series={[{ name: "A", data: [10, 25, 40, 60, 72, 86] }]}
+        categories={["1", "2", "3", "4", "5", "6"]}
+        referenceLines={[{ value: 80, label: "Target" }]}
+        title="L"
+      />,
+    );
+    expect(anchorOf(line.container)).toBe("start");
+    // The last bar rises through the goal, under the right end of its label;
+    // the first bars are well below it.
+    const bar = render(
+      <BarChart
+        data={[10, 10, 10, 50].map((value, i) => ({ label: `D${i}`, value }))}
+        referenceLines={[{ value: 40, label: "Daily goal" }]}
+        title="B"
+      />,
+    );
+    expect(anchorOf(bar.container)).toBe("start");
+    // With the right end clear, the label keeps its usual place there, above
+    // the line.
+    const clear = render(
+      <LineChart
+        series={[{ name: "A", data: [100, 12, 14] }]}
+        categories={["1", "2", "3"]}
+        referenceLines={[{ value: 80, label: "Target" }]}
+        title="C"
+      />,
+    );
+    const label = clear.container.querySelector(".raster-chart__reference-label")!;
+    expect(label.getAttribute("text-anchor")).toBe("end");
+    expect(Number(label.getAttribute("y"))).toBeLessThan(refs(clear.container)[0].y1);
   });
 
   it("server-renders the line, summary and caption", () => {

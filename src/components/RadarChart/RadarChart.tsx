@@ -1,4 +1,4 @@
-import { extent, markerPath } from "../../utils/chart-math.js";
+import { clamp, extent, markerPath, TICK_CHAR, truncateLabel } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 
@@ -63,8 +63,17 @@ export function RadarChart({
   const measured = useContainerWidth(plotRef, 300);
   const size = sizeProp ?? measured;
   const c = size / 2;
-  const radius = Math.max(size / 2 - 40, 0); // margin for labels
   const count = axes.length;
+  // Axis labels sit outside the web, anchored away from the centre. Labels to
+  // the sides need room for their width: the margin fits the longest (40 px
+  // to 30% of the chart), and longer ones are cut with an ellipsis.
+  const cos = (i: number) => Math.cos((Math.PI * 2 * i) / count - Math.PI / 2);
+  const sideRoom = Math.max(
+    0,
+    ...axes.map((a, i) => (Math.abs(cos(i)) > 0.3 ? a.length * TICK_CHAR : 0)),
+  );
+  const margin = clamp(sideRoom + 14, 40, size * 0.3);
+  const radius = Math.max(size / 2 - margin, 0);
   // One value per axis: extra values have no axis to sit on; missing ones aren't drawn.
   const data = series.map((s) => s.data.slice(0, count));
   const values = data.flat();
@@ -136,17 +145,20 @@ export function RadarChart({
 
       {axes.map((axis, i) => {
         const end = polarToCartesian(c, c, radius, i, count);
-        const labelPos = polarToCartesian(c, c, radius + 18, i, count);
+        const labelPos = polarToCartesian(c, c, radius + 8, i, count);
+        const [x, y] = [cos(i), Math.sin((Math.PI * 2 * i) / count - Math.PI / 2)];
         return (
           <g key={axis}>
             <line x1={c} y1={c} x2={end.x} y2={end.y} className="raster-chart__axis" />
             <text
               x={labelPos.x}
               y={labelPos.y}
-              dy="0.35em"
+              // Away from the centre: beside the axis end, above or below it.
+              textAnchor={x > 0.3 ? "start" : x < -0.3 ? "end" : "middle"}
+              dy={y < -0.3 ? "0" : y > 0.3 ? "0.8em" : "0.35em"}
               className="raster-chart__tick raster-radar__label"
             >
-              {axis}
+              {Math.abs(x) > 0.3 ? truncateLabel(axis, margin - 14) : axis}
             </text>
           </g>
         );
