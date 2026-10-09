@@ -111,7 +111,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "size": "node scripts/check-size.ts"
+    "size": "node scripts/check-size.ts",
+    "version-packages": "changeset version && vp check --fix"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",

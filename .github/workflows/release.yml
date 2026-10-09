@@ -35,6 +35,9 @@ jobs:
         uses: changesets/action@v2.1.2
         with:
           pr-title: "chore: version package"
+          # Format what `changeset version` writes (CHANGELOG.md doesn't match
+          # the formatter), so the version PR passes CI as opened.
+          version: pnpm run version-packages
 
       # Publish with OIDC trusted publishing (no NPM_TOKEN needed).
       # Trusted publishing requires npm >= 11.5 and npm's own publish path —
