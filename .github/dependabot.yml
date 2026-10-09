@@ -27,7 +27,19 @@ updates:
       prefix: chore
       prefix-development: chore
       include: scope
+    ignore:
+      # Node types follow the Node major CI runs (24), not the newest Node.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
     groups:
+      # vite-plus bundles its own vitest, and the coverage provider must match
+      # it exactly: update all three together (#107 failed bumping two).
+      vite-plus-and-vitest:
+        patterns:
+          - vite-plus
+          - vitest
+          - "@vitest/*"
       production-minor-and-patch:
         dependency-type: production
         update-types:
