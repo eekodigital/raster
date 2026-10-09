@@ -147,6 +147,29 @@ describe("ScatterChart structure", () => {
   });
 });
 
+describe("ScatterChart axes", () => {
+  it("round out to whole ticks, so no point sits on the corner", () => {
+    const { container } = render(
+      <ScatterChart
+        data={[
+          { x: 8, y: 1 },
+          { x: 28, y: 7 },
+          { x: 45, y: 12 },
+        ]}
+        title="S"
+      />,
+    );
+    const xTicks = [...container.querySelectorAll("text.raster-chart__tick")].filter(
+      (t) =>
+        t.getAttribute("y") && !t.getAttribute("dy") && !t.closest("g[transform^='translate(0']"),
+    );
+    // x runs 0–50, so the first tick is on the left edge and the last on the right.
+    expect(xTicks[0].textContent).toBe("0");
+    expect(Number(xTicks[0].getAttribute("x"))).toBe(0);
+    expect(xTicks.at(-1)!.textContent).toBe("50");
+  });
+});
+
 describe("ScatterChart keyboard", () => {
   it("moves by x within a series and between series", () => {
     render(<ScatterChart series={SERIES} title="S" onSelect={() => {}} />);

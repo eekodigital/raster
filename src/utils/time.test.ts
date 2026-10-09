@@ -92,41 +92,54 @@ describe("ticks", () => {
     expect(ticks[0]).toEqual({ x: 40, text: "5 Oct", anchor: "middle" });
   });
 
-  it("drops a centred tick that an inward-anchored edge label would touch", () => {
-    // "Jan 2025" (about 56 px) is anchored at 0; Feb is centred at 51 px.
-    const x = timeAxis(["2025-01-01", "2025-12-31"]);
-    expect(labels(x, 600).slice(0, 2)).toEqual(["Jan 2025", "Mar"]);
-    // 9 Nov on the right edge leaves room for 2 Nov, 67 px before it.
-    const ticks = timeAxis(days("2026-09-01", 70)).ticks(662, "en-GB");
-    expect(ticks.at(-1)).toMatchObject({ text: "9 Nov", anchor: "end" });
-    expect(ticks.at(-2)!.text).toBe("2 Nov");
-    // Two edge labels anchor away from each other, so both stay.
+  it("thins evenly instead of dropping the tick beside an edge label", () => {
+    // "Jan 2025" (56 px) is anchored at 0 and would touch a centred Feb (or,
+    // narrower, Apr): the step widens to every 2nd (or 6th) month instead.
+    const x = timeAxis(["2025-01-01", "2026-12-31"]);
+    expect(labels(x, 1200)).toEqual([
+      "Jan 2025",
+      "Mar",
+      "May",
+      "Jul",
+      "Sept",
+      "Nov",
+      "Jan 2026",
+      "Mar",
+      "May",
+      "Jul",
+      "Sept",
+      "Nov",
+    ]);
+    expect(labels(x, 320)).toEqual(["Jan 2025", "Jul", "Jan 2026", "Jul"]);
+    expect(labels(x, 100)).toEqual(["2025", "2026"]);
+    // Two edge labels that would touch: only the first stays.
     expect(
       timeAxis(["2026-10-01", "2026-10-02"])
         .ticks(60, "en-GB", 20)
-        .map((t) => t.anchor),
-    ).toEqual(["start", "end"]);
+        .map((t) => t.text),
+    ).toEqual(["1 Oct"]);
   });
 
-  it("ticks on months for long ranges, naming the year on January and the first tick", () => {
-    const x = timeAxis(["2025-01-01", "2026-12-31"]);
-    const ticks = labels(x, 1200);
-    // 24 months; Feb is dropped beside the edge-anchored "Jan 2025".
-    expect(ticks).toHaveLength(23);
-    expect(ticks.slice(0, 3)).toEqual(["Jan 2025", "Mar", "Apr"]);
-    expect(ticks[11]).toBe("Jan 2026");
-  });
-
-  it("thins to quarters, then years, as the width shrinks", () => {
-    const x = timeAxis(["2025-01-01", "2026-12-31"]);
-    expect(labels(x, 320)).toEqual(["Jan 2025", "Jul", "Oct", "Jan 2026", "Apr", "Jul", "Oct"]);
-    expect(labels(x, 100)).toEqual(["2025", "2026"]);
+  it("ticks every other Monday when weekly labels don't fit", () => {
+    // 75 days in 525 px (the docs demo): 11 Mondays don't fit, 6 do.
+    const ticks = labels(timeAxis(days("2026-09-01", 75)), 525);
+    expect(ticks).toEqual(["7 Sept", "21 Sept", "5 Oct", "19 Oct", "2 Nov"]);
   });
 
   it("keeps every k-th year when yearly ticks don't fit", () => {
     const ticks = labels(timeAxis(["1990-01-01", "2025-06-01"]), 320);
     expect(ticks.length).toBeLessThanOrEqual(8);
     expect(ticks[0]).toBe("1990");
+  });
+
+  it("ticks across the whole of a very long range", () => {
+    // 2,000 years: more than 500 of any finer unit, so the steps are years.
+    const x = timeAxis(["1000-01-01", "3000-01-01"]);
+    for (const width of [600, 1200]) {
+      const ticks = x.ticks(width, "en-GB");
+      expect(ticks[0].text).toBe("1000");
+      expect(ticks.at(-1)!.x).toBeGreaterThan(width * 0.9);
+    }
   });
 
   it("respects a minimum label spacing, thinning a unit when the next is too sparse", () => {

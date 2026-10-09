@@ -1,4 +1,11 @@
-import { extent, linearScale, markerPath, ticks, labelSkip } from "../../utils/chart-math.js";
+import {
+  extent,
+  labelSkip,
+  linearScale,
+  markerPath,
+  niceExtent,
+  ticks,
+} from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import type { XAxis, XTick } from "../../utils/time.js";
 import { seriesColor } from "../../utils/palette.js";
@@ -17,7 +24,7 @@ import {
   referenceCaption,
   referenceValues,
 } from "../shared/ReferenceLines.js";
-import type { NumericReferenceLine } from "../shared/ReferenceLines.js";
+import type { Box, NumericReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 import type { MarkClick } from "../shared/use-chart.js";
 
@@ -74,6 +81,19 @@ export type ScatterChartProps = ChartFrameOptions &
 
 const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
 
+/**
+ * A scale range for points: min–max with 4% room each side (not crossing
+ * zero), rounded out to whole ticks, so no point sits on an axis.
+ */
+function padded(min: number, max: number): [number, number] {
+  const pad = (max - min) * 0.04;
+  return niceExtent(
+    min >= 0 ? Math.max(0, min - pad) : min - pad,
+    max <= 0 ? Math.min(0, max + pad) : max + pad,
+    5,
+  );
+}
+
 export function ScatterChart({
   data,
   series: seriesProp,
@@ -116,8 +136,13 @@ export function ScatterChart({
   const ys = allPoints.map((p) => p.y);
   const [dataXMin, dataXMax] = xs.length ? extent(xs) : [0, 1];
   const [dataYMin, dataYMax] = ys.length ? extent(ys) : [0, 1];
-  const [xMin, xMax] = extent([dataXMin, dataXMax, ...referenceValues(referenceLines, "x")]);
-  const [yMin, yMax] = extent([dataYMin, dataYMax, ...referenceValues(referenceLines, "y")]);
+  // Rounded out to whole ticks, so no point sits on the axis corner or beyond
+  // the last tick. A date axis keeps the data's own range.
+  const xRange = extent([dataXMin, dataXMax, ...referenceValues(referenceLines, "x")]);
+  const [xMin, xMax] = xAxis ? xRange : padded(...xRange);
+  const [yMin, yMax] = padded(
+    ...extent([dataYMin, dataYMax, ...referenceValues(referenceLines, "y")]),
+  );
 
   // A date axis places points and ticks on its own (calendar) scale.
   const xScale = xAxis
@@ -340,7 +365,19 @@ export function ScatterChart({
             </g>
           );
         })}
-        <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
+        <ReferenceLines
+          lines={references}
+          plotWidth={plotWidth}
+          plotHeight={plotHeight}
+          avoid={{
+            boxes: series.flatMap((s) =>
+              s.data.map((p): Box => {
+                const [x, y] = [xScale(p.x), yScale(p.y)];
+                return [x - 4, y - 4, x + 4, y + 4];
+              }),
+            ),
+          }}
+        />
       </g>
     </SvgChartFrame>
   );

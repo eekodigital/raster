@@ -4,8 +4,10 @@ import {
   linearScale,
   ticks,
   sum,
-  shouldRotateLabels,
+  TICK_CHAR,
+  truncateLabel,
   labelSkip,
+  niceExtent,
 } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
@@ -24,7 +26,7 @@ import {
   referenceCaption,
   referenceValues,
 } from "../shared/ReferenceLines.js";
-import type { NumericReferenceLine } from "../shared/ReferenceLines.js";
+import type { Box, NumericReferenceLine } from "../shared/ReferenceLines.js";
 import { markProps, useChart } from "../shared/use-chart.js";
 import type { MarkClick } from "../shared/use-chart.js";
 
@@ -89,7 +91,9 @@ export type BarChartProps = ChartFrameOptions &
   };
 
 const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
-const MARGIN_H = { top: 8, right: 8, bottom: 28, left: 80 };
+const MARGIN_H = { top: 8, right: 8, bottom: 28, left: 40 };
+/** Longest rotated category label, in px, before it's cut with an ellipsis. */
+const ROTATED_LABEL_MAX = 100;
 /** Vertical stacks: Up climbs the stack (next series), Down descends. */
 const STACK_KEYS = { next: ["ArrowUp"], prev: ["ArrowDown"] };
 
@@ -128,9 +132,21 @@ export function BarChart({
 
   const isHorizontal = direction === "horizontal";
   const width = useContainerWidth(plotRef, 720);
+  // Category labels by their estimated width: rotated when they're wider than
+  // a bar's slot (vertical), or given a left margin to fit (horizontal), up to
+  // a limit past which they're cut with an ellipsis.
+  const longest = Math.max(0, ...categories.map((c) => c.length)) * TICK_CHAR;
   const rotateLabels =
-    !isHorizontal && shouldRotateLabels(count, width - MARGIN_V.left - MARGIN_V.right);
-  const MARGIN = isHorizontal ? MARGIN_H : { ...MARGIN_V, bottom: rotateLabels ? 52 : 28 };
+    !isHorizontal && count > 1 && longest + 8 > (width - MARGIN_V.left - MARGIN_V.right) / count;
+  const labelRoom = isHorizontal
+    ? Math.min(longest, Math.max(28, Math.round(width * 0.4) - 12))
+    : rotateLabels
+      ? Math.min(longest, ROTATED_LABEL_MAX)
+      : Infinity;
+  const MARGIN = isHorizontal
+    ? { ...MARGIN_H, left: Math.max(MARGIN_H.left, labelRoom + 12) }
+    : // A label rotated 45° drops by its length × sin 45°.
+      { ...MARGIN_V, bottom: rotateLabels ? Math.ceil(labelRoom * 0.71) + 22 : 28 };
   const size = plotSize(
     width,
     { height: heightProp, aspectRatio },
@@ -148,8 +164,10 @@ export function BarChart({
   );
 
   const categoryScale = bandScale(count, [0, isHorizontal ? plotHeight : plotWidth], 0.2);
-  const valueScale = linearScale([0, maxVal], isHorizontal ? [0, plotWidth] : [plotHeight, 0]);
-  const valueTicks = ticks(0, maxVal, 4);
+  // Rounded out to whole ticks, so no bar is beyond the last gridline.
+  const valueMax = niceExtent(0, maxVal, 4)[1];
+  const valueScale = linearScale([0, valueMax], isHorizontal ? [0, plotWidth] : [plotHeight, 0]);
+  const valueTicks = ticks(0, valueMax, 4);
   // Lines below zero fall off the plot (bars start at 0) and are left out.
   const references = placeReferences(
     referenceLines.map((r) => ({ ...r, axis: isHorizontal ? ("x" as const) : undefined })),
@@ -161,7 +179,9 @@ export function BarChart({
   const referenceTexts = references.map((r) => r.text);
   const skip = isHorizontal
     ? labelSkip(count, plotHeight, 20)
-    : labelSkip(count, plotWidth, rotateLabels ? 18 : 30);
+    : rotateLabels
+      ? labelSkip(count, plotWidth, 18)
+      : 1;
 
   const activate = interactive
     ? (si: number, i: number) => {
@@ -202,31 +222,35 @@ export function BarChart({
   });
 
   const subBarWidth = categoryScale.bandwidth / (stacked ? 1 : rows.length);
+  /** A bar's rectangle in plot px. */
+  const barRect = (si: number, i: number) => {
+    const v = cell(si, i);
+    let below = 0;
+    if (stacked) for (let s = 0; s < si; s++) below += cell(s, i);
+    const band = multi && !stacked ? Math.max(subBarWidth - 1, 0) : categoryScale.bandwidth;
+    const bandStart = categoryScale.offset(i) + (stacked ? 0 : si * subBarWidth);
+    const from = stacked ? below : 0;
+    return isHorizontal
+      ? {
+          x: valueScale(from),
+          y: bandStart,
+          width: valueScale(from + v) - valueScale(from),
+          height: band,
+        }
+      : {
+          x: bandStart,
+          y: valueScale(from + v),
+          width: band,
+          height: valueScale(from) - valueScale(from + v),
+        };
+  };
   const bars = rows.map((row, si) => {
     const marks = categories.map((label, i) => {
-      const v = cell(si, i);
-      let below = 0;
-      if (stacked) for (let s = 0; s < si; s++) below += cell(s, i);
-      const band = multi && !stacked ? Math.max(subBarWidth - 1, 0) : categoryScale.bandwidth;
-      const bandStart = categoryScale.offset(i) + (stacked ? 0 : si * subBarWidth);
-      const from = stacked ? below : 0;
       const selected = selection.isSelected({ series: si, point: i });
       return (
         <rect
           key={i}
-          {...(isHorizontal
-            ? {
-                x: valueScale(from),
-                y: bandStart,
-                width: valueScale(from + v) - valueScale(from),
-                height: band,
-              }
-            : {
-                x: bandStart,
-                y: valueScale(from + v),
-                width: band,
-                height: valueScale(from) - valueScale(from + v),
-              })}
+          {...barRect(si, i)}
           className={
             isHorizontal ? "raster-bar__bar raster-bar__bar--horizontal" : "raster-bar__bar"
           }
@@ -238,7 +262,7 @@ export function BarChart({
               {
                 series: multi ? row.name : undefined,
                 x: label,
-                y: format(v),
+                y: format(cell(si, i)),
                 index: i,
                 count,
               },
@@ -372,7 +396,7 @@ export function BarChart({
               textAnchor="end"
               className="raster-chart__tick"
             >
-              {label}
+              {truncateLabel(label, labelRoom)}
             </text>
           ) : (
             <text
@@ -383,13 +407,25 @@ export function BarChart({
               className="raster-chart__tick"
               transform={rotateLabels ? `rotate(-45, ${mid}, ${plotHeight + 16})` : undefined}
             >
-              {label}
+              {truncateLabel(label, labelRoom)}
             </text>
           );
         })}
 
         {bars}
-        <ReferenceLines lines={references} plotWidth={plotWidth} plotHeight={plotHeight} />
+        <ReferenceLines
+          lines={references}
+          plotWidth={plotWidth}
+          plotHeight={plotHeight}
+          avoid={{
+            boxes: rows.flatMap((_, si) =>
+              categories.map((_, i): Box => {
+                const r = barRect(si, i);
+                return [r.x, r.y, r.x + r.width, r.y + r.height];
+              }),
+            ),
+          }}
+        />
       </g>
     </SvgChartFrame>
   );

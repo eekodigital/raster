@@ -1,6 +1,6 @@
 import { feature } from "topojson-client";
 import { useMemo } from "react";
-import { extent, linearScale } from "../../utils/chart-math.js";
+import { clamp, extent, linearScale } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 
@@ -72,9 +72,14 @@ export type GeoChartProps = ChartFrameOptions &
   };
 
 // Built-in projections
+
+/** Mercator's latitude limit, as web maps use: the map is then square. */
+const MAX_LAT = 85.0511;
+
 function mercator(lon: number, lat: number): [number, number] {
   const x = (lon + 180) / 360;
-  const latRad = (lat * Math.PI) / 180;
+  // Clamped as web maps do: the poles are infinitely far away in Mercator.
+  const latRad = (clamp(lat, -MAX_LAT, MAX_LAT) * Math.PI) / 180;
   const y = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2;
   return [x, y];
 }
@@ -92,24 +97,63 @@ function getProjection(p: GeoChartProps["projection"]): ProjectionFn {
 // Uniform scaling parameters to preserve the projection's natural aspect ratio.
 type ScaleParams = { scaleX: number; scaleY: number; offsetX: number; offsetY: number };
 
+/** Projected bounds: [x0, y0, x1, y1] in the projection's 0–1 units. */
+type Bounds = [number, number, number, number];
+
+/**
+ * Fits the drawn regions and markers (`bounds`) into the plot, keeping the
+ * projection's shape (Mercator's units are square; equirectangular's are
+ * 2:1) and centring the map. A custom projection is stretched to the plot,
+ * as before: its function decides the shape.
+ */
 function getScaleParams(
   projection: GeoChartProps["projection"],
   width: number,
   height: number,
+  bounds: Bounds,
 ): ScaleParams {
   if (typeof projection === "function") {
-    // Custom projection: preserve current behaviour (caller controls aspect)
     return { scaleX: width, scaleY: height, offsetX: 0, offsetY: 0 };
   }
-  if (projection === "equirectangular") {
-    // 2:1 natural aspect (360° lon × 180° lat, both normalised to [0,1])
-    const scaleX = width;
-    const scaleY = width / 2;
-    return { scaleX, scaleY, offsetX: 0, offsetY: (height - scaleY) / 2 };
-  }
-  // Mercator: 1:1 natural aspect
-  const scale = width;
-  return { scaleX: scale, scaleY: scale, offsetX: 0, offsetY: (height - scale) / 2 };
+  // y units per x unit: equirectangular's 0–1 y spans half the distance of its x.
+  const k = projection === "equirectangular" ? 0.5 : 1;
+  // A single point (or nothing) has no size to fit: show the whole world.
+  const [x0, y0, x1, y1] = bounds[2] > bounds[0] || bounds[3] > bounds[1] ? bounds : [0, 0, 1, 1];
+  const w = Math.max(x1 - x0, 1e-9);
+  const h = Math.max((y1 - y0) * k, 1e-9);
+  const scale = Math.min(width / w, height / h);
+  return {
+    scaleX: scale,
+    scaleY: scale * k,
+    offsetX: (width - w * scale) / 2 - x0 * scale,
+    offsetY: (height - h * scale) / 2 - y0 * scale * k,
+  };
+}
+
+/** The projected bounds of every [lon, lat] in `coordinates` and `points`. */
+function projectedBounds(
+  // oxlint-disable-next-line no-explicit-any
+  geometries: any[],
+  points: [number, number][],
+  project: ProjectionFn,
+): Bounds {
+  const b: Bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  const add = (lon: number, lat: number) => {
+    const [x, y] = project(lon, lat);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    b[0] = Math.min(b[0], x);
+    b[1] = Math.min(b[1], y);
+    b[2] = Math.max(b[2], x);
+    b[3] = Math.max(b[3], y);
+  };
+  // oxlint-disable-next-line no-explicit-any
+  const walk = (c: any): void => {
+    if (typeof c?.[0] === "number") add(c[0], c[1]);
+    else if (Array.isArray(c)) c.forEach(walk);
+  };
+  geometries.forEach((g) => walk(g?.coordinates));
+  points.forEach(([lon, lat]) => add(lon, lat));
+  return b;
 }
 
 // Convert GeoJSON coordinates to SVG path, splitting at the antimeridian
@@ -173,7 +217,6 @@ export function GeoChart({
     405,
   );
   const project = getProjection(projection);
-  const scale = getScaleParams(projection, size.width, size.height);
 
   // Extract GeoJSON features from topology
   const objName = objectName ?? Object.keys(topology.objects)[0];
@@ -189,6 +232,32 @@ export function GeoChart({
     const filterSet = new Set(filter);
     return all.filter((f: any) => filterSet.has(String(f.id ?? f.properties?.name ?? "")));
   }, [geojson, filter]);
+
+  // Regions' bounds are worked out once (they walk every coordinate); markers
+  // are added on each render.
+  const regionBounds = useMemo(
+    () =>
+      projectedBounds(
+        features.map((f) => f.geometry),
+        [],
+        project,
+      ),
+    [features, project],
+  );
+  const markerBounds = projectedBounds(
+    [],
+    markers.map((m): [number, number] => [m.lon, m.lat]),
+    project,
+  );
+  // Inset by the largest marker (and a stroke), so edge markers stay inside.
+  const inset = Math.max(1, ...markers.map((m) => (m.size ?? 4) + 1));
+  const fit = getScaleParams(projection, size.width - 2 * inset, size.height - 2 * inset, [
+    Math.min(regionBounds[0], markerBounds[0]),
+    Math.min(regionBounds[1], markerBounds[1]),
+    Math.max(regionBounds[2], markerBounds[2]),
+    Math.max(regionBounds[3], markerBounds[3]),
+  ]);
+  const scale = { ...fit, offsetX: fit.offsetX + inset, offsetY: fit.offsetY + inset };
 
   const dataMap = new Map(data.map((d) => [d.id, d]));
   const regions = features.map((f, i) => {

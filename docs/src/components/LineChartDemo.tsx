@@ -118,7 +118,6 @@ export function LineChartSelectDemo() {
         series={series}
         categories={months}
         title="Results trend (select a point)"
-        aspectRatio={3}
         selectedIndex={selected}
         onSelect={setSelected}
       />

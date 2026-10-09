@@ -63,6 +63,40 @@ describe("RadarChart structure", () => {
   });
 });
 
+describe("RadarChart axis labels", () => {
+  it("anchor away from the centre, and fit beside the web", () => {
+    const axes = ["Perceivable", "Operable", "Understandable", "Robust"];
+    const { container } = render(
+      <RadarChart axes={axes} series={[{ name: "A", data: [1, 2, 3, 4] }]} size={300} title="R" />,
+    );
+    const labels = [...container.querySelectorAll(".raster-radar__label")];
+    // Top, right, bottom, left.
+    expect(labels.map((l) => l.getAttribute("text-anchor"))).toEqual([
+      "middle",
+      "start",
+      "middle",
+      "end",
+    ]);
+    // "Operable" (56 px) starts beside the web and ends inside the 300 px chart.
+    const right = labels[1];
+    expect(Number(right.getAttribute("x")) + 8 * 7).toBeLessThanOrEqual(300);
+    expect(labels.map((l) => l.textContent)).toEqual(axes);
+  });
+
+  it("cut side labels too long for the margin", () => {
+    const { container } = render(
+      <RadarChart
+        axes={["Top", "A very long axis name indeed", "Bottom", "Left"]}
+        series={[{ name: "A", data: [1, 2, 3, 4] }]}
+        size={200}
+        title="R"
+      />,
+    );
+    // 30% of 200 px, less 14, leaves 46 px: 6 characters.
+    expect(container.querySelectorAll(".raster-radar__label")[1].textContent).toBe("A ver…");
+  });
+});
+
 describe("RadarChart keyboard", () => {
   it("wraps round the axes and moves between series", () => {
     render(<RadarChart axes={AXES} series={SERIES} title="S" onSelect={() => {}} />);

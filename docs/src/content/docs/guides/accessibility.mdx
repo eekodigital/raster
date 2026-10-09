@@ -14,11 +14,10 @@ Every chart follows the same pattern, so once you know one you know them all. Ac
     - `g role="group"` per series: "Pass, 6 points"
       - `path role="img"` per mark: "Pass, Feb: 12, 2 of 6" (`role="button"` with `aria-pressed` when the chart is interactive)
   - the legend, in HTML, with swatches matching each series' line and marker
-  - `button aria-expanded`: "Show data table"
-  - the table, hidden until shown: caption "Data for Results trend", `th scope="col"` and `th scope="row"`
+  - `details` with a `summary`: "Show data table", then the table: caption "Data for Results trend", `th scope="col"` and `th scope="row"`
   - `div role="status"`: a polite live region for changes away from focus
 
-- **No `graphics-*` roles.** Support for the Graphics ARIA module is patchy, so charts use `figure`, `group`, `img` and `button`, which every screen reader understands.
+- **No `graphics-*` roles.** Support for the Graphics ARIA module is patchy, so charts use `figure`, `group`, `img`, `button` and native `details`, which every screen reader understands.
 - **Marks are static images unless the chart is interactive.** Pass `onSelect`, `selectedIndex` or `onMarkClick` and marks become `role="button"` with `aria-pressed`.
 - **The tooltip is visual only.** Each mark's name already carries the same text, so the tooltip is `aria-hidden` rather than announced twice.
 - **Sparkline** is word-sized, so it has no marks or table: the drawing is hidden and a visually hidden sentence ("Weekly views: Sparkline, 8 points. Values from 10 to 86. First 10, last 86.") takes its place.
@@ -43,7 +42,7 @@ DonutChart moves round the ring with any arrow key. RadarChart wraps round its a
 
 ## Data table
 
-By default each chart shows a **Show data table** button (`aria-expanded`, `aria-controls`). It reveals a real, visible table: captioned `Data for {title}`, with `th scope` headers and every value run through `formatValue`. It's the most reliable way for anyone to read exact values, and it works with every screen reader.
+By default each chart shows a **Show data table** disclosure: a native `<details>` and `<summary>`, which screen readers announce as an expandable button, and which opens without JavaScript. It reveals a real, visible table: captioned `Data for {title}`, with `th scope` headers and every value run through `formatValue`. It's the most reliable way for anyone to read exact values, and it works with every screen reader.
 
 If the page already shows the same data, keep the table for assistive technology only:
 

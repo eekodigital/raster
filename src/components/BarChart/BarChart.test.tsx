@@ -112,6 +112,43 @@ describe("BarChart structure", () => {
   });
 });
 
+describe("BarChart category labels", () => {
+  const LONG = [
+    { label: "Perceivable", value: 18 },
+    { label: "Operable", value: 24 },
+    { label: "Understandable", value: 12 },
+    { label: "Robust", value: 6 },
+  ];
+  const at = (px: number, ui: React.ReactElement) => {
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(px);
+    const { container } = render(ui);
+    width.mockRestore();
+    return [...container.querySelectorAll(".raster-chart__tick")].filter((t) =>
+      LONG.some((d) => d.label.startsWith(t.textContent!.replace("…", ""))),
+    );
+  };
+
+  it("rotate when they're wider than a bar's slot, and only then", () => {
+    expect(at(720, <BarChart data={LONG} title="T" />)[0].getAttribute("transform")).toBeNull();
+    const narrow = at(300, <BarChart data={LONG} title="T" />);
+    expect(narrow.map((t) => t.textContent)).toEqual(LONG.map((d) => d.label));
+    expect(narrow[0].getAttribute("transform")).toMatch(/^rotate\(-45/);
+  });
+
+  it("get a left margin to fit when horizontal, cut with an ellipsis past 40% of the width", () => {
+    const wide = at(720, <BarChart data={LONG} direction="horizontal" title="T" />);
+    expect(wide.map((t) => t.textContent)).toEqual(LONG.map((d) => d.label));
+    const narrow = at(200, <BarChart data={LONG} direction="horizontal" title="T" />);
+    // 40% of 200 px, less a 12 px gap, is 68 px: 9 characters.
+    expect(narrow.map((t) => t.textContent)).toEqual([
+      "Perceiva…",
+      "Operable",
+      "Understa…",
+      "Robust",
+    ]);
+  });
+});
+
 describe("BarChart multi-series", () => {
   for (const mode of ["stacked", "grouped"] as const) {
     it(`${mode}: series are groups of labelled bars`, () => {

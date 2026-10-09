@@ -430,10 +430,6 @@
   stroke-width: 1;
 }
 
-.raster-radar__label {
-  text-anchor: middle;
-}
-
 .raster-radar__area {
   opacity: 0.15;
 }
@@ -602,13 +598,16 @@
 }
 
 .raster-geo__legend {
+  /* One row: the gradient shrinks instead (items wrap before they shrink). */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem;
 }
 
 .raster-geo__gradient {
   height: 8px;
-  width: 120px;
+  flex: 0 1 120px;
+  min-width: 40px;
   border-radius: 4px;
 }
 

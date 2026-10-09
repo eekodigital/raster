@@ -67,6 +67,14 @@ export function bandScale(
   };
 }
 
+/** A round step (1, 2 or 5 × a power of ten) for about `count` ticks across min–max. */
+function niceStep(min: number, max: number, count: number): number {
+  const rawStep = (max - min) / count;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const residual = rawStep / magnitude;
+  return (residual <= 1.5 ? 1 : residual <= 3.5 ? 2 : residual <= 7.5 ? 5 : 10) * magnitude;
+}
+
 /**
  * Generate nice tick values between min and max.
  */
@@ -74,27 +82,34 @@ export function ticks(min: number, max: number, count: number): number[] {
   if (count <= 0) return [];
   if (min === max) return [min];
 
-  const range = max - min;
-  const rawStep = range / count;
-
-  // Round step to a "nice" value (1, 2, 5, 10, 20, 50, etc.)
-  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-  const residual = rawStep / magnitude;
-  const niceStep =
-    residual <= 1.5
-      ? 1 * magnitude
-      : residual <= 3.5
-        ? 2 * magnitude
-        : residual <= 7.5
-          ? 5 * magnitude
-          : 10 * magnitude;
-
-  const start = Math.ceil(min / niceStep) * niceStep;
+  const step = niceStep(min, max, count);
+  const start = Math.ceil(min / step) * step;
   const result: number[] = [];
-  for (let v = start; v <= max + niceStep * 0.001; v += niceStep) {
+  for (let v = start; v <= max + step * 0.001; v += step) {
     result.push(Math.round(v * 1e10) / 1e10); // avoid floating point drift
   }
   return result;
+}
+
+/**
+ * min–max widened out to whole steps of its `count` ticks, so the first and
+ * last ticks sit on the ends of the axis and no mark is beyond them.
+ */
+export function niceExtent(min: number, max: number, count: number): [number, number] {
+  if (count <= 0 || !(max > min)) return [min, max];
+  const round = (v: number) => Math.round(v * 1e10) / 1e10;
+  // Widening can change the step; repeat until the ends sit on its ticks.
+  for (let i = 0; i < 4; i++) {
+    const step = niceStep(min, max, count);
+    const next: [number, number] = [
+      round(Math.floor(min / step) * step),
+      round(Math.ceil(max / step) * step),
+    ];
+    // Too small to round (or settled): keep what we have.
+    if (!(next[1] > next[0]) || (next[0] === min && next[1] === max)) break;
+    [min, max] = next;
+  }
+  return [min, max];
 }
 
 /**
@@ -112,17 +127,56 @@ export function labelSkip(count: number, availableWidth: number, minSpacing = 30
   return Math.ceil(minSpacing / perLabel);
 }
 
+/** An axis label: its x in px, its text and how it anchors there. */
+export type AxisTick = { x: number; text: string; anchor: "start" | "middle" | "end" };
+
+/** Estimated px per character of the 0.75rem tick font. */
+export const TICK_CHAR = 7;
+
 /**
- * Determine whether category labels should be rotated based on density.
- * Returns true when there are enough categories that horizontal labels would overlap.
+ * Whether axis labels leave at least 8 px between neighbours (by estimated
+ * width, honouring each anchor), and `spacing` px between ticks if given.
  */
-export function shouldRotateLabels(
+export function ticksFit(ticks: AxisTick[], spacing?: number): boolean {
+  const span = (t: AxisTick) => {
+    const w = t.text.length * TICK_CHAR;
+    const x0 = t.anchor === "start" ? t.x : t.anchor === "end" ? t.x - w : t.x - w / 2;
+    return [x0, x0 + w];
+  };
+  return ticks.every(
+    (t, i) =>
+      !i ||
+      (span(t)[0] - span(ticks[i - 1])[1] >= 8 &&
+        (spacing === undefined || t.x - ticks[i - 1].x >= spacing)),
+  );
+}
+
+/**
+ * Labels for `count` categories, thinned to every k-th for the smallest k
+ * whose labels fit. The last category is always labelled; the label before
+ * it is dropped if the two would touch. When even the first and last don't
+ * fit, only the first is kept.
+ */
+export function categoryTicks(
   count: number,
-  availableWidth: number,
-  minSpacing = 40,
-): boolean {
-  if (count <= 1) return false;
-  return availableWidth / count < minSpacing;
+  tick: (i: number) => AxisTick,
+  spacing?: number,
+): AxisTick[] {
+  for (let k = 1; k < count; k++) {
+    const out: AxisTick[] = [];
+    for (let i = 0; i < count - 1; i += k) out.push(tick(i));
+    const last = tick(count - 1);
+    if (out.length > 1 && !ticksFit([out.at(-1)!, last], spacing)) out.pop();
+    out.push(last);
+    if (ticksFit(out, spacing)) return out;
+  }
+  return count ? [tick(0)] : [];
+}
+
+/** `text` cut with an ellipsis to fit `px` (by estimated width). */
+export function truncateLabel(text: string, px: number): string {
+  const max = Math.max(1, Math.floor(px / TICK_CHAR));
+  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 }
 
 /**
