@@ -1,16 +1,15 @@
-import { extent, markerPath } from "../../utils/chart-math.js";
+import { clamp, extent, markerPath, TICK_CHAR, truncateLabel } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { HORIZONTAL_KEYS, VERTICAL_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
-import { ChartFrame } from "../shared/ChartFrame.js";
+import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 
 export type RadarSeries = {
   name: string;
@@ -29,11 +28,14 @@ export type RadarChartProps = ChartFrameOptions & {
   levels?: number;
   /** Formats values in marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  /** Passing this (or `onSelect`/`selectedIndex`) makes points toggle buttons. */
-  onPointClick?: (seriesIndex: number, axisIndex: number, value: number) => void;
+  /**
+   * Called when a mark is clicked (or activated with Enter/Space), with its
+   * index (as `onSelect` gives it), value and no datum. Passing this (or
+   * `onSelect`/`selectedIndex`) makes marks toggle buttons.
+   */
+  onMarkClick?: (mark: MarkClick<RadarPointIndex>) => void;
   selectedIndex?: RadarPointIndex | null;
   onSelect?: (index: RadarPointIndex | null) => void;
-  exportRef?: React.Ref<ChartExportHandle>;
 };
 
 function polarToCartesian(cx: number, cy: number, r: number, angleIndex: number, total: number) {
@@ -48,22 +50,30 @@ export function RadarChart({
   size: sizeProp,
   levels = 4,
   formatValue,
-  onPointClick,
+  onMarkClick,
   selectedIndex,
   onSelect,
-  exportRef,
   labels: labelOverrides,
   ...frame
 }: RadarChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<RadarPointIndex>(selectedIndex, onSelect, labels);
-  const interactive = !!(onPointClick || onSelect || selectedIndex !== undefined);
+  const interactive = !!(onMarkClick || onSelect || selectedIndex !== undefined);
 
   const measured = useContainerWidth(plotRef, 300);
   const size = sizeProp ?? measured;
   const c = size / 2;
-  const radius = Math.max(size / 2 - 40, 0); // margin for labels
   const count = axes.length;
+  // Axis labels sit outside the web, anchored away from the centre. Labels to
+  // the sides need room for their width: the margin fits the longest (40 px
+  // to 30% of the chart), and longer ones are cut with an ellipsis.
+  const cos = (i: number) => Math.cos((Math.PI * 2 * i) / count - Math.PI / 2);
+  const sideRoom = Math.max(
+    0,
+    ...axes.map((a, i) => (Math.abs(cos(i)) > 0.3 ? a.length * TICK_CHAR : 0)),
+  );
+  const margin = clamp(sideRoom + 14, 40, size * 0.3);
+  const radius = Math.max(size / 2 - margin, 0);
   // One value per axis: extra values have no axis to sit on; missing ones aren't drawn.
   const data = series.map((s) => s.data.slice(0, count));
   const values = data.flat();
@@ -72,7 +82,7 @@ export function RadarChart({
   const activate = interactive
     ? (si: number, pi: number) => {
         selection.toggle({ series: si, point: pi });
-        onPointClick?.(si, pi, data[si][pi]);
+        onMarkClick?.({ index: { series: si, point: pi }, value: data[si][pi], datum: undefined });
       }
     : undefined;
 
@@ -85,21 +95,18 @@ export function RadarChart({
   });
 
   const [minVal, maxData] = values.length ? extent(values) : [0, 0];
-  const summary = labels.summary(
-    {
-      type: "radar",
-      series: series.length,
-      points: values.length,
-      x: count ? [axes[0], axes[count - 1]] : undefined,
-      y: values.length ? [format(minVal), format(maxData)] : undefined,
-    },
-    n,
-  );
+  const summary = describe({
+    type: "radar",
+    series: series.length,
+    points: values.length,
+    x: count ? [axes[0], axes[count - 1]] : undefined,
+    y: values.length ? [format(minVal), format(maxData)] : undefined,
+  });
 
   const gridLevels = Array.from({ length: levels }, (_, i) => ((i + 1) / levels) * radius);
 
   return (
-    <ChartFrame
+    <SvgChartFrame
       {...frame}
       labels={labels}
       summary={summary}
@@ -138,17 +145,20 @@ export function RadarChart({
 
       {axes.map((axis, i) => {
         const end = polarToCartesian(c, c, radius, i, count);
-        const labelPos = polarToCartesian(c, c, radius + 18, i, count);
+        const labelPos = polarToCartesian(c, c, radius + 8, i, count);
+        const [x, y] = [cos(i), Math.sin((Math.PI * 2 * i) / count - Math.PI / 2)];
         return (
           <g key={axis}>
             <line x1={c} y1={c} x2={end.x} y2={end.y} className="raster-chart__axis" />
             <text
               x={labelPos.x}
               y={labelPos.y}
-              dy="0.35em"
+              // Away from the centre: beside the axis end, above or below it.
+              textAnchor={x > 0.3 ? "start" : x < -0.3 ? "end" : "middle"}
+              dy={y < -0.3 ? "0" : y > 0.3 ? "0.8em" : "0.35em"}
               className="raster-chart__tick raster-radar__label"
             >
-              {axis}
+              {Math.abs(x) > 0.3 ? truncateLabel(axis, margin - 14) : axis}
             </text>
           </g>
         );
@@ -203,6 +213,6 @@ export function RadarChart({
           </g>
         );
       })}
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }

@@ -1,16 +1,15 @@
 import { extent, pieAngles, strokeArcPath, sum } from "../../utils/chart-math.js";
 import { cn } from "../../utils/cn.js";
 import type { NumberFormat } from "../../utils/labels.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
 
-export type { ChartExportHandle };
 import { useContainerWidth } from "../../utils/use-container-width.js";
 import { ALL_ARROW_KEYS, useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useSelection } from "../../utils/use-selection.js";
-import { ChartFrame } from "../shared/ChartFrame.js";
+import { SvgChartFrame } from "../shared/ChartFrame.js";
 import type { ChartFrameOptions } from "../shared/ChartFrame.js";
 import { ChartLegend } from "../shared/ChartLegend.js";
 import { markProps, useChart } from "../shared/use-chart.js";
+import type { MarkClick } from "../shared/use-chart.js";
 
 export type DonutDatum = {
   label: string;
@@ -28,11 +27,14 @@ export type DonutChartProps = ChartFrameOptions & {
   showLegend?: boolean;
   /** Formats values in marks and the table. Default: `Intl.NumberFormat(labels.locale)`. */
   formatValue?: NumberFormat;
-  /** Passing this (or `onSelect`/`selectedIndex`) makes segments toggle buttons. */
-  onSegmentClick?: (datum: DonutDatum, index: number) => void;
+  /**
+   * Called when a mark is clicked (or activated with Enter/Space), with its
+   * index (as `onSelect` gives it), value and segment. Passing this (or
+   * `onSelect`/`selectedIndex`) makes marks toggle buttons.
+   */
+  onMarkClick?: (mark: MarkClick<number, DonutDatum>) => void;
   selectedIndex?: number | null;
   onSelect?: (index: number | null) => void;
-  exportRef?: React.Ref<ChartExportHandle>;
 };
 
 export function DonutChart({
@@ -42,17 +44,16 @@ export function DonutChart({
   children,
   showLegend = false,
   formatValue,
-  onSegmentClick,
+  onMarkClick,
   selectedIndex,
   onSelect,
-  exportRef,
   labels: labelOverrides,
   className,
   ...frame
 }: DonutChartProps) {
-  const { plotRef, labels, n, format, tooltip } = useChart(labelOverrides, formatValue, exportRef);
+  const { plotRef, labels, n, format, tooltip, describe } = useChart(labelOverrides, formatValue);
   const selection = useSelection<number>(selectedIndex, onSelect, labels);
-  const interactive = !!(onSegmentClick || onSelect || selectedIndex !== undefined);
+  const interactive = !!(onMarkClick || onSelect || selectedIndex !== undefined);
   const measured = useContainerWidth(plotRef, 160);
   const size = sizeProp ?? measured;
 
@@ -71,7 +72,7 @@ export function DonutChart({
     ? (_: number, item: number) => {
         const i = visible[item];
         selection.toggle(i);
-        onSegmentClick?.(data[i], i);
+        onMarkClick?.({ index: i, value: data[i].value, datum: data[i] });
       }
     : undefined;
 
@@ -83,20 +84,17 @@ export function DonutChart({
   });
 
   const [minVal, maxVal] = data.length ? extent(data.map((d) => d.value)) : [0, 0];
-  const summary = labels.summary(
-    {
-      type: "donut",
-      series: 1,
-      points: data.length,
-      y: data.length ? [format(minVal), format(maxVal)] : undefined,
-    },
-    n,
-  );
+  const summary = describe({
+    type: "donut",
+    series: 1,
+    points: data.length,
+    y: data.length ? [format(minVal), format(maxVal)] : undefined,
+  });
 
   let sweepBefore = 0;
 
   return (
-    <ChartFrame
+    <SvgChartFrame
       {...frame}
       className={cn("raster-donut", className)}
       labels={labels}
@@ -169,6 +167,6 @@ export function DonutChart({
           <div className="raster-donut__centre">{children}</div>
         </foreignObject>
       )}
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }

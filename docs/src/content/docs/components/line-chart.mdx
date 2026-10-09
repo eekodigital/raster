@@ -9,6 +9,9 @@ import {
   LineChartMultiDemo,
   LineChartAreaDemo,
   LineChartSelectDemo,
+  LineChartDatesDemo,
+  LineChartDenseDemo,
+  LineChartReferenceDemo,
 } from "../../../components/LineChartDemo.tsx";
 
 ## Basic
@@ -44,7 +47,7 @@ Set `area` to fill below the line.
 Pass `onSelect` (and optionally `selectedIndex`) to make points toggle buttons. Enter or Space toggles the focused point; Escape clears the selection.
 
 <Example
-  code={`const [selected, setSelected] = useState<LinePointIndex | null>(null);\n\n<LineChart\n  series={series}\n  categories={months}\n  title="Results trend (select a point)"\n  aspectRatio={3}\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
+  code={`const [selected, setSelected] = useState<LinePointIndex | null>(null);\n\n<LineChart\n  series={series}\n  categories={months}\n  title="Results trend (select a point)"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
 >
   <LineChartSelectDemo client:load />
 </Example>
@@ -65,6 +68,59 @@ Keep `categories` complete: they name each point and label the table rows. To th
 
 Only the first and last categories anchor to the plot edges; every other tick centres on its point.
 
+## Dates
+
+`categories` are evenly spaced, which is right for steps like weeks of a course or survey waves. For dates, pass `xAxis={timeAxis(dates)}` instead. Points are then spaced by elapsed time, so irregular dates are drawn at their real distance apart. The data below is missing 9–11 September:
+
+<Example
+  code={`import { LineChart } from '@eekodigital/raster';\nimport { timeAxis } from '@eekodigital/raster/time';\n\n<LineChart\n  series={[{ name: 'Views', data: views }]}\n  xAxis={timeAxis(days, { interval: 'day' })}\n  labels={{ locale: 'en-GB' }}\n  title="Daily views"\n/>`}
+>
+  <LineChartDatesDemo client:load />
+</Example>
+
+`timeAxis` lives at `@eekodigital/raster/time` (about 1 KB), so charts with categories don't carry date code.
+
+- **Values** are `Date`s, ISO strings or epoch milliseconds, in ascending order, one per data point. Date-only strings like `"2026-10-03"` are UTC midnight.
+- **Ticks** fall on calendar boundaries: days for short ranges, Mondays for medium ones, then months, quarters and years, chosen to fit the width. Month ticks name the year on January and on the first tick.
+- **Gaps:** `interval` (`"day"`, `"week"`, `"month"`, `"quarter"` or `"year"`) is the data's cadence. Where a point is more than one interval after the previous one, the line and area break. Without it, the line joins every point.
+- **Time zone:** ticks and names use UTC unless you pass `timeZone`, e.g. `"Europe/London"`. Server and client render the same thing, because the zone is named rather than taken from the machine.
+- **Names:** points, the summary and the data table use the long date in `labels.locale`: "Views, 3 October 2026: 42, 3 of 12" in `en-GB`, "October 3, 2026" in `en`. The default locale is `en` (US order), so set `labels={{ locale: "en-GB" }}` (or your users' locale) for day-first dates. Points that aren't at midnight add the time. Pass `format` (`Intl.DateTimeFormatOptions` or a function) to change it. The table's first column is headed `labels.dateColumn` ("Date").
+
+`xTickFilter` and `formatXTick` work on date ticks too: they get each tick's index and text ("3 Oct"), so you can thin or reword them. `xLabelMinSpacing` sets the minimum px between date ticks, which `timeAxis` otherwise estimates from the width of the locale's labels.
+
+For large series, create the axis with `useMemo` so its formatting and gap checks aren't repeated on every render: `const x = useMemo(() => timeAxis(days, { interval: "day" }), [days])`.
+
+## Reference lines
+
+`referenceLines` draws dashed, labelled lines for targets, thresholds and goals. The value scale stretches to include each line.
+
+<Example
+  code={`<LineChart\n  series={[{ name: 'Assessed', data: [10, 25, 40, 60, 72, 86] }]}\n  categories={['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6']}\n  referenceLines={[{ value: 80, label: 'Target' }]}\n  title="Assessment progress against target"\n/>`}
+>
+  <LineChartReferenceDemo client:load />
+</Example>
+
+- **Vertical lines:** with a [date axis](#dates), `{ value: "2026-10-05", label: "Launch", axis: "x" }` draws a vertical line at that date. A date outside the data's range is left out. Categories have no in-between values, so they don't take x lines.
+- **Accessibility:** the line isn't focusable, and its SVG label is hidden from assistive technology. The same text is at the end of the summary ("… Target: 80.") and in the table caption ("Data for …, with a reference line (Target: 80)"). Reword both with `labels.referenceLine` and `labels.referenceNote`.
+- **Styling:** the colour is `--raster-reference`, falling back to `--raster-text-subtle`. The line keeps its dash in forced-colours mode, so it stays distinct from series lines.
+
+## Large series
+
+Above 200 points in a series, LineChart switches to dense mode. Each series is drawn as one path, downsampled to the first, lowest, highest and last point in each pixel column (which looks the same), with no per-point marks. At 1,000 points that takes the server HTML from about 310 KB to about 62 KB, and the SVG from 261 KB to 13 KB.
+
+<Example
+  code={`<LineChart\n  series={[\n    { name: 'Views', data: views },       // 730 days\n    { name: 'Visitors', data: visitors },\n  ]}\n  xAxis={timeAxis(days, { interval: 'day' })}\n  title="Daily traffic, 2025–2026"\n  selectedIndex={selected}\n  onSelect={setSelected}\n/>`}
+>
+  <LineChartDenseDemo client:load />
+</Example>
+
+- **One control.** The chart has a single focusable slider (a visually hidden `<input type="range">`). Its name is the series, and `aria-valuetext` names the current point, e.g. "Views, 3 October 2025: 512, 276 of 730". Screen readers announce each change, NVDA switches into focus mode so the arrow keys reach the chart, and VoiceOver on iOS can swipe through the points.
+- **Same keys** as other charts: ← / → point, Home / End, PageUp / PageDown 10 points, ↑ / ↓ series, Enter / Space select (", selected" is added to the value), Escape clear.
+- **Marker:** the current point shows a marker with the focus ring while the slider has focus. Pointing anywhere over the plot moves it to the nearest point and shows the tooltip; clicking selects that point.
+- **Still in the HTML:** the summary and the data table, so every value is available without JavaScript.
+- `curve="smooth"` is drawn straight in dense mode, because curves can't be seen at that density and cost about three times the bytes.
+- `dense={false}` keeps per-point marks, `dense` forces dense mode, and `dense={500}` changes the threshold.
+
 ## Accessibility
 
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
@@ -72,7 +128,7 @@ Only the first and last categories anchor to the plot edges; every other tick ce
 - Each series is a `role="group"` named `{series}, {n} points`.
 - Each point is labelled `{series}, {x}: {y}, 3 of 12`. With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
 - Points use a different marker shape per series (circle, square, triangle…) as well as colour.
-- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- A visible **Show data table** disclosure (a native `<details>`/`<summary>`, so it opens without JavaScript) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
 - Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
 - Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
 
@@ -95,7 +151,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -107,7 +162,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>LineSeries[]</code>
       </td>
-      <td>—</td>
       <td>
         Required. <code>&#123; name, data: number[], color? &#125;</code>.
       </td>
@@ -119,12 +173,52 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string[]</code>
       </td>
-      <td>—</td>
       <td>
-        Required. X-axis categories, one per point. They name each point and label the table rows,
-        so keep them complete and thin the axis with <code>xTickFilter</code> or{" "}
-        <code>formatXTick</code>. (A <code>""</code> category still hides its tick, but also leaves
-        that point without an x value in its name.)
+        Required unless <code>xAxis</code> is given. X-axis categories, one per point, evenly
+        spaced. They name each point and label the table rows, so keep them complete and thin the
+        axis with <code>xTickFilter</code> or <code>formatXTick</code>. (A <code>""</code> category
+        still hides its tick, but also leaves that point without an x value in its name.)
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>xAxis</code>
+      </td>
+      <td>
+        <code>XAxis</code>
+      </td>
+      <td>
+        A date axis instead of <code>categories</code>:{" "}
+        <code>timeAxis(dates, &#123; interval?, timeZone?, format? &#125;)</code> from{" "}
+        <code>@eekodigital/raster/time</code>. See <a href="#dates">Dates</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>referenceLines</code>
+      </td>
+      <td>
+        <code>ReferenceLine[]</code>
+      </td>
+      <td>
+        <code>&#123; value, label, axis? &#125;</code>: targets and thresholds as dashed, labelled
+        lines. See <a href="#reference-lines">Reference lines</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>dense</code>
+      </td>
+      <td>
+        <code>boolean | number</code>
+        <div class="props-table__default">
+          Default: <code>200</code>
+        </div>
+      </td>
+      <td>
+        Dense mode: one path per series and a single slider instead of per-point marks. A number is
+        the threshold (points in the longest series); <code>true</code> or <code>false</code> forces
+        it. See <a href="#large-series">Large series</a>.
       </td>
     </tr>
     <tr>
@@ -133,9 +227,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Fill below the line.</td>
     </tr>
@@ -145,9 +239,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Stack series.</td>
     </tr>
@@ -157,9 +251,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"linear" | "smooth"</code>
-      </td>
-      <td>
-        <code>"linear"</code>
+        <div class="props-table__default">
+          Default: <code>"linear"</code>
+        </div>
       </td>
       <td>Line interpolation.</td>
     </tr>
@@ -170,7 +264,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>X-axis title.</td>
     </tr>
     <tr>
@@ -180,7 +273,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Y-axis title.</td>
     </tr>
     <tr>
@@ -189,9 +281,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"horizontal" | "vertical" | "both" | "none"</code>
-      </td>
-      <td>
-        <code>"horizontal"</code>
+        <div class="props-table__default">
+          Default: <code>"horizontal"</code>
+        </div>
       </td>
       <td>Grid lines.</td>
     </tr>
@@ -201,13 +293,13 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>
-        <code>Intl.NumberFormat</code>
-      </td>
-      <td>
-        Formats values in ticks, marks and the table. Defaults to{" "}
-        <code>Intl.NumberFormat(labels.locale)</code>.
+        Formats values in ticks, marks and the table. Defaults to <code>Intl.NumberFormat</code> for{" "}
+        <code>labels.locale</code>.
       </td>
     </tr>
     <tr>
@@ -218,11 +310,8 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>number</code>
       </td>
       <td>
-        <code>30</code>
-      </td>
-      <td>
-        Minimum px between x labels before they thin out. Thinning keeps the first and last
-        categories.
+        Minimum px between x ticks. Labels already thin out so they don't touch (by their estimated
+        width), keeping the first and last categories; set this to space them further apart.
       </td>
     </tr>
     <tr>
@@ -232,10 +321,10 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(index: number, category: string) =&gt; boolean</code>
       </td>
-      <td>—</td>
       <td>
-        Which x ticks to label. Replaces the automatic thinning. Points and the table keep every
-        category.
+        Which x ticks to label, given each tick's index and text. With categories it replaces the
+        automatic thinning; with a date axis it filters the calendar ticks. Points and the table
+        keep every value.
       </td>
     </tr>
     <tr>
@@ -245,9 +334,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(category: string, index: number) =&gt; string</code>
       </td>
-      <td>—</td>
       <td>
-        Text for an x tick, e.g. a short date. Return <code>""</code> to hide it.
+        Text for an x tick, given its text and index (a category, or a date tick's label). Return
+        <code>""</code> to hide it.
       </td>
     </tr>
     <tr>
@@ -256,9 +345,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>200</code>
+        <div class="props-table__default">
+          Default: <code>200</code>
+        </div>
       </td>
       <td>Plot height in px.</td>
     </tr>
@@ -269,7 +358,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>
         Width ÷ height, instead of <code>height</code>. The plot box is sized in CSS either way, so
         server-rendered and hydrated layouts match.
@@ -277,13 +365,16 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>onPointClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(series, point, value) =&gt; void</code>
+        <code>(mark: &#123; index: LinePointIndex, value &#125;) =&gt; void</code>
       </td>
-      <td>—</td>
-      <td>Makes points buttons.</td>
+      <td>
+        Called when a mark is clicked (or activated with Enter/Space) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is what{" "}
+        <code>onSelect</code> gives. Makes marks toggle buttons.
+      </td>
     </tr>
     <tr>
       <td>
@@ -292,7 +383,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>&#123; series, point &#125; | null</code>
       </td>
-      <td>—</td>
       <td>Controlled selection.</td>
     </tr>
     <tr>
@@ -302,7 +392,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(index | null) =&gt; void</code>
       </td>
-      <td>—</td>
       <td>Makes points buttons; called on toggle and Escape.</td>
     </tr>
     <tr>
@@ -312,7 +401,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Required. Visible title: names the figure and captions the data table.</td>
     </tr>
     <tr>
@@ -321,9 +409,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Hide the title visually. It still names the chart for assistive technology.</td>
     </tr>
@@ -332,9 +420,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>labels</code>
       </td>
       <td>
-        <code>Partial&lt;ChartLabels&gt;</code>
+        <code>ChartLabelOverrides</code>
+        <div class="props-table__default">Default: English</div>
       </td>
-      <td>English</td>
       <td>
         Generated strings and the number locale. See{" "}
         <a href="/guides/accessibility/#labels">Accessibility</a>.
@@ -346,22 +434,23 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"disclosure" | "visually-hidden"</code>
-      </td>
-      <td>
-        <code>"disclosure"</code>
+        <div class="props-table__default">
+          Default: <code>"disclosure"</code>
+        </div>
       </td>
       <td>How the data table is offered.</td>
     </tr>
     <tr>
       <td>
-        <code>exportRef</code>
+        <code>ref</code>
       </td>
       <td>
-        <code>Ref&lt;ChartExportHandle&gt;</code>
+        <code>Ref&lt;HTMLDivElement&gt;</code>
       </td>
-      <td>—</td>
       <td>
-        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+        The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
+        <code>@eekodigital/raster/export</code>. See{" "}
+        <a href="/guides/exporting/">Exporting charts</a>.
       </td>
     </tr>
     <tr>
@@ -371,7 +460,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Class on the figure.</td>
     </tr>
   </tbody>

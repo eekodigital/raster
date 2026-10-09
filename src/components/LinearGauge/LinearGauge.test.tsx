@@ -5,7 +5,7 @@ import { LinearGauge } from "./LinearGauge.js";
 
 describe("LinearGauge", () => {
   it("is a meter named by its visible label", () => {
-    render(<LinearGauge value={42} max={100} label="Progress" />);
+    render(<LinearGauge value={42} max={100} title="Progress" />);
     const meter = screen.getByRole("meter", { name: "Progress" });
     expect(document.getElementById(meter.getAttribute("aria-labelledby")!)?.textContent).toBe(
       "Progress",
@@ -13,7 +13,9 @@ describe("LinearGauge", () => {
   });
 
   it("exposes min, max, value and a formatted valuetext", () => {
-    render(<LinearGauge value={30} min={10} max={50} label="Load" format={(v) => `${v} kg`} />);
+    render(
+      <LinearGauge value={30} min={10} max={50} title="Load" formatValue={(v) => `${v} kg`} />,
+    );
     const meter = screen.getByRole("meter", { name: "Load" });
     expect(meter.getAttribute("aria-valuemin")).toBe("10");
     expect(meter.getAttribute("aria-valuemax")).toBe("50");
@@ -24,15 +26,15 @@ describe("LinearGauge", () => {
 
   it("fills relative to min and clamps", () => {
     const { container, rerender } = render(
-      <LinearGauge value={30} min={10} max={50} label="Load" />,
+      <LinearGauge value={30} min={10} max={50} title="Load" />,
     );
     const fill = () => container.querySelector<HTMLElement>(".raster-linear-gauge__fill")!;
     expect(fill().style.width).toBe("50%");
-    rerender(<LinearGauge value={99} min={10} max={50} label="Load" />);
+    rerender(<LinearGauge value={99} min={10} max={50} title="Load" />);
     expect(fill().style.width).toBe("100%");
-    rerender(<LinearGauge value={0} min={10} max={50} label="Load" />);
+    rerender(<LinearGauge value={0} min={10} max={50} title="Load" />);
     expect(fill().style.width).toBe("0%");
-    rerender(<LinearGauge value={0} min={10} max={10} label="Load" />);
+    rerender(<LinearGauge value={0} min={10} max={10} title="Load" />);
     expect(fill().style.width).toBe("0%");
   });
 
@@ -41,7 +43,7 @@ describe("LinearGauge", () => {
       <LinearGauge
         value={3}
         max={4}
-        label="Steps"
+        title="Steps"
         height={4}
         formatLabel={(v, max) => `${v} of ${max}`}
       />,
@@ -51,7 +53,14 @@ describe("LinearGauge", () => {
   });
 
   it("has no axe violations", async () => {
-    const { container } = render(<LinearGauge value={1} max={2} label="G" />);
+    const { container } = render(<LinearGauge value={1} max={2} title="G" />);
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("LinearGauge locale", () => {
+  it("formats the value in labels.locale by default", () => {
+    render(<LinearGauge value={1234.5} max={2000} title="Views" labels={{ locale: "de" }} />);
+    expect(screen.getByRole("meter").getAttribute("aria-valuetext")).toBe("1.234,5");
   });
 });

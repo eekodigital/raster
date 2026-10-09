@@ -9,14 +9,10 @@ const DATA = [
   { label: "Fail", value: 8 },
   { label: "N/A", value: 12 },
 ];
-const QUARTERS = [
-  { label: "Q1", value: 0 },
-  { label: "Q2", value: 0 },
-];
-const SERIES = ["North", "South"];
-const VALUES = [
-  [10, 20],
-  [30, 1500],
+const CATEGORIES = ["Q1", "Q2"];
+const SERIES = [
+  { name: "North", data: [10, 30] },
+  { name: "South", data: [20, 1500] },
 ];
 
 describe("BarChart structure", () => {
@@ -40,20 +36,24 @@ describe("BarChart structure", () => {
 
   it("makes bars toggle buttons when selectable, dimming the rest", () => {
     const onSelect = vi.fn();
-    const onBarClick = vi.fn();
-    render(<BarChart data={DATA} title="R" onSelect={onSelect} onBarClick={onBarClick} />);
+    const onMarkClick = vi.fn();
+    render(<BarChart data={DATA} title="R" onSelect={onSelect} onMarkClick={onMarkClick} />);
     const fail = screen.getByRole("button", { name: "Fail: 8, 2 of 3" });
     fireEvent.click(fail);
     expect(fail.getAttribute("aria-pressed")).toBe("true");
-    expect(onSelect).toHaveBeenCalledWith(1);
-    expect(onBarClick).toHaveBeenCalledWith(DATA[1], 1, undefined);
+    expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 1 });
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { series: 0, point: 1 },
+      value: 8,
+      datum: { label: "Fail", value: 8 },
+    });
     expect(screen.getByRole("button", { name: /^Pass/ }).hasAttribute("data-dimmed")).toBe(true);
     fireEvent.click(fail);
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
   it("follows a controlled selectedIndex", () => {
-    render(<BarChart data={DATA} title="R" selectedIndex={2} />);
+    render(<BarChart data={DATA} title="R" selectedIndex={{ series: 0, point: 2 }} />);
     expect(screen.getByRole("button", { name: /^N\/A/ }).getAttribute("aria-pressed")).toBe("true");
   });
 
@@ -112,15 +112,51 @@ describe("BarChart structure", () => {
   });
 });
 
+describe("BarChart category labels", () => {
+  const LONG = [
+    { label: "Perceivable", value: 18 },
+    { label: "Operable", value: 24 },
+    { label: "Understandable", value: 12 },
+    { label: "Robust", value: 6 },
+  ];
+  const at = (px: number, ui: React.ReactElement) => {
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(px);
+    const { container } = render(ui);
+    width.mockRestore();
+    return [...container.querySelectorAll(".raster-chart__tick")].filter((t) =>
+      LONG.some((d) => d.label.startsWith(t.textContent!.replace("…", ""))),
+    );
+  };
+
+  it("rotate when they're wider than a bar's slot, and only then", () => {
+    expect(at(720, <BarChart data={LONG} title="T" />)[0].getAttribute("transform")).toBeNull();
+    const narrow = at(300, <BarChart data={LONG} title="T" />);
+    expect(narrow.map((t) => t.textContent)).toEqual(LONG.map((d) => d.label));
+    expect(narrow[0].getAttribute("transform")).toMatch(/^rotate\(-45/);
+  });
+
+  it("get a left margin to fit when horizontal, cut with an ellipsis past 40% of the width", () => {
+    const wide = at(720, <BarChart data={LONG} direction="horizontal" title="T" />);
+    expect(wide.map((t) => t.textContent)).toEqual(LONG.map((d) => d.label));
+    const narrow = at(200, <BarChart data={LONG} direction="horizontal" title="T" />);
+    // 40% of 200 px, less a 12 px gap, is 68 px: 9 characters.
+    expect(narrow.map((t) => t.textContent)).toEqual([
+      "Perceiva…",
+      "Operable",
+      "Understa…",
+      "Robust",
+    ]);
+  });
+});
+
 describe("BarChart multi-series", () => {
   for (const mode of ["stacked", "grouped"] as const) {
     it(`${mode}: series are groups of labelled bars`, () => {
       render(
         <BarChart
-          data={QUARTERS}
           series={SERIES}
-          values={VALUES}
-          {...{ [mode]: true }}
+          categories={CATEGORIES}
+          stacked={mode === "stacked"}
           title="Sales"
         />,
       );
@@ -134,7 +170,7 @@ describe("BarChart multi-series", () => {
   }
 
   it("stacked: arrows move along categories and up/down the stack", () => {
-    render(<BarChart data={QUARTERS} series={SERIES} values={VALUES} stacked title="S" />);
+    render(<BarChart series={SERIES} categories={CATEGORIES} stacked title="S" />);
     expect(tabStops()).toEqual(["North, Q1: 10, 1 of 2"]);
     press(screen.getByRole("img", { name: /^North, Q1/ }), "ArrowRight");
     expect(focusedName()).toBe("North, Q2: 30, 2 of 2");
@@ -147,7 +183,7 @@ describe("BarChart multi-series", () => {
   });
 
   it("grouped: arrows move along categories and between series", () => {
-    render(<BarChart data={QUARTERS} series={SERIES} values={VALUES} grouped title="G" />);
+    render(<BarChart series={SERIES} categories={CATEGORIES} title="G" />);
     press(screen.getByRole("img", { name: /^North, Q1/ }), "ArrowDown");
     expect(focusedName()).toBe("South, Q1: 20, 1 of 2");
     press(screen.getByRole("img", { name: /^South, Q1/ }), "End");
@@ -158,11 +194,10 @@ describe("BarChart multi-series", () => {
     it(`horizontal ${mode}: bars lie along x, Up/Down move categories, Left/Right move series`, () => {
       const { container } = render(
         <BarChart
-          data={QUARTERS}
           series={SERIES}
-          values={VALUES}
+          categories={CATEGORIES}
           direction="horizontal"
-          {...{ [mode]: true }}
+          stacked={mode === "stacked"}
           title="H"
         />,
       );
@@ -190,36 +225,50 @@ describe("BarChart multi-series", () => {
     });
   }
 
-  it("selecting a bar selects its category and reports the series", () => {
-    const onBarClick = vi.fn();
+  it("selecting a bar selects that bar, and reports its series, value and category", () => {
+    const onMarkClick = vi.fn();
     const onSelect = vi.fn();
     render(
       <BarChart
-        data={QUARTERS}
         series={SERIES}
-        values={VALUES}
-        grouped
+        categories={CATEGORIES}
         title="G"
-        onBarClick={onBarClick}
+        onMarkClick={onMarkClick}
         onSelect={onSelect}
       />,
     );
     const southQ2 = screen.getByRole("button", { name: /^South, Q2/ });
     press(southQ2, "Enter");
-    expect(onBarClick).toHaveBeenCalledWith(QUARTERS[1], 1, 1);
-    expect(onSelect).toHaveBeenCalledWith(1);
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { series: 1, point: 1 },
+      value: 1500,
+      datum: { label: "Q2", value: 1500 },
+    });
+    expect(onSelect).toHaveBeenCalledWith({ series: 1, point: 1 });
     expect(southQ2.getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: /^North, Q2/ }).getAttribute("aria-pressed")).toBe(
-      "true",
+      "false",
     );
+  });
+
+  it("takes a colour per series and per bar", () => {
+    const { container } = render(
+      <BarChart
+        series={[{ ...SERIES[0], color: "red" }, SERIES[1]]}
+        categories={CATEGORIES}
+        title="C"
+      />,
+    );
+    expect(container.querySelector("rect")?.getAttribute("fill")).toBe("red");
+    const single = render(<BarChart data={[{ label: "A", value: 1, color: "blue" }]} title="S" />);
+    expect(single.container.querySelector("rect")?.getAttribute("fill")).toBe("blue");
   });
 
   it("renders a legend and a table of formatted values", () => {
     const { container } = render(
       <BarChart
-        data={QUARTERS}
         series={SERIES}
-        values={VALUES}
+        categories={CATEGORIES}
         stacked
         title="Sales"
         formatValue={(v) => `£${v}`}
@@ -287,15 +336,25 @@ describe("BarChart axe", () => {
 
   it("has no violations: stacked, interactive", async () => {
     const { container } = render(
-      <BarChart
-        data={QUARTERS}
-        series={SERIES}
-        values={VALUES}
-        stacked
-        title="S"
-        onBarClick={() => {}}
-      />,
+      <BarChart series={SERIES} categories={CATEGORIES} stacked title="S" onMarkClick={() => {}} />,
     );
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("BarChart data you pass", () => {
+  it("gives a single series' own datum back to onMarkClick", () => {
+    const onMarkClick = vi.fn();
+    const data = [{ label: "Pass", value: 42, id: "p1" }];
+    render(<BarChart data={data} title="R" onMarkClick={onMarkClick} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Pass/ }));
+    expect(onMarkClick.mock.calls[0][0].datum).toBe(data[0]);
+  });
+
+  it("renders an empty chart, not a crash, for v3-style or missing props", () => {
+    const v3 = { data: [{ label: "Q1", value: 0 }], series: ["North"], values: [[1]] };
+    type Props = React.ComponentProps<typeof BarChart>;
+    expect(() => render(<BarChart {...(v3 as unknown as Props)} title="Old" />)).not.toThrow();
+    expect(() => render(<BarChart {...({} as Props)} title="Nothing" />)).not.toThrow();
   });
 });

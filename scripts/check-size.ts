@@ -6,6 +6,10 @@
  * a consumer pays for `import * from "@eekodigital/raster/<entry>"`. Bare
  * imports (react, topojson-client) are peers and aren't counted.
  *
+ * The main entry has no budget: nobody imports all of it, and importing one
+ * chart from it costs the same as that chart's own entry, because
+ * `sideEffects` (checked in src/package.test.ts) lets bundlers drop the rest.
+ *
  * Also fails if any built JS imports CSS: styles ship only as
  * `dist/styles.css`, so `sideEffects` can stay limited to CSS (`["*.css"]`).
  *
@@ -15,33 +19,36 @@ import { appendFileSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
+import { clientEntries, entries } from "../tsdown.config.ts";
 
 /**
- * Budgets in gzipped bytes. Raise deliberately, in the PR that needs it.
+ * Budgets in gzipped bytes. They're tripwires, not targets: each is about
+ * 15% over the entry's size when set, to catch accidental jumps (a chart
+ * pulling in another chart's code, an unused feature bundled into every
+ * chart), not to argue over tens of bytes. Each PR reports its size changes;
+ * judge them by what they buy. Reset with headroom when a budget gets close.
  *
  * Framed charts carry the shared accessibility layer (figure + summary, data
- * table disclosure, `labels`, state-based roving focus, selection + live
- * region): about 1.3–2.5 KB per entry, set in the raster-3 a11y PR.
- *
- * The review pass (tooltip clamping, Escape dismissal, translatable table
- * headers, tick filtering, horizontal multi-series bars) added 50–350 B per
- * JS entry; minifying styles.css saved ~900 B, so every chart's JS + CSS
- * total went down.
+ * table disclosure, `labels`, roving focus, selection + live region): about
+ * 1.3–2.5 KB per entry. `/time` is the opt-in date axis for LineChart.
  */
 const BUDGETS: Record<string, number> = {
-  ".": 11_300,
-  "./bar-chart": 6_600,
-  "./chart-tooltip": 800,
-  "./donut-chart": 5_450,
-  "./gauge": 2_000,
-  "./geo": 6_000,
-  "./line-chart": 6_700,
-  "./linear-gauge": 800,
-  "./radar-chart": 5_600,
-  "./scatter-chart": 6_150,
-  "./sparkline": 2_500,
+  "./bar-chart": 7_300,
+  "./chart-tooltip": 900,
+  "./donut-chart": 5_500,
+  "./gauge": 1_500,
+  "./geo": 6_200,
+  "./line-chart": 9_200,
+  "./linear-gauge": 900,
+  "./radar-chart": 5_800,
+  "./scatter-chart": 6_900,
+  "./sparkline": 2_200,
   "./theme": 300,
-  "./styles.css": 2_550,
+  "./time": 1_600,
+  "./export": 1_100,
+  "./frame": 2_100,
+  "./labels": 1_000,
+  "./styles.css": 3_100,
 };
 
 const root = resolve(import.meta.dirname, "..");
@@ -54,8 +61,18 @@ function localImports(file: string): string[] {
   return specs.map((m) => m[1]).filter((s) => s.startsWith("."));
 }
 
-/** Tree-shaken, minified, gzipped size of everything `entry` exports. */
-async function bundledSize(entry: string): Promise<number> {
+/**
+ * Tripwire for each entry's lazily loaded chunks (`import()`). None today: it's
+ * kept as a guard, so a chunk that comes back is measured and capped rather than
+ * hidden. They're fetched only when used, so they don't count towards the entry.
+ */
+const LAZY_BUDGET = 1_200;
+
+/**
+ * Tree-shaken, minified, gzipped size of everything `entry` exports, and of
+ * the chunks it loads with `import()`.
+ */
+async function bundledSize(entry: string): Promise<{ size: number; lazy: number }> {
   const bundle = await rolldown({
     input: entry,
     external: (id) => !id.startsWith(".") && !id.startsWith("/"),
@@ -63,10 +80,14 @@ async function bundledSize(entry: string): Promise<number> {
   });
   const { output } = await bundle.generate({ format: "esm", minify: true });
   await bundle.close();
-  return output.reduce(
-    (total, chunk) => total + (chunk.type === "chunk" ? gzipSync(chunk.code).length : 0),
-    0,
-  );
+  let size = 0;
+  let lazy = 0;
+  for (const chunk of output) {
+    if (chunk.type !== "chunk") continue;
+    if (chunk.isDynamicEntry) lazy += gzipSync(chunk.code).length;
+    else size += gzipSync(chunk.code).length;
+  }
+  return { size, lazy };
 }
 
 const failures: string[] = [];
@@ -81,18 +102,33 @@ for (const f of readdirSync(join(root, "dist")).filter((f) => f.endsWith(".mjs")
   if (css.some((s) => s.endsWith(".css"))) failures.push(`dist/${f} imports CSS`);
 }
 
+// Component entries start with "use client" (for React Server Components);
+// entries of plain functions and values don't, so server code can call them.
+for (const [name, source] of Object.entries(entries)) {
+  const first = readFileSync(join(root, "dist", `${name}.mjs`), "utf8").split("\n", 1)[0];
+  const marked = first === '"use client";';
+  if (clientEntries.has(name) !== marked)
+    failures.push(
+      `dist/${name}.mjs (${source}) ${marked ? "shouldn't" : "should"} start with "use client"`,
+    );
+}
+
 const rows: string[] = [];
 for (const [key, value] of Object.entries(pkg.exports as Record<string, unknown>)) {
-  if (key === "./package.json") continue;
+  if (key === "./package.json" || key === ".") continue;
   const target = typeof value === "string" ? value : (value as { import: string }).import;
   const file = join(root, target);
-  const size = target.endsWith(".css") ? gz(file) : await bundledSize(file);
+  const { size, lazy } = target.endsWith(".css")
+    ? { size: gz(file), lazy: 0 }
+    : await bundledSize(file);
+  if (lazy > LAZY_BUDGET)
+    failures.push(`${key} loads ${lazy} B gz lazily, over the ${LAZY_BUDGET} B lazy budget`);
   const budget = BUDGETS[key];
   if (budget === undefined) failures.push(`${key} has no budget in scripts/check-size.ts`);
   else if (size > budget) failures.push(`${key} is ${size} B gz, over its ${budget} B budget`);
   const status = budget === undefined || size > budget ? "❌" : "✅";
   rows.push(
-    `| \`${key}\` | ${(size / 1024).toFixed(2)} KB | ${((budget ?? 0) / 1024).toFixed(2)} KB | ${status} |`,
+    `| \`${key}\` | ${(size / 1024).toFixed(2)} KB${lazy ? ` (+${(lazy / 1024).toFixed(2)} KB lazy)` : ""} | ${((budget ?? 0) / 1024).toFixed(2)} KB | ${status} |`,
   );
 }
 

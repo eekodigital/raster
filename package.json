@@ -75,6 +75,22 @@
       "types": "./dist/sparkline.d.mts",
       "import": "./dist/sparkline.mjs"
     },
+    "./labels": {
+      "types": "./dist/labels.d.mts",
+      "import": "./dist/labels.mjs"
+    },
+    "./frame": {
+      "types": "./dist/frame.d.mts",
+      "import": "./dist/frame.mjs"
+    },
+    "./export": {
+      "types": "./dist/export.d.mts",
+      "import": "./dist/export.mjs"
+    },
+    "./time": {
+      "types": "./dist/time.d.mts",
+      "import": "./dist/time.mjs"
+    },
     "./theme": {
       "types": "./dist/theme.d.mts",
       "import": "./dist/theme.mjs"
@@ -95,7 +111,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "size": "node scripts/check-size.ts"
+    "size": "node scripts/check-size.ts",
+    "version-packages": "changeset version && vp check --fix"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",

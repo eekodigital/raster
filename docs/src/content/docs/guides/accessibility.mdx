@@ -14,12 +14,11 @@ Every chart follows the same pattern, so once you know one you know them all. Ac
     - `g role="group"` per series: "Pass, 6 points"
       - `path role="img"` per mark: "Pass, Feb: 12, 2 of 6" (`role="button"` with `aria-pressed` when the chart is interactive)
   - the legend, in HTML, with swatches matching each series' line and marker
-  - `button aria-expanded`: "Show data table"
-  - the table, hidden until shown: caption "Data for Results trend", `th scope="col"` and `th scope="row"`
+  - `details` with a `summary`: "Show data table", then the table: caption "Data for Results trend", `th scope="col"` and `th scope="row"`
   - `div role="status"`: a polite live region for changes away from focus
 
-- **No `graphics-*` roles.** Support for the Graphics ARIA module is patchy, so charts use `figure`, `group`, `img` and `button`, which every screen reader understands.
-- **Marks are static images unless the chart is interactive.** Pass `onSelect`, `selectedIndex` or a click handler (`onPointClick`, `onBarClick`, …) and marks become `role="button"` with `aria-pressed`.
+- **No `graphics-*` roles.** Support for the Graphics ARIA module is patchy, so charts use `figure`, `group`, `img`, `button` and native `details`, which every screen reader understands.
+- **Marks are static images unless the chart is interactive.** Pass `onSelect`, `selectedIndex` or `onMarkClick` and marks become `role="button"` with `aria-pressed`.
 - **The tooltip is visual only.** Each mark's name already carries the same text, so the tooltip is `aria-hidden` rather than announced twice.
 - **Sparkline** is word-sized, so it has no marks or table: the drawing is hidden and a visually hidden sentence ("Weekly views: Sparkline, 8 points. Values from 10 to 86. First 10, last 86.") takes its place.
 - **Gauge and LinearGauge** are `role="meter"`, named by their visible `label`, with `aria-valuetext` from `format`.
@@ -37,11 +36,13 @@ Each chart is one Tab stop. The last mark you visited stays the Tab stop when yo
 | Enter / Space     | Toggle selection of the focused mark (interactive charts)                                                    |
 | Escape            | Hide the tooltip and clear the selection. Handled inside the chart only, so a surrounding dialog stays open. |
 
+A LineChart with more than 200 points in a series is [dense](/components/line-chart/#large-series). It has no per-point marks; its one Tab stop is a slider whose value names the current point. The keys are the same.
+
 DonutChart moves round the ring with any arrow key. RadarChart wraps round its axes. GeoChart moves across regions with ← / →, and ↑ / ↓ switch between regions and markers.
 
 ## Data table
 
-By default each chart shows a **Show data table** button (`aria-expanded`, `aria-controls`). It reveals a real, visible table: captioned `Data for {title}`, with `th scope` headers and every value run through `formatValue`. It's the most reliable way for anyone to read exact values, and it works with every screen reader.
+By default each chart shows a **Show data table** disclosure: a native `<details>` and `<summary>`, which screen readers announce as an expandable button, and which opens without JavaScript. It reveals a real, visible table: captioned `Data for {title}`, with `th scope` headers and every value run through `formatValue`. It's the most reliable way for anyone to read exact values, and it works with every screen reader.
 
 If the page already shows the same data, keep the table for assistive technology only:
 
@@ -66,14 +67,15 @@ Changes you make on the focused mark are announced by the mark itself (its `aria
 Every string a chart generates comes from one `labels` prop. Anything you leave out keeps its English default. Numbers go through `Intl.NumberFormat(labels.locale)`: the default `formatValue` uses it, and so do the counts in mark and series names.
 
 ```tsx
-import type { ChartLabels } from "@eekodigital/raster";
+import type { ChartLabelOverrides } from "@eekodigital/raster";
 
-const de: Partial<ChartLabels> = {
+const de: ChartLabelOverrides = {
   locale: "de",
   chart: "Diagramm",
   showTable: "Datentabelle anzeigen",
   hideTable: "Datentabelle ausblenden",
   tableCaption: (title) => `Daten für ${title}`,
+  selected: "ausgewählt",
   selectionCleared: "Auswahl aufgehoben",
   series: (name, count, n) => `${name}, ${n(count)} Punkte`,
   mark: ({ series, x, y, index, count }, n) => {
@@ -81,26 +83,32 @@ const de: Partial<ChartLabels> = {
     const pos = `${n(index + 1)} von ${n(count)}`;
     return [series, value, pos].filter(Boolean).join(", ");
   },
-  summary: (s, n) => `Diagramm, ${n(s.points)} Punkte.`,
+  chartNames: { line: "Liniendiagramm", bar: "Balkendiagramm" },
+  // `name` is already worked out (from chartNames, or a wrapped chart's own name).
+  summary: ({ name, points }, n) => `${name}, ${n(points)} Punkte.`,
 };
 
 <LineChart {...props} labels={de} />;
 ```
 
-| Key                                                                                                                                                                | Default                                                                                                                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `locale`                                                                                                                                                           | `"en"`                                                                                                                                                                                                                           |
-| `chart`                                                                                                                                                            | `"chart"` (the SVG's `aria-roledescription`)                                                                                                                                                                                     |
-| `showTable`                                                                                                                                                        | `"Show data table"`                                                                                                                                                                                                              |
-| `hideTable`                                                                                                                                                        | `"Hide data table"`                                                                                                                                                                                                              |
-| `tableCaption`                                                                                                                                                     | `(title) => "Data for {title}"`                                                                                                                                                                                                  |
-| `selectionCleared`                                                                                                                                                 | `"Selection cleared"`                                                                                                                                                                                                            |
-| `noData`                                                                                                                                                           | `"No data"` (GeoChart regions without a value)                                                                                                                                                                                   |
-| `regions`, `markers`, `region`, `marker`                                                                                                                           | GeoChart group names and table types                                                                                                                                                                                             |
-| `categoryColumn`, `valueColumn`, `percentageColumn`, `periodColumn`, `axisColumn`, `nameColumn`, `typeColumn`, `seriesColumn`, `labelColumn`, `xColumn`, `yColumn` | Data table headers: `"Category"`, `"Value"`, `"Percentage"`, `"Period"`, `"Axis"`, `"Name"`, `"Type"`, `"Series"`, `"Label"`, `"X"`, `"Y"`. Series columns use the series names; ScatterChart uses `xLabel`/`yLabel` when given. |
-| `series`                                                                                                                                                           | `(name, count, n) => "{name}, {count} points"`                                                                                                                                                                                   |
-| `mark`                                                                                                                                                             | `({ series, x, y, index, count }, n) => "{series}, {x}: {y}, {index + 1} of {count}"`                                                                                                                                            |
-| `summary`                                                                                                                                                          | `({ type, series, points, x, y, first, last }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."`                                                                                                        |
+| Key                                                                                                                                                                              | Default                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `locale`                                                                                                                                                                         | `"en"`                                                                                                                                                                                                                                     |
+| `chart`                                                                                                                                                                          | `"chart"` (the SVG's `aria-roledescription`)                                                                                                                                                                                               |
+| `showTable`                                                                                                                                                                      | `"Show data table"`                                                                                                                                                                                                                        |
+| `hideTable`                                                                                                                                                                      | `"Hide data table"`                                                                                                                                                                                                                        |
+| `tableCaption`                                                                                                                                                                   | `(title) => "Data for {title}"`                                                                                                                                                                                                            |
+| `referenceLine`                                                                                                                                                                  | A reference line's text, in the SVG and the summary: `(label, value) => "Target: 90"`                                                                                                                                                      |
+| `referenceNote`                                                                                                                                                                  | The table caption when a chart has reference lines, given the caption and the lines: `(caption, lines) => "Data for P, with a reference line (Target: 90)"`                                                                                |
+| `selected`                                                                                                                                                                       | Added to a dense LineChart's current point when it's selected, and announced on selecting: `"selected"`.                                                                                                                                   |
+| `selectionCleared`                                                                                                                                                               | `"Selection cleared"`                                                                                                                                                                                                                      |
+| `noData`                                                                                                                                                                         | `"No data"` (GeoChart regions without a value)                                                                                                                                                                                             |
+| `regions`, `markers`, `region`, `marker`                                                                                                                                         | GeoChart group names and table types                                                                                                                                                                                                       |
+| `categoryColumn`, `valueColumn`, `percentageColumn`, `periodColumn`, `dateColumn`, `axisColumn`, `nameColumn`, `typeColumn`, `seriesColumn`, `labelColumn`, `xColumn`, `yColumn` | Data table headers: `"Category"`, `"Value"`, `"Percentage"`, `"Period"`, `"Date"`, `"Axis"`, `"Name"`, `"Type"`, `"Series"`, `"Label"`, `"X"`, `"Y"`. Series columns use the series names; ScatterChart uses `xLabel`/`yLabel` when given. |
+| `series`                                                                                                                                                                         | `(name, count, n) => "{name}, {count} points"`                                                                                                                                                                                             |
+| `mark`                                                                                                                                                                           | `({ series, x, y, index, count }, n) => "{series}, {x}: {y}, {index + 1} of {count}"`                                                                                                                                                      |
+| `chartNames`                                                                                                                                                                     | Names of the chart types in summaries: `{ line: "Line chart", bar: "Bar chart", donut: "Donut chart", … }`. Override one or all; the rest keep their defaults.                                                                             |
+| `summary`                                                                                                                                                                        | `({ name, series, points, x, y, first, last, references }, n) => "Line chart, 2 series, 12 points. Jan to Jun. Values from 0 to 42."`. `name` is already worked out, so translate chart names in `chartNames`.                             |
 
 `DEFAULT_LABELS` is exported if you want to wrap a default.
 
@@ -112,4 +120,5 @@ Raster's tests cover roles, names, keyboard and axe for every chart and mode, bu
 2. Press → a few times. Each step announces the next point with its position. Press End, then Home.
 3. On a multi-series chart press ↓. Expect the same period in the next series ("Fail, Jan: 0, 1 of 6").
 4. On the Selection example, press Space. Expect "selected" or "pressed". Press Escape: expect "Selection cleared", and the button is no longer pressed.
-5. Tab to **Show data table**. Expect "Show data table, collapsed, button". Press Space: expect "expanded". Use VO+⌘T (next table) and table navigation (VO+arrows) to read the caption and cells.
+5. On the dense "Daily traffic" example, Tab to the chart. Expect the slider: "Views, 1 January 2025: …, 1 of 730, slider". Press → and PageDown: each step announces only the new point. Hold → briefly: speech shouldn't build up a backlog. Press ↓: expect "Visitors". Repeat with NVDA (Chrome and Firefox), which should switch to focus mode by itself, and VoiceOver on iOS, swiping up and down.
+6. Tab to **Show data table**. Expect "Show data table, collapsed, button". Press Space: expect "expanded". Use VO+⌘T (next table) and table navigation (VO+arrows) to read the caption and cells.

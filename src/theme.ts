@@ -5,6 +5,7 @@
  * one has a fallback, so a chart renders legibly with none of them set:
  *
  * - `text`, `textSubtle`, `axis`, `focus`, `selected` fall back to `currentColor`
+ * - `reference` (reference lines) falls back to `textSubtle`
  * - `grid` falls back to `color-mix(in srgb, currentColor 25%, transparent)`
  * - `series1`–`series8` fall back to a validated light/dark palette via `light-dark()`
  * - `surface`, `tooltipBg`, `tooltipText` fall back to fixed light/dark values via `light-dark()`
@@ -17,6 +18,7 @@
 export const rasterVars = {
   text: "var(--raster-text)",
   textSubtle: "var(--raster-text-subtle)",
+  reference: "var(--raster-reference)",
   surface: "var(--raster-surface)",
   grid: "var(--raster-grid)",
   axis: "var(--raster-axis)",

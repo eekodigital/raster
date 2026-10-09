@@ -1,5 +1,8 @@
-import { useCallback } from "react";
-import type React from "react";
+/**
+ * SVG and PNG export for raster charts. Kept out of the chart entries: import
+ * it from `@eekodigital/raster/export`, and only apps that export pay for it.
+ * Pass the chart (its `ref`), or any element containing it.
+ */
 
 /** CSS properties to inline on SVG elements for standalone export. */
 const SVG_STYLE_PROPS = [
@@ -10,6 +13,7 @@ const SVG_STYLE_PROPS = [
   "stroke-linejoin",
   "stroke-dasharray",
   "stroke-dashoffset",
+  "paint-order",
   "opacity",
   "font-family",
   "font-size",
@@ -88,9 +92,13 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 function prepareExportSvg(
-  container: HTMLElement,
-): { clone: SVGElement; source: SVGSVGElement } | null {
-  const source = container.querySelector("svg");
+  target: Element,
+): { clone: SVGElement; width: number; height: number } | null {
+  // Raster's chart SVG is marked, so overlays, legend swatches and wrapped
+  // non-raster charts are left out; `target` can also be an SVG itself.
+  const source = (
+    target.matches("svg") ? target : target.querySelector("svg[data-raster-chart]")
+  ) as SVGSVGElement | null;
   if (!source) return null;
   const clone = source.cloneNode(true) as SVGElement;
 
@@ -101,44 +109,29 @@ function prepareExportSvg(
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
   inlineComputedStyles(clone, source);
-  return { clone, source };
+  return { clone, width, height };
 }
 
-export type ChartExportHandle = {
-  exportSVG: (filename?: string) => void;
-  exportPNG: (filename?: string, scale?: number) => Promise<void>;
-};
-
 /**
- * Hook providing SVG and PNG export for chart components.
- * Pass a ref to the chart's container div (the one with data-chart-container).
+ * Downloads the chart in `target` (the chart, via its `ref`, or any element
+ * containing it) as a standalone SVG, with its computed styles inlined so it
+ * looks the same outside your app.
  */
-export function useChartExport(
-  containerRef: React.RefObject<HTMLElement | null>,
-): ChartExportHandle {
-  const exportSVG = useCallback(
-    (filename = "chart.svg") => {
-      if (!containerRef.current) return;
-      const result = prepareExportSvg(containerRef.current);
-      if (!result) return;
-      const svgString = new XMLSerializer().serializeToString(result.clone);
-      downloadBlob(new Blob([svgString], { type: "image/svg+xml" }), filename);
-    },
-    [containerRef],
-  );
+export function exportSVG(target: Element | null, filename = "chart.svg"): void {
+  const result = target && prepareExportSvg(target);
+  if (!result) return;
+  const svgString = new XMLSerializer().serializeToString(result.clone);
+  downloadBlob(new Blob([svgString], { type: "image/svg+xml" }), filename);
+}
 
-  const exportPNG = useCallback(
-    async (filename = "chart.png", scale = 2) => {
-      if (!containerRef.current) return;
-      const result = prepareExportSvg(containerRef.current);
-      if (!result) return;
-      const { width, height } = result.source.getBoundingClientRect();
-      const svgString = new XMLSerializer().serializeToString(result.clone);
-      const blob = await svgToPng(svgString, width, height, scale);
-      downloadBlob(blob, filename);
-    },
-    [containerRef],
-  );
-
-  return { exportSVG, exportPNG };
+/** Downloads the chart in `target` as a PNG at `scale` times its on-screen size. */
+export async function exportPNG(
+  target: Element | null,
+  filename = "chart.png",
+  scale = 2,
+): Promise<void> {
+  const result = target && prepareExportSvg(target);
+  if (!result) return;
+  const svgString = new XMLSerializer().serializeToString(result.clone);
+  downloadBlob(await svgToPng(svgString, result.width, result.height, scale), filename);
 }

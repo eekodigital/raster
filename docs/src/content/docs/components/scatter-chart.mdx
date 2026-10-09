@@ -25,6 +25,36 @@ import {
   <ScatterChartMultiDemo client:load />
 </Example>
 
+## Dates on x
+
+For dates, give x values as epoch milliseconds and pass a date axis from `@eekodigital/raster/time`. Ticks fall on days, weeks, months or years, and x values are worded as dates in point names, the summary and the table:
+
+```tsx
+import { timeAxis } from "@eekodigital/raster/time";
+
+<ScatterChart
+  data={orders} // { x: Date.parse(order.date), y: order.total }
+  xAxis={timeAxis(orders.map((p) => p.x))}
+  labels={{ locale: "en-GB" }}
+  title="Order value by date"
+/>;
+```
+
+## Reference lines
+
+`referenceLines` draws dashed, labelled lines: across y by default, or vertical at an x value with `axis: "x"`. Both scales stretch to include them. The x value is worded with `formatX`. They're named in the summary and the table caption, and aren't focusable.
+
+```tsx
+<ScatterChart
+  data={points}
+  referenceLines={[
+    { value: 4.5, label: "Pass mark" },
+    { value: 60, label: "Time limit", axis: "x" },
+  ]}
+  title="Score against time taken"
+/>
+```
+
 ## Accessibility
 
 - A `role="figure"` named by the visible `title` and described by a generated summary (chart type, series and point counts, range).
@@ -32,7 +62,7 @@ import {
 - Named series are `role="group"`s. Each point is labelled `{series}, {x}: {y}, 3 of 12` (with its `label` when given). With `onSelect`, `selectedIndex` or a click handler, marks are `role="button"` with `aria-pressed`; otherwise they're static `role="img"`.
 - Points use a different marker shape per series.
 - Arrow keys move in x order, so left and right match the drawing.
-- A visible **Show data table** button (`aria-expanded`) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatValue`.
+- A visible **Show data table** disclosure (a native `<details>`/`<summary>`, so it opens without JavaScript) reveals a real table captioned `Data for {title}`, with `th scope` headers and values run through `formatX` and `formatValue`.
 - Escape (inside the chart only) clears the selection and announces it in a polite live region; it doesn't close a surrounding dialog.
 - Animations stop under `prefers-reduced-motion`. In forced-colours mode marks use system colours, told apart by dash pattern and marker shape.
 
@@ -55,7 +85,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -67,7 +96,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>ScatterPoint[]</code>
       </td>
-      <td>—</td>
       <td>
         Single series: <code>&#123; x, y, label? &#125;</code>.
       </td>
@@ -79,7 +107,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>ScatterSeries[]</code>
       </td>
-      <td>—</td>
       <td>
         Named series: <code>&#123; name, data, color? &#125;</code>.
       </td>
@@ -91,7 +118,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>X-axis title.</td>
     </tr>
     <tr>
@@ -101,7 +127,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Y-axis title.</td>
     </tr>
     <tr>
@@ -110,9 +135,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"horizontal" | "vertical" | "both" | "none"</code>
-      </td>
-      <td>
-        <code>"both"</code>
+        <div class="props-table__default">
+          Default: <code>"both"</code>
+        </div>
       </td>
       <td>Grid lines.</td>
     </tr>
@@ -122,13 +147,55 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>
-        <code>Intl.NumberFormat</code>
+        Formats y values, and x values unless <code>formatX</code> is set, in ticks, marks, the
+        table and the summary. Defaults to <code>Intl.NumberFormat</code> for{" "}
+        <code>labels.locale</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>xAxis</code>
       </td>
       <td>
-        Formats values in ticks, marks and the table. Defaults to{" "}
-        <code>Intl.NumberFormat(labels.locale)</code>.
+        <code>XAxis</code>
+      </td>
+      <td>
+        A date axis: <code>timeAxis(points.map((p) =&gt; p.x))</code> from{" "}
+        <code>@eekodigital/raster/time</code>, with x as epoch ms. Calendar ticks, and x worded as
+        dates. Overrides <code>formatX</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatX</code>
+      </td>
+      <td>
+        <code>(value: number) =&gt; string</code>
+        <div class="props-table__default">
+          Default: <code>formatValue</code>
+        </div>
+      </td>
+      <td>
+        Formats x values separately, e.g. epoch milliseconds as dates:{" "}
+        <code>(ms) =&gt; dateFormat.format(ms)</code>. Ticks stay at evenly spaced numbers, thinned
+        to fit the formatted labels.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>referenceLines</code>
+      </td>
+      <td>
+        <code>&#123; value: number, label: string, axis?: "x" | "y" &#125;[]</code>
+      </td>
+      <td>
+        Targets and thresholds as dashed, labelled lines, across y or (with <code>axis: "x"</code>)
+        x. See <a href="#reference-lines">Reference lines</a>.
       </td>
     </tr>
     <tr>
@@ -137,9 +204,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>240</code>
+        <div class="props-table__default">
+          Default: <code>240</code>
+        </div>
       </td>
       <td>Plot height in px.</td>
     </tr>
@@ -150,7 +217,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>
         Width ÷ height, instead of <code>height</code>. The plot box is sized in CSS either way, so
         server-rendered and hydrated layouts match.
@@ -158,13 +224,18 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     </tr>
     <tr>
       <td>
-        <code>onPointClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(point, seriesIndex, pointIndex) =&gt; void</code>
+        <code>
+          (mark: &#123; index: ScatterPointIndex, value, datum: ScatterPoint &#125;) =&gt; void
+        </code>
       </td>
-      <td>—</td>
-      <td>Makes points buttons.</td>
+      <td>
+        Called when a mark is clicked (or activated with Enter/Space) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is what{" "}
+        <code>onSelect</code> gives. Makes marks toggle buttons.
+      </td>
     </tr>
     <tr>
       <td>
@@ -173,7 +244,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>&#123; series, point &#125; | null</code>
       </td>
-      <td>—</td>
       <td>Controlled selection.</td>
     </tr>
     <tr>
@@ -183,7 +253,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(index | null) =&gt; void</code>
       </td>
-      <td>—</td>
       <td>Makes points buttons.</td>
     </tr>
     <tr>
@@ -193,7 +262,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Required. Visible title: names the figure and captions the data table.</td>
     </tr>
     <tr>
@@ -202,9 +270,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Hide the title visually. It still names the chart for assistive technology.</td>
     </tr>
@@ -213,9 +281,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>labels</code>
       </td>
       <td>
-        <code>Partial&lt;ChartLabels&gt;</code>
+        <code>ChartLabelOverrides</code>
+        <div class="props-table__default">Default: English</div>
       </td>
-      <td>English</td>
       <td>
         Generated strings and the number locale. See{" "}
         <a href="/guides/accessibility/#labels">Accessibility</a>.
@@ -227,22 +295,23 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"disclosure" | "visually-hidden"</code>
-      </td>
-      <td>
-        <code>"disclosure"</code>
+        <div class="props-table__default">
+          Default: <code>"disclosure"</code>
+        </div>
       </td>
       <td>How the data table is offered.</td>
     </tr>
     <tr>
       <td>
-        <code>exportRef</code>
+        <code>ref</code>
       </td>
       <td>
-        <code>Ref&lt;ChartExportHandle&gt;</code>
+        <code>Ref&lt;HTMLDivElement&gt;</code>
       </td>
-      <td>—</td>
       <td>
-        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+        The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
+        <code>@eekodigital/raster/export</code>. See{" "}
+        <a href="/guides/exporting/">Exporting charts</a>.
       </td>
     </tr>
     <tr>
@@ -252,7 +321,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Class on the figure.</td>
     </tr>
   </tbody>

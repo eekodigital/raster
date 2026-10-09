@@ -96,7 +96,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -108,7 +107,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>GeoTopology</code>
       </td>
-      <td>—</td>
       <td>
         Required. TopoJSON, e.g. <code>world-atlas</code>.
       </td>
@@ -119,9 +117,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string</code>
-      </td>
-      <td>
-        <code>first object</code>
+        <div class="props-table__default">
+          Default: <code>first object</code>
+        </div>
       </td>
       <td>Topology object to draw.</td>
     </tr>
@@ -131,9 +129,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>GeoRegionDatum[]</code>
-      </td>
-      <td>
-        <code>[]</code>
+        <div class="props-table__default">
+          Default: <code>[]</code>
+        </div>
       </td>
       <td>
         <code>&#123; id, value, label? &#125;</code> per region.
@@ -145,9 +143,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string[]</code>
-      </td>
-      <td>
-        <code>series 1 ramp</code>
+        <div class="props-table__default">
+          Default: <code>series 1 ramp</code>
+        </div>
       </td>
       <td>Colours from low to high.</td>
     </tr>
@@ -157,9 +155,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>GeoMarker[]</code>
-      </td>
-      <td>
-        <code>[]</code>
+        <div class="props-table__default">
+          Default: <code>[]</code>
+        </div>
       </td>
       <td>
         <code>&#123; lat, lon, label, value?, size?, color? &#125;</code>.
@@ -171,9 +169,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"mercator" | "equirectangular" | fn</code>
-      </td>
-      <td>
-        <code>"mercator"</code>
+        <div class="props-table__default">
+          Default: <code>"mercator"</code>
+        </div>
       </td>
       <td>Map projection.</td>
     </tr>
@@ -184,7 +182,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string[]</code>
       </td>
-      <td>—</td>
       <td>Only draw these region ids.</td>
     </tr>
     <tr>
@@ -194,7 +191,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Colour-scale legend title.</td>
     </tr>
     <tr>
@@ -203,13 +199,13 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>
-        <code>Intl.NumberFormat</code>
-      </td>
-      <td>
-        Formats values in ticks, marks and the table. Defaults to{" "}
-        <code>Intl.NumberFormat(labels.locale)</code>.
+        Formats values in ticks, marks and the table. Defaults to <code>Intl.NumberFormat</code> for{" "}
+        <code>labels.locale</code>.
       </td>
     </tr>
     <tr>
@@ -219,7 +215,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Plot height in px.</td>
     </tr>
     <tr>
@@ -228,31 +223,25 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>16 / 9</code>
+        <div class="props-table__default">
+          Default: <code>16 / 9</code>
+        </div>
       </td>
       <td>Width ÷ height. The map fills its container's width.</td>
     </tr>
     <tr>
       <td>
-        <code>onRegionClick</code>
+        <code>onMarkClick</code>
       </td>
       <td>
-        <code>(datum, id) =&gt; void</code>
-      </td>
-      <td>—</td>
-      <td>Makes regions buttons.</td>
-    </tr>
-    <tr>
-      <td>
-        <code>onMarkerClick</code>
+        <code>(mark: &#123; index: GeoSelection, value?, datum? &#125;) =&gt; void</code>
       </td>
       <td>
-        <code>(marker, index) =&gt; void</code>
+        Called when a region or marker is clicked (or activated) with{" "}
+        <code>&#123; index, value, datum &#125;</code>; <code>index</code> is{" "}
+        <code>&#123; region &#125;</code> or <code>&#123; marker &#125;</code>, as{" "}
+        <code>onSelect</code> gives it. Makes regions and markers toggle buttons.
       </td>
-      <td>—</td>
-      <td>Makes markers buttons.</td>
     </tr>
     <tr>
       <td>
@@ -261,7 +250,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>&#123; region &#125; | &#123; marker &#125; | null</code>
       </td>
-      <td>—</td>
       <td>Controlled selection.</td>
     </tr>
     <tr>
@@ -271,7 +259,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>(selection | null) =&gt; void</code>
       </td>
-      <td>—</td>
       <td>Makes regions and markers buttons.</td>
     </tr>
     <tr>
@@ -281,7 +268,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Required. Visible title: names the figure and captions the data table.</td>
     </tr>
     <tr>
@@ -290,9 +276,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Hide the title visually. It still names the chart for assistive technology.</td>
     </tr>
@@ -301,9 +287,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>labels</code>
       </td>
       <td>
-        <code>Partial&lt;ChartLabels&gt;</code>
+        <code>ChartLabelOverrides</code>
+        <div class="props-table__default">Default: English</div>
       </td>
-      <td>English</td>
       <td>
         Generated strings and the number locale. See{" "}
         <a href="/guides/accessibility/#labels">Accessibility</a>.
@@ -315,22 +301,23 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>"disclosure" | "visually-hidden"</code>
-      </td>
-      <td>
-        <code>"disclosure"</code>
+        <div class="props-table__default">
+          Default: <code>"disclosure"</code>
+        </div>
       </td>
       <td>How the data table is offered.</td>
     </tr>
     <tr>
       <td>
-        <code>exportRef</code>
+        <code>ref</code>
       </td>
       <td>
-        <code>Ref&lt;ChartExportHandle&gt;</code>
+        <code>Ref&lt;HTMLDivElement&gt;</code>
       </td>
-      <td>—</td>
       <td>
-        SVG/PNG export. See <a href="/guides/exporting/">Exporting charts</a>.
+        The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
+        <code>@eekodigital/raster/export</code>. See{" "}
+        <a href="/guides/exporting/">Exporting charts</a>.
       </td>
     </tr>
     <tr>
@@ -340,7 +327,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Class on the figure.</td>
     </tr>
   </tbody>

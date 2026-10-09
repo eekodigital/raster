@@ -135,6 +135,78 @@ describe("GeoChart structure", () => {
   });
 });
 
+describe("GeoChart fit", () => {
+  /** Every x, y in the regions' paths and the markers. */
+  const coords = (root: Element) => {
+    const nums = [...root.querySelectorAll(".raster-geo__region")].flatMap((p) =>
+      (p.getAttribute("d")!.match(/-?[\d.]+(e-?\d+)?/g) ?? []).map(Number),
+    );
+    const xs = nums.filter((_, i) => i % 2 === 0);
+    const ys = nums.filter((_, i) => i % 2 === 1);
+    return { xs, ys };
+  };
+
+  it("keeps the map inside the plot, centred, in both directions", () => {
+    // 16:9 at 720 px: 720 × 405. Antarctica reaches the pole, where Mercator
+    // is infinite; it's clamped like a web map.
+    const world = {
+      ...TOPOLOGY,
+      objects: {
+        countries: {
+          ...TOPOLOGY.objects.countries,
+          geometries: [
+            ...TOPOLOGY.objects.countries.geometries,
+            {
+              type: "Polygon" as const,
+              id: "ATA",
+              properties: { name: "Antarctica" },
+              arcs: [[4]],
+            },
+          ],
+        },
+      },
+      arcs: [...TOPOLOGY.arcs, square(-180, -90, 180, -60)],
+    };
+    for (const projection of ["mercator", "equirectangular"] as const) {
+      const { container, unmount } = render(
+        <GeoChart topology={world} projection={projection} title="W" />,
+      );
+      const { xs, ys } = coords(container);
+      expect(xs.every((x) => x >= -0.01 && x <= 720.01)).toBe(true);
+      expect(ys.every((y) => Number.isFinite(y) && y >= -0.01 && y <= 405.01)).toBe(true);
+      // It fills the width or the height (Mercator's clamped world is
+      // taller than 16:9, equirectangular's wider), centred both ways.
+      const [w, h] = [Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)];
+      // Inset 1 px for the outline.
+      expect(Math.abs(w - 718) < 0.5 || Math.abs(h - 403) < 0.5).toBe(true);
+      expect(Math.min(...xs) + Math.max(...xs)).toBeCloseTo(720, 0);
+      expect(Math.min(...ys) + Math.max(...ys)).toBeCloseTo(405, 0);
+      unmount();
+    }
+  });
+
+  it("zooms to the regions it draws", () => {
+    const { container } = render(<GeoChart topology={TOPOLOGY} filter={["GBR"]} title="F" />);
+    const { xs, ys } = coords(container);
+    // The UK alone fills the plot's height (it's taller than 16:9), inset 1 px.
+    expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(403, 0);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(720);
+  });
+
+  it("keeps edge markers inside the plot", () => {
+    const { container } = render(
+      <GeoChart topology={TOPOLOGY} filter={[]} markers={MARKERS} title="M" />,
+    );
+    for (const c of container.querySelectorAll("circle")) {
+      const [x, y, r] = ["cx", "cy", "r"].map((a) => Number(c.getAttribute(a)));
+      expect(x - r).toBeGreaterThanOrEqual(0);
+      expect(x + r).toBeLessThanOrEqual(720);
+      expect(y - r).toBeGreaterThanOrEqual(0);
+      expect(y + r).toBeLessThanOrEqual(405);
+    }
+  });
+});
+
 describe("GeoChart keyboard and selection", () => {
   it("moves across regions with arrows and down to markers", () => {
     render(<GeoChart topology={TOPOLOGY} data={DATA} markers={MARKERS} title="M" />);
@@ -153,8 +225,7 @@ describe("GeoChart keyboard and selection", () => {
   });
 
   it("regions and markers become toggle buttons when clickable", () => {
-    const onRegionClick = vi.fn();
-    const onMarkerClick = vi.fn();
+    const onMarkClick = vi.fn();
     const onSelect = vi.fn();
     render(
       <GeoChart
@@ -162,19 +233,26 @@ describe("GeoChart keyboard and selection", () => {
         data={DATA}
         markers={MARKERS}
         title="M"
-        onRegionClick={onRegionClick}
-        onMarkerClick={onMarkerClick}
+        onMarkClick={onMarkClick}
         onSelect={onSelect}
       />,
     );
     const fiji = screen.getByRole("button", { name: /^Fiji/ });
     fireEvent.click(fiji);
-    expect(onRegionClick).toHaveBeenCalledWith(undefined, "FJI");
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { region: "FJI" },
+      value: undefined,
+      datum: undefined,
+    });
     expect(onSelect).toHaveBeenCalledWith({ region: "FJI" });
     expect(fiji.getAttribute("aria-pressed")).toBe("true");
     const paris = screen.getByRole("button", { name: /Paris/ });
     press(paris, "Enter");
-    expect(onMarkerClick).toHaveBeenCalledWith(MARKERS[1], 1);
+    expect(onMarkClick).toHaveBeenLastCalledWith({
+      index: { marker: 1 },
+      value: MARKERS[1].value,
+      datum: MARKERS[1],
+    });
     expect(onSelect).toHaveBeenLastCalledWith({ marker: 1 });
     expect(fiji.getAttribute("aria-pressed")).toBe("false");
     press(paris, "Escape");
@@ -182,10 +260,10 @@ describe("GeoChart keyboard and selection", () => {
     expect(screen.getByRole("status").textContent).toBe("Selection cleared");
   });
 
-  it("only regions are buttons when only regions are clickable", () => {
-    render(<GeoChart topology={TOPOLOGY} markers={MARKERS} title="M" onRegionClick={() => {}} />);
-    expect(screen.getAllByRole("button", { pressed: false }).length).toBe(3);
-    screen.getByRole("img", { name: /London/ });
+  it("onMarkClick makes regions and markers buttons", () => {
+    render(<GeoChart topology={TOPOLOGY} markers={MARKERS} title="M" onMarkClick={() => {}} />);
+    screen.getByRole("button", { name: /London/ });
+    expect(screen.queryAllByRole("img")).toHaveLength(0);
   });
 });
 
@@ -197,7 +275,7 @@ describe("GeoChart axe", () => {
         data={DATA}
         markers={MARKERS}
         title="M"
-        onRegionClick={() => {}}
+        onMarkClick={() => {}}
       />,
     );
     openTable();

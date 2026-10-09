@@ -36,9 +36,63 @@ test.describe("keyboard", () => {
     await expect(jun).toHaveAttribute("tabindex", "0");
   });
 
+  test("LineChart dense mode: one slider, arrows, pointer, selection", async ({ page }) => {
+    await page.goto("/components/line-chart");
+    const chart = figure(page, "Daily traffic, 2025–2026");
+    const slider = chart.getByRole("slider", { name: "Views" });
+    await expect(chart.locator('input, [tabindex="0"]')).toHaveCount(1);
+
+    await slider.focus();
+    await expect(slider).toHaveAttribute(
+      "aria-valuetext",
+      /^Views, 1 January 2025: \d+, 1 of 730$/,
+    );
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("PageDown");
+    await expect(slider).toHaveAttribute(
+      "aria-valuetext",
+      /^Views, 12 January 2025: \d+, 12 of 730$/,
+    );
+    await expect(chart.locator(".raster-line__marker[data-focused]")).toBeVisible();
+    // The focus ring is drawn centred on the marker.
+    const ring = (await chart.locator(".raster-line__ring").boundingBox())!;
+    const dot = (await chart.locator(".raster-line__marker").boundingBox())!;
+    expect(Math.abs(ring.x + ring.width / 2 - (dot.x + dot.width / 2))).toBeLessThan(1);
+    expect(Math.abs(ring.y + ring.height / 2 - (dot.y + dot.height / 2))).toBeLessThan(1);
+    await page.keyboard.press("ArrowDown");
+    await expect(chart.getByRole("slider", { name: "Visitors" })).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(page.getByText(/^Selected: Visitors, \d+$/)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByText("Nothing selected").last()).toBeVisible();
+
+    // Pointer: hovering the middle of the plot shows the tooltip for a mid-range point.
+    const hit = chart.locator(".raster-line__hit");
+    await hit.hover();
+    const tip = chart.locator(".raster-tooltip");
+    await expect(tip).toHaveAttribute("data-visible", "true");
+    await expect(tip).toHaveText(/^(Views|Visitors), \d+ \w+ 202[56]: \d+, \d+ of 730$/);
+  });
+
+  test("reference lines don't block the pointer on marks underneath", async ({ page }) => {
+    // Bars grow in; with reduced motion they're drawn at full height at once.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/components/bar-chart");
+    const chart = figure(page, "Issues fixed this week");
+    await chart.scrollIntoViewIfNeeded();
+    // The dashed line crosses Thursday's bar (45, over the goal of 40). The
+    // line ignores the pointer, so point at the crossing rather than hover it.
+    const bar = (await chart.getByRole("img", { name: /^Thu/ }).boundingBox())!;
+    const line = (await chart.locator(".raster-chart__reference-line").boundingBox())!;
+    await page.mouse.move(bar.x + bar.width / 2, line.y + line.height / 2);
+    await expect(chart.locator(".raster-tooltip")).toHaveAttribute("data-visible", "true");
+    await expect(chart.locator(".raster-tooltip")).toHaveText(/^Thu/);
+  });
+
   test("BarChart: stacked bars are navigable and select a category", async ({ page }) => {
     await page.goto("/components/bar-chart");
-    const chart = figure(page, "Sales by region (select a quarter)");
+    const chart = figure(page, "Sales by region (select a bar)");
     await chart.getByRole("button", { name: "North, Q1: 12, 1 of 3" }).focus();
     await page.keyboard.press("ArrowUp");
     const southQ1 = chart.getByRole("button", { name: "South, Q1: 8, 1 of 3" });
@@ -49,7 +103,7 @@ test.describe("keyboard", () => {
       "aria-pressed",
       "true",
     );
-    await expect(page.getByText("Selected: Q2")).toBeVisible();
+    await expect(page.getByText("Selected: South, Q2")).toBeVisible();
   });
 
   test("GeoChart: regions are reachable by arrow keys, markers by ArrowDown", async ({ page }) => {
@@ -68,18 +122,26 @@ test.describe("keyboard", () => {
 
 test("data table disclosure shows a captioned table", async ({ page }) => {
   await page.goto("/components/line-chart");
+  await page.waitForLoadState("networkidle"); // hydrated, so the label follows the state
   const chart = figure(page, "Assessment progress over time");
-  const toggle = chart.getByRole("button", { name: "Show data table" });
-  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  const toggle = chart.locator("summary", { hasText: "Show data table" });
   await expect(chart.getByRole("table")).toBeHidden();
   await toggle.click();
-  await expect(chart.getByRole("button", { name: "Hide data table" })).toHaveAttribute(
-    "aria-expanded",
-    "true",
-  );
+  await expect(chart.locator("summary")).toHaveText("Hide data table");
   const table = chart.getByRole("table", { name: "Data for Assessment progress over time" });
   await expect(table).toBeVisible();
   await expect(table.getByRole("rowheader", { name: "Week 6" })).toBeVisible();
+});
+
+test("the data table opens without JavaScript", async ({ browser }) => {
+  const page = await browser.newPage({ javaScriptEnabled: false });
+  await page.goto("/components/line-chart");
+  const chart = figure(page, "Assessment progress over time");
+  await chart.locator("summary", { hasText: "Show data table" }).click();
+  const table = chart.getByRole("table", { name: "Data for Assessment progress over time" });
+  await expect(table).toBeVisible();
+  await expect(table.getByRole("rowheader", { name: "Week 6" })).toBeVisible();
+  await page.close();
 });
 
 test.describe("server rendering", () => {
@@ -164,8 +226,75 @@ test.describe("marks in a real browser", () => {
   });
 });
 
+test.describe("wrapping other charts", () => {
+  test("ChartFrame names, describes and tables a canvas chart", async ({ page }) => {
+    await page.goto("/guides/wrapping");
+    const chart = figure(page, "Views this week (canvas)");
+    await expect(chart).toHaveAccessibleDescription(
+      "Line chart, 7 points. Mon to Sun. Values from 340 to 610.",
+    );
+    await expect(chart.locator("canvas")).toBeVisible();
+    await chart.locator("summary", { hasText: "Show data table" }).click();
+    await expect(chart.getByRole("table")).toContainText("Data for Views this week (canvas)");
+  });
+});
+
+test.describe("export", () => {
+  test("/export downloads the chart a ref points at", async ({ page }) => {
+    await page.goto("/guides/exporting");
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download SVG", exact: true }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toBe("visitors.svg");
+    const svg = await (await file.createReadStream()).toArray();
+    expect(Buffer.concat(svg).toString()).toMatch(/^<svg[^>]*aria-roledescription="chart"/);
+  });
+});
+
+test.describe("focus ring", () => {
+  for (const reducedMotion of ["reduce", "no-preference"] as const) {
+    test(`the tooltip clears a focused point's ring (motion: ${reducedMotion})`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion });
+      await page.goto("/components/line-chart");
+      const chart = figure(page, "Results trend by status");
+      const point = chart.locator(".raster-line__point").nth(2);
+      await point.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(1200); // let the draw-in finish
+      await point.focus();
+      await page.waitForTimeout(300); // and the focus scale
+      const box = (await point.boundingBox())!;
+      const tip = (await chart.locator(".raster-tooltip").boundingBox())!;
+      // The ring is a 2 px outline 1 px outside the point.
+      expect(tip.y + tip.height).toBeLessThanOrEqual(box.y - 3);
+    });
+  }
+});
+
 test.describe("forced colours", () => {
   test.use({ colorScheme: "light" });
+
+  test("reference lines stay dashed in system colours", async ({ page }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await page.goto("/components/line-chart");
+    const line = figure(page, "Assessment progress against target").locator(
+      ".raster-chart__reference-line",
+    );
+    // A horizontal line has no height, so check it's there and styled, not "visible".
+    await expect(line).toHaveCount(1);
+    const style = await line.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const probe = document.createElement("span");
+      probe.style.color = "CanvasText";
+      document.body.append(probe);
+      const canvasText = getComputedStyle(probe).color;
+      probe.remove();
+      return { dash: cs.strokeDasharray, stroke: cs.stroke, canvasText };
+    });
+    expect(style.dash).not.toBe("none");
+    expect(style.stroke).toBe(style.canvasText);
+  });
 
   test("series use system colours, dash patterns and marker shapes", async ({ page }) => {
     await page.emulateMedia({ forcedColors: "active" });
@@ -215,7 +344,7 @@ test.describe("forced colours: bars", () => {
     await page.emulateMedia({ forcedColors: "active" });
     await page.goto("/components/bar-chart");
     await page.waitForLoadState("networkidle");
-    const chart = figure(page, "Sales by region (select a quarter)");
+    const chart = figure(page, "Sales by region (select a bar)");
     const style = (selector: string, prop: string) =>
       chart
         .locator(selector)

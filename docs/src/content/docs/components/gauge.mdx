@@ -11,7 +11,7 @@ import { GaugeBasicDemo } from "../../../components/GaugeDemo.tsx";
 Different sizes, colours, and format functions.
 
 <Example
-  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} label="Assessed" />\n<Gauge value={3.5} max={4} label="Score" format={(v) => v.toFixed(1)} color="var(--demo-good)" />\n<Gauge value={45} max={100} label="Complete" format={(v) => \`\${v}%\`} size={80} thickness={8} />`}
+  code={`import { Gauge } from '@eekodigital/raster';\n\n<Gauge value={72} max={86} title="Assessed" />\n<Gauge value={3.5} max={4} title="Score" formatValue={(v) => v.toFixed(1)} color="var(--demo-good)" />\n<Gauge value={45} max={100} title="Complete" formatValue={(v) => \`\${v}%\`} size={80} thickness={8} />`}
 >
   <GaugeBasicDemo client:load />
 </Example>
@@ -19,7 +19,7 @@ Different sizes, colours, and format functions.
 ## Accessibility
 
 - `role="meter"` with `aria-valuemin`, `aria-valuemax`, `aria-valuenow` and `aria-valuetext` from `format`.
-- Named by the visible `label` through `aria-labelledby`, so what you see is what is announced.
+- Named by the visible `title` through `aria-labelledby`, so what you see is what is announced.
 - The fill transition stops under `prefers-reduced-motion`.
 
 See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared structure, the `labels` prop and screen-reader testing.
@@ -31,7 +31,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -43,7 +42,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Required.</td>
     </tr>
     <tr>
@@ -52,9 +50,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>0</code>
+        <div class="props-table__default">
+          Default: <code>0</code>
+        </div>
       </td>
       <td>Start of the range.</td>
     </tr>
@@ -65,31 +63,41 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Required. End of the range.</td>
     </tr>
     <tr>
       <td>
-        <code>label</code>
+        <code>title</code>
       </td>
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
-      <td>Required. Visible label and accessible name.</td>
+      <td>Required. Visible title and accessible name.</td>
     </tr>
     <tr>
       <td>
-        <code>format</code>
+        <code>labels</code>
+      </td>
+      <td>
+        <code>ChartLabelOverrides</code>
+      </td>
+      <td>
+        <code>locale</code> for the default number format, as on the other charts.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>formatValue</code>
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>
-        <code>Intl.NumberFormat("en")</code>
-      </td>
-      <td>
-        Formats the displayed value and <code>aria-valuetext</code>.
+        Formats the displayed value and <code>aria-valuetext</code>. Defaults to the number format
+        for <code>labels.locale</code>.
       </td>
     </tr>
     <tr>
@@ -99,7 +107,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Fixed diameter in px. Omit to fill the container's width (square).</td>
     </tr>
     <tr>
@@ -108,9 +115,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>10</code>
+        <div class="props-table__default">
+          Default: <code>10</code>
+        </div>
       </td>
       <td>Ring thickness in px.</td>
     </tr>
@@ -120,9 +127,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string</code>
-      </td>
-      <td>
-        <code>series 1</code>
+        <div class="props-table__default">
+          Default: <code>series 1</code>
+        </div>
       </td>
       <td>Fill colour.</td>
     </tr>
@@ -132,21 +139,24 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string</code>
-      </td>
-      <td>
-        <code>grid colour</code>
+        <div class="props-table__default">
+          Default: <code>grid colour</code>
+        </div>
       </td>
       <td>Track colour.</td>
     </tr>
     <tr>
       <td>
-        <code>exportRef</code>
+        <code>ref</code>
       </td>
       <td>
-        <code>Ref&lt;ChartExportHandle&gt;</code>
+        <code>Ref&lt;HTMLDivElement&gt;</code>
       </td>
-      <td>—</td>
-      <td>SVG/PNG export.</td>
+      <td>
+        The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
+        <code>@eekodigital/raster/export</code>. See{" "}
+        <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -155,7 +165,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td></td>
     </tr>
   </tbody>

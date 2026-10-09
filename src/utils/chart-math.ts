@@ -67,6 +67,14 @@ export function bandScale(
   };
 }
 
+/** A round step (1, 2 or 5 × a power of ten) for about `count` ticks across min–max. */
+function niceStep(min: number, max: number, count: number): number {
+  const rawStep = (max - min) / count;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const residual = rawStep / magnitude;
+  return (residual <= 1.5 ? 1 : residual <= 3.5 ? 2 : residual <= 7.5 ? 5 : 10) * magnitude;
+}
+
 /**
  * Generate nice tick values between min and max.
  */
@@ -74,27 +82,34 @@ export function ticks(min: number, max: number, count: number): number[] {
   if (count <= 0) return [];
   if (min === max) return [min];
 
-  const range = max - min;
-  const rawStep = range / count;
-
-  // Round step to a "nice" value (1, 2, 5, 10, 20, 50, etc.)
-  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-  const residual = rawStep / magnitude;
-  const niceStep =
-    residual <= 1.5
-      ? 1 * magnitude
-      : residual <= 3.5
-        ? 2 * magnitude
-        : residual <= 7.5
-          ? 5 * magnitude
-          : 10 * magnitude;
-
-  const start = Math.ceil(min / niceStep) * niceStep;
+  const step = niceStep(min, max, count);
+  const start = Math.ceil(min / step) * step;
   const result: number[] = [];
-  for (let v = start; v <= max + niceStep * 0.001; v += niceStep) {
+  for (let v = start; v <= max + step * 0.001; v += step) {
     result.push(Math.round(v * 1e10) / 1e10); // avoid floating point drift
   }
   return result;
+}
+
+/**
+ * min–max widened out to whole steps of its `count` ticks, so the first and
+ * last ticks sit on the ends of the axis and no mark is beyond them.
+ */
+export function niceExtent(min: number, max: number, count: number): [number, number] {
+  if (count <= 0 || !(max > min)) return [min, max];
+  const round = (v: number) => Math.round(v * 1e10) / 1e10;
+  // Widening can change the step; repeat until the ends sit on its ticks.
+  for (let i = 0; i < 4; i++) {
+    const step = niceStep(min, max, count);
+    const next: [number, number] = [
+      round(Math.floor(min / step) * step),
+      round(Math.ceil(max / step) * step),
+    ];
+    // Too small to round (or settled): keep what we have.
+    if (!(next[1] > next[0]) || (next[0] === min && next[1] === max)) break;
+    [min, max] = next;
+  }
+  return [min, max];
 }
 
 /**
@@ -112,17 +127,56 @@ export function labelSkip(count: number, availableWidth: number, minSpacing = 30
   return Math.ceil(minSpacing / perLabel);
 }
 
+/** An axis label: its x in px, its text and how it anchors there. */
+export type AxisTick = { x: number; text: string; anchor: "start" | "middle" | "end" };
+
+/** Estimated px per character of the 0.75rem tick font. */
+export const TICK_CHAR = 7;
+
 /**
- * Determine whether category labels should be rotated based on density.
- * Returns true when there are enough categories that horizontal labels would overlap.
+ * Whether axis labels leave at least 8 px between neighbours (by estimated
+ * width, honouring each anchor), and `spacing` px between ticks if given.
  */
-export function shouldRotateLabels(
+export function ticksFit(ticks: AxisTick[], spacing?: number): boolean {
+  const span = (t: AxisTick) => {
+    const w = t.text.length * TICK_CHAR;
+    const x0 = t.anchor === "start" ? t.x : t.anchor === "end" ? t.x - w : t.x - w / 2;
+    return [x0, x0 + w];
+  };
+  return ticks.every(
+    (t, i) =>
+      !i ||
+      (span(t)[0] - span(ticks[i - 1])[1] >= 8 &&
+        (spacing === undefined || t.x - ticks[i - 1].x >= spacing)),
+  );
+}
+
+/**
+ * Labels for `count` categories, thinned to every k-th for the smallest k
+ * whose labels fit. The last category is always labelled; the label before
+ * it is dropped if the two would touch. When even the first and last don't
+ * fit, only the first is kept.
+ */
+export function categoryTicks(
   count: number,
-  availableWidth: number,
-  minSpacing = 40,
-): boolean {
-  if (count <= 1) return false;
-  return availableWidth / count < minSpacing;
+  tick: (i: number) => AxisTick,
+  spacing?: number,
+): AxisTick[] {
+  for (let k = 1; k < count; k++) {
+    const out: AxisTick[] = [];
+    for (let i = 0; i < count - 1; i += k) out.push(tick(i));
+    const last = tick(count - 1);
+    if (out.length > 1 && !ticksFit([out.at(-1)!, last], spacing)) out.pop();
+    out.push(last);
+    if (ticksFit(out, spacing)) return out;
+  }
+  return count ? [tick(0)] : [];
+}
+
+/** `text` cut with an ellipsis to fit `px` (by estimated width). */
+export function truncateLabel(text: string, px: number): string {
+  const max = Math.max(1, Math.floor(px / TICK_CHAR));
+  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 }
 
 /**
@@ -199,14 +253,18 @@ export function pieAngles(values: number[]): { start: number; end: number }[] {
   return angles;
 }
 
+/** Straight-line SVG path through `points` (just a move for one point). */
+export function polylinePath(points: { x: number; y: number }[]): string {
+  return `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")}`;
+}
+
 /**
  * Generate a smooth SVG path using Catmull-Rom interpolation.
  * Converts a set of points into cubic bezier curves for smooth lines.
  * Tension controls curvature (0 = straight lines, 1 = full catmull-rom).
  */
 export function catmullRomPath(points: { x: number; y: number }[], tension = 0.5): string {
-  if (points.length < 2) return "";
-  if (points.length === 2) return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+  if (points.length < 3) return polylinePath(points);
 
   const parts: string[] = [`M ${points[0].x} ${points[0].y}`];
 
@@ -262,4 +320,56 @@ export function markerPath(index: number, x: number, y: number, r: number): stri
     d += `${i ? "L" : "M"}${r2(x + shape[i] * r)} ${r2(y + shape[i + 1] * r)}`;
   }
   return `${d}Z`;
+}
+
+type XY = { x: number; y: number };
+
+/**
+ * Downsamples a line for drawing (M4): keeps the first, lowest, highest and
+ * last point in each 1 px column, in their original order, so the line looks
+ * the same at that resolution. Long series shrink to at most four points per
+ * pixel.
+ */
+export function decimate<T extends XY>(points: T[]): T[] {
+  const out: T[] = [];
+  let col = NaN;
+  let first = 0;
+  let lo = 0;
+  let hi = 0;
+  const flush = (last: number) => {
+    if (col !== col) return;
+    for (const i of [...new Set([first, lo, hi, last])].sort((a, b) => a - b)) out.push(points[i]);
+  };
+  points.forEach((p, i) => {
+    const c = Math.floor(p.x);
+    if (c !== col) {
+      flush(i - 1);
+      col = c;
+      first = lo = hi = i;
+    } else {
+      if (p.y < points[lo].y) lo = i;
+      if (p.y > points[hi].y) hi = i;
+    }
+  });
+  flush(points.length - 1);
+  return out;
+}
+
+const r1 = (v: number) => Math.round(v * 10) / 10;
+
+/** Straight-line path with coordinates to 0.1 px and implicit line-tos: small for long series. */
+export function compactPath(points: XY[]): string {
+  return `M${points.map((p) => `${r1(p.x)} ${r1(p.y)}`).join(" ")}`;
+}
+
+/** Index of the value in ascending `xs` nearest to `x` (binary search); -1 when empty. */
+export function nearestIndex(xs: number[], x: number): number {
+  let lo = 0;
+  let hi = xs.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (xs[mid] < x) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo > 0 && x - xs[lo - 1] <= xs[lo] - x ? lo - 1 : hi;
 }

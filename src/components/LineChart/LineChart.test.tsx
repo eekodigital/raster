@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "../../test-utils/axe.js";
 import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
+import { renderToString } from "react-dom/server";
+import { timeAxis } from "../../utils/time.js";
 import { LineChart } from "./LineChart.js";
 
 const SERIES = [{ name: "Assessed", data: [10, 25, 40, 60, 86] }];
@@ -55,13 +57,17 @@ describe("LineChart structure", () => {
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
-  it("fires onPointClick and makes marks buttons", () => {
+  it("fires onMarkClick and makes marks buttons", () => {
     const onClick = vi.fn();
     render(
-      <LineChart series={SERIES} categories={CATEGORIES} title="Click" onPointClick={onClick} />,
+      <LineChart series={SERIES} categories={CATEGORIES} title="Click" onMarkClick={onClick} />,
     );
     fireEvent.click(screen.getByRole("button", { name: "Assessed, Week 3: 40, 3 of 5" }));
-    expect(onClick).toHaveBeenCalledWith(0, 2, 40);
+    expect(onClick).toHaveBeenCalledWith({
+      index: { series: 0, point: 2 },
+      value: 40,
+      datum: undefined,
+    });
   });
 
   it("follows a controlled selection", () => {
@@ -146,7 +152,7 @@ describe("LineChart structure", () => {
       />,
     );
     screen.getByRole("img", { name: "Aufrufe, A: 1.200, 1 von 2" });
-    fireEvent.click(screen.getByRole("button", { name: "Tabelle anzeigen" }));
+    fireEvent.click(screen.getByText("Tabelle anzeigen", { selector: "summary" }));
     screen.getByRole("table", { name: "Daten für V" });
   });
 });
@@ -171,7 +177,7 @@ describe("LineChart data table", () => {
     render(
       <LineChart series={SERIES} categories={CATEGORIES} title="P" dataTable="visually-hidden" />,
     );
-    expect(screen.queryByRole("button", { name: "Show data table" })).toBeNull();
+    expect(document.querySelector("details")).toBeNull();
     expect(screen.getByRole("table", { name: "Data for P" }).classList).toContain("raster-sr-only");
   });
 });
@@ -285,6 +291,25 @@ describe("LineChart sizing", () => {
   });
 });
 
+describe("LineChart category labels", () => {
+  it("thin so they don't overlap at phone widths, keeping the first and last", () => {
+    const width = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(300);
+    const { container } = render(
+      <LineChart
+        series={[{ name: "A", data: [1, 2, 3, 4, 5, 6] }]}
+        categories={["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"]}
+        title="T"
+      />,
+    );
+    width.mockRestore();
+    expect(
+      [...container.querySelectorAll(".raster-chart__tick")]
+        .map((t) => t.textContent)
+        .filter((t) => t?.startsWith("Week")),
+    ).toEqual(["Week 1", "Week 3", "Week 6"]);
+  });
+});
+
 describe("LineChart drawing", () => {
   it("renders grid lines per the grid prop", () => {
     const { container, rerender } = render(
@@ -322,6 +347,16 @@ describe("LineChart drawing", () => {
       screen.getByRole("img", { name: "Fail, Mar: 3, 3 of 3" });
       unmount();
     }
+  });
+
+  it("closes stacked smooth areas along the series below, right to left", () => {
+    const { container } = render(
+      <LineChart series={MULTI} categories={MONTHS} stacked area curve="smooth" title="S" />,
+    );
+    // Fail (stacked on Pass, drawn first) runs out left to right, then back from the right.
+    const d = container.querySelector(".raster-line__area")!.getAttribute("d")!;
+    const back = /\sL ([\d.]+) /.exec(d)!;
+    expect(Number(back[1])).toBe(662);
   });
 
   it("renders axis titles", () => {
@@ -459,5 +494,420 @@ describe("LineChart axe", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /^Pass, Feb/ }));
     expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("LineChart with a time axis", () => {
+  const VIEWS = [{ name: "Views", data: [10, 20, 30] }];
+  const DATES = ["2026-10-01", "2026-10-02", "2026-10-04"];
+  const GB = { locale: "en-GB" };
+  /** x of each point, from its marker path (a circle starts 3.5 left of centre). */
+  const pointXs = (root: Element) =>
+    [...root.querySelectorAll(".raster-line__point")].map(
+      (p) => Number(/^M([\d.-]+)/.exec(p.getAttribute("d")!)![1]) + 3.5,
+    );
+
+  it("spaces points by elapsed time, not index", () => {
+    const { container } = render(
+      <LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Views" labels={GB} />,
+    );
+    // Plot is 720 - 58 = 662 wide over 3 days.
+    expect(pointXs(container).map(Math.round)).toEqual([0, 221, 662]);
+  });
+
+  it("names points, the summary and the table with formatted dates", () => {
+    render(<LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Views" labels={GB} />);
+    screen.getByRole("img", { name: "Views, 2 October 2026: 20, 2 of 3" });
+    const figure = screen.getByRole("figure", { name: "Views" });
+    expect(document.getElementById(figure.getAttribute("aria-describedby")!)?.textContent).toBe(
+      "Line chart, 3 points. 1 October 2026 to 4 October 2026. Values from 10 to 30.",
+    );
+    expect(tableText(openTable())).toEqual([
+      ["Date", "Views"],
+      ["1 October 2026", "10"],
+      ["2 October 2026", "20"],
+      ["4 October 2026", "30"],
+    ]);
+  });
+
+  it("draws calendar ticks, anchoring labels at the plot edges, with grid lines at ticks", () => {
+    const { container } = render(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES)}
+        title="Views"
+        labels={GB}
+        grid="vertical"
+      />,
+    );
+    const ticks = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => !t.hasAttribute("dy"))
+      .map((t) => [t.textContent, t.getAttribute("text-anchor")]);
+    expect(ticks).toEqual([
+      ["1 Oct", "start"],
+      ["2 Oct", "middle"],
+      ["3 Oct", "middle"],
+      ["4 Oct", "end"],
+    ]);
+    expect(container.querySelectorAll("line.raster-chart__grid")).toHaveLength(4);
+  });
+
+  it("gives formatXTick each date tick's original index, after xTickFilter", () => {
+    const seen: number[] = [];
+    render(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES)}
+        labels={GB}
+        title="Views"
+        xTickFilter={(i) => i % 2 === 0}
+        formatXTick={(text, i) => (seen.push(i), text)}
+      />,
+    );
+    // Ticks 0–3 (1–4 Oct); the filter keeps 0 and 2, and formatXTick sees those indices.
+    expect(seen.slice(-2)).toEqual([0, 2]);
+  });
+
+  it("filters and formats date ticks with xTickFilter and formatXTick", () => {
+    const { container } = render(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES)}
+        labels={GB}
+        title="Views"
+        xTickFilter={(i) => i % 2 === 0}
+        formatXTick={(text) => text.toUpperCase()}
+      />,
+    );
+    const ticks = [...container.querySelectorAll("text.raster-chart__tick")]
+      .filter((t) => !t.hasAttribute("dy"))
+      .map((t) => t.textContent);
+    // Daily ticks 1–4 Oct, every other one kept, then formatted.
+    expect(ticks).toEqual(["1 OCT", "3 OCT"]);
+  });
+
+  it("breaks the line and area where a point is missing at the interval", () => {
+    const x = timeAxis(["2026-10-01", "2026-10-02", "2026-10-04", "2026-10-05"], {
+      interval: "day",
+    });
+    for (const curve of ["linear", "smooth"] as const) {
+      const { container, unmount } = render(
+        <LineChart
+          series={[
+            { name: "A", data: [1, 2, 3, 4] },
+            { name: "B", data: [1, 1, 1, 1] },
+          ]}
+          xAxis={x}
+          area
+          stacked
+          curve={curve}
+          title="Gaps"
+        />,
+      );
+      for (const line of container.querySelectorAll(".raster-line__line"))
+        expect(line.getAttribute("d")!.match(/M/g)).toHaveLength(2);
+      for (const area of container.querySelectorAll(".raster-line__area"))
+        expect(area.getAttribute("d")!.match(/Z/g)).toHaveLength(2);
+      unmount();
+    }
+    // Without an interval, the same data joins up.
+    const { container } = render(
+      <LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Joined" />,
+    );
+    expect(
+      container.querySelector(".raster-line__line")!.getAttribute("d")!.match(/M/g),
+    ).toHaveLength(1);
+  });
+
+  it("keeps one tab stop and moves point by point across gaps", () => {
+    const { container } = render(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES, { interval: "day" })}
+        title="Views"
+        labels={GB}
+      />,
+    );
+    expect(tabStops(container)).toEqual(["Views, 1 October 2026: 10, 1 of 3"]);
+    press(screen.getByRole("img", { name: /1 of 3/ }), "ArrowRight");
+    expect(focusedName()).toBe("Views, 2 October 2026: 20, 2 of 3");
+    press(document.activeElement!, "ArrowRight");
+    expect(focusedName()).toBe("Views, 4 October 2026: 30, 3 of 3");
+    press(document.activeElement!, "Home");
+    expect(focusedName()).toBe("Views, 1 October 2026: 10, 1 of 3");
+  });
+
+  it("server-renders the summary, table, names and one tab stop", () => {
+    const html = renderToString(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES, { interval: "day" })}
+        title="Views"
+        labels={GB}
+      />,
+    );
+    expect(html).toContain("1 October 2026 to 4 October 2026. Values from 10 to 30.");
+    expect(html).toContain('aria-label="Views, 4 October 2026: 30, 3 of 3"');
+    expect(html).toContain('<th scope="row">2 October 2026</th>');
+    expect(html.match(/tabindex="0"/g)).toHaveLength(1);
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <LineChart
+        series={VIEWS}
+        xAxis={timeAxis(DATES, { interval: "day" })}
+        title="Views"
+        onSelect={() => {}}
+      />,
+    );
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+
+describe("LineChart dense mode", () => {
+  const big = (n: number, name = "Views") => ({
+    name,
+    data: Array.from({ length: n }, (_, i) => 100 + (i % 10)),
+  });
+  const days = (n: number) => Array.from({ length: n }, (_, i) => `Day ${i + 1}`);
+  const slider = () => screen.getByRole("slider") as HTMLInputElement;
+  const valueText = () => slider().getAttribute("aria-valuetext");
+
+  it("switches on above 200 points, or as set by `dense`", () => {
+    const { unmount } = render(<LineChart series={[big(201)]} categories={days(201)} title="V" />);
+    expect(slider().getAttribute("aria-label")).toBe("Views");
+    expect(screen.queryAllByRole("img", { name: /Views, Day/ })).toHaveLength(0);
+    unmount();
+    const cases: [number, boolean | number | undefined, boolean][] = [
+      [200, undefined, false],
+      [300, false, false],
+      [10, true, true],
+      [60, 50, true],
+      [40, 50, false],
+    ];
+    for (const [count, dense, expected] of cases) {
+      const r = render(
+        <LineChart series={[big(count)]} categories={days(count)} dense={dense} title="V" />,
+      );
+      expect(screen.queryAllByRole("slider")).toHaveLength(expected ? 1 : 0);
+      r.unmount();
+    }
+  });
+
+  it("is one focusable control that names the current point", () => {
+    const { container } = render(
+      <LineChart series={[big(300)]} categories={days(300)} title="V" />,
+    );
+    const plot = container.querySelector(".raster-chart__plot")!;
+    expect(plot.querySelectorAll("input, [tabindex]")).toHaveLength(1);
+    expect(slider().value).toBe("0");
+    expect(slider().max).toBe("299");
+    expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
+  });
+
+  it("moves with the keyboard: arrows, Home/End, PageUp/PageDown, and ↑/↓ between series", () => {
+    render(<LineChart series={[big(300), big(250, "Visits")]} categories={days(300)} title="V" />);
+    const key = (k: string) => fireEvent.keyDown(slider(), { key: k });
+    slider().focus();
+    key("ArrowRight");
+    expect(valueText()).toBe("Views, Day 2: 101, 2 of 300");
+    key("PageDown");
+    expect(valueText()).toBe("Views, Day 12: 101, 12 of 300");
+    key("PageUp");
+    key("ArrowLeft");
+    expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
+    key("End");
+    expect(valueText()).toBe("Views, Day 300: 109, 300 of 300");
+    key("ArrowDown");
+    expect(slider().getAttribute("aria-label")).toBe("Visits");
+    expect(valueText()).toBe("Visits, Day 250: 109, 250 of 250");
+    key("ArrowUp");
+    key("Home");
+    expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
+  });
+
+  it("follows value changes from assistive technology (e.g. iOS swipes)", () => {
+    render(<LineChart series={[big(300)]} categories={days(300)} title="V" />);
+    fireEvent.change(slider(), { target: { value: "4" } });
+    expect(valueText()).toBe("Views, Day 5: 104, 5 of 300");
+  });
+
+  it("shows a marker and tooltip on focus, and hides them on blur", () => {
+    const { container } = render(
+      <LineChart series={[big(300)]} categories={days(300)} title="V" />,
+    );
+    const marker = () => container.querySelector(".raster-line__marker");
+    expect(marker()).toBeNull();
+    fireEvent.focus(slider());
+    expect(marker()?.closest(".raster-line__overlay")?.getAttribute("aria-hidden")).toBe("true");
+    expect(marker()?.hasAttribute("data-focused")).toBe(true);
+    expect(container.querySelectorAll(".raster-tooltip")).toHaveLength(1);
+    expect(
+      container
+        .querySelector(".raster-line__overlay + .raster-tooltip")
+        ?.hasAttribute("data-visible"),
+    ).toBe(true);
+    fireEvent.blur(slider());
+    expect(marker()).toBeNull();
+  });
+
+  it("selects with Enter or Space when interactive, and says so in the value", () => {
+    const onSelect = vi.fn();
+    const onMarkClick = vi.fn();
+    const { container } = render(
+      <LineChart
+        series={[big(300)]}
+        categories={days(300)}
+        title="V"
+        onSelect={onSelect}
+        onMarkClick={onMarkClick}
+      />,
+    );
+    fireEvent.keyDown(slider(), { key: "ArrowRight" });
+    fireEvent.keyDown(slider(), { key: "Enter" });
+    expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 1 });
+    expect(onMarkClick).toHaveBeenCalledWith({
+      index: { series: 0, point: 1 },
+      value: 101,
+      datum: undefined,
+    });
+    expect(valueText()).toBe("Views, Day 2: 101, 2 of 300, selected");
+    expect(container.querySelector(".raster-line__marker[data-selected]")).toBeTruthy();
+    fireEvent.keyDown(slider(), { key: "Escape" });
+    expect(valueText()).toBe("Views, Day 2: 101, 2 of 300");
+    expect(screen.getByRole("status").textContent).toBe("Selection cleared");
+  });
+
+  it("ignores Enter when static", () => {
+    render(<LineChart series={[big(300)]} categories={days(300)} title="V" />);
+    fireEvent.keyDown(slider(), { key: "Enter" });
+    expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
+  });
+
+  it("tracks the nearest point under the pointer, and selects it on click", () => {
+    const onSelect = vi.fn();
+    const { container } = render(
+      <LineChart
+        series={[big(300), { name: "Low", data: Array(300).fill(0) }]}
+        categories={days(300)}
+        title="V"
+        onSelect={onSelect}
+      />,
+    );
+    const hit = container.querySelector(".raster-line__hit")!;
+    expect(hit.closest(".raster-line__overlay")?.getAttribute("aria-hidden")).toBe("true");
+    // happy-dom rects are at 0,0: the plot starts at the 50 px left margin.
+    // Point 150 of 300 sits at 150 / 299 × 662 ≈ 332 px; y near the top is the Views line.
+    fireEvent.pointerMove(hit, { clientX: 50 + 332, clientY: 20 });
+    expect(container.querySelector(".raster-line__marker")).toBeTruthy();
+    fireEvent.click(hit, { clientX: 50 + 332, clientY: 20 });
+    expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 150 });
+    // Near the bottom, the Low series is nearer.
+    fireEvent.click(hit, { clientX: 50 + 332, clientY: 150 });
+    expect(onSelect).toHaveBeenLastCalledWith({ series: 1, point: 150 });
+    fireEvent.pointerLeave(hit);
+    expect(container.querySelector(".raster-line__marker:not([data-selected])")).toBeNull();
+  });
+
+  it("keeps pointer and keyboard apart: hovering doesn't move the slider, blur keeps the hover", () => {
+    const { container } = render(
+      <LineChart series={[big(300)]} categories={days(300)} title="V" />,
+    );
+    const hit = container.querySelector(".raster-line__hit")!;
+    fireEvent.focus(slider());
+    fireEvent.pointerMove(hit, { clientX: 50 + 332, clientY: 20 });
+    expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
+    // The focused point and the hovered point both show.
+    expect(container.querySelectorAll(".raster-line__marker")).toHaveLength(2);
+    fireEvent.blur(slider());
+    expect(container.querySelectorAll(".raster-line__marker")).toHaveLength(1);
+  });
+
+  it("skips an empty first series, so there's always a slider", () => {
+    render(
+      <LineChart
+        series={[{ name: "Empty", data: [] }, big(300, "Visits")]}
+        categories={days(300)}
+        title="V"
+      />,
+    );
+    expect(slider().getAttribute("aria-label")).toBe("Visits");
+  });
+
+  it("announces selection changes in the live region", () => {
+    render(<LineChart series={[big(300)]} categories={days(300)} title="V" onSelect={() => {}} />);
+    fireEvent.keyDown(slider(), { key: "Enter" });
+    expect(screen.getByRole("status").textContent).toBe("Views, Day 1: 100, 1 of 300, selected");
+    fireEvent.keyDown(slider(), { key: " " });
+    expect(screen.getByRole("status").textContent).toBe("Selection cleared");
+  });
+
+  it("doesn't re-render the chart while hovering", () => {
+    // A full render formats every table row; hovering should only name the hovered point.
+    const format = vi.fn((v: number) => String(v));
+    const { container } = render(
+      <LineChart series={[big(300)]} categories={days(300)} title="V" formatValue={format} />,
+    );
+    const hit = container.querySelector(".raster-line__hit")!;
+    format.mockClear();
+    for (const clientX of [100, 200, 300, 400])
+      fireEvent.pointerMove(hit, { clientX, clientY: 20 });
+    expect(format.mock.calls.length).toBeLessThan(20);
+  });
+
+  it("draws straight, compact, downsampled lines with no per-point marks", () => {
+    const { container } = render(
+      <LineChart series={[big(5000)]} categories={days(5000)} curve="smooth" area title="V" />,
+    );
+    const d = container.querySelector(".raster-line__line")!.getAttribute("d")!;
+    expect(d).not.toMatch(/[CL]/);
+    expect(d).not.toMatch(/\.\d\d/);
+    // At most four points (first, lowest, highest, last) per pixel column of the 662 px plot.
+    expect(d.split(" ").length / 2).toBeLessThanOrEqual(4 * 663);
+    expect(container.querySelectorAll(".raster-line__point")).toHaveLength(0);
+    expect(container.querySelector(".raster-line__area")).toBeTruthy();
+  });
+
+  it("dots points a gap leaves on their own", () => {
+    const dates = Array.from({ length: 300 }, (_, i) =>
+      Date.UTC(2026, 0, 1 + i + (i >= 150 ? 1 : 0) + (i >= 151 ? 1 : 0)),
+    );
+    const { container } = render(
+      <LineChart series={[big(300)]} xAxis={timeAxis(dates, { interval: "day" })} title="V" />,
+    );
+    expect(
+      container.querySelector(".raster-line__line")!.getAttribute("d")!.match(/M/g),
+    ).toHaveLength(3);
+    expect(container.querySelector(".raster-line__dots")?.getAttribute("d")).toMatch(/^M/);
+  });
+
+  it("server-renders small HTML: one control, the summary and the table", () => {
+    const html = renderToString(
+      <LineChart series={[big(1000)]} categories={days(1000)} title="V" />,
+    );
+    const svg = html.slice(html.indexOf("<svg"), html.indexOf("</svg>") + 6);
+    expect(svg.length).toBeLessThan(20_000);
+    expect(html.match(/<input/g)).toHaveLength(1);
+    expect(html).not.toMatch(/tabindex="0"/);
+    expect(html).toContain('aria-valuetext="Views, Day 1: 100, 1 of 1,000"');
+    expect(html).toContain("Line chart, 1,000 points.");
+    expect(html.match(/<tr>/g)).toHaveLength(1001);
+  });
+
+  it("has no axe violations, static and interactive", async () => {
+    // `dense` forces the same markup on a short series, keeping axe quick.
+    const { container, unmount } = render(
+      <LineChart series={[big(20)]} categories={days(20)} dense title="V" />,
+    );
+    openTable();
+    expect(await axe(container)).toHaveNoViolations();
+    unmount();
+    const r = render(
+      <LineChart series={[big(20)]} categories={days(20)} dense title="V" onSelect={() => {}} />,
+    );
+    fireEvent.keyDown(slider(), { key: "Enter" });
+    expect(await axe(r.container)).toHaveNoViolations();
   });
 });

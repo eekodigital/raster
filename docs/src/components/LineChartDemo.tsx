@@ -1,5 +1,74 @@
 import { LineChart, type LinePointIndex } from "@eekodigital/raster";
+import { timeAxis } from "@eekodigital/raster/time";
 import { useState } from "react";
+
+// Ten weeks of daily views from 1 September 2026, with 9–11 September missing.
+const DAY = 864e5;
+const VIEW_DAYS = Array.from({ length: 70 }, (_, i) => Date.UTC(2026, 8, 1) + i * DAY).filter(
+  (_, i) => i < 8 || i > 10,
+);
+const VIEWS = VIEW_DAYS.map((_, i) => Math.round(120 + 40 * Math.sin(i / 3) + i * 1.5));
+
+export function LineChartDatesDemo() {
+  return (
+    <LineChart
+      series={[{ name: "Views", data: VIEWS }]}
+      xAxis={timeAxis(VIEW_DAYS, { interval: "day" })}
+      labels={{ locale: "en-GB" }}
+      title="Daily views"
+    />
+  );
+}
+
+// Two years of daily figures: 730 points a series, so the chart is dense.
+const YEAR_DAYS = Array.from({ length: 730 }, (_, i) => Date.UTC(2025, 0, 1) + i * DAY);
+/** Daily traffic: slow growth, a yearly cycle, quieter weekends and a little noise. */
+const traffic = (base: number, seed: number) =>
+  YEAR_DAYS.map((t, i) => {
+    const weekend = [0, 6].includes(new Date(t).getUTCDay()) ? 0.9 : 1;
+    const noise = Math.sin(i * 12.9898 + seed) * 43758.5453;
+    return Math.round(
+      (base + i * 0.2 + base * 0.25 * Math.sin((2 * Math.PI * i) / 365)) * weekend +
+        (noise - Math.floor(noise)) * base * 0.05,
+    );
+  });
+const DENSE = [
+  { name: "Views", data: traffic(400, 1) },
+  { name: "Visitors", data: traffic(180, 2) },
+];
+const DENSE_AXIS = timeAxis(YEAR_DAYS, { interval: "day" });
+
+export function LineChartDenseDemo() {
+  const [selected, setSelected] = useState<LinePointIndex | null>(null);
+  return (
+    <div style={{ width: "100%" }}>
+      <LineChart
+        series={DENSE}
+        xAxis={DENSE_AXIS}
+        labels={{ locale: "en-GB" }}
+        title="Daily traffic, 2025–2026"
+        selectedIndex={selected}
+        onSelect={setSelected}
+      />
+      <p>
+        {selected
+          ? `Selected: ${DENSE[selected.series].name}, ${DENSE[selected.series].data[selected.point]}`
+          : "Nothing selected"}
+      </p>
+    </div>
+  );
+}
+
+export function LineChartReferenceDemo() {
+  return (
+    <LineChart
+      series={[{ name: "Assessed", data: [10, 25, 40, 60, 72, 86] }]}
+      categories={["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"]}
+      referenceLines={[{ value: 80, label: "Target" }]}
+      title="Assessment progress against target"
+    />
+  );
+}
 
 export function LineChartBasicDemo() {
   return (
@@ -49,7 +118,6 @@ export function LineChartSelectDemo() {
         series={series}
         categories={months}
         title="Results trend (select a point)"
-        aspectRatio={3}
         selectedIndex={selected}
         onSelect={setSelected}
       />

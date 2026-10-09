@@ -29,7 +29,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
     <tr>
       <th>Prop</th>
       <th>Type</th>
-      <th>Default</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -41,7 +40,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number[]</code>
       </td>
-      <td>—</td>
       <td>Required. Two or more values.</td>
     </tr>
     <tr>
@@ -51,7 +49,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td>Required. What the values are. Not displayed; it leads the text summary.</td>
     </tr>
     <tr>
@@ -61,7 +58,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>number</code>
       </td>
-      <td>—</td>
       <td>Fixed width in px. Omit to fill the container's width.</td>
     </tr>
     <tr>
@@ -70,9 +66,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>number</code>
-      </td>
-      <td>
-        <code>24</code>
+        <div class="props-table__default">
+          Default: <code>24</code>
+        </div>
       </td>
       <td>Height in px.</td>
     </tr>
@@ -82,9 +78,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>string</code>
-      </td>
-      <td>
-        <code>series 1</code>
+        <div class="props-table__default">
+          Default: <code>series 1</code>
+        </div>
       </td>
       <td>Line colour.</td>
     </tr>
@@ -94,9 +90,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>boolean</code>
-      </td>
-      <td>
-        <code>false</code>
+        <div class="props-table__default">
+          Default: <code>false</code>
+        </div>
       </td>
       <td>Fill below the line.</td>
     </tr>
@@ -106,9 +102,9 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       </td>
       <td>
         <code>(value: number) =&gt; string</code>
-      </td>
-      <td>
-        <code>Intl.NumberFormat</code>
+        <div class="props-table__default">
+          Default: <code>Intl.NumberFormat</code>
+        </div>
       </td>
       <td>Formats values in the summary.</td>
     </tr>
@@ -117,20 +113,23 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>labels</code>
       </td>
       <td>
-        <code>Partial&lt;ChartLabels&gt;</code>
+        <code>ChartLabelOverrides</code>
+        <div class="props-table__default">Default: English</div>
       </td>
-      <td>English</td>
       <td>Summary wording and number locale.</td>
     </tr>
     <tr>
       <td>
-        <code>exportRef</code>
+        <code>ref</code>
       </td>
       <td>
-        <code>Ref&lt;ChartExportHandle&gt;</code>
+        <code>Ref&lt;HTMLSpanElement&gt;</code>
       </td>
-      <td>—</td>
-      <td>SVG/PNG export.</td>
+      <td>
+        The chart's root element, e.g. for <code>exportSVG</code> and <code>exportPNG</code> from{" "}
+        <code>@eekodigital/raster/export</code>. See{" "}
+        <a href="/guides/exporting/">Exporting charts</a>.
+      </td>
     </tr>
     <tr>
       <td>
@@ -139,7 +138,6 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
       <td></td>
     </tr>
   </tbody>

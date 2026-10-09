@@ -1,13 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   arcPath,
+  categoryTicks,
+  ticksFit,
+  truncateLabel,
+  catmullRomPath,
+  compactPath,
+  decimate,
+  nearestIndex,
+  polylinePath,
   bandScale,
   clamp,
   fraction,
   labelSkip,
+  niceExtent,
   MARKER_SHAPES,
   markerPath,
-  shouldRotateLabels,
   strokeArcPath,
   extent,
   linearScale,
@@ -188,20 +196,6 @@ describe("labelSkip", () => {
   });
 });
 
-describe("shouldRotateLabels", () => {
-  it("returns false when labels have space", () => {
-    expect(shouldRotateLabels(3, 300)).toBe(false);
-  });
-
-  it("returns true when labels are dense", () => {
-    expect(shouldRotateLabels(12, 300)).toBe(true);
-  });
-
-  it("returns false for single label", () => {
-    expect(shouldRotateLabels(1, 100)).toBe(false);
-  });
-});
-
 describe("markerPath", () => {
   it("draws a distinct closed shape per series, cycling", () => {
     const shapes = Array.from({ length: MARKER_SHAPES }, (_, i) => markerPath(i, 10, 10, 3));
@@ -215,5 +209,138 @@ describe("markerPath", () => {
     expect(markerPath(1, 10, 20, 5)).toBe("M5.5 15.5L14.5 15.5L14.5 24.5L5.5 24.5Z");
     // Circle: two arcs through (x-r, y) and (x+r, y).
     expect(markerPath(0, 10, 20, 5)).toBe("M5 20a5 5 0 1 0 10 0a5 5 0 1 0-10 0Z");
+  });
+});
+
+describe("polylinePath and catmullRomPath", () => {
+  it("draws straight segments, and a move for a single point", () => {
+    expect(polylinePath([{ x: 0, y: 1 }])).toBe("M 0 1");
+    expect(
+      polylinePath([
+        { x: 0, y: 1 },
+        { x: 2, y: 3 },
+      ]),
+    ).toBe("M 0 1 L 2 3");
+  });
+
+  it("curves three or more points and draws fewer as straight lines", () => {
+    expect(catmullRomPath([{ x: 0, y: 1 }])).toBe("M 0 1");
+    expect(
+      catmullRomPath([
+        { x: 0, y: 1 },
+        { x: 2, y: 3 },
+      ]),
+    ).toBe("M 0 1 L 2 3");
+    expect(
+      catmullRomPath([
+        { x: 0, y: 0 },
+        { x: 1, y: 1 },
+        { x: 2, y: 0 },
+      ]),
+    ).toMatch(/^M 0 0 C .* C .*, 2 0$/);
+  });
+});
+
+describe("dense series helpers", () => {
+  it("keeps each pixel column's first, lowest, highest and last point, in order", () => {
+    const pts = [
+      { x: 0.1, y: 5 },
+      { x: 0.2, y: 6 },
+      { x: 0.4, y: 1 },
+      { x: 0.6, y: 9 },
+      { x: 0.7, y: 7 },
+      { x: 0.9, y: 4 },
+      { x: 1.2, y: 3 },
+    ];
+    expect(decimate(pts)).toEqual([pts[0], pts[2], pts[3], pts[5], pts[6]]);
+  });
+
+  it("keeps a spike's fall inside its column", () => {
+    const pts = [
+      { x: 0.1, y: 0 },
+      { x: 0.5, y: 100 },
+      { x: 0.9, y: 0 },
+      { x: 1.1, y: 0 },
+    ];
+    expect(decimate(pts)).toEqual(pts);
+  });
+
+  it("bounds the output at four points per column", () => {
+    const pts = Array.from({ length: 5000 }, (_, i) => ({ x: i / 10, y: Math.sin(i) }));
+    expect(decimate(pts).length).toBeLessThanOrEqual(2000);
+  });
+
+  it("draws a compact path: one decimal place, implicit line-tos", () => {
+    expect(
+      compactPath([
+        { x: 0, y: 1.234 },
+        { x: 2.05, y: 3 },
+        { x: 4, y: 5.96 },
+      ]),
+    ).toBe("M0 1.2 2.1 3 4 6");
+  });
+
+  it("finds the nearest x by binary search", () => {
+    const xs = [0, 10, 20, 30];
+    expect([-5, 4, 6, 15, 26, 99].map((x) => nearestIndex(xs, x))).toEqual([0, 0, 1, 1, 3, 3]);
+    expect(nearestIndex([], 3)).toBe(-1);
+  });
+});
+
+describe("axis labels", () => {
+  const tick = (x: number, text: string, anchor: "start" | "middle" | "end" = "middle") => ({
+    x,
+    text,
+    anchor,
+  });
+
+  it("ticksFit measures labels by their anchors", () => {
+    // "Week 1" is 42 px: from 0 when anchored at the start, so it reaches 42.
+    expect(ticksFit([tick(0, "Week 1", "start"), tick(80, "Week 2")])).toBe(true);
+    expect(ticksFit([tick(0, "Week 1", "start"), tick(50, "Week 2")])).toBe(false);
+    // Centred labels 50 px apart leave an 8 px gap; a spacing can ask for more.
+    expect(ticksFit([tick(0, "Week 1"), tick(50, "Week 2")])).toBe(true);
+    expect(ticksFit([tick(0, "Week 1"), tick(50, "Week 2")], 60)).toBe(false);
+  });
+
+  it("categoryTicks thins to the smallest step that fits, keeping the last", () => {
+    const names = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"];
+    const at = (width: number) => (i: number) =>
+      tick((i / 5) * width, names[i], i === 0 ? "start" : i === 5 ? "end" : "middle");
+    expect(categoryTicks(6, at(600)).map((t) => t.text)).toEqual(names);
+    // At 252 px every label would touch; every other one still crowds Week 6,
+    // so Week 5 makes way for it.
+    expect(categoryTicks(6, at(252)).map((t) => t.text)).toEqual(["Week 1", "Week 3", "Week 6"]);
+    expect(categoryTicks(6, at(60)).map((t) => t.text)).toEqual(["Week 1"]);
+    expect(categoryTicks(0, at(60))).toEqual([]);
+  });
+
+  it("truncateLabel cuts to fit with an ellipsis", () => {
+    expect(truncateLabel("Robust", 100)).toBe("Robust");
+    expect(truncateLabel("Understandable", 70)).toBe("Understan…");
+  });
+});
+
+describe("niceExtent", () => {
+  it("widens a range out to whole ticks", () => {
+    expect(niceExtent(8, 45, 5)).toEqual([0, 50]);
+    expect(niceExtent(1, 12, 5)).toEqual([0, 12]);
+    expect(niceExtent(0, 86, 4)).toEqual([0, 100]);
+    expect(niceExtent(-3.2, 7.9, 5)).toEqual([-4, 8]);
+    // The ends are ticks.
+    const [lo, hi] = niceExtent(0, 86, 4);
+    expect([ticks(lo, hi, 4)[0], ticks(lo, hi, 4).at(-1)]).toEqual([lo, hi]);
+  });
+
+  it("leaves empty and single-value ranges alone", () => {
+    expect(niceExtent(5, 5, 4)).toEqual([5, 5]);
+    expect(niceExtent(0, 10, 0)).toEqual([0, 10]);
+    // Too small to round to whole steps: never NaN.
+    for (const [lo, hi] of [
+      [1e-12, 3e-12],
+      [0, 3e-11],
+    ]) {
+      expect(niceExtent(lo, hi, 4).every(Number.isFinite)).toBe(true);
+    }
   });
 });

@@ -10,6 +10,11 @@ export default defineConfig({
       expressiveCode: {
         themes: ["github-light-default", "github-dark-default", "github-light-high-contrast"],
         useStarlightDarkModeSwitch: false,
+        // Wrap long lines instead of scrolling: Expressive Code gives a
+        // scrolling block an unnamed role="region", and two on a page fail axe.
+        defaultProps: { wrap: true },
+        // Flat, like the code under each demo.
+        styleOverrides: { frames: { frameBoxShadowCssValue: "none" } },
         themeCssRoot: "html",
         themeCssSelector: (theme) => {
           const map: Record<string, string> = {
@@ -39,8 +44,9 @@ export default defineConfig({
             { label: "Accessibility", slug: "guides/accessibility" },
             { label: "Theming charts", slug: "guides/theming" },
             { label: "Exporting charts", slug: "guides/exporting" },
+            { label: "Wrapping other charts", slug: "guides/wrapping" },
             { label: "Compared with alternatives", slug: "guides/comparison" },
-            { label: "Migrating from v2", slug: "guides/migrating" },
+            { label: "Migrating", slug: "guides/migrating" },
           ],
         },
         {

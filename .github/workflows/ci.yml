@@ -2,8 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
+  # Draft PRs don't run CI; marking one ready does.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
 
 # A newer push to the same PR or feature branch cancels the run it
 # supersedes; pushes to main and develop always run to completion.
@@ -13,6 +18,7 @@ concurrency:
 
 jobs:
   check:
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,11 +34,17 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm --filter @eekodigital/raster test:coverage
       - run: cd docs && pnpm build
-      - run: cd docs && pnpm exec playwright install --with-deps chromium
+      # The runner image already has Chrome's system libraries, so only the
+      # browser is downloaded (from Playwright's CDN). --with-deps used apt,
+      # whose mirror once hung until the job timed out.
+      - name: Install Playwright's Chromium
+        run: cd docs && pnpm exec playwright install chromium
+        timeout-minutes: 5
       - run: cd docs && pnpm test:e2e
 
   size:
     name: Bundle size
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

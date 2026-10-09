@@ -4,10 +4,14 @@ version: 2
 # We'd love to DRY this with YAML anchors, but GitHub's dependabot parser
 # explicitly rejects YAML aliases ("YAML aliases are not supported"), so the
 # config has to be inlined per workspace.
+#
+# Every entry targets `develop`, the integration branch: releases reach
+# `main` through a develop → main PR.
 
 updates:
   - package-ecosystem: npm
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
       day: friday
@@ -23,7 +27,19 @@ updates:
       prefix: chore
       prefix-development: chore
       include: scope
+    ignore:
+      # Node types follow the Node major CI runs (24), not the newest Node.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
     groups:
+      # vite-plus bundles its own vitest, and the coverage provider must match
+      # it exactly: update all three together (#107 failed bumping two).
+      vite-plus-and-vitest:
+        patterns:
+          - vite-plus
+          - vitest
+          - "@vitest/*"
       production-minor-and-patch:
         dependency-type: production
         update-types:
@@ -37,6 +53,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /docs
+    target-branch: develop
     schedule:
       interval: weekly
       day: friday
@@ -72,6 +89,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
       day: friday
