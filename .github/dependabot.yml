@@ -4,10 +4,14 @@ version: 2
 # We'd love to DRY this with YAML anchors, but GitHub's dependabot parser
 # explicitly rejects YAML aliases ("YAML aliases are not supported"), so the
 # config has to be inlined per workspace.
+#
+# Every entry targets `develop`, the integration branch: releases reach
+# `main` through a develop → main PR.
 
 updates:
   - package-ecosystem: npm
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
       day: friday
@@ -37,6 +41,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /docs
+    target-branch: develop
     schedule:
       interval: weekly
       day: friday
@@ -72,6 +77,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
       day: friday
