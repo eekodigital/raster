@@ -1,12 +1,12 @@
 ---
 title: Wrapping other charts
-description: Use raster's accessible frame (figure, summary and data table) around a chart raster doesn't draw, such as a TanStack Charts or Canvas chart.
+description: "Use raster's accessible frame (figure, summary and data table) around a chart raster doesn't draw: your own SVG or canvas, or another library's chart."
 ---
 
 import Example from "../../../components/Example.astro";
 import { FrameDemo } from "../../../components/FrameDemo.tsx";
 
-Raster deliberately leaves out zoom, brushing, Canvas rendering and combined chart types. When a product needs one of those, draw that chart with another library and wrap it in raster's `ChartFrame`. It gets the same accessible structure as raster's own charts, in the server-rendered HTML before any JavaScript runs:
+`ChartFrame` gives a chart raster doesn't draw, such as your own SVG or canvas or another library's chart, the same accessible structure as raster's own charts, in the server-rendered HTML before any JavaScript runs:
 
 - a `role="figure"` named by the visible title
 - a text summary describing what the chart shows
@@ -63,17 +63,18 @@ import { Chart } from "@tanstack/charts/react";
 
 ## Props
 
-| Prop        | Type                                       | Description                                                                                       |
-| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| `title`     | `string`                                   | Required. Visible title: names the figure and captions the table.                                 |
-| `summary`   | `string`                                   | Required. The text alternative: what the chart shows.                                             |
-| `children`  | `ReactNode`                                | Required. The chart, rendered as it is.                                                           |
-| `table`     | `{ headers, rows, caption?, rowHeaders? }` | The data. `caption` defaults to "Data for \{title\}"; the first cell of each row is a row header. |
-| `dataTable` | `"disclosure" \| "visually-hidden"`        | How the table is offered. Default `"disclosure"`.                                                 |
-| `hideTitle` | `boolean`                                  | Keep the title for assistive technology but hide it visually.                                     |
-| `legend`    | `ReactNode`                                | Shown under the chart.                                                                            |
-| `labels`    | `ChartLabelOverrides`                      | Generated strings and the number locale.                                                          |
-| `ref`       | `Ref<HTMLDivElement>`                      | The figure element.                                                                               |
-| `className` | `string`                                   | Class on the figure.                                                                              |
+| Prop        | Type                                          | Description                                                                                       |
+| ----------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `title`     | `string`                                      | Required. Visible title: names the figure and captions the table.                                 |
+| `summary`   | `string`                                      | Required. The text alternative: what the chart shows.                                             |
+| `children`  | `ReactNode`                                   | Required. The chart, rendered as it is.                                                           |
+| `table`     | `{ headers, rows, caption?, rowHeaders? }`    | The data. `caption` defaults to "Data for \{title\}"; the first cell of each row is a row header. |
+| `dataTable` | `"disclosure" \| "visually-hidden" \| "none"` | How the table is offered. Default `"disclosure"`.                                                 |
+| `actions`   | `ReactNode`                                   | Shown on the same row as the **Show data table** button, such as download buttons.                |
+| `hideTitle` | `boolean`                                     | Keep the title for assistive technology but hide it visually.                                     |
+| `legend`    | `ReactNode`                                   | Shown under the chart.                                                                            |
+| `labels`    | `ChartLabelOverrides`                         | Generated strings and the number locale.                                                          |
+| `ref`       | `Ref<HTMLDivElement>`                         | The figure element.                                                                               |
+| `className` | `string`                                      | Class on the figure.                                                                              |
 
 `ChartDataTable` takes `caption`, `headers`, `rows`, `rowHeaders`, `labels`, `mode` and `describedBy` on its own, if a product only needs the table.

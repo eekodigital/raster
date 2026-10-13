@@ -9,14 +9,11 @@ hero:
     - text: Get started
       link: /guides/getting-started/
       icon: right-arrow
-    - text: Browse the charts
-      link: /components/line-chart/
-      variant: minimal
 ---
 
 Raster is a small React chart library by [Eeko Digital](https://eeko.digital): LineChart, BarChart, DonutChart, ScatterChart, Sparkline, Gauge, LinearGauge, RadarChart and GeoChart.
 
-Up to version 2 it was a design system. Version 3 keeps only the charts; see [Migrating from v2](/guides/migrating/).
+Up to version 2 it was a design system; since version 3 it's only charts. Upgrading? See [Migrating](/guides/migrating/).
 
 ## Design goals
 
@@ -30,8 +27,6 @@ These goals decide what goes into raster and what stays out. Where a chart doesn
 | **Not based on d3.**                          | Scales, ticks, curves and arcs come from raster's own `chart-math` (about 260 lines).                                                                                                                                                                                                                                                                                                                            |
 | **TypeScript native.**                        | Written in TypeScript; types ship with the package.                                                                                                                                                                                                                                                                                                                                                              |
 | **Responsive.**                               | Every chart fills its container unless given a fixed size, and draws at display pixels. Cartesian charts take a `height` or an `aspectRatio`, sized in CSS so server-rendered and hydrated layouts match, and thin or rotate labels to fit.                                                                                                                                                                      |
-
-If these goals don't match yours, [Compared with alternatives](/guides/comparison/) lists what else is out there.
 
 ## Quick start
 

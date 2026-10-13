@@ -50,6 +50,25 @@ If the page already shows the same data, keep the table for assistive technology
 <BarChart {...props} dataTable="visually-hidden" />
 ```
 
+To offer the data your own way (your own table, a download, a link to a report), leave raster's table out. The chart keeps its summary and its keyboard and screen reader names; the exact values are then yours to provide:
+
+```tsx
+<BarChart {...props} dataTable="none" />
+```
+
+`actions` puts your own controls, such as download buttons, on the same row as the **Show data table** button:
+
+```tsx
+<BarChart
+  {...props}
+  actions={
+    <button type="button" onClick={download}>
+      Download CSV
+    </button>
+  }
+/>
+```
+
 GeoChart's table lists every region, including those with no data, and every marker.
 
 ## Announcements

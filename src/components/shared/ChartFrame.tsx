@@ -17,8 +17,13 @@ export type ChartFrameOptions = {
   hideTitle?: boolean;
   /** Generated strings (English by default) and the number locale. */
   labels?: ChartLabelOverrides;
-  /** How the data table is offered. Default `disclosure`. */
-  dataTable?: DataTableMode;
+  /**
+   * How the data table is offered. Default `disclosure`. `none` leaves it out,
+   * for apps that offer the data themselves.
+   */
+  dataTable?: DataTableMode | "none";
+  /** Shown on the same row as the "Show data table" button, e.g. download buttons. */
+  actions?: React.ReactNode;
   className?: string;
   /** The chart's figure element, e.g. for `exportSVG` from `@eekodigital/raster/export`. */
   ref?: React.Ref<HTMLDivElement>;
@@ -41,7 +46,7 @@ export type ChartFrameProps = ChartFrameOptions & {
 
 type FigureProps = Pick<
   ChartFrameProps,
-  "ref" | "title" | "hideTitle" | "className" | "summary" | "legend" | "dataTable"
+  "ref" | "title" | "hideTitle" | "className" | "summary" | "legend" | "dataTable" | "actions"
 > & {
   labels: ChartLabels;
   table?: ChartTableData;
@@ -69,6 +74,7 @@ function Figure({
   legend,
   table,
   dataTable,
+  actions,
   plotRef,
   plotStyle,
   onKeyDown,
@@ -78,6 +84,9 @@ function Figure({
   const id = useId();
   const titleId = `${id}-title`;
   const summaryId = `${id}-summary`;
+  const dataTableEl = table && dataTable !== "none" && (
+    <DataTable {...table} labels={labels} mode={dataTable} describedBy={titleId} />
+  );
 
   return (
     <div
@@ -102,7 +111,16 @@ function Figure({
         {plot(titleId)}
       </div>
       {legend}
-      {table && <DataTable {...table} labels={labels} mode={dataTable} describedBy={titleId} />}
+      {actions ? (
+        // The app's actions first, then the table button; the table opens
+        // below them both.
+        <div className="raster-chart__actions">
+          <div className="raster-chart__actions-items">{actions}</div>
+          {dataTableEl}
+        </div>
+      ) : (
+        dataTableEl
+      )}
       {status !== undefined && (
         <div role="status" className="raster-sr-only" style={SR_ONLY_STYLE}>
           {status}
@@ -116,7 +134,7 @@ function Figure({
  * Raster's accessible frame around a chart it doesn't draw: a figure named by
  * the visible title and described by `summary`, the chart as it is, a legend,
  * and the "Show data table" disclosure, all in the server-rendered HTML. For
- * products that need zoom, brushing or Canvas, which raster doesn't provide.
+ * charts raster doesn't draw: your own SVG or canvas, or another library's.
  */
 export function ChartFrame({ labels: overrides, table, children, ...props }: ChartFrameProps) {
   const labels = resolveLabels(overrides);

@@ -356,7 +356,7 @@ describe("LineChart drawing", () => {
     // Fail (stacked on Pass, drawn first) runs out left to right, then back from the right.
     const d = container.querySelector(".raster-line__area")!.getAttribute("d")!;
     const back = /\sL ([\d.]+) /.exec(d)!;
-    expect(Number(back[1])).toBe(662);
+    expect(Number(back[1])).toBe(686);
   });
 
   it("renders axis titles", () => {
@@ -511,8 +511,8 @@ describe("LineChart with a time axis", () => {
     const { container } = render(
       <LineChart series={VIEWS} xAxis={timeAxis(DATES)} title="Views" labels={GB} />,
     );
-    // Plot is 720 - 58 = 662 wide over 3 days.
-    expect(pointXs(container).map(Math.round)).toEqual([0, 221, 662]);
+    // Plot is 720 - 34 = 686 wide over 3 days.
+    expect(pointXs(container).map(Math.round)).toEqual([0, 229, 686]);
   });
 
   it("names points, the summary and the table with formatted dates", () => {
@@ -798,14 +798,15 @@ describe("LineChart dense mode", () => {
     );
     const hit = container.querySelector(".raster-line__hit")!;
     expect(hit.closest(".raster-line__overlay")?.getAttribute("aria-hidden")).toBe("true");
-    // happy-dom rects are at 0,0: the plot starts at the 50 px left margin.
-    // Point 150 of 300 sits at 150 / 299 × 662 ≈ 332 px; y near the top is the Views line.
-    fireEvent.pointerMove(hit, { clientX: 50 + 332, clientY: 20 });
+    // happy-dom rects are at 0,0: the plot starts after the 33 px left margin
+    // (fitting "120"). Point 150 of 300 sits at 150 / 299 × 679 ≈ 341 px; y near
+    // the top is the Views line.
+    fireEvent.pointerMove(hit, { clientX: 33 + 341, clientY: 20 });
     expect(container.querySelector(".raster-line__marker")).toBeTruthy();
-    fireEvent.click(hit, { clientX: 50 + 332, clientY: 20 });
+    fireEvent.click(hit, { clientX: 33 + 341, clientY: 20 });
     expect(onSelect).toHaveBeenCalledWith({ series: 0, point: 150 });
     // Near the bottom, the Low series is nearer.
-    fireEvent.click(hit, { clientX: 50 + 332, clientY: 150 });
+    fireEvent.click(hit, { clientX: 33 + 341, clientY: 150 });
     expect(onSelect).toHaveBeenLastCalledWith({ series: 1, point: 150 });
     fireEvent.pointerLeave(hit);
     expect(container.querySelector(".raster-line__marker:not([data-selected])")).toBeNull();
@@ -817,7 +818,7 @@ describe("LineChart dense mode", () => {
     );
     const hit = container.querySelector(".raster-line__hit")!;
     fireEvent.focus(slider());
-    fireEvent.pointerMove(hit, { clientX: 50 + 332, clientY: 20 });
+    fireEvent.pointerMove(hit, { clientX: 33 + 341, clientY: 20 });
     expect(valueText()).toBe("Views, Day 1: 100, 1 of 300");
     // The focused point and the hovered point both show.
     expect(container.querySelectorAll(".raster-line__marker")).toHaveLength(2);
@@ -864,7 +865,7 @@ describe("LineChart dense mode", () => {
     const d = container.querySelector(".raster-line__line")!.getAttribute("d")!;
     expect(d).not.toMatch(/[CL]/);
     expect(d).not.toMatch(/\.\d\d/);
-    // At most four points (first, lowest, highest, last) per pixel column of the 662 px plot.
+    // At most four points (first, lowest, highest, last) per pixel column of the plot.
     expect(d.split(" ").length / 2).toBeLessThanOrEqual(4 * 663);
     expect(container.querySelectorAll(".raster-line__point")).toHaveLength(0);
     expect(container.querySelector(".raster-line__area")).toBeTruthy();

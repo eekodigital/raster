@@ -15,6 +15,22 @@
   width: 100%;
 }
 
+/* The default colours pick their light or dark value with light-dark(), which
+   follows color-scheme. Sites that mark their theme with a .dark/.light class
+   or data-theme often don't set color-scheme, so raster reads those too. The
+   nearest marker wins; zero specificity, so any color-scheme you set wins. */
+@scope (.dark, [data-theme="dark"]) {
+  :where(.raster-chart, .raster-tooltip, .raster-sparkline, .raster-gauge, .raster-linear-gauge) {
+    color-scheme: dark;
+  }
+}
+
+@scope (.light, [data-theme="light"]) {
+  :where(.raster-chart, .raster-tooltip, .raster-sparkline, .raster-gauge, .raster-linear-gauge) {
+    color-scheme: light;
+  }
+}
+
 .raster-chart__title {
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
@@ -38,13 +54,40 @@
   inset: 0;
 }
 
+/* The app's actions and the data table button on one row, wrapping as needed.
+   The actions float, so the table opens below the whole row. */
+.raster-chart__actions {
+  display: flow-root;
+  margin-top: 0.75rem;
+}
+
+.raster-chart__actions-items {
+  float: left;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0.5rem 0.5rem 0;
+}
+
+/* overflow makes the button sit beside the actions, or below them when
+   there's no room, without changing its display. */
+.raster-chart__actions .raster-chart__table-toggle {
+  margin-top: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.raster-chart__actions .raster-chart__table {
+  clear: left;
+}
+
 /* The data table's <summary>, styled as a button; its disclosure marker is hidden. */
 .raster-chart__table-toggle {
   /* Keep the summary's own display (list-item): changing it can drop its
      disclosure semantics in some browser and screen reader pairs. */
   width: fit-content;
   list-style: none;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   padding: 0.25rem 0.5rem;
   font: inherit;
   font-size: 0.75rem;

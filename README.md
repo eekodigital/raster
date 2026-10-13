@@ -19,8 +19,6 @@ Docs: [raster.eeko.digital](https://raster.eeko.digital)
 | **TypeScript native.**                        | Types ship with the package.                                                                                                                                                                                                                                                                                                                                             |
 | **Responsive.**                               | Every chart fills its container unless given a fixed size. Cartesian charts take a `height` or an `aspectRatio`, sized in CSS so server-rendered and hydrated layouts match, and thin or rotate labels to fit.                                                                                                                                                           |
 
-No other library we found is light, SVG and d3-free at once; see the [comparison](https://raster.eeko.digital/guides/comparison/).
-
 ## Install
 
 ```sh

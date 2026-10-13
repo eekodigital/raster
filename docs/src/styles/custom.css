@@ -154,18 +154,11 @@
 }
 
 /* Buttons in demos, matching the charts' "Show data table" toggle. */
-.demo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
 .demo-button {
   padding: 0.25rem 0.5rem;
   font: inherit;
   font-size: 0.75rem;
-  color: var(--sl-color-text);
+  color: var(--raster-text, inherit);
   background: transparent;
   border: 1px solid currentColor;
   border-radius: 0.25rem;

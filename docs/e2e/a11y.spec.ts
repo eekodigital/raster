@@ -13,7 +13,6 @@ const PAGES = [
   { label: "Theming charts", path: "/guides/theming" },
   { label: "Exporting charts", path: "/guides/exporting" },
   { label: "Wrapping other charts", path: "/guides/wrapping" },
-  { label: "Comparison", path: "/guides/comparison" },
   { label: "Migrating", path: "/guides/migrating" },
 
   // Charts

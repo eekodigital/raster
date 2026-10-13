@@ -9,23 +9,30 @@ export function ExportDemo() {
   const chart = useRef<HTMLDivElement>(null);
   return (
     <div style={{ width: "100%" }}>
-      <LineChart ref={chart} series={SERIES} categories={DAYS} title="Visitors this week" />
-      <p className="demo-actions">
-        <button
-          type="button"
-          className="demo-button"
-          onClick={() => exportSVG(chart.current, "visitors.svg")}
-        >
-          Download SVG
-        </button>
-        <button
-          type="button"
-          className="demo-button"
-          onClick={() => exportPNG(chart.current, "visitors.png", 3)}
-        >
-          Download PNG
-        </button>
-      </p>
+      <LineChart
+        ref={chart}
+        series={SERIES}
+        categories={DAYS}
+        title="Visitors this week"
+        actions={
+          <>
+            <button
+              type="button"
+              className="demo-button"
+              onClick={() => exportSVG(chart.current, "visitors.svg")}
+            >
+              Download SVG
+            </button>
+            <button
+              type="button"
+              className="demo-button"
+              onClick={() => exportPNG(chart.current, "visitors.png", 3)}
+            >
+              Download PNG
+            </button>
+          </>
+        }
+      />
     </div>
   );
 }

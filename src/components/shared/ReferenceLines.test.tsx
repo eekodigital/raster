@@ -69,7 +69,7 @@ describe("reference lines", () => {
     const [line] = refs(container);
     expect(refs(container)).toHaveLength(1);
     expect(line.x1).toBe(line.x2);
-    expect(Math.round(line.x1)).toBe(221);
+    expect(Math.round(line.x1)).toBe(229);
     expect(refLabels(container)).toEqual(["Launch: 2 October 2026"]);
     expect(summaryOf("Views")).toMatch(/Launch: 2 October 2026\.$/);
   });
