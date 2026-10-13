@@ -32,14 +32,13 @@ updates:
       - dependency-name: "@types/node"
         update-types:
           - version-update:semver-major
+      # vite-plus bundles one exact vitest, and vitest and @vitest/* must match
+      # it. They're pinned together in the pnpm catalog: update vite-plus by
+      # hand and run `vp migrate`, which aligns the rest (#116).
+      - dependency-name: vite-plus
+      - dependency-name: vitest
+      - dependency-name: "@vitest/*"
     groups:
-      # vite-plus bundles its own vitest, and the coverage provider must match
-      # it exactly: update all three together (#107 failed bumping two).
-      vite-plus-and-vitest:
-        patterns:
-          - vite-plus
-          - vitest
-          - "@vitest/*"
       production-minor-and-patch:
         dependency-type: production
         update-types:

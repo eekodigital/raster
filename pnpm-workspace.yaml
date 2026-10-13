@@ -20,3 +20,15 @@ overrides:
   # http-cache-semantics GHSA-ch52-4w7c-c8xp (high), via astro (docs only),
   # which asks for ^4.2.0. Drop once astro resolves 4.3.0+ on its own.
   "http-cache-semantics@<4.3.0": ">=4.3.0"
+  # vite-plus bundles one exact vitest; vitest itself (needed as a peer by
+  # @vitest/coverage-v8 and vitest-axe) and the coverage plugin must match it.
+  # They come from the catalog below, which `vp migrate` keeps in step when
+  # vite-plus is updated. Dependabot ignores all three.
+  vitest@*: "catalog:"
+catalog:
+  # The root package's vite is vite-plus's core, so vitest has one instance
+  # (vite-plus/test re-exports it). Docs keep Astro's own vite.
+  vite: npm:@voidzero-dev/vite-plus-core@1.1.0
+  vite-plus: 1.1.0
+  vitest: 5.0.3
+  "@vitest/coverage-v8": 5.0.3

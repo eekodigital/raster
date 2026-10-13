@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { addTime, floorTime, timeAxis } from "./time.js";
 
 const utc = (iso: string) => Date.parse(iso);
