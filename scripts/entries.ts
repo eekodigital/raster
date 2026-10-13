@@ -1,7 +1,3 @@
-import { readFileSync, writeFileSync } from "node:fs";
-import { defineConfig } from "tsdown";
-import { minifyCss } from "./src/utils/minify-css.ts";
-
 /**
  * Public entry points. Each becomes `dist/<name>.mjs` and is listed in
  * package.json `exports`; shared code is split into chunks, so importing one
@@ -51,18 +47,3 @@ export const clientEntries = new Set<string>([
   "scatter-chart",
   "sparkline",
 ]);
-
-export default defineConfig({
-  entry: entries,
-  format: ["esm"],
-  outputOptions: {
-    banner: (chunk) => (chunk.isEntry && clientEntries.has(chunk.name) ? '"use client";' : ""),
-  },
-  dts: true,
-  clean: true,
-  hooks: {
-    "build:done": () => {
-      writeFileSync("dist/styles.css", minifyCss(readFileSync("src/styles.css", "utf8")));
-    },
-  },
-});
