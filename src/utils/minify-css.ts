@@ -1,5 +1,5 @@
 /**
- * Build-time only (tsdown.config.ts): strips comments and insignificant
+ * Build-time only (the `pack` block in vite.config.ts): strips comments and insignificant
  * whitespace from styles.css. Safe because the stylesheet has no strings or urls.
  */
 export function minifyCss(css: string): string {

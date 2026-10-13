@@ -19,7 +19,7 @@ import { appendFileSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
 import { rolldown } from "rolldown";
-import { clientEntries, entries } from "../tsdown.config.ts";
+import { clientEntries, entries } from "./entries.ts";
 
 /**
  * Budgets in gzipped bytes. They're tripwires, not targets: each is about
