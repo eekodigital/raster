@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { DEFAULT_LABELS, numberFormatter, resolveLabels, summarize } from "./labels.js";
 
 const n = numberFormatter("en");

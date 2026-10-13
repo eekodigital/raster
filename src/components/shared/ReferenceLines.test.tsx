@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { axe } from "../../test-utils/axe.js";
 import { openTable } from "../../test-utils/chart.js";
 import { timeAxis } from "../../utils/time.js";

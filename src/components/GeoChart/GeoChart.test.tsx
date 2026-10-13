@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { axe } from "../../test-utils/axe.js";
 import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { GeoChart } from "./GeoChart.js";

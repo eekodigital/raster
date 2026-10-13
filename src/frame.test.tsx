@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { axe } from "./test-utils/axe.js";
 import { openTable, tableText } from "./test-utils/chart.js";
 import { exportSVG } from "./export.js";
