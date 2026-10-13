@@ -4,6 +4,7 @@ import {
   categoryTicks,
   ticksFit,
   truncateLabel,
+  valueAxisMargin,
   catmullRomPath,
   compactPath,
   decimate,
@@ -318,6 +319,13 @@ describe("axis labels", () => {
   it("truncateLabel cuts to fit with an ellipsis", () => {
     expect(truncateLabel("Robust", 100)).toBe("Robust");
     expect(truncateLabel("Understandable", 70)).toBe("Understan…");
+  });
+
+  it("valueAxisMargin fits the widest value label, and a rotated title", () => {
+    // "100" is 21 px, plus the 8 px gap and 4 px to the edge.
+    expect(valueAxisMargin(["0", "50", "100"])).toBe(33);
+    expect(valueAxisMargin(["0", "50", "100"], "Score")).toBe(51);
+    expect(valueAxisMargin([])).toBe(19);
   });
 });
 

@@ -5,9 +5,7 @@ description: Charts read a small, documented set of --raster-* custom properties
 
 Raster doesn't ship a theme or design tokens. Charts read a small contract of `--raster-*` custom properties and nothing else from the page. Every property has a fallback, so an unthemed chart is still legible, and your app maps its own tokens onto the contract wherever its theme switches.
 
-:::caution[Set `color-scheme` on your dark themes]
-The default series palette, surface and tooltip colours choose between light and dark values with CSS `light-dark()`, which follows the element's `color-scheme`, not your theme class. If a dark theme doesn't set `color-scheme: dark`, every series you haven't mapped keeps its **light** colour on your dark background. Set it wherever your theme switches (see [`color-scheme`](#color-scheme)), or map all the `--raster-*` properties you rely on.
-:::
+The default colours have light and dark values, and charts pick the dark ones for a dark theme on their own: see [Light and dark](#light-and-dark).
 
 ## The contract
 
@@ -57,7 +55,7 @@ globalStyle(":root", {
 });
 ```
 
-Unmapped series still fall back to the default palette, which needs [`color-scheme`](#color-scheme) to pick its dark values.
+Unmapped series still fall back to the default palette, in its light or dark values: see [Light and dark](#light-and-dark).
 
 ## Plain CSS
 
@@ -135,17 +133,26 @@ With no `--raster-series-*` set, series use eight colours derived from the Okabe
 
 Light values are checked against `#ffffff` and `#f5f5f5`, dark values against `#121212` and `#262626`. If your surfaces are very different, set your own series colours.
 
-### `color-scheme`
+### Light and dark
 
-The palette and the other fixed fallbacks pick their light or dark value with CSS `light-dark()`, which follows the `color-scheme` of the element. **If your dark theme doesn't set `color-scheme: dark`, charts keep the light values**: series 2–8, the surface and the tooltip stay light-theme colours on a dark page. Set it where your theme switches:
+The palette, the surface and the tooltip each have a light and a dark value. A chart uses the dark values when either:
+
+- it's inside an element with a `dark` class or `data-theme="dark"`, the way Tailwind and most theme switchers mark dark mode (a `light` class or `data-theme="light"` inside one switches back; the nearest wins), or
+- your page sets `color-scheme: dark`, which also darkens scrollbars and form controls.
+
+If your theme marks dark mode some other way, for example only a `prefers-color-scheme` media query that changes your colours, set `color-scheme` there too:
 
 ```css
-[data-theme="dark"] {
-  color-scheme: dark;
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
 }
 ```
 
-With vanilla-extract, add `colorScheme: "dark"` to the dark theme class's style.
+With vanilla-extract, add `colorScheme: "dark"` to the dark theme class's style. A `color-scheme` set on the chart itself (through `className`) wins.
+
+Reading the `dark` class and `data-theme` uses CSS `@scope`, in every current browser since early 2026 (Baseline 2026); older browsers use `color-scheme` alone.
 
 `light-dark()` needs Chrome or Edge 123, Firefox 120 or Safari 17.5 or later. In older browsers the fallbacks are invalid, so unmapped series render black. If you support those browsers, set every `--raster-series-*` you use and the tooltip and surface properties.
 

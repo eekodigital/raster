@@ -300,12 +300,28 @@ See the <a href="/guides/accessibility/">Accessibility guide</a> for the shared 
         <code>dataTable</code>
       </td>
       <td>
-        <code>"disclosure" | "visually-hidden"</code>
+        <code>"disclosure" | "visually-hidden" | "none"</code>
         <div class="props-table__default">
           Default: <code>"disclosure"</code>
         </div>
       </td>
-      <td>How the data table is offered.</td>
+      <td>
+        How the data table is offered: behind a <strong>Show data table</strong> button, for screen
+        readers only, or not at all, when you offer the data yourself. See{" "}
+        <a href="/guides/accessibility/#data-table">Accessibility</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>actions</code>
+      </td>
+      <td>
+        <code>ReactNode</code>
+      </td>
+      <td>
+        Shown on the same row as the <strong>Show data table</strong> button, such as download
+        buttons.
+      </td>
     </tr>
     <tr>
       <td>

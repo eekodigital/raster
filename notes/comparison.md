@@ -1,9 +1,8 @@
----
-title: Compared with alternatives
-description: How raster compares with other React and JavaScript chart libraries, including TanStack Charts 1.0, on its design goals. Checked October 2026.
----
+# Compared with alternatives
 
-Raster exists because no library we found meets its [design goals](/) together: **light, SVG, and not based on d3**. This page is the evidence, and a guide to picking something else if raster doesn't fit.
+Internal notes, not published on the docs site. Links are to https://raster.eeko.digital.
+
+Raster exists because no library we found meets its [design goals](https://raster.eeko.digital/) together: **light, SVG, and not based on d3**. This page is the evidence, and a guide to picking something else if raster doesn't fit.
 
 Sizes in the first two tables are min+gzip from `npm view` and bundlephobia, checked in September 2026. They change often, so treat them as rough. The [TanStack Charts](#tanstack-charts-10) comparison was measured directly, in October 2026.
 
@@ -38,14 +37,14 @@ TanStack Charts 1.0 was released on 5 October 2026. It's the closest alternative
 | All 8 non-geo chart types    | 13.6 KB    | 11.6 KB      | –                                    |
 | Runtime dependencies         | none       | none         | `tslib` and 13 `d3-*` modules        |
 
-Raster 4.0's line chart grew by about 1.6 KB for [date axes](/components/line-chart/#dates), [dense mode](/components/line-chart/#large-series) and [reference lines](/components/line-chart/#reference-lines), less the [export code](/guides/exporting/) that moved to its own entry.
+Raster 4.0's line chart grew by about 1.6 KB for [date axes](https://raster.eeko.digital/components/line-chart/#dates), [dense mode](https://raster.eeko.digital/components/line-chart/#large-series) and [reference lines](https://raster.eeko.digital/components/line-chart/#reference-lines), less the [export code](https://raster.eeko.digital/guides/exporting/) that moved to its own entry.
 
 **Server-rendered HTML** for one line series, before any JavaScript runs:
 
-| Points       | Raster 4.0                                                                                                                         | TanStack Charts 1.0                                                                                        |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 5 points     | 4.2 KB: a figure named by its title, a text summary, a data table, and 5 named points. No axe violations.                          | 5.9 KB: the SVG is `role="img"` with an `aria-label`; marks and axes are `aria-hidden`. No axe violations. |
-| 1,000 points | 59 KB: 13.5 KB of SVG (one path, [dense mode](/components/line-chart/#large-series)), a 46 KB data table, and one focusable slider | 18.8 KB: one path. Values are available only after hydration, through the tooltip.                         |
+| Points       | Raster 4.0                                                                                                                                                    | TanStack Charts 1.0                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 5 points     | 4.2 KB: a figure named by its title, a text summary, a data table, and 5 named points. No axe violations.                                                     | 5.9 KB: the SVG is `role="img"` with an `aria-label`; marks and axes are `aria-hidden`. No axe violations. |
+| 1,000 points | 59 KB: 13.5 KB of SVG (one path, [dense mode](https://raster.eeko.digital/components/line-chart/#large-series)), a 46 KB data table, and one focusable slider | 18.8 KB: one path. Values are available only after hydration, through the tooltip.                         |
 
 Both pass axe. The difference is what's in the HTML: with raster, every value is readable without JavaScript, in the summary and in the data table, which opens without JavaScript. With TanStack Charts the values reach assistive technology only once the page has hydrated.
 
@@ -59,12 +58,12 @@ Both pass axe. The difference is what's in the HTML: with raster, every value is
 
 **Where raster is better:** about a quarter of the size, no dependencies, CSS custom property theming, and accessible in the server-rendered HTML (a named figure, a summary, a data table and named points), not only after hydration.
 
-If a product needs TanStack Charts' zoom, brushing or Canvas, you can still wrap it in raster's accessible frame: see [Wrapping other charts](/guides/wrapping/).
+If a product needs TanStack Charts' zoom, brushing or Canvas, you can still wrap it in raster's accessible frame: see [Wrapping other charts](https://raster.eeko.digital/guides/wrapping/).
 
 ## Where raster stands
 
 Raster's charts are about 1.4–8 KB min+gzip each, including the shared accessibility layer (most are 5–6.5 KB; LineChart is about 8 KB). They render SVG, use no d3 and have no runtime dependencies. That's the gap it fills.
 
-It also does less, on purpose. **Out of scope by design:** zoom, brushing, Canvas rendering, combined chart types, and animation APIs. Raster won't add them. If you need those, one of the libraries above is the better choice, and [Wrapping other charts](/guides/wrapping/) shows how to give it raster's accessible frame.
+It also does less, on purpose. **Out of scope by design:** zoom, brushing, Canvas rendering, combined chart types, and animation APIs. Raster won't add them. If you need those, one of the libraries above is the better choice, and [Wrapping other charts](https://raster.eeko.digital/guides/wrapping/) shows how to give it raster's accessible frame.
 
 **Accessibility is table stakes, not raster's differentiator.** AG Charts Community and MUI X Charts both ship keyboard navigation and screen-reader support out of the box. Raster aims to match them (SVG marks with accessible names, a "Show data table" disclosure, arrow-key navigation, tooltips on focus), not to claim it's uniquely accessible.

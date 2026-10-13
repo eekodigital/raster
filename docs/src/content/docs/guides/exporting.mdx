@@ -16,12 +16,12 @@ function exportPNG(target: Element | null, filename?: string, scale?: number): P
 ```
 
 <Example
-  code={`import { useRef } from "react";\nimport { LineChart } from "@eekodigital/raster";\nimport { exportPNG, exportSVG } from "@eekodigital/raster/export";\n\nexport function VisitorsChart() {\n  const chart = useRef<HTMLDivElement>(null);\n  return (\n    <>\n      <LineChart ref={chart} series={series} categories={days} title="Visitors this week" />\n      <button type="button" onClick={() => exportSVG(chart.current, "visitors.svg")}>\n        Download SVG\n      </button>\n      <button type="button" onClick={() => exportPNG(chart.current, "visitors.png", 3)}>\n        Download PNG\n      </button>\n    </>\n  );\n}`}
+  code={`import { useRef } from "react";\nimport { LineChart } from "@eekodigital/raster";\nimport { exportPNG, exportSVG } from "@eekodigital/raster/export";\n\nexport function VisitorsChart() {\n  const chart = useRef<HTMLDivElement>(null);\n  return (\n    <LineChart\n      ref={chart}\n      series={series}\n      categories={days}\n      title="Visitors this week"\n      actions={\n        <>\n          <button type="button" onClick={() => exportSVG(chart.current, "visitors.svg")}>\n            Download SVG\n          </button>\n          <button type="button" onClick={() => exportPNG(chart.current, "visitors.png", 3)}>\n            Download PNG\n          </button>\n        </>\n      }\n    />\n  );\n}`}
 >
   <ExportDemo client:load />
 </Example>
 
-Every SVG chart takes a `ref`: it points at the chart's figure (or, for Gauge and Sparkline, its root element). LinearGauge is HTML, not SVG, so it can't be exported.
+`actions` puts the buttons on the same row as **Show data table**. Every SVG chart takes a `ref`: it points at the chart's figure (or, for Gauge and Sparkline, its root element). LinearGauge is HTML, not SVG, so it can't be exported.
 
 ## How it works
 

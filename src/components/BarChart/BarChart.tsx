@@ -3,6 +3,7 @@ import {
   extent,
   linearScale,
   ticks,
+  valueAxisMargin,
   sum,
   TICK_CHAR,
   truncateLabel,
@@ -90,7 +91,7 @@ export type BarChartProps = ChartFrameOptions &
     referenceLines?: Omit<NumericReferenceLine, "axis">[];
   };
 
-const MARGIN_V = { top: 8, right: 8, bottom: 28, left: 40 };
+const MARGIN_V = { top: 8, right: 8, bottom: 28 };
 const MARGIN_H = { top: 8, right: 8, bottom: 28, left: 40 };
 /** Longest rotated category label, in px, before it's cut with an ellipsis. */
 const ROTATED_LABEL_MAX = 100;
@@ -130,23 +131,40 @@ export function BarChart({
   const color = (si: number, i: number) =>
     multi ? (rows[si].color ?? seriesColor(si)) : (data?.[i]?.color ?? seriesColor(i));
 
+  const barValues = rows.flatMap((r) => categories.map((_, i) => r.data[i] ?? 0));
+  // The value scale reaches every reference line.
+  const maxVal = Math.max(
+    ...(stacked ? categories.map((_, i) => sum(rows.map((_, si) => cell(si, i)))) : barValues),
+    ...referenceValues(referenceLines, "y"),
+    1,
+  );
+  // Rounded out to whole ticks, so no bar is beyond the last gridline.
+  const valueMax = niceExtent(0, maxVal, 4)[1];
+  const valueTicks = ticks(0, valueMax, 4);
+
   const isHorizontal = direction === "horizontal";
   const width = useContainerWidth(plotRef, 720);
   // Category labels by their estimated width: rotated when they're wider than
   // a bar's slot (vertical), or given a left margin to fit (horizontal), up to
   // a limit past which they're cut with an ellipsis.
   const longest = Math.max(0, ...categories.map((c) => c.length)) * TICK_CHAR;
+  // Vertical bars: the left margin fits the value axis's labels.
+  const valueLeft = valueAxisMargin(valueTicks.map(format), yLabel);
   const rotateLabels =
-    !isHorizontal && count > 1 && longest + 8 > (width - MARGIN_V.left - MARGIN_V.right) / count;
+    !isHorizontal && count > 1 && longest + 8 > (width - valueLeft - MARGIN_V.right) / count;
   const labelRoom = isHorizontal
     ? Math.min(longest, Math.max(28, Math.round(width * 0.4) - 12))
     : rotateLabels
       ? Math.min(longest, ROTATED_LABEL_MAX)
       : Infinity;
   const MARGIN = isHorizontal
-    ? { ...MARGIN_H, left: Math.max(MARGIN_H.left, labelRoom + 12) }
+    ? { ...MARGIN_H, left: Math.max(MARGIN_H.left, labelRoom + 12) + (yLabel ? 18 : 0) }
     : // A label rotated 45° drops by its length × sin 45°.
-      { ...MARGIN_V, bottom: rotateLabels ? Math.ceil(labelRoom * 0.71) + 22 : 28 };
+      {
+        ...MARGIN_V,
+        left: valueLeft,
+        bottom: rotateLabels ? Math.ceil(labelRoom * 0.71) + 22 : 28,
+      };
   const size = plotSize(
     width,
     { height: heightProp, aspectRatio },
@@ -155,19 +173,8 @@ export function BarChart({
   const plotWidth = size.width - MARGIN.left - MARGIN.right;
   const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
 
-  const barValues = rows.flatMap((r) => categories.map((_, i) => r.data[i] ?? 0));
-  // The value scale reaches every reference line.
-  const maxVal = Math.max(
-    ...(stacked ? categories.map((_, i) => sum(rows.map((_, si) => cell(si, i)))) : barValues),
-    ...referenceValues(referenceLines, "y"),
-    1,
-  );
-
   const categoryScale = bandScale(count, [0, isHorizontal ? plotHeight : plotWidth], 0.2);
-  // Rounded out to whole ticks, so no bar is beyond the last gridline.
-  const valueMax = niceExtent(0, maxVal, 4)[1];
   const valueScale = linearScale([0, valueMax], isHorizontal ? [0, plotWidth] : [plotHeight, 0]);
-  const valueTicks = ticks(0, valueMax, 4);
   // Lines below zero fall off the plot (bars start at 0) and are left out.
   const references = placeReferences(
     referenceLines.map((r) => ({ ...r, axis: isHorizontal ? ("x" as const) : undefined })),
@@ -342,7 +349,7 @@ export function BarChart({
           return (
             <g key={tick} transform={`translate(0, ${valueScale(tick)})`}>
               {showHGrid && <line x1={0} x2={plotWidth} className="raster-chart__grid" />}
-              <text x={-6} dy="0.35em" textAnchor="end" className="raster-chart__tick">
+              <text x={-8} dy="0.35em" textAnchor="end" className="raster-chart__tick">
                 {format(tick)}
               </text>
             </g>
@@ -374,7 +381,7 @@ export function BarChart({
         {yLabel && (
           <text
             x={-plotHeight / 2}
-            y={-30}
+            y={12 - MARGIN.left}
             textAnchor="middle"
             transform="rotate(-90)"
             className="raster-chart__tick"

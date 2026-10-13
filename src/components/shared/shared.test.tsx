@@ -177,6 +177,27 @@ describe("ChartFrame", () => {
     expect(screen.getByText("Sales").className).toBe("raster-chart__title");
   });
 
+  it("leaves the data table out with dataTable none, for apps that offer their own", () => {
+    const { container } = render(<Frame dataTable="none" />);
+    expect(container.querySelector("details, table")).toBeNull();
+  });
+
+  it("puts actions on the data table button's row, inside the figure", () => {
+    render(<Frame actions={<button type="button">Download SVG</button>} />);
+    const row = screen
+      .getByRole("button", { name: "Download SVG" })
+      .closest(".raster-chart__actions")!;
+    expect(row.querySelector("details > summary")?.textContent).toBe("Show data table");
+    expect(row.closest("[role=figure]")).not.toBeNull();
+  });
+
+  it("keeps actions without the built-in table", () => {
+    render(<Frame dataTable="none" actions={<button type="button">Share</button>} />);
+    expect(
+      screen.getByRole("button", { name: "Share" }).closest(".raster-chart__actions"),
+    ).not.toBeNull();
+  });
+
   it("can visually hide the title", () => {
     render(<Frame hideTitle />);
     screen.getByRole("figure", { name: "Sales" });

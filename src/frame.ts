@@ -1,6 +1,7 @@
 // @eekodigital/raster/frame — raster's accessible frame around a chart it
-// doesn't draw (zoom, brushing, Canvas): a named figure, a text summary and
-// a data table, all server-rendered. Also exported from the main entry.
+// doesn't draw (your own SVG or canvas, or another library's): a named figure,
+// a text summary and a data table, all server-rendered. Also exported from the
+// main entry.
 export { ChartFrame } from "./components/shared/ChartFrame.js";
 export type { ChartFrameProps } from "./components/shared/ChartFrame.js";
 export { ChartDataTable } from "./components/shared/ChartDataTable.js";

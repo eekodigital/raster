@@ -133,6 +133,18 @@ export type AxisTick = { x: number; text: string; anchor: "start" | "middle" | "
 /** Estimated px per character of the 0.75rem tick font. */
 export const TICK_CHAR = 7;
 
+/** Room for a rotated value-axis title, left of the tick labels. */
+const AXIS_TITLE_ROOM = 18;
+
+/**
+ * Left margin for a value axis: its widest tick label (estimated), the 8 px
+ * gap to the plot and 4 px to the edge, plus room for a rotated title.
+ */
+export function valueAxisMargin(labels: string[], title?: string): number {
+  const widest = Math.max(1, ...labels.map((l) => l.length)) * TICK_CHAR;
+  return widest + 12 + (title ? AXIS_TITLE_ROOM : 0);
+}
+
 /**
  * Whether axis labels leave at least 8 px between neighbours (by estimated
  * width, honouring each anchor), and `spacing` px between ticks if given.

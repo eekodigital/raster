@@ -5,6 +5,7 @@ import {
   markerPath,
   niceExtent,
   ticks,
+  valueAxisMargin,
 } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
 import type { XAxis, XTick } from "../../utils/time.js";
@@ -79,7 +80,8 @@ export type ScatterChartProps = ChartFrameOptions &
     referenceLines?: NumericReferenceLine[];
   };
 
-const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
+// The left margin fits the value axis's labels.
+const MARGIN = { top: 8, right: 8, bottom: 40 };
 
 /**
  * A scale range for points: min–max with 4% room each side (not crossing
@@ -126,10 +128,6 @@ export function ScatterChart({
     s.data.map((_, i) => i).sort((a, b) => s.data[a].x - s.data[b].x),
   );
 
-  const size = plotSize(useContainerWidth(plotRef, 720), { height, aspectRatio }, 240);
-  const plotWidth = size.width - MARGIN.left - MARGIN.right;
-  const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
-
   // The data's range (for the summary), and the scales' range, which also
   // reaches every reference line.
   const xs = allPoints.map((p) => p.x);
@@ -143,6 +141,12 @@ export function ScatterChart({
   const [yMin, yMax] = padded(
     ...extent([dataYMin, dataYMax, ...referenceValues(referenceLines, "y")]),
   );
+  const yTicks = ticks(yMin, yMax, 5);
+  const left = valueAxisMargin(yTicks.map(format), yLabel);
+
+  const size = plotSize(useContainerWidth(plotRef, 720), { height, aspectRatio }, 240);
+  const plotWidth = size.width - left - MARGIN.right;
+  const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
 
   // A date axis places points and ticks on its own (calendar) scale.
   const xScale = xAxis
@@ -150,7 +154,6 @@ export function ScatterChart({
     : linearScale([xMin, xMax], [0, plotWidth]);
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
   const xTicks = xAxis ? [] : ticks(xMin, xMax, 5);
-  const yTicks = ticks(yMin, yMax, 5);
   // Custom x labels (e.g. dates) can be wider than numbers: thin by their
   // estimated width (7 px a character, plus a gap).
   const xTickSkip = labelSkip(
@@ -251,7 +254,7 @@ export function ScatterChart({
         ),
       }}
     >
-      <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
+      <g transform={`translate(${left}, ${MARGIN.top})`}>
         {yTicks.map((tick) => (
           <g key={`y-${tick}`} transform={`translate(0, ${yScale(tick)})`}>
             {showHGrid && <line x1={0} x2={plotWidth} className="raster-chart__grid" />}
@@ -306,7 +309,7 @@ export function ScatterChart({
         {yLabel && (
           <text
             x={-plotHeight / 2}
-            y={-38}
+            y={12 - left}
             textAnchor="middle"
             transform="rotate(-90)"
             className="raster-chart__tick raster-chart__axis-title"

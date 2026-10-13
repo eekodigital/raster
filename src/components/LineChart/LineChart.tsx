@@ -8,6 +8,7 @@ import {
   markerPath,
   ticks,
   categoryTicks,
+  valueAxisMargin,
   niceExtent,
 } from "../../utils/chart-math.js";
 import type { NumberFormat } from "../../utils/labels.js";
@@ -113,7 +114,8 @@ export type LineChartProps = ChartFrameOptions &
     referenceLines?: ReferenceLine[];
   };
 
-const MARGIN = { top: 8, right: 8, bottom: 40, left: 50 };
+// The left margin fits the value axis's labels.
+const MARGIN = { top: 8, right: 8, bottom: 40 };
 
 export function LineChart({
   series,
@@ -145,10 +147,6 @@ export function LineChart({
   const longest = Math.max(0, ...series.map((s) => s.data.length));
   const isDense = typeof dense === "boolean" ? dense : longest > (dense ?? 200);
 
-  const size = plotSize(useContainerWidth(plotRef, 720), { height: heightProp, aspectRatio }, 200);
-  const plotWidth = size.width - MARGIN.left - MARGIN.right;
-  const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
-
   const stackedData: number[][] = stacked
     ? series.reduce<number[][]>((acc, s, si) => {
         const prev = si > 0 ? acc[si - 1] : s.data.map(() => 0);
@@ -163,6 +161,12 @@ export function LineChart({
   const yRefs = referenceValues(referenceLines, "y");
   // Rounded out to whole ticks, so no point is above the top gridline.
   const [yMin, yMax] = niceExtent(Math.min(0, minVal, ...yRefs), Math.max(maxVal, 1, ...yRefs), 4);
+  const yTicks = ticks(yMin, yMax, 4);
+  const left = valueAxisMargin(yTicks.map(format), yLabel);
+
+  const size = plotSize(useContainerWidth(plotRef, 720), { height: heightProp, aspectRatio }, 200);
+  const plotWidth = size.width - left - MARGIN.right;
+  const plotHeight = size.height - MARGIN.top - MARGIN.bottom;
 
   const showHGrid = grid === "horizontal" || grid === "both";
   const showVGrid = grid === "vertical" || grid === "both";
@@ -173,7 +177,6 @@ export function LineChart({
   const xScale = (i: number) =>
     x ? x.position(i, plotWidth) : count <= 1 ? plotWidth / 2 : (i / (count - 1)) * plotWidth;
   const yScale = linearScale([yMin, yMax], [plotHeight, 0]);
-  const yTicks = ticks(yMin, yMax, 4);
   // Vertical lines need a time axis that can place them.
   const references = placeReferences(
     referenceLines,
@@ -287,7 +290,7 @@ export function LineChart({
           <DenseOverlay
             width={size.width}
             height={size.height}
-            left={MARGIN.left}
+            left={left}
             top={MARGIN.top}
             plotWidth={plotWidth}
             plotHeight={plotHeight}
@@ -310,7 +313,7 @@ export function LineChart({
         })),
       }}
     >
-      <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
+      <g transform={`translate(${left}, ${MARGIN.top})`}>
         {yTicks.map((tick) => (
           <g key={tick} transform={`translate(0, ${yScale(tick)})`}>
             {showHGrid && <line x1={0} x2={plotWidth} className="raster-chart__grid" />}
@@ -357,7 +360,7 @@ export function LineChart({
         {yLabel && (
           <text
             x={-plotHeight / 2}
-            y={-38}
+            y={12 - left}
             textAnchor="middle"
             transform="rotate(-90)"
             className="raster-chart__tick"
