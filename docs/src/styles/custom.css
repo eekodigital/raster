@@ -46,6 +46,8 @@
   --sl-color-gray-7: hsl(0, 0%, 12%);
   --sl-color-black: hsl(0, 0%, 7%);
   --sl-color-text-accent: var(--sl-color-white);
+  /* Starlight's default (gray-5) leaves inline code at 4.4:1. */
+  --sl-color-bg-inline-code: var(--sl-color-gray-6);
 }
 
 /* Light mode — neutral grays, black headings */
@@ -149,7 +151,7 @@
    beside the page's table of contents. */
 .props-table__default {
   margin-top: 0.25rem;
-  color: var(--sl-color-gray-3);
+  color: var(--sl-color-gray-2);
   font-size: var(--sl-text-xs);
 }
 
