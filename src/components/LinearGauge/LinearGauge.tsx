@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { cn } from "../../utils/cn.js";
 import { numberFormatter } from "../../utils/labels.js";
+import type { ChartLabelOverrides } from "../../utils/labels.js";
 import { seriesColor } from "../../utils/palette.js";
 import { fraction } from "../../utils/chart-math.js";
 
@@ -8,12 +9,14 @@ export type LinearGaugeProps = {
   value: number;
   min?: number;
   max: number;
-  /** Visible label; also the meter's accessible name. */
-  label: string;
+  /** Visible title; also the meter's accessible name. */
+  title: string;
   color?: string;
   height?: number;
-  /** Formats the value for display and `aria-valuetext`. Default: `Intl.NumberFormat("en")`. */
-  format?: (value: number) => string;
+  /** Formats the value for display and `aria-valuetext`. Default: `Intl.NumberFormat(labels.locale)`. */
+  formatValue?: (value: number) => string;
+  /** The number locale (`labels.locale`), as for the other charts. */
+  labels?: Pick<ChartLabelOverrides, "locale">;
   /** Visible value text. Default: "{value} / {max}". */
   formatLabel?: (value: number, max: number) => string;
   className?: string;
@@ -23,14 +26,16 @@ export function LinearGauge({
   value,
   min = 0,
   max,
-  label,
+  title,
   color = seriesColor(0),
   height = 8,
-  format = numberFormatter("en"),
+  formatValue,
+  labels,
   formatLabel,
   className,
 }: LinearGaugeProps) {
   const labelId = useId();
+  const format = formatValue ?? numberFormatter(labels?.locale ?? "en");
   const pct = `${fraction(value, min, max) * 100}%`;
   return (
     <div
@@ -44,7 +49,7 @@ export function LinearGauge({
     >
       <div className="raster-linear-gauge__header">
         <span id={labelId} className="raster-linear-gauge__label">
-          {label}
+          {title}
         </span>
         <span className="raster-linear-gauge__value">
           {formatLabel ? formatLabel(value, max) : `${format(value)} / ${format(max)}`}

@@ -1,5 +1,5 @@
 import { cleanup } from "@testing-library/react";
-import { afterEach, expect } from "vitest";
+import { afterEach, expect } from "vite-plus/test";
 // vitest-axe@0.1.0 ships an empty `extend-expect.js`, so register the matcher
 // manually. The package types `toHaveNoViolations` via `export type`, so the
 // namespace import + cast is the one path that satisfies both runtime and TS.

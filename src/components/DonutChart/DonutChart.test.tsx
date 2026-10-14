@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { axe } from "../../test-utils/axe.js";
 import { focusedName, openTable, press, tableText, tabStops } from "../../test-utils/chart.js";
 import { DonutChart } from "./DonutChart.js";
@@ -105,14 +105,12 @@ describe("DonutChart keyboard and selection", () => {
   });
 
   it("toggles with click, Enter and Space; Escape clears within the chart", () => {
-    const onSegmentClick = vi.fn();
+    const onMarkClick = vi.fn();
     const onSelect = vi.fn();
-    render(
-      <DonutChart data={DATA} title="R" onSegmentClick={onSegmentClick} onSelect={onSelect} />,
-    );
+    render(<DonutChart data={DATA} title="R" onMarkClick={onMarkClick} onSelect={onSelect} />);
     const fail = screen.getByRole("button", { name: /^Fail/ });
     fireEvent.click(fail);
-    expect(onSegmentClick).toHaveBeenCalledWith(DATA[1], 1);
+    expect(onMarkClick).toHaveBeenCalledWith({ index: 1, value: DATA[1].value, datum: DATA[1] });
     expect(onSelect).toHaveBeenCalledWith(1);
     expect(fail.getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: /^Pass/ }).hasAttribute("data-dimmed")).toBe(true);

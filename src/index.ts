@@ -2,12 +2,33 @@
 //
 // GeoChart lives at `@eekodigital/raster/geo` so the main entry never pulls in
 // `topojson-client`. Styles ship separately as `@eekodigital/raster/styles.css`.
-export type { ChartExportHandle } from "./utils/use-chart-export.js";
-export { DEFAULT_LABELS } from "./utils/labels.js";
-export type { ChartLabels, ChartType, MarkLabelParts, SummaryParts } from "./utils/labels.js";
-export type { DataTableMode } from "./components/shared/ChartDataTable.js";
+export { DEFAULT_LABELS, describeChart } from "./utils/labels.js";
+export type {
+  ChartLabelOverrides,
+  ChartLabels,
+  ChartType,
+  MarkLabelParts,
+  ResolvedSummaryParts,
+  SummaryParts,
+} from "./utils/labels.js";
+export { ChartDataTable } from "./components/shared/ChartDataTable.js";
+export type {
+  ChartDataTableProps,
+  ChartDataTableRow,
+  ChartTableData,
+  DataTableMode,
+} from "./components/shared/ChartDataTable.js";
+export { ChartFrame } from "./components/shared/ChartFrame.js";
+export type { ChartFrameProps } from "./components/shared/ChartFrame.js";
+export type { NumericReferenceLine, ReferenceLine } from "./components/shared/ReferenceLines.js";
 export { BarChart } from "./components/BarChart/BarChart.js";
-export type { BarChartProps, BarDatum } from "./components/BarChart/BarChart.js";
+export type {
+  BarChartProps,
+  BarDatum,
+  BarPointIndex,
+  BarSeries,
+} from "./components/BarChart/BarChart.js";
+export type { MarkClick } from "./components/shared/use-chart.js";
 export { ChartTooltip, useChartTooltip } from "./components/ChartTooltip/ChartTooltip.js";
 export type { ChartTooltipProps } from "./components/ChartTooltip/ChartTooltip.js";
 export { DonutChart } from "./components/DonutChart/DonutChart.js";
@@ -21,6 +42,7 @@ export type {
   LineChartProps,
   LinePointIndex,
   LineSeries,
+  XAxis,
 } from "./components/LineChart/LineChart.js";
 export { RadarChart } from "./components/RadarChart/RadarChart.js";
 export type {

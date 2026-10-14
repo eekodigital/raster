@@ -25,7 +25,9 @@ export function useChartTooltip() {
     setState({
       visible: true,
       x: rect.left - containerRect.left + rect.width / 2,
-      y: rect.top - containerRect.top - 8,
+      // 14 px above the mark: clear of a focused point's ring (scaled 1.6×
+      // plus a 3 px outline), even if measured before the scale has finished.
+      y: rect.top - containerRect.top - 14,
       content,
     });
   }, []);

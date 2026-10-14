@@ -15,6 +15,22 @@
   width: 100%;
 }
 
+/* The default colours pick their light or dark value with light-dark(), which
+   follows color-scheme. Sites that mark their theme with a .dark/.light class
+   or data-theme often don't set color-scheme, so raster reads those too. The
+   nearest marker wins; zero specificity, so any color-scheme you set wins. */
+@scope (.dark, [data-theme="dark"]) {
+  :where(.raster-chart, .raster-tooltip, .raster-sparkline, .raster-gauge, .raster-linear-gauge) {
+    color-scheme: dark;
+  }
+}
+
+@scope (.light, [data-theme="light"]) {
+  :where(.raster-chart, .raster-tooltip, .raster-sparkline, .raster-gauge, .raster-linear-gauge) {
+    color-scheme: light;
+  }
+}
+
 .raster-chart__title {
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
@@ -38,8 +54,40 @@
   inset: 0;
 }
 
+/* The app's actions and the data table button on one row, wrapping as needed.
+   The actions float, so the table opens below the whole row. */
+.raster-chart__actions {
+  display: flow-root;
+  margin-top: 0.75rem;
+}
+
+.raster-chart__actions-items {
+  float: left;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0.5rem 0.5rem 0;
+}
+
+/* overflow makes the button sit beside the actions, or below them when
+   there's no room, without changing its display. */
+.raster-chart__actions .raster-chart__table-toggle {
+  margin-top: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.raster-chart__actions .raster-chart__table {
+  clear: left;
+}
+
+/* The data table's <summary>, styled as a button; its disclosure marker is hidden. */
 .raster-chart__table-toggle {
-  margin-top: 0.5rem;
+  /* Keep the summary's own display (list-item): changing it can drop its
+     disclosure semantics in some browser and screen reader pairs. */
+  width: fit-content;
+  list-style: none;
+  margin-top: 0.75rem;
   padding: 0.25rem 0.5rem;
   font: inherit;
   font-size: 0.75rem;
@@ -48,6 +96,10 @@
   border: 1px solid currentColor;
   border-radius: 0.25rem;
   cursor: pointer;
+}
+
+.raster-chart__table-toggle::-webkit-details-marker {
+  display: none;
 }
 
 .raster-chart__table-toggle:focus-visible {
@@ -91,6 +143,29 @@
   stroke: var(--raster-grid, color-mix(in srgb, currentColor 25%, transparent));
   stroke-width: 1;
   stroke-dasharray: 2 4;
+}
+
+/* Reference lines (targets, thresholds): dashed, and longer dashes than the
+   grid. The pointer passes through to marks underneath. */
+.raster-chart__reference {
+  pointer-events: none;
+}
+
+.raster-chart__reference-line {
+  stroke: var(--raster-reference, var(--raster-text-subtle, var(--raster-text, currentColor)));
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+/* A surface-coloured halo keeps the label readable where data runs under it. */
+.raster-chart__reference-label {
+  fill: var(--raster-reference, var(--raster-text-subtle, var(--raster-text, currentColor)));
+  font-size: 0.75rem;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--raster-surface, light-dark(#ffffff, #121212));
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 
 .raster-chart__tick {
@@ -192,6 +267,11 @@
   animation: raster-line-draw 0.8s ease both;
 }
 
+/* Dense series: a thinner line keeps detail readable at a point per pixel. */
+.raster-line__line--dense {
+  stroke-width: 1.5;
+}
+
 .raster-line__area {
   opacity: 0.15;
   animation: raster-fade-in 0.6s ease 0.4s backwards;
@@ -226,6 +306,27 @@
 .raster-scatter__point:focus,
 .raster-radar__point:focus {
   outline: none;
+}
+
+/* Dense LineChart: one marker follows the slider or pointer. It appears at
+   once (no fade-in) and lets the pointer through to the hit area. While the
+   slider has focus, the marker gets the halo and a drawn ring. */
+.raster-line__marker,
+.raster-line__ring {
+  animation: none;
+  pointer-events: none;
+}
+
+.raster-line__marker[data-focused] {
+  transform: scale(1.6);
+  stroke: var(--raster-surface, light-dark(#ffffff, #121212));
+  stroke-width: 2;
+}
+
+.raster-line__ring {
+  fill: none;
+  stroke: var(--raster-focus, currentColor);
+  stroke-width: 2;
 }
 
 /* Surface halo inside the focus ring: visible even if focus = series colour. */
@@ -370,10 +471,6 @@
   fill: none;
   stroke: var(--raster-grid, color-mix(in srgb, currentColor 25%, transparent));
   stroke-width: 1;
-}
-
-.raster-radar__label {
-  text-anchor: middle;
 }
 
 .raster-radar__area {
@@ -544,13 +641,16 @@
 }
 
 .raster-geo__legend {
+  /* One row: the gradient shrinks instead (items wrap before they shrink). */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem;
 }
 
 .raster-geo__gradient {
   height: 8px;
-  width: 120px;
+  flex: 0 1 120px;
+  min-width: 40px;
   border-radius: 4px;
 }
 
@@ -587,7 +687,16 @@
  * by per-series dash patterns.
  */
 @media (forced-colors: active) {
+  .raster-chart__reference-line {
+    stroke: CanvasText;
+  }
+
+  .raster-chart__reference-label {
+    stroke: Canvas;
+  }
+
   .raster-chart__tick,
+  .raster-chart__reference-label,
   .raster-legend,
   .raster-donut__centre,
   .raster-gauge__value,
@@ -740,6 +849,7 @@
 
   /* Focus and selection */
   .raster-line__point:focus-visible,
+  .raster-line__ring,
   .raster-scatter__point:focus-visible,
   .raster-radar__point:focus-visible,
   .raster-geo__region:focus-visible,

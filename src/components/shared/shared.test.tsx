@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { axe } from "../../test-utils/axe.js";
 import { DEFAULT_LABELS } from "../../utils/labels.js";
 import { useSelection } from "../../utils/use-selection.js";
 import { ChartDataTable } from "./ChartDataTable.js";
-import { ChartFrame, type ChartFrameProps } from "./ChartFrame.js";
+import { SvgChartFrame, type SvgChartFrameProps } from "./ChartFrame.js";
 import { ChartLegend } from "./ChartLegend.js";
 
 const TABLE = {
@@ -18,20 +18,22 @@ const TABLE = {
 };
 
 describe("ChartDataTable", () => {
-  it("is a collapsed disclosure by default", () => {
+  it("is a closed native disclosure by default, with the table inside it", () => {
     render(<ChartDataTable {...TABLE} labels={DEFAULT_LABELS} />);
-    const button = screen.getByRole("button", { name: "Show data table" });
-    expect(button.getAttribute("aria-expanded")).toBe("false");
-    expect(screen.queryByRole("table")).toBeNull();
-    const table = document.getElementById(button.getAttribute("aria-controls")!)!;
-    expect(table.hidden).toBe(true);
+    const summary = screen.getByText("Show data table", { selector: "summary" });
+    const details = summary.parentElement as HTMLDetailsElement;
+    expect(details.tagName).toBe("DETAILS");
+    expect(details.open).toBe(false);
+    // The table is in the HTML (no `hidden`), so it opens without JavaScript.
+    const table = details.querySelector("table")!;
+    expect(table.hidden).toBe(false);
   });
 
   it("expands to a captioned table with scoped headers", () => {
     render(<ChartDataTable {...TABLE} labels={DEFAULT_LABELS} />);
-    fireEvent.click(screen.getByRole("button", { name: "Show data table" }));
-    const button = screen.getByRole("button", { name: "Hide data table" });
-    expect(button.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(screen.getByText("Show data table", { selector: "summary" }));
+    const summary = screen.getByText("Hide data table", { selector: "summary" });
+    expect((summary.parentElement as HTMLDetailsElement).open).toBe(true);
     screen.getByRole("table", { name: "Data for Sales" });
     expect(document.querySelector("caption")?.textContent).toBe("Data for Sales");
     expect(
@@ -47,8 +49,9 @@ describe("ChartDataTable", () => {
       ["Feb", "row"],
     ]);
     expect(screen.getAllByRole("cell").map((td) => td.textContent)).toEqual(["10", "12"]);
-    fireEvent.click(button);
-    expect(screen.queryByRole("table")).toBeNull();
+    fireEvent.click(summary);
+    expect((summary.parentElement as HTMLDetailsElement).open).toBe(false);
+    expect(summary.textContent).toBe("Show data table");
   });
 
   it("end-aligns data column headers to match their cells", () => {
@@ -98,7 +101,7 @@ describe("ChartDataTable", () => {
         <ChartDataTable {...TABLE} labels={DEFAULT_LABELS} describedBy="t" />
       </>,
     );
-    expect(screen.getByRole("button").getAttribute("aria-describedby")).toBe("t");
+    expect(document.querySelector("summary")?.getAttribute("aria-describedby")).toBe("t");
   });
 });
 
@@ -139,11 +142,11 @@ describe("ChartLegend", () => {
   });
 });
 
-function Frame(props: Partial<ChartFrameProps> & { onSelect?: (v: number | null) => void }) {
+function Frame(props: Partial<SvgChartFrameProps> & { onSelect?: (v: number | null) => void }) {
   const plotRef = useRef<HTMLDivElement>(null);
   const selection = useSelection<number>(undefined, props.onSelect, DEFAULT_LABELS);
   return (
-    <ChartFrame
+    <SvgChartFrame
       title="Sales"
       summary="Bar chart, 2 points."
       labels={DEFAULT_LABELS}
@@ -161,7 +164,7 @@ function Frame(props: Partial<ChartFrameProps> & { onSelect?: (v: number | null)
         tabIndex={0}
         onClick={() => selection.toggle(0)}
       />
-    </ChartFrame>
+    </SvgChartFrame>
   );
 }
 
@@ -172,6 +175,27 @@ describe("ChartFrame", () => {
     const summary = document.getElementById(figure.getAttribute("aria-describedby")!)!;
     expect(summary.textContent).toBe("Bar chart, 2 points.");
     expect(screen.getByText("Sales").className).toBe("raster-chart__title");
+  });
+
+  it("leaves the data table out with dataTable none, for apps that offer their own", () => {
+    const { container } = render(<Frame dataTable="none" />);
+    expect(container.querySelector("details, table")).toBeNull();
+  });
+
+  it("puts actions on the data table button's row, inside the figure", () => {
+    render(<Frame actions={<button type="button">Download SVG</button>} />);
+    const row = screen
+      .getByRole("button", { name: "Download SVG" })
+      .closest(".raster-chart__actions")!;
+    expect(row.querySelector("details > summary")?.textContent).toBe("Show data table");
+    expect(row.closest("[role=figure]")).not.toBeNull();
+  });
+
+  it("keeps actions without the built-in table", () => {
+    render(<Frame dataTable="none" actions={<button type="button">Share</button>} />);
+    expect(
+      screen.getByRole("button", { name: "Share" }).closest(".raster-chart__actions"),
+    ).not.toBeNull();
   });
 
   it("can visually hide the title", () => {
@@ -236,7 +260,7 @@ describe("ChartFrame", () => {
     const { container } = render(
       <Frame legend={<ChartLegend items={[{ label: "A", color: "red" }]} />} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Show data table" }));
+    fireEvent.click(screen.getByText("Show data table", { selector: "summary" }));
     expect(await axe(container)).toHaveNoViolations();
   });
 });

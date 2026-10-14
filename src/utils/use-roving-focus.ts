@@ -33,11 +33,44 @@ function findRow(counts: readonly number[], from: number, dir: 1 | -1): number {
   return -1;
 }
 
-function clampPosition(counts: readonly number[], { row, item }: Position): Position {
+/** `at`, kept inside `counts`, moving off empty rows. */
+export function clampPosition(counts: readonly number[], { row, item }: Position): Position {
   let r = row < counts.length ? findRow(counts, row, 1) : -1;
   if (r === -1) r = findRow(counts, Math.min(row, counts.length - 1), -1);
   if (r === -1) return { row: 0, item: 0 };
   return { row: r, item: Math.min(item, counts[r] - 1) };
+}
+
+/**
+ * Where `key` moves from `at` in a grid with `counts` items per row, or null
+ * when it isn't a movement key. Shared by roving focus and dense charts' slider.
+ */
+export function movePosition(
+  counts: readonly number[],
+  at: Position,
+  key: string,
+  itemKeys: KeyMap,
+  rowKeys?: KeyMap,
+  wrap = false,
+): Position | null {
+  let { row: r, item: i } = at;
+  const count = counts[r] ?? 0;
+  const last = count - 1;
+  if (itemKeys.next.includes(key)) i = wrap ? (i + 1) % count : Math.min(i + 1, last);
+  else if (itemKeys.prev.includes(key)) i = wrap ? (i - 1 + count) % count : Math.max(i - 1, 0);
+  else if (key === "Home") i = 0;
+  else if (key === "End") i = last;
+  else if (key === "PageDown") i = Math.min(i + PAGE_SIZE, last);
+  else if (key === "PageUp") i = Math.max(i - PAGE_SIZE, 0);
+  else if (rowKeys?.next.includes(key) || rowKeys?.prev.includes(key)) {
+    const dir = rowKeys.next.includes(key) ? 1 : -1;
+    const target = findRow(counts, r + dir, dir);
+    if (target !== -1) {
+      r = target;
+      i = Math.min(i, counts[r] - 1);
+    }
+  } else return null;
+  return { row: r, item: i };
 }
 
 /**
@@ -62,34 +95,18 @@ export function useRovingFocus({
 
   const onKeyDown = useCallback(
     (row: number, item: number, e: React.KeyboardEvent) => {
-      let r = row;
-      let i = item;
-      const count = counts[row] ?? 0;
-      const last = count - 1;
       const { key } = e;
-
-      if (itemKeys.next.includes(key)) i = wrap ? (i + 1) % count : Math.min(i + 1, last);
-      else if (itemKeys.prev.includes(key)) i = wrap ? (i - 1 + count) % count : Math.max(i - 1, 0);
-      else if (key === "Home") i = 0;
-      else if (key === "End") i = last;
-      else if (key === "PageDown") i = Math.min(i + PAGE_SIZE, last);
-      else if (key === "PageUp") i = Math.max(i - PAGE_SIZE, 0);
-      else if (rowKeys?.next.includes(key) || rowKeys?.prev.includes(key)) {
-        const dir = rowKeys.next.includes(key) ? 1 : -1;
-        const target = findRow(counts, row + dir, dir);
-        if (target !== -1) {
-          r = target;
-          i = Math.min(i, counts[r] - 1);
+      const to = movePosition(counts, { row, item }, key, itemKeys, rowKeys, wrap);
+      if (!to) {
+        if ((key === "Enter" || key === " ") && onActivate) {
+          e.preventDefault();
+          onActivate(row, item);
         }
-      } else if ((key === "Enter" || key === " ") && onActivate) {
-        e.preventDefault();
-        onActivate(row, item);
         return;
-      } else return;
-
+      }
       e.preventDefault();
-      setActive({ row: r, item: i });
-      (elements.current.get(`${r}-${i}`) as HTMLOrSVGElement | undefined)?.focus();
+      setActive(to);
+      (elements.current.get(`${to.row}-${to.item}`) as HTMLOrSVGElement | undefined)?.focus();
     },
     [counts, itemKeys, rowKeys, wrap, onActivate],
   );

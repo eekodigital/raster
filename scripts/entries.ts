@@ -1,7 +1,3 @@
-import { readFileSync, writeFileSync } from "node:fs";
-import { defineConfig } from "tsdown";
-import { minifyCss } from "./src/utils/minify-css.ts";
-
 /**
  * Public entry points. Each becomes `dist/<name>.mjs` and is listed in
  * package.json `exports`; shared code is split into chunks, so importing one
@@ -14,6 +10,10 @@ import { minifyCss } from "./src/utils/minify-css.ts";
 export const entries = {
   index: "src/index.ts",
   theme: "src/theme.ts",
+  time: "src/time.ts",
+  export: "src/export.ts",
+  frame: "src/frame.ts",
+  labels: "src/labels.ts",
   geo: "src/geo.ts",
   "bar-chart": "src/components/BarChart/BarChart.tsx",
   "chart-tooltip": "src/components/ChartTooltip/ChartTooltip.tsx",
@@ -26,14 +26,24 @@ export const entries = {
   sparkline: "src/components/Sparkline/Sparkline.tsx",
 } as const;
 
-export default defineConfig({
-  entry: entries,
-  format: ["esm"],
-  dts: true,
-  clean: true,
-  hooks: {
-    "build:done": () => {
-      writeFileSync("dist/styles.css", minifyCss(readFileSync("src/styles.css", "utf8")));
-    },
-  },
-});
+/**
+ * Entries that export React components start with `"use client"`, so React
+ * Server Components can import them directly. They're still server-rendered
+ * (SSR); the directive only marks where hydration starts. Entries of plain
+ * functions and values (`time`, `theme`, `export`) stay unmarked, so server
+ * code can call them.
+ */
+export const clientEntries = new Set<string>([
+  "index",
+  "frame",
+  "geo",
+  "bar-chart",
+  "chart-tooltip",
+  "donut-chart",
+  "gauge",
+  "line-chart",
+  "linear-gauge",
+  "radar-chart",
+  "scatter-chart",
+  "sparkline",
+]);

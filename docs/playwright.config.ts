@@ -12,7 +12,10 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "pnpm preview",
+    // --ignore-lock keeps the server in the foreground: when Astro detects an
+    // AI agent it otherwise starts it in the background and exits at once,
+    // which Playwright reads as the server dying.
+    command: "pnpm exec astro preview --port 4322 --ignore-lock",
     url: "http://localhost:4322",
     reuseExistingServer: !process.env["CI"],
   },
