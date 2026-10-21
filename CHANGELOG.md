@@ -1,5 +1,141 @@
 # @eekodigital/raster
 
+## 4.0.0
+
+### Major Changes
+
+- a37d935: **One API across charts.**
+
+  ### Changed (breaking)
+  - **`onMarkClick` on every chart**, with `{ index, value, datum }` (`index` as `onSelect` gives it). It replaces `onPointClick`, `onBarClick`, `onSegmentClick`, `onRegionClick` and `onMarkerClick`. On GeoChart it makes both regions and markers clickable.
+  - **BarChart takes `series: { name, data, color? }[]` with `categories`**, like LineChart, instead of `series` names with `values[category][series]`. `data: { label, value, color? }[]` remains for a single series. `grouped` is removed (it's the default for several series), and so is `colors`: use `color` on each datum or series. Selection is one bar, `{ series, point }` (`BarPointIndex`), not a whole category.
+  - **Gauge and LinearGauge take `title` and `formatValue`**, instead of `label` and `format`, and a `labels` prop; the default number format follows `labels.locale`.
+  - LineChart's date axis prop is `xAxis` (was `x`).
+
+  ### Added
+  - ScatterChart `xAxis`: a date axis (`timeAxis(points.map((p) => p.x))`) for calendar ticks and dates in names, the summary and the table.
+  - `xTickFilter` and `formatXTick` also apply to LineChart's date ticks.
+  - Types: `MarkClick`, `BarSeries`, `BarPointIndex`.
+
+- 6508a02: **Chart names are worked out once, and translated in one place.**
+
+  ### Changed (breaking)
+  - `labels.summary` receives a ready-made `name` ("Line chart", or a wrapped chart's own name such as "Heatmap"), worked out from the new `labels.chartNames`. `type` can now be missing (for charts raster doesn't draw), so a custom summary that looked up `type` should use `name` instead, and its chart names move to `chartNames`. See "Migrating from v3 to v4".
+  - The `labels` prop's type is `ChartLabelOverrides`: any `ChartLabels` key, with `chartNames` merged one name at a time.
+  - `XAxis.at` and `XAxis.format` are required (`timeAxis` provides them).
+
+  ### Added
+  - `labels.chartNames`, and `describeChart({ name: "Heatmap", … })` without a `type`.
+  - The `ChartLabelOverrides` and `ResolvedSummaryParts` types.
+
+- ea80100: **Export is opt-in.** SVG and PNG export moves to `@eekodigital/raster/export`, so charts no longer bundle it. Every SVG chart is about 600–620 B (min+gzip) smaller.
+
+  ### Added
+  - `@eekodigital/raster/export`: `exportSVG(target, filename?)` and `exportPNG(target, filename?, scale?)`. `target` is the chart, or any element containing it.
+  - A `ref` prop on every SVG chart, pointing at its figure (or, for Gauge and Sparkline, its root element).
+
+  ### Removed (breaking)
+  - The `exportRef` prop and the `ChartExportHandle` type. Give the chart a `ref` and call `exportSVG(ref.current)` or `exportPNG(ref.current)` from `@eekodigital/raster/export`. See "Migrating from v3 to v4".
+
+- c8294a6: From trying raster in fresh Next.js 16 and React Router 8 apps:
+
+  ### Changed (breaking)
+  - **The data table disclosure is a native `<details>`/`<summary>`**, so it opens without JavaScript and the values are reachable from the server-rendered HTML. (It was a `<button>` that needed JavaScript, with the table `hidden`, which also hid it from assistive technology.) With JavaScript, the label still switches between "Show data table" and "Hide data table".
+
+    **If your tests or CSS find the toggle:** it's no longer a `button`. In tests, find it by text (`getByText("Show data table", { selector: "summary" })`) instead of `getByRole("button", …)`, and check `details.open` instead of `aria-expanded`. CSS on `button.raster-chart__table-toggle` should target `.raster-chart__table-toggle`.
+
+  ### Added
+  - `@eekodigital/raster/labels`: `describeChart` and `DEFAULT_LABELS` without `"use client"`, so React Server Components can call them.
+  - README: server rendering, React Server Components (which props need a client component), every entry point, a BarChart example, the date locale, and an absolute changelog link (the relative one broke on npm). Getting started: a Vite `optimizeDeps` tip. JSDoc on BarChart's `data`/`series` and LineChart's `xAxis`.
+
+### Minor Changes
+
+- 7461379: **Dark themes, your own controls beside the data table, and tighter value axes.**
+
+  - **Dark themes work without setting `color-scheme`.** Charts inside an element with a `dark` class or `data-theme="dark"` (Tailwind's `dark` class, most theme switchers) use the dark palette, surface and tooltip. A `light` class or `data-theme="light"` inside one switches back; the nearest wins. `color-scheme` still works as before, and one set on a chart wins.
+  - **`actions`** puts your own controls, such as download buttons, on the same row as the **Show data table** button, inside the chart's figure. The table opens below the whole row.
+  - **`dataTable="none"`** leaves raster's data table out, for apps that offer the data their own way.
+  - **Value axes fit their labels.** LineChart, ScatterChart and vertical BarChart size their left margin from the widest tick label (and `yLabel`), instead of a fixed 40–50 px, so short labels no longer sit indented from the title.
+  - The **Show data table** button has a little more room above it.
+
+- 62bcc05: **Date axes for LineChart.** Pass `xAxis={timeAxis(dates, options)}` from the new `@eekodigital/raster/time` entry instead of `categories`.
+
+  ### Added
+  - `timeAxis(values, { interval?, timeZone?, format? })` at `@eekodigital/raster/time`, about 1 KB, so charts with categories don't carry date code. Values are `Date`s, ISO strings (date-only = UTC midnight) or epoch ms.
+    - Points are spaced by elapsed time.
+    - Ticks fall on days, Monday weeks, months, quarters or years, chosen and thinned to fit the width.
+    - `interval` breaks the line and area where data at that cadence is missing.
+    - `timeZone` (IANA, default UTC) places ticks on local boundaries, with the same output on server and client.
+    - Point names, the summary and the data table use formatted dates ("Views, 3 October 2026: 42, 3 of 12" in `en-GB`).
+  - LineChart `xAxis` prop, and the `XAxis` type.
+  - ScatterChart `formatX`: formats x values separately from `formatValue`, e.g. epoch ms as dates.
+  - `labels.dateColumn` ("Date"), which heads the data table's first column for date axes.
+
+  ### Fixed
+  - Stacked smooth areas drew each upper series' lower edge left to right, so the area crossed itself. They now close along the series below, right to left.
+
+- c08a7a7: **Dense mode for long LineChart series.** Above 200 points in a series (configurable with `dense`), each series is drawn as one downsampled path with no per-point marks, and a single slider steps through the points.
+
+  At 1,000 points the server HTML drops from about 310 KB to 62 KB, with the SVG going from 261 KB to 13 KB. There is one focusable control instead of 1,000.
+
+  ### Added
+  - LineChart `dense?: boolean | number`. A number sets the threshold; `true` or `false` forces dense mode on or off.
+  - In dense mode:
+    - **Slider:** a visually hidden `<input type="range">` named by the series, with `aria-valuetext` naming the current point ("Views, 3 October 2026: 42, 3 of 1,000").
+    - **Keys:** the same as other charts. ← / →, Home / End and PageUp / PageDown move between points, ↑ / ↓ move between series, Enter / Space select (", selected" is added to the value), and Escape clears.
+    - **Marker:** a marker with a drawn focus ring shows the current point.
+    - **Pointer:** hovering over the plot moves to the nearest point (binary search on x) and shows the tooltip; clicking selects it.
+    - **Drawing:** lines are 1.5 px, at most four points per pixel column (first, lowest, highest, last), with coordinates to 0.1 px. Smooth curves are drawn straight. A point left on its own by a gap still gets a dot.
+    - **Still in the HTML:** the summary and data table.
+  - `labels.selected` ("selected").
+  - `ChartFrame` takes an `overlay`. It's internal for now.
+
+- 873886a: **Raster's accessibility frame is public**, so a chart raster doesn't draw (TanStack Charts, Canvas, anything with zoom or brushing) can get the same figure, summary and data table.
+
+  ### Added
+  - `ChartFrame`: wraps any chart in a `role="figure"` named by the visible `title` and described by `summary`. The chart is rendered as it is, with an optional `legend` and a "Show data table" disclosure built from `table`. Everything is server-rendered. It takes `hideTitle`, `dataTable`, `labels`, `className` and `ref`.
+  - `ChartDataTable`, on its own. Its `labels` are partial, cells are shown as given, and on its own its toggle is described by the caption.
+  - `describeChart(parts, labels?)`: writes raster's generated summary ("Line chart, 2 series, 730 points. …") from counts and ranges. `SummaryParts.name` overrides the type's name ("Heatmap") for charts raster doesn't draw.
+  - `@eekodigital/raster/frame` (about 1.6 KB), and the same exports from the main entry. Types: `ChartFrameProps`, `ChartDataTableProps`, `ChartDataTableRow`, `ChartTableData`.
+  - A "Wrapping other charts" guide with a canvas demo, a TanStack example, and guidance on when to hide the wrapped chart.
+
+  ### Changed
+  - `exportSVG` and `exportPNG` only export raster's own (marked) chart SVG, or an SVG passed directly. They no longer fall back to the first SVG inside the target, which could be a legend swatch or a wrapped chart.
+
+- 0549248: **Reference lines** for targets, thresholds and goals on LineChart, BarChart and ScatterChart.
+
+  ### Added
+  - `referenceLines: { value, label, axis? }[]`. Each is a dashed line with a visible label ("Target: 90"), and the value scale stretches to include it.
+    - **BarChart:** across the value axis, so vertical for `direction="horizontal"`.
+    - **ScatterChart:** across y, or vertical with `axis: "x"` (worded with `formatX`).
+    - **LineChart:** across y, or vertical at a date with `axis: "x"` on a `timeAxis`. Dates outside the data range are left out.
+  - **Accessibility:** not focusable, and hidden from assistive technology in the SVG. The same text ends the summary ("… Target: 90.") and is noted in the data table caption ("Data for Progress, with a reference line (Target: 90)").
+  - `labels.referenceLine(label, value)` and `labels.referenceNote(caption, lines)` to reword or translate them (the note returns the whole caption, so punctuation is the translator's), and `SummaryParts.references`.
+  - `--raster-reference` theming property (`rasterVars.reference`), falling back to `--raster-text-subtle`. In forced-colours mode lines are `CanvasText` and keep their dash, and labels get a halo so they stay readable over data.
+  - Optional `XAxis.at` and `XAxis.format`, so time axes can place and name any date. `timeAxis` provides them.
+  - The `ReferenceLine` and `NumericReferenceLine` types.
+  - Lines that can't be placed, or fall off the plot (e.g. below zero on BarChart), are left out of the drawing, summary and caption. They don't block the pointer, and exported files keep their label halo.
+
+- c304c14: ### Added
+
+  - Entries that export React components (the main entry, every chart, `/frame`, `/chart-tooltip`, `/geo`) start with `"use client"`, so React Server Components can import them directly. They're still server-rendered. `/time`, `/export` and `/theme` stay unmarked, so server code can call them. CI checks the directive on every built entry.
+
+  ### Fixed
+  - The tooltip covered the top of a focused point's focus ring. It now sits 14 px above the mark (was 8 px), clear of the ring even while the focus scale animates.
+
+### Patch Changes
+
+- 6202abb: Docs: the comparison page's raster figures are re-measured for 4.0 (one line chart 8.3 KB, line and bar 9.9 KB, all 8 types 13.6 KB, added to a React page).
+- d1dd9c0: Docs: the comparison page adds TanStack Charts 1.0, measured directly (bundle size, runtime dependencies, server-rendered HTML and accessibility), says plainly where it's the better choice, and lists what raster leaves out by design (zoom, brushing, Canvas, combined chart types, animation APIs). The README and docs home page give the current per-chart sizes.
+- ba74131: **Axis labels, reference lines and maps fit their charts.** From a visual review of the docs site at desktop and phone widths:
+
+  - **Axis labels never overlap.** Category labels (LineChart) thin to the smallest even step whose labels fit, measured by their estimated width. They no longer use a fixed 30 px, which let "Week 1" and "Week 2" overlap on a phone. `xLabelMinSpacing` no longer has a default; set it to space ticks further apart. BarChart rotates its labels when they're wider than a bar's slot (not by bar count), sizes the room for them from the longest label, and cuts very long labels with an ellipsis. Horizontal bars get a left margin to fit their labels.
+  - **Date ticks are evenly spaced.** `timeAxis` picks the finest even step that fits: 1 or 2 days, 1 or 2 weeks, 1, 2, 3 or 6 months, then years. It no longer drops a single tick beside a wide edge label, which left a gap (Jan 2025, Jul, Oct…).
+  - **Reference line labels keep clear of the data.** A label tries the right end then the left, above the line then below, and takes the first spot clear of lines, bars and points. With none clear, it takes the spot covering the least.
+  - **Value axes end on a tick.** LineChart, BarChart and ScatterChart round their value scale out to whole ticks, so no point or bar is beyond the last gridline. ScatterChart also leaves a little room, so no point sits on an axis.
+  - **GeoChart fits the map to the plot** in both directions, centred, instead of fitting the width and spilling over the title and legend. A `filter`ed map zooms to the regions it draws. Mercator latitudes are clamped to ±85°, as web maps do. Custom projection functions are unchanged. The colour legend stays on one row.
+  - **RadarChart's axis labels sit beside the web,** anchored away from the centre. The margin fits the longest side label, up to 30% of the chart.
+
 ## 3.0.0
 
 ### Major Changes
