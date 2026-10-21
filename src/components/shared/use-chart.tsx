@@ -1,27 +1,33 @@
-import { useImperativeHandle, useRef } from "react";
-import type React from "react";
-import { numberFormatter, resolveLabels } from "../../utils/labels.js";
-import type { ChartLabels, NumberFormat } from "../../utils/labels.js";
-import { useChartExport } from "../../utils/use-chart-export.js";
-import type { ChartExportHandle } from "../../utils/use-chart-export.js";
+import { useRef } from "react";
+import { numberFormatter, resolveLabels, summarize } from "../../utils/labels.js";
+import type { ChartLabelOverrides, NumberFormat, SummaryParts } from "../../utils/labels.js";
 import type { useRovingFocus } from "../../utils/use-roving-focus.js";
 import { useChartTooltip } from "../ChartTooltip/ChartTooltip.js";
 
 type Tooltip = ReturnType<typeof useChartTooltip>;
 
-/** Wiring every framed chart shares: labels, number format, tooltip, export. */
+/**
+ * What a chart's `onMarkClick` receives: the mark's `index` (the same value
+ * `onSelect` gives for it), its `value`, and its data, where it has some.
+ */
+export type MarkClick<Index, Datum = undefined, Value = number> = {
+  index: Index;
+  value: Value;
+  datum: Datum;
+};
+
+/** Wiring every framed chart shares: labels, number format, tooltip. */
 export function useChart(
-  labelOverrides: Partial<ChartLabels> | undefined,
+  labelOverrides: ChartLabelOverrides | undefined,
   formatValue: NumberFormat | undefined,
-  exportRef: React.Ref<ChartExportHandle> | undefined,
 ) {
   const plotRef = useRef<HTMLDivElement>(null);
-  const exportHandle = useChartExport(plotRef);
-  useImperativeHandle(exportRef, () => exportHandle, [exportHandle]);
   const labels = resolveLabels(labelOverrides);
   const n = numberFormatter(labels.locale);
   const tooltip = useChartTooltip();
-  return { plotRef, labels, n, format: formatValue ?? n, tooltip };
+  /** The chart's summary, in `labels`' words. */
+  const describe = (parts: SummaryParts) => summarize(parts, labels, n);
+  return { plotRef, labels, n, format: formatValue ?? n, tooltip, describe };
 }
 
 type MarkOptions = {

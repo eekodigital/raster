@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 /**
- * Accessibility checks for the docs: every guide and chart page. Axe runs after JS hydration so React-rendered demos
+ * Accessibility checks for the docs: every guide and chart page, in light and dark mode. Axe runs after JS hydration so React-rendered demos
  * are included in the scan.
  */
 const PAGES = [
@@ -12,8 +12,8 @@ const PAGES = [
   { label: "Accessibility", path: "/guides/accessibility" },
   { label: "Theming charts", path: "/guides/theming" },
   { label: "Exporting charts", path: "/guides/exporting" },
-  { label: "Comparison", path: "/guides/comparison" },
-  { label: "Migrating from v2", path: "/guides/migrating" },
+  { label: "Wrapping other charts", path: "/guides/wrapping" },
+  { label: "Migrating", path: "/guides/migrating" },
 
   // Charts
   { label: "BarChart", path: "/components/bar-chart" },
@@ -28,17 +28,25 @@ const PAGES = [
   { label: "Sparkline", path: "/components/sparkline" },
 ];
 
-for (const { label, path } of PAGES) {
-  test(`${label} page is accessible`, async ({ page }) => {
-    await page.goto(path);
-    // Wait for React hydration so demos are fully rendered before axe scans
-    await page.waitForLoadState("networkidle");
+for (const colorScheme of ["light", "dark"] as const) {
+  test.describe(`${colorScheme} mode`, () => {
+    // Starlight follows prefers-color-scheme when no theme is stored, and raster's charts follow it too.
+    test.use({ colorScheme });
 
-    const results = await new AxeBuilder({ page })
-      // Exclude the Astro dev toolbar if present
-      .exclude("astro-dev-toolbar")
-      .analyze();
+    for (const { label, path } of PAGES) {
+      test(`${label} page is accessible`, async ({ page }) => {
+        await page.goto(path);
+        // Wait for React hydration so demos are fully rendered before axe scans
+        await page.waitForLoadState("networkidle");
+        await expect(page.locator("html")).toHaveAttribute("data-theme", colorScheme);
 
-    expect(results.violations).toEqual([]);
+        const results = await new AxeBuilder({ page })
+          // Exclude the Astro dev toolbar if present
+          .exclude("astro-dev-toolbar")
+          .analyze();
+
+        expect(results.violations).toEqual([]);
+      });
+    }
   });
 }

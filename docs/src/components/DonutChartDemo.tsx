@@ -3,7 +3,7 @@ import { DonutChart } from "@eekodigital/raster";
 export function DonutChartBasicDemo() {
   // Without `size`, the donut fills its container's width.
   return (
-    <div style={{ width: 240 }}>
+    <div style={{ width: 200 }}>
       <DonutChart
         data={[
           { label: "Pass", value: 42, color: "var(--demo-good)" },
@@ -13,11 +13,11 @@ export function DonutChartBasicDemo() {
         ]}
         title="Conformance summary"
       >
-        <strong style={{ fontSize: "1.5rem", lineHeight: 1, color: "inherit" }}>86</strong>
+        <strong style={{ fontSize: "2rem", lineHeight: 1, color: "inherit" }}>86</strong>
         <span
           style={{
-            fontSize: "0.75rem",
-            lineHeight: 1,
+            fontSize: "0.875rem",
+            lineHeight: 1.2,
             color: "inherit",
           }}
         >

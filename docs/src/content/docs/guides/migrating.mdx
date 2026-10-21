@@ -1,11 +1,61 @@
 ---
-title: Migrating from v2
-description: Raster 3 keeps only the charts. UI components, design tokens and DataTable are gone. Here's what to change.
+title: Migrating
+description: What to change when upgrading raster, from v3 to v4 and from v2 to v3.
 ---
+
+## From v3 to v4
+
+Raster 4 adds date axes, dense mode for long series, reference lines, a public accessibility frame and server-safe entries (see the [changelog](https://github.com/eekodigital/raster/blob/main/CHANGELOG.md)). Three things can need a change:
+
+1. **`exportRef` is removed.** Give the chart a `ref` and call `exportSVG` or `exportPNG` from `@eekodigital/raster/export`. See [Exporting charts](/guides/exporting/#migrating-from-exportref). The `ChartExportHandle` type is gone.
+2. **The data table toggle is a native `<details>`/`<summary>`**, so it opens without JavaScript. Nothing changes for users. In your own tests, find it by text instead of as a button, and check `open` instead of `aria-expanded`:
+
+   ```diff title="Your tests"
+   - screen.getByRole("button", { name: "Show data table" })
+   + screen.getByText("Show data table", { selector: "summary" })
+   ```
+
+   CSS on `button.raster-chart__table-toggle` should target `.raster-chart__table-toggle`.
+
+3. **A custom `labels.summary` gets a ready-made `name`.** It's worked out from the new `labels.chartNames` (or a wrapped chart's own name), so translate chart names there and use `name` in the summary instead of looking up `type`, which can now be missing:
+
+   ```diff title="Your labels"
+   - summary: ({ type, points }) => `${DE[type]}: ${points}`,
+   + chartNames: { line: "Liniendiagramm" },
+   + summary: ({ name, points }) => `${name}: ${points}`,
+   ```
+
+   The `labels` prop's type is now `ChartLabelOverrides` (any `ChartLabels` key, with `chartNames` merged one name at a time).
+
+4. **One click handler on every chart: `onMarkClick`.** It replaces `onPointClick` (LineChart, RadarChart, ScatterChart), `onBarClick`, `onSegmentClick`, `onRegionClick` and `onMarkerClick`, and gets `{ index, value, datum }`. `index` is what `onSelect` gives for that mark:
+
+   ```diff title="Clicks"
+   - onPointClick={(series, point, value) => …}
+   + onMarkClick={({ index, value }) => …} // index: { series, point }
+   ```
+
+   On GeoChart it makes both regions and markers clickable.
+
+5. **BarChart takes series like LineChart.** `series` is `{ name, data, color? }[]` with `categories`, replacing `series` (names), `values` and `data` for categories. `grouped` is the default for several series, so the prop is gone. `colors` is replaced by `color` on each datum or series. Selection picks one bar, `{ series, point }`, instead of a whole category:
+
+   ```diff title="BarChart"
+   - data={quarters} series={["North", "South"]} values={[[12, 8], [15, 11]]}
+   + categories={["Q1", "Q2"]}
+   + series={[{ name: "North", data: [12, 15] }, { name: "South", data: [8, 11] }]}
+   ```
+
+   Single series stay `data={[{ label, value }]}`, but their selection changes too: `selectedIndex` and `onSelect` use `{ series: 0, point }` instead of a number. (DonutChart keeps a number: it has one series.)
+
+6. **Gauge and LinearGauge take `title` and `formatValue`** like the other charts, instead of `label` and `format`. Their default number format follows `labels.locale`.
+7. **LineChart's date axis prop is `xAxis`** (it was `x` in the 3.1 pre-release docs), matching ScatterChart's new `xAxis`.
+
+If you built your own `XAxis` object for LineChart rather than using `timeAxis`, it now needs `at` and `format`.
+
+## From v2 to v3
 
 Raster 3.0 is a charts library. Everything else from raster 2 has been removed. The 2.x source and docs stay available at the [`v2.0.1` tag](https://github.com/eekodigital/raster/tree/v2.0.1), and `2.0.1` stays on npm.
 
-## If you only use charts
+### If you only use charts
 
 1. **Load the stylesheet once** at your app root, and remove any `tokens.css` or `primitives.css` import:
 
@@ -69,14 +119,14 @@ Raster 3.0 is a charts library. Everything else from raster 2 has been removed. 
 
 `ChartTooltip` and `useChartTooltip` are now exported, and every chart has its own entry point (`@eekodigital/raster/line-chart`, …).
 
-## If you use UI components
+### If you use UI components
 
 Button, Dialog, AlertDialog, DropdownMenu, Popover, Tooltip, Tabs, Select, form fields, Pagination and the other UI components are gone. Move them into your app, on [Base UI](https://base-ui.com) or plain semantic HTML. Base UI supplies the accessible behaviour (focus management, positioning, dismissal, form participation); your app supplies the styling.
 
-## If you use DataTable
+### If you use DataTable
 
 `@eekodigital/raster/data-table` is gone. Copy the component from the `v2.0.1` tag into your app and add `@tanstack/react-table` as a direct dependency.
 
-## If you use the design tokens
+### If you use the design tokens
 
 `tokens.css` and `primitives.css` are gone. Copy the values you use from `src/tokens/primitives.css` at the `v2.0.1` tag into your app's own token file.

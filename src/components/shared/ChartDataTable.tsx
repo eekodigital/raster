@@ -1,6 +1,7 @@
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
-import type { ChartLabels } from "../../utils/labels.js";
+import { resolveLabels } from "../../utils/labels.js";
+import type { ChartLabels, ChartLabelOverrides } from "../../utils/labels.js";
 
 /**
  * Inline fallback for the visually-hidden rule, so hidden text stays hidden
@@ -23,7 +24,8 @@ export const SR_ONLY_STYLE: React.CSSProperties = {
 export type ChartDataTableRow = { key: React.Key; cells: React.ReactNode[] };
 
 /**
- * - `disclosure` (default): a visible "Show data table" button toggles a real,
+ * - `disclosure` (default): a native `<details>` disclosure, "Show data table",
+ *   that opens without JavaScript and reveals a real,
  *   visible table. The reliable path for every user.
  * - `visually-hidden`: the table is always present for assistive technology
  *   only, e.g. when the page already shows the data elsewhere.
@@ -38,14 +40,27 @@ export type ChartTableData = {
   rowHeaders?: boolean;
 };
 
-type ChartDataTableProps = ChartTableData & {
-  labels: ChartLabels;
+export type ChartDataTableProps = ChartTableData & {
+  /** Generated strings ("Show data table"…). English by default. */
+  labels?: ChartLabelOverrides;
+  /** How the table is offered. Default `disclosure`. */
   mode?: DataTableMode;
   /** Id of the chart title, so each toggle has context when there are several. */
   describedBy?: string;
 };
 
-export function ChartDataTable({
+/**
+ * A data table offered as a "Show data table" disclosure (or visually hidden),
+ * captioned, with scoped headers. Cells are shown as given: format numbers
+ * before passing them. On its own, the toggle is described by the caption, so
+ * several tables on a page stay distinguishable.
+ */
+export function ChartDataTable({ labels, ...props }: ChartDataTableProps) {
+  return <DataTable {...props} labels={resolveLabels(labels)} />;
+}
+
+/** The table inside raster's charts, which pass resolved labels. */
+export function DataTable({
   caption,
   headers,
   rows,
@@ -53,19 +68,22 @@ export function ChartDataTable({
   labels,
   mode = "disclosure",
   describedBy,
-}: ChartDataTableProps) {
+}: Omit<ChartDataTableProps, "labels"> & { labels: ChartLabels }) {
   const [open, setOpen] = useState(false);
+  const details = useRef<HTMLDetailsElement>(null);
   const id = useId();
+  // The disclosure may have been opened before hydration: start from its real state.
+  useLayoutEffect(() => {
+    if (details.current?.open) setOpen(true);
+  }, []);
   const hiddenMode = mode === "visually-hidden";
 
   const table = (
     <table
-      id={id}
       className={hiddenMode ? "raster-sr-only" : "raster-chart__table"}
       style={hiddenMode ? SR_ONLY_STYLE : undefined}
-      hidden={!hiddenMode && !open}
     >
-      <caption>{caption}</caption>
+      <caption id={`${id}-caption`}>{caption}</caption>
       <thead>
         <tr>
           {headers.map((h, i) => (
@@ -99,19 +117,18 @@ export function ChartDataTable({
   );
 
   if (hiddenMode) return table;
+  // A native disclosure: it opens without JavaScript, so the values are
+  // reachable from the server-rendered HTML. With JavaScript, the label
+  // follows the state.
   return (
-    <>
-      <button
-        type="button"
+    <details ref={details} onToggle={(e) => setOpen(e.currentTarget.open)}>
+      <summary
         className="raster-chart__table-toggle"
-        aria-expanded={open}
-        aria-controls={id}
-        aria-describedby={describedBy}
-        onClick={() => setOpen(!open)}
+        aria-describedby={describedBy ?? `${id}-caption`}
       >
         {open ? labels.hideTable : labels.showTable}
-      </button>
+      </summary>
       {table}
-    </>
+    </details>
   );
 }
