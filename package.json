@@ -1,6 +1,6 @@
 {
   "name": "@eekodigital/raster",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Light, accessible SVG charts for React — no d3, zero runtime dependencies, themable through CSS custom properties.",
   "keywords": [
     "a11y",
