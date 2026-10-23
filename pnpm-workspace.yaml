@@ -25,6 +25,8 @@ overrides:
   # They come from the catalog below, which `vp migrate` keeps in step when
   # vite-plus is updated. Dependabot ignores all three.
   vitest@*: "catalog:"
+  # launch-editor GHSA alerts (dev-only tooling); patched in 2.14.2.
+  "launch-editor@2": "2.14.2"
 catalog:
   # The root package's vite is vite-plus's core, so vitest has one instance
   # (vite-plus/test re-exports it). Docs keep Astro's own vite.
