@@ -118,7 +118,7 @@
     "@changesets/cli": "^3.0.3",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
-    "@types/node": "^24.19.1",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/topojson-client": "^3.1.5",
@@ -126,10 +126,10 @@
     "@vitest/coverage-v8": "catalog:",
     "axe-core": "^4.14.0",
     "concurrently": "^10.0.6",
-    "happy-dom": "^20.14.6",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "rolldown": "~1.2.13",
+    "happy-dom": "^21.0.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "rolldown": "~1.2.15",
     "topojson-client": "^3.1.0",
     "typescript": "^7.0.2",
     "vite": "catalog:",
@@ -147,5 +147,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.24.0"
+  "packageManager": "pnpm@11.28.3"
 }
