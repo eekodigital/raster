@@ -1,5 +1,11 @@
 # @eekodigital/raster
 
+## 4.0.1
+
+### Patch Changes
+
+- Refresh dev tooling and toolchain (vite-plus 1.3, vitest 5.0.5, rolldown 1.2.15, pnpm 11.28.3). No change to the public API, peer dependencies or runtime behaviour; the build output differs only in how two entry files re-export.
+
 ## 4.0.0
 
 ### Major Changes
