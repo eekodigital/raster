@@ -36,7 +36,7 @@ overrides:
 catalog:
   # The root package's vite is vite-plus's core, so vitest has one instance
   # (vite-plus/test re-exports it). Docs keep Astro's own vite.
-  vite: npm:@voidzero-dev/vite-plus-core@1.6.0
-  vite-plus: 1.6.0
+  vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
+  vite-plus: 1.7.0
   vitest: 5.1.0
   "@vitest/coverage-v8": 5.1.0
