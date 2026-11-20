@@ -74,6 +74,10 @@ updates:
       - dependency-name: typescript
         update-types:
           - version-update:semver-major
+      # axe 4.14 adds label-content-name-mismatch, which flags Starlight's
+      # own search button (aria-label "Search") and fails every docs a11y
+      # test. Stay on ~4.13 until Starlight fixes it; then drop this.
+      - dependency-name: "@axe-core/playwright"
     groups:
       production-minor-and-patch:
         dependency-type: production
